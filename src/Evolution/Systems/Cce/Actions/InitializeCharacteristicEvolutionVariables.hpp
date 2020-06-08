@@ -11,6 +11,8 @@
 #include "DataStructures/DataBox/PrefixHelpers.hpp"
 #include "DataStructures/Variables.hpp"
 #include "DataStructures/VariablesTag.hpp"
+#include "Domain/MinimumGridSpacing.hpp"
+#include "Domain/SizeOfElement.hpp"
 #include "Evolution/Systems/Cce/OptionTags.hpp"
 #include "NumericalAlgorithms/Spectral/SwshInterpolation.hpp"
 #include "Parallel/GlobalCache.hpp"
@@ -23,6 +25,15 @@
 namespace Cce {
 /// \brief The set of actions for use in the CCE evolution system
 namespace Actions {
+
+namespace detail {
+CREATE_HAS_TYPE_ALIAS(compute_tags)
+CREATE_HAS_TYPE_ALIAS_V(compute_tags)
+CREATE_GET_TYPE_ALIAS_OR_DEFAULT(compute_tags)
+CREATE_HAS_TYPE_ALIAS(cce_step_choosers)
+CREATE_HAS_TYPE_ALIAS_V(cce_step_choosers)
+CREATE_GET_TYPE_ALIAS_OR_DEFAULT(cce_step_choosers)
+}  // namespace detail
 
 /*!
  * \ingroup ActionsGroup
@@ -113,7 +124,16 @@ struct InitializeCharacteristicEvolutionVariables {
       tmpl::append<StepChoosers::step_chooser_simple_tags<Metavariables>,
                    simple_tags_for_evolution>;
 
-  using compute_tags = StepChoosers::step_chooser_compute_tags<Metavariables>;
+  // filter required for interoperability with the coupled GH-CCE system. The
+  // CCE system does not have its own characteristic speed computation, and we
+  // do not wish to use the GH characteristic speed compute tag in CCE.
+  using compute_tags = tmpl::remove_duplicates<tmpl::join<tmpl::transform<
+      detail::get_cce_step_choosers_or_default_t<
+          Metavariables,
+          tmpl::at<typename Metavariables::factory_creation::factory_classes,
+                   StepChooser<StepChooserUse::LtsStep>>>,
+      tmpl::bind<detail::get_compute_tags_or_default_t, tmpl::_1,
+                 tmpl::pin<tmpl::list<>>>>>>;
 
   template <typename DbTags, typename... InboxTags, typename ArrayIndex,
             typename ActionList, typename ParallelComponent>
