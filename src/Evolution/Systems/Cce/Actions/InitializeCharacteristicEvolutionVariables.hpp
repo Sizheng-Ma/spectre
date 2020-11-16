@@ -92,6 +92,9 @@ struct InitializeCharacteristicEvolutionVariables {
     using evolved_swsh_dt_variables_tag =
         db::add_tag_prefix<::Tags::dt, evolved_swsh_variables_tag>;
 
+    using ccm_tag = ::Tags::Variables<typename Metavariables::ccm_psi0>;
+    using dccm_tag = ::Tags::Variables<typename Metavariables::ccm_dpsi0>;
+
   using simple_tags = tmpl::list<
       boundary_value_variables_tag, coordinate_variables_tag,
       dt_coordinate_variables_tag, evolved_swsh_variables_tag,
@@ -99,7 +102,9 @@ struct InitializeCharacteristicEvolutionVariables {
       scri_variables_tag, volume_variables_tag,
       pre_swsh_derivatives_variables_tag, transform_buffer_variables_tag,
       swsh_derivative_variables_tag,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>>;
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>,
+      ccm_tag,dccm_tag>;
 
   using compute_tags = tmpl::list<>;
 
@@ -136,7 +141,10 @@ struct InitializeCharacteristicEvolutionVariables {
         typename transform_buffer_variables_tag::type{transform_buffer_size,
                                                       0.0},
         typename swsh_derivative_variables_tag::type{volume_size, 0.0},
-        Spectral::Swsh::SwshInterpolator{});
+        Spectral::Swsh::SwshInterpolator{},
+        Spectral::Swsh::SwshInterpolator{},
+        typename ccm_tag::type{boundary_size},
+        typename dccm_tag::type{boundary_size});
 
     return std::make_tuple(std::move(box));
   }

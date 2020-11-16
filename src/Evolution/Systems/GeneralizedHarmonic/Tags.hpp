@@ -122,6 +122,25 @@ struct VMinus : db::SimpleTag {
 };
 // @}
 
+//TODO comment later
+template <size_t Dim, typename Frame>
+struct CCMw : db::SimpleTag {
+  using type = tnsr::aa<DataVector, Dim, Frame>;
+};
+
+//struct Psi0FromCce : db::SimpleTag {
+//  using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
+//};
+
+struct Psi0FromCceInterpolate : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
+};
+
+template <size_t Dim, typename Frame>
+struct AngularTetrad : db::SimpleTag {
+  using type = tnsr::a<ComplexDataVector, Dim, Frame>;
+};
+
 template <size_t Dim, typename Frame>
 struct CharacteristicSpeeds : db::SimpleTag {
   using type = std::array<DataVector, 4>;

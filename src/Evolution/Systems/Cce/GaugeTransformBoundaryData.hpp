@@ -524,9 +524,11 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiH> {
 
 /*!
  * \brief Update the Cauchy gauge cartesian coordinate derivative \f$\partial_u
- * x(\hat x)\f$, as well as remaining gauge quantities \f$\mathcal U^{(0)}\f$,
- * \f$\hat U \equiv \mathcal U - \mathcal U^{(0)}\f$, and \f$\partial_{\hat u}
- * \hat \omega\f$ to maintain asymptotically inertial angular coordinates.
+ * x(\hat x)\f$, the inertial gauge cartesian coordinate derivative
+ * \f$\partial_u \hat x(x)\f$, as well as remaining gauge quantities
+ * \f$\mathcal U^{(0)}\f$, \f$\hat U \equiv \mathcal U - \mathcal U^{(0)}\f$,
+ * and \f$\partial_{\hat u} \hat \omega\f$ to maintain asymptotically
+ * inertial angular coordinates.
  *
  * \details The constraint we must satisfy to maintain the asymptotically
  * inertial angular coordinates is
@@ -551,6 +553,31 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiH> {
  * rely on this information \f$\mathcal U^{(0)}\f$,
  * \f$\hat U\f$, and \f$\partial_{\hat u} \hat \omega\f$.
  *
+ * Similarly, for the asymptotically inertial angular coordinates
+ * \f$\hat{x}^{\hat{A}}\f$, we have:
+ *
+ * \f{align*}{
+ * \partial_u \hat{x}^{\hat{A}} = -U^{(0)B}\partial_B \hat{x}^{\hat{A}}
+ * \f}
+ *
+ * and the Cartesian version reads
+ *
+ * \f{align*}{
+ * \partial_u \hat{x}^{\hat{i}}= - \text{Re}(\bar{U}^{(0)}
+ * \eth \hat{x}^{\hat{i}})
+ * \f}
+ *
+ * Note that \f$U^{0}\f$ and \f$\mathcal U^{(0)}\f$ are related by
+ *
+ * \f{align*}{
+ * U^{(0)} &= \frac{1}{2\omega^2} \left( \bar{d} \mathcal U^{(0)} -
+ * c \bar{\mathcal U}^{(0)} \right) \\
+ * &= \frac{\hat \omega^2}{2} \left( \bar{d} \mathcal U^{(0)} -
+ * c \bar{\mathcal U}^{(0)} \right)
+ * \f}
+ *
+ * see Eq. (79) in arXiv:2007.01339.
+ *
  * The time derivative of \f$\hat \omega\f$ is calculated from the equation
  * \f{align*}{
  * \partial_{\hat u} \hat \omega
@@ -565,24 +592,31 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiH> {
  */
 struct GaugeUpdateTimeDerivatives {
   using return_tags =
-      tmpl::list<::Tags::dt<Tags::CauchyCartesianCoords>, Tags::BondiUAtScri,
+      tmpl::list<::Tags::dt<Tags::CauchyCartesianCoords>,
+                 ::Tags::dt<Tags::InertialCartesianCoords>, Tags::BondiUAtScri,
                  Tags::BondiU, Tags::Du<Tags::GaugeOmega>>;
   using argument_tags =
-      tmpl::list<Tags::CauchyCartesianCoords, Tags::GaugeOmega,
+      tmpl::list<Tags::CauchyCartesianCoords, Tags::InertialCartesianCoords,
+                 Tags::GaugeCnohat,
                  Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
                                                   Spectral::Swsh::Tags::Eth>,
-                 Tags::LMax>;
-
+                 Tags::GaugeOmega, Tags::GaugeDnohat, Tags::LMax,
+         Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
   static void apply(
       gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_cauchy_du_x,
+      gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_inertial_du_x,
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*>
           evolution_gauge_u_at_scri,
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*> volume_u,
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_omega,
       const tnsr::i<DataVector, 3>& cartesian_cauchy_coordinates,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+      const tnsr::i<DataVector, 3>& cartesian_inertial_coordinates,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
       const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_omega,
-      size_t l_max) noexcept;
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
+      size_t l_max,
+      const Spectral::Swsh::SwshInterpolator& interpolator) noexcept;
 };
 
 /*!
@@ -742,6 +776,58 @@ struct GaugeUpdateOmega {
 };
 
 /*!
+ * \brief Update the quantity \f$\omega\f$ and \f$\eth \omega\f$
+ * for updated spin-weighted Jacobian quantities \f$c\f$ and \f$d\f$.
+ *
+ * \details The conformal factor \f$\omega\f$ can be determined by the
+ * angular determinant from the spin-weighted Jacobian factors as
+ *
+ * \f{align*}{
+ * \omega = \frac{1}{2} \sqrt{d \bar d - c \bar c}.
+ * \f}
+ */
+struct GaugeUpdateOmeganohat {
+  using argument_tags = tmpl::list<Tags::GaugeCnohat,
+                                   Tags::GaugeDnohat, Tags::LMax>;
+  using return_tags =
+      tmpl::list<Tags::GaugeOmeganohat,
+                 Spectral::Swsh::Tags::Derivative<Tags::GaugeOmeganohat,
+                                                  Spectral::Swsh::Tags::Eth>>;
+
+  static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> omeganohat,
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*> eth_omeganohat,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
+      size_t l_max) noexcept;
+};
+
+/*!
+ * \brief Test the stability of coordinates evolution \f$x (\hat x)\f$ and
+ * \f$\hat x (x)\f$
+ *
+ * \details Both the Cauchy coordinates \f$x (\hat x)\f$ and the asymptotically
+ * inertial coordinates \f$\hat x (x)\f$ are evolved in the code. One of them
+ * is expected to be the inverse of the other one. The stability of such
+ * relation is tested by an identity:
+ *
+ * \f{align*}{
+ * \omega (x) \hat \omega(\hat x(x)) =1
+ * \f}
+ */
+struct TestOmega {
+  using argument_tags = tmpl::list<
+        Tags::GaugeOmeganohat,Tags::GaugeOmega,
+        Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
+  using return_tags = tmpl::list<>;
+
+  static void apply(
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+      const Spectral::Swsh::SwshInterpolator& interpolator_inertial) noexcept;
+};
+
+/*!
  * \brief Initialize to default values (identity transform) all of the angular
  * gauge quantities for the boundary gauge transforms.
  *
@@ -759,6 +845,7 @@ struct GaugeUpdateOmega {
  * - `GaugeD` is set to 2
  * - `GaugeOmega` is set to 1
  */
+//TODO Do we still want to keep it?
 struct InitializeGauge {
   using return_tags =
       tmpl::list<Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords,

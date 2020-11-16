@@ -16,15 +16,18 @@
 #include "Domain/FaceNormal.hpp"
 #include "Domain/Structure/IndexToSliceAt.hpp"
 #include "Domain/Tags.hpp"
-#include "Utilities/ErrorHandling/Assert.hpp"
+#include "Evolution/Systems/Cce/OptionTags.hpp"
+#include "Evolution/Systems/Cce/ReceiveTags.hpp"
 #include "Evolution/Systems/GeneralizedHarmonic/BoundaryConditions/BjorhusImpl.hpp"
 #include "Evolution/Systems/GeneralizedHarmonic/BoundaryConditions/BoundaryConditions.hpp"
+#include "Evolution/Systems/GeneralizedHarmonic/CCMHelper.hpp"
 #include "Evolution/Systems/GeneralizedHarmonic/Characteristics.hpp"
 #include "Evolution/Systems/GeneralizedHarmonic/Tags.hpp"
 #include "Parallel/GlobalCache.hpp"
 #include "Parallel/Invoke.hpp"
 #include "Time/Tags.hpp"
 #include "Utilities/ContainerHelpers.hpp"
+#include "Utilities/ErrorHandling/Assert.hpp"
 #include "Utilities/Gsl.hpp"
 #include "Utilities/TMPL.hpp"
 #include "Utilities/TaggedTuple.hpp"
@@ -164,6 +167,41 @@ struct ImposeBjorhusBoundaryConditions {
         intermediates.compute_vars(box, direction, dimension, mesh, vars,
                                    dt_vars, unit_normal_one_form, char_speeds);
 
+        // auto& inbox = tuples::get<Cce::ReceiveTags::BoundaryData<tmpl::list<
+        //     Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>>>(inboxes);
+
+        // using tag = typename
+        // Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>::type;
+        // db::mutate<Cce::Tags::BoundaryValue
+        //           <Cce::Tags::Psi0Match>>(make_not_null(&box),
+        //           [&inbox](const gsl::not_null<typename tag::type*>
+        //           destination,
+        //                    const TimeStepId& time) noexcept {
+        //             *destination = get<tag>(inbox[time]);
+        //           },
+        //           db::get<::Tags::TimeStepId>(box));
+        // inbox.erase(db::get<::Tags::TimeStepId>(box));
+
+        // TODO volume type or boundary type? check later
+        db::mutate<Tags::AngularTetrad<VolumeDim, Frame::Inertial>>(
+            make_not_null(&box),
+            &(AngularTetradForCCM<VolumeDim, Frame::Inertial>::get_m_vector),
+            inertial_coords);
+
+        // TODO is this correct?
+        db::mutate<Tags::Psi0FromCceInterpolate>(
+            make_not_null(&box),
+            &(InterpolatePsi0<VolumeDim, Frame::Inertial>::interpolate_psi0),
+            inertial_coords,
+            db::get<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>(box),
+            db::get<Cce::Tags::LMax>(box)); //FIXME LMax or LMaxBase?
+
+        db::mutate<Tags::CCMw<VolumeDim, Frame::Inertial>>(
+            make_not_null(&box),
+            &(IncomingWFromCCE<VolumeDim, Frame::Inertial>::wijfromcce),
+            db::get<Tags::AngularTetrad<VolumeDim, Frame::Inertial>>(box),
+            db::get<Tags::Psi0FromCceInterpolate>(box));
+
         db::mutate<dt_variables_tag>(
             make_not_null(&box),
             // Function that applies bdry conditions to dt<variables>
@@ -172,7 +210,9 @@ struct ImposeBjorhusBoundaryConditions {
              &inertial_coords, &char_speeds](
                 const gsl::not_null<typename dt_variables_tag::type*>
                     volume_dt_vars,
-                const double /* time */, const auto& /* boundary_condition */
+                const double /* time */, const auto& /* boundary_condition */,
+                const typename Tags::CCMw<VolumeDim, Frame::Inertial>
+                    ::type& wij
                 ) noexcept {
               // Preliminaries
               ASSERT(
@@ -228,7 +268,7 @@ struct ImposeBjorhusBoundaryConditions {
                           VolumeDim>::apply(VMinusMethod,
                                             make_not_null(&intermediates), vars,
                                             dt_vars, inertial_coords,
-                                            unit_normal_one_form),
+                                            unit_normal_one_form, wij),
                       char_speeds.at(3));
               // Convert them to desired values on dt<U>
               const auto bc_dt_all_u =
@@ -279,7 +319,8 @@ struct ImposeBjorhusBoundaryConditions {
               }
             },
             db::get<::Tags::Time>(box),
-            get<typename Metavariables::boundary_condition_tag>(cache));
+            get<typename Metavariables::boundary_condition_tag>(cache),
+            db::get<Tags::CCMw<VolumeDim, Frame::Inertial>>(box));
       }
 
       return std::forward_as_tuple(std::move(box));
