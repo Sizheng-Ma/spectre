@@ -43,9 +43,11 @@ using swsh_boundary_tags_to_generate =
 
 using real_boundary_tags_to_compute =
     tmpl::list<Tags::CauchyCartesianCoords, Tags::CauchyAngularCoords,
+               Tags::InertialCartesianCoords, Tags::InertialAngularCoords,
                Tags::InertialRetardedTime>;
 
-using swsh_boundary_tags_to_compute = tmpl::list<Tags::GaugeC, Tags::GaugeD>;
+using swsh_boundary_tags_to_compute = tmpl::list<Tags::GaugeC, Tags::GaugeD,
+                                      Tags::GaugeCnohat, Tags::GaugeDnohat>;
 
 using swsh_volume_tags_to_compute = tmpl::list<Tags::BondiJ>;
 
@@ -71,9 +73,15 @@ struct mock_characteristic_evolution {
               Actions::InitializeFirstHypersurface,
               ::Actions::MutateApply<GaugeUpdateAngularFromCartesian<
                   Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>,
+              ::Actions::MutateApply<GaugeUpdateAngularFromCartesian<
+                  Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>,
               ::Actions::MutateApply<GaugeUpdateJacobianFromCoordinates<
                   Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
-                  Tags::CauchyCartesianCoords>>>>>;
+                  Tags::CauchyCartesianCoords>>,
+              ::Actions::MutateApply<GaugeUpdateJacobianFromCoordinates<
+                  Tags::GaugeCnohat, Tags::GaugeDnohat,
+                  Tags::InertialAngularCoords,
+                  Tags::InertialCartesianCoords>>>>>;
 };
 
 struct metavariables {
@@ -156,9 +164,15 @@ SPECTRE_TEST_CASE(
   db::mutate_apply<GaugeUpdateAngularFromCartesian<
       Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
       make_not_null(&expected_box));
+  db::mutate_apply<GaugeUpdateAngularFromCartesian<
+      Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+      make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
       Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
       Tags::CauchyCartesianCoords>>(make_not_null(&expected_box));
+  db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
+      Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+      Tags::InertialCartesianCoords>>(make_not_null(&expected_box));
   db::mutate_apply<InitializeScriPlusValue<Tags::InertialRetardedTime>>(
       make_not_null(&expected_box), 1.5);
 
