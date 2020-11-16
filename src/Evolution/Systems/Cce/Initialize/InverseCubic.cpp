@@ -33,6 +33,10 @@ void InverseCubic::operator()(
     const gsl::not_null<
         tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
         angular_cauchy_coordinates,
+    const gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_inertial_coordinates,
+    const gsl::not_null<
+        tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
+        angular_inertial_coordinates,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_j,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_dr_j,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& r, const size_t l_max,
@@ -65,6 +69,10 @@ void InverseCubic::operator()(
         collocation_point.theta;
     get<1>(*angular_cauchy_coordinates)[collocation_point.offset] =
         collocation_point.phi;
+    get<0>(*angular_inertial_coordinates)[collocation_point.offset] =
+        collocation_point.theta;
+    get<1>(*angular_inertial_coordinates)[collocation_point.offset] =
+        collocation_point.phi;
   }
   get<0>(*cartesian_cauchy_coordinates) =
       sin(get<0>(*angular_cauchy_coordinates)) *
@@ -74,6 +82,15 @@ void InverseCubic::operator()(
       sin(get<1>(*angular_cauchy_coordinates));
   get<2>(*cartesian_cauchy_coordinates) =
       cos(get<0>(*angular_cauchy_coordinates));
+
+  get<0>(*cartesian_inertial_coordinates) =
+      sin(get<0>(*angular_inertial_coordinates)) *
+      cos(get<1>(*angular_inertial_coordinates));
+  get<1>(*cartesian_inertial_coordinates) =
+      sin(get<0>(*angular_inertial_coordinates)) *
+      sin(get<1>(*angular_inertial_coordinates));
+  get<2>(*cartesian_inertial_coordinates) =
+      cos(get<0>(*angular_inertial_coordinates));
 }
 
 void InverseCubic::pup(PUP::er& /*p*/) noexcept {}

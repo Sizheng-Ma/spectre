@@ -87,11 +87,16 @@ void test_gauge_transforms_via_inverse_coordinate_map(
 
   using real_boundary_tags =
       tmpl::list<Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords,
-                 ::Tags::dt<Tags::CauchyCartesianCoords>>;
+                 Tags::InertialAngularCoords, Tags::InertialCartesianCoords,
+                 ::Tags::dt<Tags::CauchyCartesianCoords>,
+                 ::Tags::dt<Tags::InertialCartesianCoords>>;
   using spin_weighted_boundary_tags = tmpl::flatten<tmpl::list<
       tmpl::list<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega,
+                 Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::GaugeOmeganohat,
                  Tags::Du<Tags::GaugeOmega>,
                  Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
+                                                  Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::GaugeOmeganohat,
                                                   Spectral::Swsh::Tags::Eth>,
                  Tags::BondiUAtScri>,
       Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>,
@@ -107,12 +112,14 @@ void test_gauge_transforms_via_inverse_coordinate_map(
       coordinate_variables_tag, spin_weighted_variables_tag,
       volume_spin_weighted_variables_tag, Tags::LMax,
       Tags::NumberOfRadialPoints,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>>>(
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>>(
       typename coordinate_variables_tag::type{number_of_angular_grid_points},
       typename spin_weighted_variables_tag::type{number_of_angular_grid_points},
       typename volume_spin_weighted_variables_tag::type{
           number_of_angular_grid_points * number_of_radial_grid_points},
-      l_max, number_of_radial_grid_points, Spectral::Swsh::SwshInterpolator{});
+      l_max, number_of_radial_grid_points, Spectral::Swsh::SwshInterpolator{},
+      Spectral::Swsh::SwshInterpolator{});
 
   // create analytic data for the forward transform
   UniformCustomDistribution<double> value_dist{0.1, 0.5};
@@ -171,6 +178,7 @@ void test_gauge_transforms_via_inverse_coordinate_map(
 
   // construct the coordinate transform quantities
   const double variation_amplitude = value_dist(*gen);
+  const double variation_amplitude_inertial = value_dist(*gen);
   db::mutate<Tags::CauchyCartesianCoords>(
       make_not_null(&forward_transform_box),
       [&l_max,
@@ -204,16 +212,51 @@ void test_gauge_transforms_via_inverse_coordinate_map(
             cos(get<0>(cauchy_angular_coordinates));
       });
 
+  db::mutate<Tags::InertialCartesianCoords>(
+      make_not_null(&forward_transform_box),
+      [&l_max, &variation_amplitude_inertial]
+                                 (const gsl::not_null<tnsr::i<DataVector, 3>*>
+                                 inertial_cartesian_coordinates) noexcept {
+        tnsr::i<DataVector, 2> inertial_angular_coordinates{
+            get<0>(*inertial_cartesian_coordinates).size()};
+        // There is a bug in Clang 10.0.0 that gives a nonsensical
+        // error message for the following call to
+        // cached_collocation_metadata unless l_max is captured in
+        // this lambda.  (The capture should not be necessary.)  This
+        // line silences the (correct) "unused capture" warnings.
+        (void)l_max;
+        const auto& collocation = Spectral::Swsh::cached_collocation_metadata<
+            Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max);
+        for (const auto& collocation_point : collocation) {
+          get<1>(inertial_angular_coordinates)[collocation_point.offset] =
+              collocation_point.phi + 1.0e-2 * variation_amplitude_inertial *
+                                          cos(collocation_point.phi) *
+                                          sin(collocation_point.theta);
+          get<0>(inertial_angular_coordinates)[collocation_point.offset] =
+              collocation_point.theta;
+        }
+        get<0>(*inertial_cartesian_coordinates) =
+            sin(get<0>(inertial_angular_coordinates)) *
+            cos(get<1>(inertial_angular_coordinates));
+        get<1>(*inertial_cartesian_coordinates) =
+            sin(get<0>(inertial_angular_coordinates)) *
+            sin(get<1>(inertial_angular_coordinates));
+        get<2>(*inertial_cartesian_coordinates) =
+            cos(get<0>(inertial_angular_coordinates));
+      });
+
   auto inverse_transform_box = db::create<db::AddSimpleTags<
       coordinate_variables_tag, spin_weighted_variables_tag,
       volume_spin_weighted_variables_tag, Tags::LMax,
       Tags::NumberOfRadialPoints,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>>>(
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>>(
       typename coordinate_variables_tag::type{number_of_angular_grid_points},
       typename spin_weighted_variables_tag::type{number_of_angular_grid_points},
       typename volume_spin_weighted_variables_tag::type{
           number_of_angular_grid_points * number_of_radial_grid_points},
-      l_max, number_of_radial_grid_points, Spectral::Swsh::SwshInterpolator{});
+      l_max, number_of_radial_grid_points, Spectral::Swsh::SwshInterpolator{},
+      Spectral::Swsh::SwshInterpolator{});
 
   db::mutate<Tags::CauchyCartesianCoords>(
       make_not_null(&inverse_transform_box),
@@ -254,25 +297,80 @@ void test_gauge_transforms_via_inverse_coordinate_map(
             cos(get<0>(inverse_cauchy_angular_coordinates));
       });
 
+  db::mutate<Tags::InertialCartesianCoords>(
+      make_not_null(&inverse_transform_box),
+      [&l_max, &variation_amplitude_inertial](
+          const gsl::not_null<tnsr::i<DataVector, 3>*>
+              inverse_inertial_cartesian_coordinates) noexcept {
+        tnsr::i<DataVector, 2> inverse_inertial_angular_coordinates{
+            get<0>(*inverse_inertial_cartesian_coordinates).size()};
+        // There is a bug in Clang 10.0.0 that gives a nonsensical
+        // error message for the following call to
+        // cached_collocation_metadata unless l_max is captured in
+        // this lambda.  (The capture should not be necessary.)  This
+        // line silences the (correct) "unused capture" warnings.
+        (void)l_max;
+        const auto& collocation = Spectral::Swsh::cached_collocation_metadata<
+            Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max);
+        for (const auto& collocation_point : collocation) {
+          auto rootfind = RootFinder::toms748(
+              [&collocation_point, &variation_amplitude_inertial]
+              (const double x) {
+                return collocation_point.phi -
+                       (x + 1.0e-2 * variation_amplitude_inertial * cos(x) *
+                                sin(collocation_point.theta));
+              },
+              collocation_point.phi - 2.0e-2, collocation_point.phi + 2.0e-2,
+              1.0e-15, 1.0e-15);
+          get<1>(inverse_inertial_angular_coordinates)
+              [collocation_point.offset] = rootfind;
+          get<0>(inverse_inertial_angular_coordinates)
+              [collocation_point.offset] = collocation_point.theta;
+        }
+        get<0>(*inverse_inertial_cartesian_coordinates) =
+            sin(get<0>(inverse_inertial_angular_coordinates)) *
+            cos(get<1>(inverse_inertial_angular_coordinates));
+        get<1>(*inverse_inertial_cartesian_coordinates) =
+            sin(get<0>(inverse_inertial_angular_coordinates)) *
+            sin(get<1>(inverse_inertial_angular_coordinates));
+        get<2>(*inverse_inertial_cartesian_coordinates) =
+            cos(get<0>(inverse_inertial_angular_coordinates));
+      });
+
   {
     INFO("Checking GaugeUpdateAngularFromCartesian");
     db::mutate_apply<GaugeUpdateAngularFromCartesian<
         Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
         make_not_null(&forward_transform_box));
+    db::mutate_apply<GaugeUpdateAngularFromCartesian<
+        Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+        make_not_null(&forward_transform_box));
     double angular_phi = 0.0;
-    const auto& computed_angular_coordinates =
+    double angular_phi_inertial = 0.0;
+    const auto& computed_angular_cauchy_coordinates =
         db::get<Tags::CauchyAngularCoords>(forward_transform_box);
+    const auto& computed_angular_inertial_coordinates =
+        db::get<Tags::InertialAngularCoords>(forward_transform_box);
     const auto& collocation = Spectral::Swsh::cached_collocation_metadata<
         Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max);
     for (const auto& collocation_point : collocation) {
       angular_phi = collocation_point.phi + 1.0e-2 * variation_amplitude *
                                                 cos(collocation_point.phi) *
                                                 sin(collocation_point.theta);
-      CHECK(get<1>(computed_angular_coordinates)[collocation_point.offset] ==
-            approx((angular_phi > M_PI) ? angular_phi - 2.0 * M_PI
-                                        : angular_phi));
-      CHECK(get<0>(computed_angular_coordinates)[collocation_point.offset] ==
-            approx(collocation_point.theta));
+      angular_phi_inertial = collocation_point.phi + 1.0e-2 *
+                                                variation_amplitude_inertial *
+                                                cos(collocation_point.phi) *
+                                                sin(collocation_point.theta);
+      CHECK(get<1>(computed_angular_cauchy_coordinates)
+            [collocation_point.offset] == approx((angular_phi > M_PI)
+            ? angular_phi - 2.0 * M_PI : angular_phi));
+      CHECK(get<0>(computed_angular_cauchy_coordinates)
+            [collocation_point.offset] == approx(collocation_point.theta));
+      CHECK(get<1>(computed_angular_inertial_coordinates)
+            [collocation_point.offset] == approx((angular_phi_inertial > M_PI)
+            ? angular_phi_inertial - 2.0 * M_PI : angular_phi_inertial));
+      CHECK(get<0>(computed_angular_inertial_coordinates)
+            [collocation_point.offset] == approx(collocation_point.theta));
     }
   }
 
@@ -281,10 +379,18 @@ void test_gauge_transforms_via_inverse_coordinate_map(
     db::mutate_apply<GaugeUpdateAngularFromCartesian<
         Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
         make_not_null(&inverse_transform_box));
+    db::mutate_apply<GaugeUpdateAngularFromCartesian<
+        Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+        make_not_null(&inverse_transform_box));
 
     db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
         make_not_null(&forward_transform_box));
     db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
+        make_not_null(&inverse_transform_box));
+
+    db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
+        make_not_null(&forward_transform_box));
+    db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
         make_not_null(&inverse_transform_box));
 
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
@@ -294,13 +400,30 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
         Tags::CauchyCartesianCoords>>(make_not_null(&inverse_transform_box));
 
+    db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
+        Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+        Tags::InertialCartesianCoords>>(make_not_null(&forward_transform_box));
+    db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
+        Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+        Tags::InertialCartesianCoords>>(make_not_null(&inverse_transform_box));
+
     db::mutate_apply<GaugeUpdateOmega>(make_not_null(&forward_transform_box));
     db::mutate_apply<GaugeUpdateOmega>(make_not_null(&inverse_transform_box));
+
+    db::mutate_apply<GaugeUpdateOmeganohat>(make_not_null
+                                           (&forward_transform_box));
+    db::mutate_apply<GaugeUpdateOmeganohat>(make_not_null
+                                           (&inverse_transform_box));
 
     const auto& forward_cauchy_angular_coordinates =
         db::get<Tags::CauchyAngularCoords>(forward_transform_box);
     const auto& inverse_cauchy_angular_coordinates =
         db::get<Tags::CauchyAngularCoords>(inverse_transform_box);
+
+    const auto& forward_inertial_angular_coordinates =
+        db::get<Tags::InertialAngularCoords>(forward_transform_box);
+    const auto& inverse_inertial_angular_coordinates =
+        db::get<Tags::InertialAngularCoords>(inverse_transform_box);
 
     const Spectral::Swsh::SwshInterpolator interpolator{
         get<0>(forward_cauchy_angular_coordinates),
@@ -310,12 +433,26 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         get<0>(inverse_cauchy_angular_coordinates),
         get<1>(inverse_cauchy_angular_coordinates), l_max};
 
+    const Spectral::Swsh::SwshInterpolator interpolator_inertial{
+        get<0>(forward_inertial_angular_coordinates),
+        get<1>(forward_inertial_angular_coordinates), l_max};
+
+    const Spectral::Swsh::SwshInterpolator inverse_interpolator_inertial{
+        get<0>(inverse_inertial_angular_coordinates),
+        get<1>(inverse_inertial_angular_coordinates), l_max};
+
     Scalar<SpinWeighted<ComplexDataVector, 0>> interpolated_forward_omega_cd{
         number_of_angular_grid_points};
+    Scalar<SpinWeighted<ComplexDataVector, 0>>
+        interpolated_forward_omeganohat_cd{number_of_angular_grid_points};
+
     // check that the coordinates are actually inverses of one another.
     interpolator.interpolate(
         make_not_null(&get(interpolated_forward_omega_cd)),
         get(db::get<Tags::GaugeOmega>(inverse_transform_box)));
+    interpolator_inertial.interpolate(
+        make_not_null(&get(interpolated_forward_omeganohat_cd)),
+        get(db::get<Tags::GaugeOmeganohat>(inverse_transform_box)));
 
     SpinWeighted<ComplexDataVector, 0>
         forward_and_inverse_interpolated_omega_cd{
@@ -324,10 +461,21 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         make_not_null(&forward_and_inverse_interpolated_omega_cd),
         get(interpolated_forward_omega_cd));
 
+    SpinWeighted<ComplexDataVector, 0>
+        forward_and_inverse_interpolated_omeganohat_cd{
+            number_of_angular_grid_points};
+    inverse_interpolator_inertial.interpolate(
+        make_not_null(&forward_and_inverse_interpolated_omeganohat_cd),
+        get(interpolated_forward_omeganohat_cd));
+
     const auto& check_rhs =
         get(db::get<Tags::GaugeOmega>(inverse_transform_box)).data();
     CHECK_ITERABLE_APPROX(forward_and_inverse_interpolated_omega_cd.data(),
                           check_rhs);
+    const auto& check_rhs_nohat =
+        get(db::get<Tags::GaugeOmeganohat>(inverse_transform_box)).data();
+    CHECK_ITERABLE_APPROX(forward_and_inverse_interpolated_omeganohat_cd.data(),
+                          check_rhs_nohat);
 
     interpolator.interpolate(
         make_not_null(&get(interpolated_forward_omega_cd)),
@@ -337,6 +485,16 @@ void test_gauge_transforms_via_inverse_coordinate_map(
     const auto another_check_rhs = 1.0 / (get(inverse_omega_cd).data());
     CHECK_ITERABLE_APPROX(get(interpolated_forward_omega_cd).data(),
                           another_check_rhs);
+
+    interpolator_inertial.interpolate(
+        make_not_null(&get(interpolated_forward_omeganohat_cd)),
+        get(db::get<Tags::GaugeOmeganohat>(inverse_transform_box)));
+    const auto& inverse_omeganohat_cd =
+        db::get<Tags::GaugeOmeganohat>(forward_transform_box);
+    const auto another_check_rhs_nohat =
+        1.0 / (get(inverse_omeganohat_cd).data());
+    CHECK_ITERABLE_APPROX(get(interpolated_forward_omeganohat_cd).data(),
+                          another_check_rhs_nohat);
   }
 
   Approx interpolation_approx =

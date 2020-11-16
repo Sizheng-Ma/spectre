@@ -110,6 +110,12 @@ struct BondiW : db::SimpleTag {
   static std::string name() noexcept { return "W"; }
 };
 
+/// Bondi parameter \f$\bar{J}\f$ in the Cauchy frame
+struct BondiJ_Cauchyview : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
+  static std::string name() noexcept { return "J_Cauchy_view"; }
+};
+
 /// The derivative with respect to the numerical coordinate \f$y = 1 - 2R/r\f$,
 /// where \f$R(u, \theta, \phi)\f$ is Bondi radius of the worldtube.
 template <typename Tag>
@@ -122,6 +128,15 @@ struct Dy : db::PrefixTag, db::SimpleTag {
 /// The derivative with respect to Bondi \f$r\f$
 template <typename Tag>
 struct Dr : db::PrefixTag, db::SimpleTag {
+  using type = typename Tag::type;
+  using tag = Tag;
+};
+
+/// The derivative with respect to \f$\lambda\f$,
+//  where \f$\lambda\f$ is an affine parameter along \f$l\f$, see
+//  Eq. (19a) in arXiv:2007.01339.
+template <typename Tag>
+struct Dlambda : db::PrefixTag, db::SimpleTag {
   using type = typename Tag::type;
   using tag = Tag;
 };
@@ -143,8 +158,25 @@ struct GaugeD : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 
+/// The spin-weight 2 angular Jacobian factor in the partially
+/// flat Bondi-like coordinates.
+struct GaugeCnohat : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
+};
+
+/// The spin-weight 0 angular Jacobian factor in the partially
+/// flat Bondi-like coordinates.
+struct GaugeDnohat : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
+
 /// The conformal factor associated with an angular transformation
 struct GaugeOmega : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
+
+/// The conformal factor in the partially flat Bondi-like coordinates.
+struct GaugeOmeganohat : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 
@@ -158,9 +190,19 @@ struct CauchyAngularCoords : db::SimpleTag {
   using type = tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>;
 };
 
+// The angular coordinates for the partially flat Bondi-like coordinates.
+struct InertialAngularCoords : db::SimpleTag {
+  using type = tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>;
+};
+
 // For expressing the Cauchy Cartesian coordinates for the worldtube data in
 // terms of the evolution angular coordinates.
 struct CauchyCartesianCoords : db::SimpleTag {
+  using type = tnsr::i<DataVector, 3>;
+};
+
+// The partially flat Bondi-like coordinates.
+struct InertialCartesianCoords : db::SimpleTag {
   using type = tnsr::i<DataVector, 3>;
 };
 
@@ -323,6 +365,10 @@ struct Psi0 : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
 };
 
+/// The Weyl scalar \f$\Psi_0\f$ for matching (in the Cauchy frame)
+struct Psi0Match : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
+};
 /// The Weyl scalar \f$\Psi_1\f$
 struct Psi1 : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 1>>;

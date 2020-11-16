@@ -36,6 +36,7 @@ struct EvolutionMetavars {
   using evolved_swsh_dt_tag = Cce::Tags::BondiH;
   using evolved_coordinates_variables_tag =
       Tags::Variables<tmpl::list<Cce::Tags::CauchyCartesianCoords,
+                                 Cce::Tags::InertialCartesianCoords,
                                  Cce::Tags::InertialRetardedTime>>;
   using cce_boundary_communication_tags =
       Cce::Tags::characteristic_worldtube_boundary_tags<
@@ -49,8 +50,13 @@ struct EvolutionMetavars {
                      Cce::Tags::BondiW, Cce::Tags::BondiH>,
           tmpl::bind<Cce::Tags::EvolutionGaugeBoundaryValue, tmpl::_1>>,
       Cce::Tags::BondiUAtScri, Cce::Tags::GaugeC, Cce::Tags::GaugeD,
-      Cce::Tags::GaugeOmega, Cce::Tags::Du<Cce::Tags::GaugeOmega>,
+      Cce::Tags::GaugeCnohat, Cce::Tags::GaugeDnohat,
+      Cce::Tags::GaugeOmega, Cce::Tags::GaugeOmeganohat,
+      Cce::Tags::Du<Cce::Tags::GaugeOmega>,
+      Cce::Tags::Du<Cce::Tags::GaugeOmeganohat>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::GaugeOmega,
+                                       Spectral::Swsh::Tags::Eth>,
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::GaugeOmeganohat,
                                        Spectral::Swsh::Tags::Eth>,
       Cce::all_boundary_pre_swsh_derivative_tags_for_scri,
       Cce::all_boundary_swsh_derivative_tags_for_scri>>;
@@ -78,7 +84,16 @@ struct EvolutionMetavars {
       tmpl::bind<Cce::integrand_terms_to_compute_for_bondi_variable,
                  tmpl::_1>>>;
   using cce_integration_independent_tags =
-      tmpl::push_back<Cce::pre_computation_tags, Cce::Tags::DuRDividedByR>;
+      tmpl::append<Cce::pre_computation_tags,
+      tmpl::list<Cce::Tags::BondiJ_Cauchyview,Cce::Tags::Psi0Match,
+                 Cce::Tags::Dy<Cce::Tags::Psi0Match>,
+                 Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,
+                 Cce::Tags::BoundaryValue<
+                     Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>,
+                 Cce::Tags::Psi0,
+                 Cce::Tags::Dy<Cce::Tags::BondiJ_Cauchyview>,
+                 Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiJ_Cauchyview>>,
+                 Cce::Tags::DuRDividedByR>>;
   using cce_temporary_equations_tags = tmpl::remove_duplicates<tmpl::flatten<
       tmpl::transform<cce_integrand_tags,
                       tmpl::bind<Cce::integrand_temporary_tags, tmpl::_1>>>>;
@@ -86,7 +101,7 @@ struct EvolutionMetavars {
   using cce_transform_buffer_tags = Cce::all_transform_buffer_tags;
   using cce_swsh_derivative_tags = Cce::all_swsh_derivative_tags;
   using cce_angular_coordinate_tags =
-      tmpl::list<Cce::Tags::CauchyAngularCoords>;
+   tmpl::list<Cce::Tags::CauchyAngularCoords,Cce::Tags::InertialAngularCoords>;
 
   using cce_boundary_component = Cce::H5WorldtubeBoundary<EvolutionMetavars>;
 
