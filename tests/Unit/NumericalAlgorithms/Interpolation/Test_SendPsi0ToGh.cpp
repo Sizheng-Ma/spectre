@@ -14,6 +14,7 @@
 #include "DataStructures/DataBox/TagName.hpp"
 #include "DataStructures/Tensor/Tensor.hpp"
 #include "DataStructures/Tensor/TypeAliases.hpp"
+#include "Evolution/Initialization/Evolution.hpp"
 #include "Evolution/Systems/Cce/Actions/BoundaryComputeAndSendToEvolution.hpp"
 #include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionScri.hpp"
 #include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionTime.hpp"
@@ -22,6 +23,7 @@
 #include "Evolution/Systems/Cce/Actions/ReceiveGhWorldtubeData.hpp"
 #include "Evolution/Systems/Cce/Actions/ReceiveWorldtubeData.hpp"
 #include "Evolution/Systems/Cce/Actions/RequestBoundaryData.hpp"
+#include "Evolution/Systems/Cce/Actions/Psi0Matching.hpp"
 #include "Evolution/Systems/Cce/BoundaryData.hpp"
 #include "Evolution/Systems/Cce/Components/CharacteristicEvolution.hpp"
 #include "Evolution/Systems/Cce/Components/WorldtubeBoundary.hpp"
@@ -38,7 +40,6 @@
 #include "NumericalAlgorithms/Spectral/SwshCollocation.hpp"
 #include "NumericalAlgorithms/Spectral/SwshTags.hpp"
 #include "Parallel/Actions/SetupDataBox.hpp"
-#include "Parallel/RegisterDerivedClassesWithCharm.hpp"
 #include "PointwiseFunctions/AnalyticSolutions/GeneralRelativity/KerrSchild.hpp"
 #include "Time/Tags.hpp"
 #include "Time/TimeSteppers/RungeKutta3.hpp"
@@ -47,17 +48,41 @@
 #include "Utilities/Gsl.hpp"
 #include "Utilities/TMPL.hpp"
 
+#include "Evolution/DiscontinuousGalerkin/DgElementArray.hpp"
+#include "Evolution/Systems/GeneralizedHarmonic/BoundaryConditions/ReceivePsi0FromCce.hpp"
 namespace Cce {
 namespace {
 template <typename Metavariables>
-struct mock_gh_worldtube_boundary : GhWorldtubeBoundary<Metavariables> {
-  using component_being_mocked = GhWorldtubeBoundary<Metavariables>;
+struct test_action {
+  template <typename ParallelComponent, typename... DbTags, typename ArrayIndex>
+  static void apply(
+      db::DataBox<tmpl::list<DbTags...>>& box,
+      Parallel::GlobalCache<Metavariables>& /*cache*/,
+      const ArrayIndex& /*array_index*/,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi0_cce) noexcept {
+    if constexpr (tmpl::list_contains_v<
+                      tmpl::list<DbTags...>,
+                      Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>) {
+      db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>(
+          make_not_null(&box),
+          [&psi0_cce](gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
+                          psi0) noexcept { *psi0 = psi0_cce; });
+    } else {
+      ERROR("Required tag: BoundaryValue<Psi0Match> not present");
+    }
+  }
+};
+
+template <typename Metavariables>
+struct mock_gh_evolution {
+  using component_being_mocked = typename Metavariables::gh_dg_element_array;
   using replace_these_simple_actions = tmpl::list<>;
   using with_these_simple_actions = tmpl::list<>;
 
   using initialize_action_list = tmpl::list<
       ::Actions::SetupDataBox,
-      Actions::InitializeWorldtubeBoundary<GhWorldtubeBoundary<Metavariables>>>;
+      Initialization::Actions::InitializeCcmTags<Metavariables>
+      >;
   using initialization_tags =
       Parallel::get_initialization_tags<initialize_action_list>;
 
@@ -65,11 +90,20 @@ struct mock_gh_worldtube_boundary : GhWorldtubeBoundary<Metavariables> {
   using chare_type = ActionTesting::MockArrayChare;
   using array_index = size_t;
 
-  using simple_tags = tmpl::list<>;
+  using simple_tags = tmpl::list<
+        ::Tags::TimeStepId
+        >;
   using phase_dependent_action_list = tmpl::list<
-      Parallel::PhaseActions<typename Metavariables::Phase,
-                             Metavariables::Phase::Initialization,
-                             initialize_action_list>>;
+      Parallel::PhaseActions<
+          typename Metavariables::Phase, Metavariables::Phase::Initialization,
+          tmpl::list<
+              ActionTesting::InitializeDataBox<simple_tags, tmpl::list<>>,
+              ::Actions::SetupDataBox,
+              Initialization::Actions::InitializeCcmTags<Metavariables>>>,
+      Parallel::PhaseActions<
+          typename Metavariables::Phase, Metavariables::Phase::Evolve,
+          tmpl::list<
+              GeneralizedHarmonic::Actions::ReceiveCCEData<Metavariables>>>>;
   using const_global_cache_tags =
       Parallel::get_const_global_cache_tags_from_actions<
           phase_dependent_action_list>;
@@ -82,14 +116,9 @@ struct mock_characteristic_evolution {
   using with_these_simple_actions = tmpl::list<>;
 
   using initialize_action_list = tmpl::list<
-      ::Actions::SetupDataBox,
-      Actions::InitializeCharacteristicEvolutionVariables<Metavariables>,
-      Actions::InitializeCharacteristicEvolutionTime<
-          typename Metavariables::evolved_coordinates_variables_tag,
-          typename Metavariables::evolved_swsh_tag>,
-      Actions::InitializeCharacteristicEvolutionScri<
-          typename Metavariables::scri_values_to_observe,
-          typename Metavariables::cce_boundary_component>>;
+             ::Actions::SetupDataBox,
+             Initialization::Actions::InitializeCcmTags<Metavariables>
+      >;
   using initialization_tags =
       Parallel::get_initialization_tags<initialize_action_list>;
 
@@ -97,26 +126,30 @@ struct mock_characteristic_evolution {
   using chare_type = ActionTesting::MockArrayChare;
   using array_index = size_t;
 
-  using simple_tags = tmpl::list<>;
+//FIXME db::AddSimpleTags ?
+  using simple_tags = tmpl::list<::Tags::TimeStepId>;
   using phase_dependent_action_list = tmpl::list<
       Parallel::PhaseActions<typename Metavariables::Phase,
                              Metavariables::Phase::Initialization,
-                             initialize_action_list>,
+      tmpl::list<
+             ActionTesting::InitializeDataBox<simple_tags, tmpl::list<>>,
+             ::Actions::SetupDataBox,
+             Initialization::Actions::InitializeCcmTags<Metavariables>
+                >>,
       Parallel::PhaseActions<
           typename Metavariables::Phase, Metavariables::Phase::Evolve,
-          tmpl::list<Actions::RequestBoundaryData<
-                         GhWorldtubeBoundary<Metavariables>,
-                         mock_characteristic_evolution<Metavariables>>,
-                     Actions::ReceiveWorldtubeData<Metavariables>,
-                     Actions::RequestNextBoundaryData<
-                         GhWorldtubeBoundary<Metavariables>,
-                         mock_characteristic_evolution<Metavariables>>>>>;
+          tmpl::list<
+                     Actions::TransferPsi0<CharacteristicEvolution
+                                           <Metavariables>>
+                >>>;
   using const_global_cache_tags =
       Parallel::get_const_global_cache_tags_from_actions<
           phase_dependent_action_list>;
 };
 
 struct test_metavariables {
+  using gh_dg_element_array = DgElementArray<test_metavariables,tmpl::flatten<
+                                tmpl::list<>>>;
   using evolved_swsh_tag = Tags::BondiJ;
   using evolved_swsh_dt_tag = Tags::BondiH;
   using evolved_coordinates_variables_tag = ::Tags::Variables<
@@ -156,128 +189,90 @@ struct test_metavariables {
                  Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>,
                  Cce::Tags::ScriPlusFactor<Cce::Tags::Psi4>>;
 
-  using component_list =
-      tmpl::list<mock_gh_worldtube_boundary<test_metavariables>,
-                 mock_characteristic_evolution<test_metavariables>>;
   using ccm_psi0 = tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>;
   using ccm_dpsi0 = tmpl::list<                 Cce::Tags::BoundaryValue<
                      Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>>;
+
+  using component_list =
+      tmpl::list<mock_gh_evolution<test_metavariables>,
+                 mock_characteristic_evolution<test_metavariables>>;
+  using temporal_id = ::Tags::TimeStepId;
   enum class Phase { Initialization, Evolve, Exit };
 };
 }  // namespace
 
 SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.GhBoundaryCommunication",
                   "[Unit][Cce]") {
-  Parallel::register_derived_classes_with_charm<TimeStepper>();
-  using evolution_component = mock_characteristic_evolution<test_metavariables>;
-  using worldtube_component = mock_gh_worldtube_boundary<test_metavariables>;
-  const size_t number_of_radial_points = 10;
-  const size_t l_max = 8;
-  const double extraction_radius = 100.0;
+  using cce_component = mock_characteristic_evolution<test_metavariables>;
+  using gh_component = mock_gh_evolution<test_metavariables>;
+
   MAKE_GENERATOR(gen);
-  UniformCustomDistribution<double> value_dist{0.1, 0.5};
+  UniformCustomDistribution<size_t> resolution_distribution{7, 10};
+  const size_t l_max = resolution_distribution(gen);
 
-  const double frequency = 0.1 * value_dist(gen);
-  const double amplitude = 0.1 * value_dist(gen);
-  const double target_time = 50.0 * value_dist(gen);
-
-  const double start_time = target_time;
-  const double target_step_size = 0.01 * value_dist(gen);
-  const double end_time = target_time + 10.0 * target_step_size;
+  const Slab single_step_slab{0.0,0.0 + 0.1};
+  const Time initial_time = single_step_slab.start();
+  TimeStepId initial_time_id{true, 0, initial_time};
 
   ActionTesting::MockRuntimeSystem<test_metavariables> runner{
       tuples::tagged_tuple_from_typelist<
           Parallel::get_const_global_cache_tags<test_metavariables>>{
-          l_max, extraction_radius, end_time, start_time,
-          InterfaceManagers::InterpolationStrategy::EveryStep,
-          number_of_radial_points,
-          std::make_unique<::TimeSteppers::DormandPrince5>()}};
-
-  // first prepare the input for the modal version
-  const double mass = value_dist(gen);
-  const std::array<double, 3> spin{
-      {value_dist(gen), value_dist(gen), value_dist(gen)}};
-  const std::array<double, 3> center{
-      {value_dist(gen), value_dist(gen), value_dist(gen)}};
-  const gr::Solutions::KerrSchild solution{mass, spin, center};
-
-  // create the test file, because on initialization the manager will need
-  // to get basic data out of the file
-  const size_t scri_plus_interpolation_order = 3;
+          l_max}};
 
   runner.set_phase(test_metavariables::Phase::Initialization);
-  ActionTesting::emplace_component<evolution_component>(
-      &runner, 0, target_step_size, scri_plus_interpolation_order);
-  ActionTesting::emplace_component<worldtube_component>(
-      &runner, 0,
-      Tags::GhInterfaceManager::create_from_options(
-          std::make_unique<InterfaceManagers::GhLockstep>()),
-      target_step_size, target_step_size);
+  ActionTesting::emplace_component_and_initialize<cce_component>(
+      &runner, 0, initial_time_id);
+  ActionTesting::emplace_component_and_initialize<
+      gh_component>(&runner, 0, initial_time_id);
 
-  // this should run the initializations
-  for (size_t i = 0; i < 4; ++i) {
-    ActionTesting::next_action<evolution_component>(make_not_null(&runner), 0);
-  }
-  for (size_t i = 0; i < 2; ++i) {
-    ActionTesting::next_action<worldtube_component>(make_not_null(&runner), 0);
-  }
+  ActionTesting::next_action<gh_component>(make_not_null(&runner), 0);
+  ActionTesting::next_action<gh_component>(make_not_null(&runner), 0);
+
+  ActionTesting::next_action<cce_component>(make_not_null(&runner), 0);
+  ActionTesting::next_action<cce_component>(make_not_null(&runner), 0);
+
   runner.set_phase(test_metavariables::Phase::Evolve);
+  ActionTesting::next_action<cce_component>(make_not_null(&runner), 0);
+  ActionTesting::next_action<gh_component>(make_not_null(&runner), 0);
+  CHECK(ActionTesting::get_terminate<gh_component>
+                                          (runner, 0));
 
-  // the first request
-  ActionTesting::next_action<evolution_component>(make_not_null(&runner), 0);
-  // check that the 'block' appropriately reports that it's not ready:
-  ActionTesting::next_action<evolution_component>(make_not_null(&runner), 0);
-  CHECK(ActionTesting::get_terminate<evolution_component>(runner, 0));
-
-  // send the current timestep data to the boundary component
-  const auto current_time =
-      ActionTesting::get_databox_tag<evolution_component, ::Tags::TimeStepId>(
-          runner, 0);
-  tnsr::aa<DataVector, 3> spacetime_metric{
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
-  tnsr::iaa<DataVector, 3> phi{
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
-  tnsr::aa<DataVector, 3> pi{
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
-  TestHelpers::create_fake_time_varying_gh_nodal_data(
-      make_not_null(&spacetime_metric), make_not_null(&phi), make_not_null(&pi),
-      solution, extraction_radius, amplitude, frequency, target_time, l_max);
-  ActionTesting::simple_action<
-      worldtube_component,
-      Actions::ReceiveGhWorldtubeData<evolution_component>>(
-      make_not_null(&runner), 0, current_time, spacetime_metric, phi, pi);
-
-  // the first response (`BoundaryComputeAndSendToEvolution`)
-  ActionTesting::invoke_queued_simple_action<worldtube_component>(
-      make_not_null(&runner), 0);
-  ActionTesting::invoke_queued_simple_action<worldtube_component>(
-      make_not_null(&runner), 0);
-  // then `ReceiveWorldtubeBoundaryData` in the evolution
-  ActionTesting::next_action<evolution_component>(make_not_null(&runner), 0);
-
-  const size_t number_of_angular_points =
+  // TODO change later
+  UniformCustomDistribution<double> value_distribution{0.1, 1.0};
+  const size_t number_of_angular_grid_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
-  Variables<Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>
-      expected_boundary_variables{number_of_angular_points};
-  create_bondi_boundary_data(make_not_null(&expected_boundary_variables), phi,
-                             pi, spacetime_metric, extraction_radius, l_max);
+  Scalar<SpinWeighted<ComplexDataVector, 2>> generated_psi0{
+      number_of_angular_grid_points};
+  for (size_t i = 0; i < get(generated_psi0).data().size(); ++i)
+    get(generated_psi0).data()[i] = value_distribution(gen);
+
+
+  ActionTesting::simple_action<cce_component,
+                               test_action<test_metavariables>>(
+      make_not_null(&runner), 0, generated_psi0);
+
+  const auto& test_lhs_cce = ActionTesting::get_databox_tag<
+      cce_component, Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>(
+      runner, 0);
 
   Approx angular_derivative_approx =
       Approx::custom()
           .epsilon(std::numeric_limits<double>::epsilon() * 1.0e4)
           .scale(1.0);
+  CHECK_ITERABLE_CUSTOM_APPROX(test_lhs_cce, generated_psi0,
+                               angular_derivative_approx);
 
-  tmpl::for_each<
-      Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>(
-      [&expected_boundary_variables, &runner,
-       &angular_derivative_approx](auto tag_v) {
-        using tag = typename decltype(tag_v)::type;
-        INFO(db::tag_name<tag>());
-        const auto& test_lhs =
-            ActionTesting::get_databox_tag<evolution_component, tag>(runner, 0);
-        const auto& test_rhs = get<tag>(expected_boundary_variables);
-        CHECK_ITERABLE_CUSTOM_APPROX(test_lhs, test_rhs,
-                                     angular_derivative_approx);
-      });
+  ActionTesting::invoke_queued_simple_action<cce_component>(
+      make_not_null(&runner), 0);
+  //CHECK(ActionTesting::next_action_if_ready<gh_component>
+  //(make_not_null(&runner), 0));
+  ActionTesting::next_action<gh_component>(make_not_null(&runner), 0);
+
+  const auto& test_lhs_gh = ActionTesting::get_databox_tag<
+      gh_component, Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>(
+      runner, 0);
+
+  CHECK_ITERABLE_CUSTOM_APPROX(test_lhs_gh, generated_psi0,
+                               angular_derivative_approx);
 }
 }  // namespace Cce

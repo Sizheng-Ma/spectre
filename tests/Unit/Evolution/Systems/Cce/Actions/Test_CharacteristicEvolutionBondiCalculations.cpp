@@ -94,7 +94,8 @@ struct metavariables {
   using evolved_swsh_tag = Tags::BondiJ;
   using evolved_swsh_dt_tag = Tags::BondiH;
   using evolved_coordinates_variables_tag = ::Tags::Variables<
-      tmpl::list<Tags::CauchyCartesianCoords, Tags::InertialRetardedTime>>;
+      tmpl::list<Tags::CauchyCartesianCoords,Tags::InertialCartesianCoords,
+                 Tags::InertialRetardedTime>>;
   using cce_boundary_communication_tags =
       Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>;
   using cce_gauge_boundary_tags = tmpl::flatten<tmpl::list<
@@ -104,8 +105,11 @@ struct metavariables {
                      Tags::BondiU, Tags::BondiW, Tags::BondiH>,
           tmpl::bind<Tags::EvolutionGaugeBoundaryValue, tmpl::_1>>,
       Tags::BondiUAtScri, Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega,
+      Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::GaugeOmeganohat,
       Tags::Du<Tags::GaugeOmega>,
       Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
+                                       Spectral::Swsh::Tags::Eth>,
+      Spectral::Swsh::Tags::Derivative<Tags::GaugeOmeganohat,
                                        Spectral::Swsh::Tags::Eth>>>;
 
   using const_global_cache_tags =
@@ -123,7 +127,8 @@ struct metavariables {
   using cce_pre_swsh_derivatives_tags = all_pre_swsh_derivative_tags;
   using cce_transform_buffer_tags = all_transform_buffer_tags;
   using cce_swsh_derivative_tags = all_swsh_derivative_tags;
-  using cce_angular_coordinate_tags = tmpl::list<Tags::CauchyAngularCoords>;
+  using cce_angular_coordinate_tags = tmpl::list<Tags::CauchyAngularCoords,
+                                              Tags::InertialAngularCoords>;
   using cce_scri_tags =
       tmpl::list<Cce::Tags::News, Cce::Tags::ScriPlus<Cce::Tags::Strain>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi0>,
@@ -239,6 +244,7 @@ SPECTRE_TEST_CASE(
       ::Tags::Variables<
           typename metavariables::cce_integration_independent_tags>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>,
       Tags::LMax, Tags::NumberOfRadialPoints>>(
       typename boundary_variables_tag::type{number_of_angular_points},
       Variables<pre_swsh_derivative_tag_list>{number_of_radial_points *
@@ -251,7 +257,8 @@ SPECTRE_TEST_CASE(
           number_of_angular_points},
       Variables<typename metavariables::cce_integration_independent_tags>{
           number_of_angular_points * number_of_radial_points},
-      Spectral::Swsh::SwshInterpolator{}, l_max, number_of_radial_points);
+      Spectral::Swsh::SwshInterpolator{}, Spectral::Swsh::SwshInterpolator{},
+          l_max, number_of_radial_points);
   db::mutate<boundary_variables_tag>(
       make_not_null(&boundary_box),
       [&spatial_metric_coefficients, &dt_spatial_metric_coefficients,

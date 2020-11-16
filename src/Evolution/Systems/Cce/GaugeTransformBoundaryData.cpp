@@ -13,6 +13,8 @@
 #include "NumericalAlgorithms/Spectral/SwshDerivatives.hpp"
 #include "NumericalAlgorithms/Spectral/SwshInterpolation.hpp"
 
+#include "Parallel/Printf.hpp"
+
 
 namespace Cce {
 
@@ -412,14 +414,19 @@ void GaugeAdjustedBoundaryValue<Tags::BondiH>::apply_impl(
 
 void GaugeUpdateTimeDerivatives::apply(
     const gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_cauchy_du_x,
+    const gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_inertial_du_x,
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*>
         evolution_gauge_u_at_scri,
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*> volume_u,
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_omega,
     const tnsr::i<DataVector, 3>& cartesian_cauchy_coordinates,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+    const tnsr::i<DataVector, 3>& cartesian_inertial_coordinates,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_omega,
-    const size_t l_max) noexcept {
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
+    const size_t l_max,
+    const Spectral::Swsh::SwshInterpolator& interpolator) noexcept {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
   const size_t number_of_radial_points =
@@ -456,7 +463,19 @@ void GaugeUpdateTimeDerivatives::apply(
                  ::Tags::SpinWeighted<::Tags::TempScalar<6, ComplexDataVector>,
                                       std::integral_constant<int, 2>>,
                  ::Tags::SpinWeighted<::Tags::TempScalar<7, ComplexDataVector>,
-                                      std::integral_constant<int, 0>>>>
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<8, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<9, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<10, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<11, ComplexDataVector>,
+                                      std::integral_constant<int, 1>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<12, ComplexDataVector>,
+                                      std::integral_constant<int, 1>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<13, ComplexDataVector>,
+                                      std::integral_constant<int, 1>>>>
       computation_buffers{number_of_angular_points};
 
   auto& x =
@@ -471,6 +490,7 @@ void GaugeUpdateTimeDerivatives::apply(
       get(get<::Tags::SpinWeighted<::Tags::TempScalar<2, ComplexDataVector>,
                                    std::integral_constant<int, 0>>>(
           computation_buffers));
+
   // Switch to complex so we can take spin-weighted derivatives
   x.data() =
       std::complex<double>(1.0, 0.0) * get<0>(cartesian_cauchy_coordinates);
@@ -500,13 +520,51 @@ void GaugeUpdateTimeDerivatives::apply(
       get(get<::Tags::SpinWeighted<::Tags::TempScalar<7, ComplexDataVector>,
                                    std::integral_constant<int, 0>>>(
           computation_buffers));
+
+  // Repeat previous calculations for partially flat Bondi-like coordinates
+  auto& xhat =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<8, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
+  auto& yhat =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<9, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
+  auto& zhat =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<10, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
+
+  xhat.data() =
+      std::complex<double>(1.0, 0.0) * get<0>(cartesian_inertial_coordinates);
+  yhat.data() =
+      std::complex<double>(1.0, 0.0) * get<1>(cartesian_inertial_coordinates);
+  zhat.data() =
+      std::complex<double>(1.0, 0.0) * get<2>(cartesian_inertial_coordinates);
+
+  auto& eth_xhat =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<11, ComplexDataVector>,
+                                   std::integral_constant<int, 1>>>(
+          computation_buffers));
+  auto& eth_yhat =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<12, ComplexDataVector>,
+                                   std::integral_constant<int, 1>>>(
+          computation_buffers));
+  auto& eth_zhat =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<13, ComplexDataVector>,
+                                   std::integral_constant<int, 1>>>(
+          computation_buffers));
   Spectral::Swsh::angular_derivatives<
       tmpl::list<Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Eth,
                  Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Eth,
+                 Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Eth,
+                 Spectral::Swsh::Tags::Eth,
                  Spectral::Swsh::Tags::Ethbar>>(
       l_max, 1, make_not_null(&eth_x), make_not_null(&eth_y),
-      make_not_null(&eth_z), make_not_null(&eth_evolution_gauge_u_at_scri),
-      make_not_null(&ethbar_evolution_gauge_u_at_scri), x, y, z,
+      make_not_null(&eth_z), make_not_null(&eth_xhat), make_not_null(&eth_yhat),
+      make_not_null(&eth_zhat), make_not_null(&eth_evolution_gauge_u_at_scri),
+      make_not_null(&ethbar_evolution_gauge_u_at_scri),
+      x, y, z, xhat, yhat, zhat,
       get(*evolution_gauge_u_at_scri), get(*evolution_gauge_u_at_scri));
   get<0>(*cartesian_cauchy_du_x) =
       real(conj(get(*evolution_gauge_u_at_scri).data()) * eth_x.data());
@@ -514,6 +572,27 @@ void GaugeUpdateTimeDerivatives::apply(
       real(conj(get(*evolution_gauge_u_at_scri).data()) * eth_y.data());
   get<2>(*cartesian_cauchy_du_x) =
       real(conj(get(*evolution_gauge_u_at_scri).data()) * eth_z.data());
+
+  // Interpolate evolution_gauge_u_at_scri and omega to the partially flat
+  // Bondi-like coordinates
+  SpinWeighted<ComplexDataVector, 1> original_u_at_scri;
+  SpinWeighted<ComplexDataVector, 0> ome_inte;
+  interpolator.interpolate(make_not_null(&original_u_at_scri),
+                          get(*evolution_gauge_u_at_scri));
+  interpolator.interpolate(make_not_null(&ome_inte),get(omega));
+
+  // Eq. (79) in arXiv:2007.01339
+  original_u_at_scri =
+  0.5*(-get(gauge_cnohat)*conj(original_u_at_scri)
+  +conj(get(gauge_dnohat))*original_u_at_scri);
+  original_u_at_scri.data()*=square(ome_inte.data());
+
+  get<0>(*cartesian_inertial_du_x) =
+      -real(conj(original_u_at_scri.data()) * eth_xhat.data());
+  get<1>(*cartesian_inertial_du_x) =
+      -real(conj(original_u_at_scri.data()) * eth_yhat.data());
+  get<2>(*cartesian_inertial_du_x) =
+      -real(conj(original_u_at_scri.data()) * eth_zhat.data());
 
   get(*du_omega) =
       0.25 *
@@ -648,6 +727,8 @@ void gauge_update_jacobian_from_coordinates_apply_impl(
 }
 }  // namespace detail
 
+
+
 void GaugeUpdateOmega::apply(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> omega,
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*> eth_omega,
@@ -659,6 +740,40 @@ void GaugeUpdateOmega::apply(
 
   Spectral::Swsh::angular_derivatives<tmpl::list<Spectral::Swsh::Tags::Eth>>(
       l_max, 1, make_not_null(&get(*eth_omega)), get(*omega));
+}
+
+void GaugeUpdateOmeganohat::apply(
+    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> omeganohat,
+    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*>
+          eth_omeganohat,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
+    const size_t l_max) noexcept {
+  get(*omeganohat) = 0.5 * sqrt(get(gauge_dnohat).data() *
+                           conj(get(gauge_dnohat).data()) -
+                           get(gauge_cnohat).data() *
+                           conj(get(gauge_cnohat).data()));
+
+  Spectral::Swsh::angular_derivatives<tmpl::list<Spectral::Swsh::Tags::Eth>>(
+      l_max, 1, make_not_null(&get(*eth_omeganohat)), get(*omeganohat));
+}
+
+void TestOmega::apply(
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+      const Spectral::Swsh::SwshInterpolator& interpolator_inertial) noexcept {
+
+  SpinWeighted<ComplexDataVector, 0> product;
+  SpinWeighted<ComplexDataVector, 0> omega_inte;
+  interpolator_inertial.interpolate(make_not_null(&omega_inte),get(omega));
+  product = get(omeganohat)*omega_inte;
+
+  double l2norm = 0.0;
+  for(size_t i = 0; i < product.size(); ++i)
+   l2norm += norm(product.data()[i]-1.0);
+  l2norm/=product.size();
+  l2norm = sqrt(l2norm);
+  Parallel::printf("%e \n",l2norm);
 }
 
 void InitializeGauge::apply(

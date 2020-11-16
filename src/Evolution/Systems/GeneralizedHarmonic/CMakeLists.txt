@@ -8,6 +8,7 @@ add_spectre_library(${LIBRARY})
 spectre_target_sources(
   ${LIBRARY}
   PRIVATE
+  CCMHelper.cpp
   Characteristics.cpp
   Constraints.cpp
   Equations.cpp
@@ -20,6 +21,7 @@ spectre_target_headers(
   ${LIBRARY}
   INCLUDE_DIRECTORY ${CMAKE_SOURCE_DIR}/src
   HEADERS
+  CCMHelper.hpp
   Characteristics.hpp
   Constraints.hpp
   DuDtTempTags.hpp
@@ -35,6 +37,7 @@ spectre_target_headers(
 target_link_libraries(
   ${LIBRARY}
   PUBLIC
+  Hdf5
   DataStructures
   ErrorHandling
   GeneralRelativity
