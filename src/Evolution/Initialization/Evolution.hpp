@@ -13,6 +13,9 @@
 #include "DataStructures/Variables.hpp"
 #include "Domain/Tags.hpp"
 #include "Evolution/Initialization/Tags.hpp"
+#include "Evolution/Systems/Cce/OptionTags.hpp"
+#include "Evolution/Systems/Cce/ReceiveTags.hpp"
+#include "Evolution/Systems/Cce/Tags.hpp"
 #include "NumericalAlgorithms/LinearOperators/Divergence.tpp"
 #include "NumericalAlgorithms/LinearOperators/PartialDerivatives.hpp"
 #include "NumericalAlgorithms/Spectral/Mesh.hpp"
@@ -173,6 +176,69 @@ struct TimeAndTimeStep {
   }
 };
 
+// TODO add comment later
+template<typename Metavariables>
+struct InitializeCcmTags {
+  // TODO typename?
+  using tagtag = ::Tags::Variables<typename Metavariables::ccm_psi0>;
+  using simple_tags = tmpl::list<tagtag>;
+  using const_global_cache_tags = tmpl::list<Cce::Tags::LMax>;
+  template <typename DbTags, typename... InboxTags,
+            typename ArrayIndex, typename ActionList,
+            typename ParallelComponent>
+  static auto apply(db::DataBox<DbTags>& box,
+                    const tuples::TaggedTuple<InboxTags...>& /*inboxes*/,
+                    const Parallel::GlobalCache<Metavariables>& /*cache*/,
+                    const ArrayIndex& /*array_index*/,
+                    const ActionList /*meta*/,
+                    const ParallelComponent* const /*meta*/) noexcept {
+      // TODO l_max?
+      const size_t l_max = db::get<Spectral::Swsh::Tags::LMaxBase>(box);
+      const size_t number_of_angular_grid_points =
+          Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+      // typename Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>::type
+      // init_psi0(
+      //    number_of_angular_grid_points, 0.0);
+      // TODO std::move?
+      Initialization::mutate_assign<simple_tags>(
+          make_not_null(&box),
+          typename tagtag::type{number_of_angular_grid_points, 0.0});
+      return std::make_tuple(std::move(box));
+  }
+};
+
+// TODO add comment later
+template<typename Metavariables>
+struct InitializeCcmOtherTags {
+  // TODO typename?
+  using tagtag1 = ::Tags::Variables<typename Metavariables::tags_for_matching1>;
+  using tagtag2 = ::Tags::Variables<typename Metavariables::tags_for_matching2>;
+  using tagtag3 = ::Tags::Variables<typename Metavariables::tags_for_matching3>;
+  using tagtag4 = ::Tags::Variables<typename Metavariables::ccm_dpsi0>;
+  using simple_tags = tmpl::list<tagtag1, tagtag2, tagtag3, tagtag4>;
+  using const_global_cache_tags = tmpl::list<Cce::Tags::LMax>;
+  template <typename DbTags, typename... InboxTags,
+            typename ArrayIndex, typename ActionList,
+            typename ParallelComponent>
+  static auto apply(db::DataBox<DbTags>& box,
+                    const tuples::TaggedTuple<InboxTags...>& /*inboxes*/,
+                    const Parallel::GlobalCache<Metavariables>& /*cache*/,
+                    const ArrayIndex& /*array_index*/,
+                    const ActionList /*meta*/,
+                    const ParallelComponent* const /*meta*/) noexcept {
+      // TODO l_max? LMaxBase?
+      //const size_t l_max = db::get<Spectral::Swsh::Tags::LMaxBase>(box);
+      //const size_t number_of_angular_grid_points =
+      //    Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+      // TODO std::move?
+      Initialization::mutate_assign<simple_tags>(
+          make_not_null(&box),
+          typename tagtag1::type{},
+          typename tagtag2::type{},
+          typename tagtag3::type{},typename tagtag4::type{});
+      return std::make_tuple(std::move(box));
+  }
+};
 /// \ingroup InitializationGroup
 /// \brief Initialize time-stepper items
 ///
