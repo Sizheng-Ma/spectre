@@ -118,6 +118,10 @@
 #include "Utilities/Functional.hpp"
 #include "Utilities/TMPL.hpp"
 
+#include "ParallelAlgorithms/Initialization/MutateAssign.hpp"
+#include "Evolution/Initialization/Evolution.hpp"
+#include "Evolution/Systems/GeneralizedHarmonic/BoundaryConditions/ReceivePsi0FromCce.hpp"
+#include "Evolution/Systems/Cce/Actions/Psi0Matching.hpp"
 /// \cond
 namespace Frame {
 // IWYU pragma: no_forward_declare MathFunction
@@ -359,7 +363,10 @@ struct GeneralizedHarmonicTemplateBase<EvolutionMetavarsDerived<
           local_time_stepping,
           tmpl::list<tmpl::conditional_t<
                          BjorhusExternalBoundary,
-                         tmpl::list<GeneralizedHarmonic::Actions::
+                         tmpl::list<
+//Cce::Actions::TransferPsi0<Cce::CharacteristicEvolution<derived_metavars>>,
+//GeneralizedHarmonic::Actions::ReceiveCCEData<derived_metavars>,
+                                    GeneralizedHarmonic::Actions::
                                         ImposeBjorhusBoundaryConditions<
                                             derived_metavars>>,
                          tmpl::list<>>,
@@ -368,7 +375,10 @@ struct GeneralizedHarmonicTemplateBase<EvolutionMetavarsDerived<
           tmpl::list<Actions::MutateApply<boundary_scheme>,
                      tmpl::conditional_t<
                          BjorhusExternalBoundary,
-                         tmpl::list<GeneralizedHarmonic::Actions::
+                         tmpl::list<
+//Cce::Actions::TransferPsi0<Cce::CharacteristicEvolution<derived_metavars>>,
+//GeneralizedHarmonic::Actions::ReceiveCCEData<derived_metavars>,
+                                    GeneralizedHarmonic::Actions::
                                         ImposeBjorhusBoundaryConditions<
                                             derived_metavars>>,
                          tmpl::list<>>,
@@ -386,6 +396,8 @@ struct GeneralizedHarmonicTemplateBase<EvolutionMetavarsDerived<
           evolution::Initialization::Actions::SetVariables<
               domain::Tags::Coordinates<volume_dim, Frame::Logical>>>,
       Initialization::Actions::TimeStepperHistory<derived_metavars>,
+      //Initialization::Actions::InitializeCcmTags<derived_metavars>,
+      //Initialization::Actions::InitializeCcmOtherTags<derived_metavars>,
       GeneralizedHarmonic::Actions::InitializeGhAnd3Plus1Variables<volume_dim>,
       dg::Actions::InitializeInterfaces<
           system,

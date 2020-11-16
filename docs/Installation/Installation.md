@@ -186,8 +186,8 @@ To use Singularity you must:
    source, and build directories, let's call it WORKDIR. The WORKDIR must be
    somewhere in your home directory. If this does not work for you, follow the
    Singularity instructions on setting up additional [bind
-   points](https://sylabs.io/guides/3.7/user-guide/bind_paths_and_mounts.html) 
-   (version 3.7. For other versions, see the [docs](https://sylabs.io/docs/)). 
+   points](https://sylabs.io/guides/3.7/user-guide/bind_paths_and_mounts.html)
+   (version 3.7. For other versions, see the [docs](https://sylabs.io/docs/)).
    Once inside the WORKDIR, clone SpECTRE into `WORKDIR/SPECTRE_ROOT`.
 3. Run `sudo singularity build spectre.img
    docker://sxscollaboration/spectrebuildenv:latest`.

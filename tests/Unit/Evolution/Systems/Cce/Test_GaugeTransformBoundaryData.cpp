@@ -87,11 +87,16 @@ void test_gauge_transforms_via_inverse_coordinate_map(
 
   using real_boundary_tags =
       tmpl::list<Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords,
-                 ::Tags::dt<Tags::CauchyCartesianCoords>>;
+                 Tags::InertialAngularCoords, Tags::InertialCartesianCoords,
+                 ::Tags::dt<Tags::CauchyCartesianCoords>,
+                 ::Tags::dt<Tags::InertialCartesianCoords>>;
   using spin_weighted_boundary_tags = tmpl::flatten<tmpl::list<
       tmpl::list<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega,
+                 Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::GaugeOmeganohat,
                  Tags::Du<Tags::GaugeOmega>,
                  Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
+                                                  Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::GaugeOmeganohat,
                                                   Spectral::Swsh::Tags::Eth>,
                  Tags::BondiUAtScri>,
       Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>,
@@ -107,12 +112,14 @@ void test_gauge_transforms_via_inverse_coordinate_map(
       coordinate_variables_tag, spin_weighted_variables_tag,
       volume_spin_weighted_variables_tag, Tags::LMax,
       Tags::NumberOfRadialPoints,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>>>(
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>>(
       typename coordinate_variables_tag::type{number_of_angular_grid_points},
       typename spin_weighted_variables_tag::type{number_of_angular_grid_points},
       typename volume_spin_weighted_variables_tag::type{
           number_of_angular_grid_points * number_of_radial_grid_points},
-      l_max, number_of_radial_grid_points, Spectral::Swsh::SwshInterpolator{});
+      l_max, number_of_radial_grid_points, Spectral::Swsh::SwshInterpolator{},
+      Spectral::Swsh::SwshInterpolator{});
 
   // create analytic data for the forward transform
   UniformCustomDistribution<double> value_dist{0.1, 0.5};
@@ -208,12 +215,14 @@ void test_gauge_transforms_via_inverse_coordinate_map(
       coordinate_variables_tag, spin_weighted_variables_tag,
       volume_spin_weighted_variables_tag, Tags::LMax,
       Tags::NumberOfRadialPoints,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>>>(
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>>(
       typename coordinate_variables_tag::type{number_of_angular_grid_points},
       typename spin_weighted_variables_tag::type{number_of_angular_grid_points},
       typename volume_spin_weighted_variables_tag::type{
           number_of_angular_grid_points * number_of_radial_grid_points},
-      l_max, number_of_radial_grid_points, Spectral::Swsh::SwshInterpolator{});
+      l_max, number_of_radial_grid_points, Spectral::Swsh::SwshInterpolator{},
+      Spectral::Swsh::SwshInterpolator{});
 
   db::mutate<Tags::CauchyCartesianCoords>(
       make_not_null(&inverse_transform_box),
@@ -287,6 +296,11 @@ void test_gauge_transforms_via_inverse_coordinate_map(
     db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
         make_not_null(&inverse_transform_box));
 
+    db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
+        make_not_null(&forward_transform_box));
+    db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
+        make_not_null(&inverse_transform_box));
+
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
         Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
         Tags::CauchyCartesianCoords>>(make_not_null(&forward_transform_box));
@@ -294,8 +308,20 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
         Tags::CauchyCartesianCoords>>(make_not_null(&inverse_transform_box));
 
+    db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
+        Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+        Tags::InertialCartesianCoords>>(make_not_null(&forward_transform_box));
+    db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
+        Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+        Tags::InertialCartesianCoords>>(make_not_null(&inverse_transform_box));
+
     db::mutate_apply<GaugeUpdateOmega>(make_not_null(&forward_transform_box));
     db::mutate_apply<GaugeUpdateOmega>(make_not_null(&inverse_transform_box));
+
+    db::mutate_apply<GaugeUpdateOmeganohat>(make_not_null
+                                           (&forward_transform_box));
+    db::mutate_apply<GaugeUpdateOmeganohat>(make_not_null
+                                           (&inverse_transform_box));
 
     const auto& forward_cauchy_angular_coordinates =
         db::get<Tags::CauchyAngularCoords>(forward_transform_box);

@@ -13,7 +13,6 @@
 #include "DataStructures/Tensor/Tensor.hpp"
 #include "DataStructures/Tensor/TypeAliases.hpp"
 #include "Domain/Tags.hpp"
-#include "Utilities/ErrorHandling/Assert.hpp"
 #include "Evolution/Systems/GeneralizedHarmonic/BoundaryConditions/BjorhusHelpers.hpp"
 #include "Evolution/Systems/GeneralizedHarmonic/BoundaryConditions/BjorhusInternals.hpp"
 #include "Evolution/Systems/GeneralizedHarmonic/BoundaryConditions/BoundaryConditions.hpp"
@@ -24,9 +23,12 @@
 #include "PointwiseFunctions/GeneralRelativity/IndexManipulation.hpp"
 #include "PointwiseFunctions/GeneralRelativity/Tags.hpp"
 #include "Utilities/ContainerHelpers.hpp"
+#include "Utilities/ErrorHandling/Assert.hpp"
 #include "Utilities/Gsl.hpp"
 #include "Utilities/TMPL.hpp"
 #include "Utilities/TypeTraits.hpp"
+
+#include "Parallel/Printf.hpp"
 
 namespace GeneralizedHarmonic {
 namespace Actions {
@@ -289,7 +291,8 @@ struct set_dt_v_minus {
       const typename domain::Tags::Coordinates<
           VolumeDim, Frame::Inertial>::type& inertial_coords,
       const tnsr::i<DataVector, VolumeDim, Frame::Inertial>&
-      /* unit_normal_one_form */) noexcept {
+      /* unit_normal_one_form */,
+      const tnsr::aa<DataVector, VolumeDim, Frame::Inertial>& w_ccm) noexcept {
     // Not using auto below to enforce a loose test on the quantity being
     // fetched from the buffer
     const auto constraint_gamma2 =
@@ -415,7 +418,8 @@ struct set_dt_v_minus {
             spacetime_unit_normal_vector, projection_ab, projection_Ab,
             projection_AB, inverse_spatial_metric, extrinsic_curvature,
             spacetime_metric, inverse_spacetime_metric, three_index_constraint,
-            char_projected_rhs_dt_u_minus, phi, d_phi, d_pi, char_speeds);
+            char_projected_rhs_dt_u_minus, phi, d_phi, d_pi,
+            char_speeds, w_ccm);
         return apply_gauge_sommerfeld(
             make_not_null(&bc_dt_u_minus), constraint_gamma2, inertial_coords,
             incoming_null_one_form, outgoing_null_one_form,
@@ -476,7 +480,9 @@ struct set_dt_v_minus {
       const tnsr::iaa<DataVector, VolumeDim, Frame::Inertial>& phi,
       const tnsr::ijaa<DataVector, VolumeDim, Frame::Inertial>& d_phi,
       const tnsr::iaa<DataVector, VolumeDim, Frame::Inertial>& d_pi,
-      const std::array<DataVector, 4>& char_speeds) noexcept;
+      const std::array<DataVector, 4>& char_speeds,
+      const tnsr::aa<DataVector, VolumeDim, Frame::Inertial>&
+          w_ccm) noexcept;
   static ReturnType apply_gauge_sommerfeld(
       gsl::not_null<ReturnType*> bc_dt_u_minus,
       const Scalar<DataVector>& gamma2,
@@ -587,7 +593,9 @@ ReturnType set_dt_v_minus<ReturnType, VolumeDim>::
         const tnsr::iaa<DataVector, VolumeDim, Frame::Inertial>& phi,
         const tnsr::ijaa<DataVector, VolumeDim, Frame::Inertial>& d_phi,
         const tnsr::iaa<DataVector, VolumeDim, Frame::Inertial>& d_pi,
-        const std::array<DataVector, 4>& char_speeds) noexcept {
+        const std::array<DataVector, 4>& char_speeds,
+        const tnsr::aa<DataVector, VolumeDim, Frame::Inertial>&
+            w_ccm) noexcept {
   ASSERT(get_size(get<0, 0>(*bc_dt_u_minus)) == get_size(get(gamma2)),
          "Size of input variables and temporary memory do not match: "
              << get_size(get<0, 0>(*bc_dt_u_minus)) << ","
@@ -792,8 +800,9 @@ ReturnType set_dt_v_minus<ReturnType, VolumeDim>::
                 (projection_Ab.get(a, c) * projection_Ab.get(b, d) -
                  0.5 * projection_ab.get(c, d) * projection_AB.get(a, b)) *
                 (char_projected_rhs_dt_u_minus.get(a, b) +
-                 char_speeds.at(3) *
-                     (U3m.get(a, b) - tmp - mMuPhys * U3p.get(a, b)));
+                 char_speeds.at(3) * (U3m.get(a, b) - w_ccm.get(a, b) -
+                                      tmp - mMuPhys * U3p.get(a, b)));
+                //Parallel::printf("wccm1: %e\n",w_ccm.get(a, b)[0]);
           }
         }
       }
@@ -807,7 +816,9 @@ ReturnType set_dt_v_minus<ReturnType, VolumeDim>::
                 (projection_Ab.get(a, c) * projection_Ab.get(b, d) -
                  0.5 * projection_ab.get(c, d) * projection_AB.get(a, b)) *
                 (char_projected_rhs_dt_u_minus.get(a, b) +
-                 char_speeds.at(3) * (U3m.get(a, b) - mMuPhys * U3p.get(a, b)));
+                 char_speeds.at(3) * (U3m.get(a, b) - w_ccm.get(a, b) -
+                                      mMuPhys * U3p.get(a, b)));
+                //Parallel::printf("wccm2: %e\n",w_ccm.get(a, b)[0]);
           }
         }
       }

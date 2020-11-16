@@ -43,9 +43,11 @@ using swsh_boundary_tags_to_generate =
 
 using real_boundary_tags_to_compute =
     tmpl::list<Tags::CauchyCartesianCoords, Tags::CauchyAngularCoords,
+               Tags::InertialCartesianCoords, Tags::InertialAngularCoords,
                Tags::InertialRetardedTime>;
 
-using swsh_boundary_tags_to_compute = tmpl::list<Tags::GaugeC, Tags::GaugeD>;
+using swsh_boundary_tags_to_compute = tmpl::list<Tags::GaugeC, Tags::GaugeD,
+                                      Tags::GaugeCnohat, Tags::GaugeDnohat>;
 
 using swsh_volume_tags_to_compute = tmpl::list<Tags::BondiJ>;
 
