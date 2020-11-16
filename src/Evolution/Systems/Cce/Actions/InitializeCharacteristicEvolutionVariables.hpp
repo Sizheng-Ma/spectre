@@ -99,7 +99,8 @@ struct InitializeCharacteristicEvolutionVariables {
       scri_variables_tag, volume_variables_tag,
       pre_swsh_derivatives_variables_tag, transform_buffer_variables_tag,
       swsh_derivative_variables_tag,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>>;
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
 
   using compute_tags = tmpl::list<>;
 
@@ -136,6 +137,7 @@ struct InitializeCharacteristicEvolutionVariables {
         typename transform_buffer_variables_tag::type{transform_buffer_size,
                                                       0.0},
         typename swsh_derivative_variables_tag::type{volume_size, 0.0},
+        Spectral::Swsh::SwshInterpolator{},
         Spectral::Swsh::SwshInterpolator{});
 
     return std::make_tuple(std::move(box));
