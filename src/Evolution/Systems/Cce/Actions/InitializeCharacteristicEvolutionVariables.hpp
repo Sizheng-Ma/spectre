@@ -109,6 +109,8 @@ struct InitializeCharacteristicEvolutionVariables {
   using evolved_swsh_stepper_error_variables_tag =
       db::add_tag_prefix<::Tags::StepperError, evolved_swsh_variables_tag>;
 
+  using ccm_tag = ::Tags::Variables<typename Metavariables::ccm_psi0>;
+  using dccm_tag = ::Tags::Variables<typename Metavariables::ccm_dpsi0>;
   using simple_tags_for_evolution = tmpl::list<
       boundary_value_variables_tag, coordinate_variables_tag,
       dt_coordinate_variables_tag, stepper_error_coordinate_variables_tag,
@@ -119,7 +121,7 @@ struct InitializeCharacteristicEvolutionVariables {
       transform_buffer_variables_tag, swsh_derivative_variables_tag,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>,
-      ::Tags::StepperErrorUpdated>;
+      ccm_tag, dccm_tag, ::Tags::StepperErrorUpdated>;
   using simple_tags =
       tmpl::append<StepChoosers::step_chooser_simple_tags<Metavariables>,
                    simple_tags_for_evolution>;
@@ -173,9 +175,10 @@ struct InitializeCharacteristicEvolutionVariables {
                                                       0.0},
         typename swsh_derivative_variables_tag::type{volume_size, 0.0},
         Spectral::Swsh::SwshInterpolator{}, Spectral::Swsh::SwshInterpolator{},
-         false);
+        typename ccm_tag::type{boundary_size},
+        typename dccm_tag::type{boundary_size}, false);
 
-      return std::make_tuple(std::move(box));
+    return std::make_tuple(std::move(box));
   }
 };
 

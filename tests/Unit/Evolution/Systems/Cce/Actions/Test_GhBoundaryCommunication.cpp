@@ -177,8 +177,11 @@ struct test_metavariables {
       tmpl::list<mock_gh_worldtube_boundary<test_metavariables>,
                  mock_characteristic_evolution<test_metavariables>>;
 
-  static constexpr bool uses_partially_flat_cartesian_coordinates = false;
+  static constexpr bool uses_partially_flat_cartesian_coordinates = true;
 
+  using ccm_psi0 = tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>;
+  using ccm_dpsi0 = tmpl::list<
+      Cce::Tags::BoundaryValue<Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>>;
   enum class Phase { Initialization, Evolve, Exit };
 };
 }  // namespace

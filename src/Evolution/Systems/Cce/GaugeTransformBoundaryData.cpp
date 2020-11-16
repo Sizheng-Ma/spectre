@@ -13,6 +13,7 @@
 #include "NumericalAlgorithms/Spectral/SwshDerivatives.hpp"
 #include "NumericalAlgorithms/Spectral/SwshInterpolation.hpp"
 
+#include "Parallel/Printf.hpp"
 
 namespace Cce {
 
@@ -757,6 +758,23 @@ void GaugeUpdateOmega<GaugeC, GaugeD, GaugeOmega>::apply(
 
   Spectral::Swsh::angular_derivatives<tmpl::list<Spectral::Swsh::Tags::Eth>>(
       l_max, 1, make_not_null(&get(*eth_omega)), get(*omega));
+}
+
+void TestOmega::apply(
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+    const Spectral::Swsh::SwshInterpolator& interpolator_inertial) noexcept {
+  SpinWeighted<ComplexDataVector, 0> product;
+  SpinWeighted<ComplexDataVector, 0> omega_inte;
+  interpolator_inertial.interpolate(make_not_null(&omega_inte), get(omega));
+  product = get(omeganohat) * omega_inte;
+
+  double l2norm = 0.0;
+  for (size_t i = 0; i < product.size(); ++i)
+    l2norm += norm(product.data()[i] - 1.0);
+  l2norm /= product.size();
+  l2norm = sqrt(l2norm);
+  Parallel::printf("%e \n", l2norm);
 }
 
 void InitializeGauge::apply(

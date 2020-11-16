@@ -76,6 +76,8 @@ struct UpdateGauge {
                                         Tags::CauchyGaugeOmega>>(
           make_not_null(&box));
     }
+    // TODO do we still want this?
+    db::mutate_apply<TestOmega>(make_not_null(&box));
     return {std::move(box)};
   }
 };

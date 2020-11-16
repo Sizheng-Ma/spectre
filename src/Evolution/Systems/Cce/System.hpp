@@ -118,6 +118,7 @@ struct System {
   using variables_tag = tmpl::list<
       ::Tags::Variables<tmpl::list<Tags::BondiJ>>,
       ::Tags::Variables<tmpl::list<Cce::Tags::CauchyCartesianCoords,
+                                   Cce::Tags::PartiallyFlatCartesianCoords,
                                    Cce::Tags::InertialRetardedTime>>>;
   static constexpr bool has_primitive_and_conservative_vars = false;
 };

@@ -12,7 +12,7 @@
 #include "Utilities/TMPL.hpp"
 
 struct CharacteristicExtractDefaults {
-  static constexpr bool uses_partially_flat_cartesian_coordinates = false;
+  static constexpr bool uses_partially_flat_cartesian_coordinates = true;
   using evolved_swsh_tag = Cce::Tags::BondiJ;
   using evolved_swsh_dt_tag = Cce::Tags::BondiH;
   using evolved_coordinates_variables_tag = Tags::Variables<
@@ -80,8 +80,13 @@ struct CharacteristicExtractDefaults {
       Cce::bondi_hypersurface_step_tags,
       tmpl::bind<Cce::integrand_terms_to_compute_for_bondi_variable,
                  tmpl::_1>>>;
-  using cce_integration_independent_tags =
-      tmpl::push_back<Cce::pre_computation_tags, Cce::Tags::DuRDividedByR>;
+  using cce_integration_independent_tags = tmpl::append<
+      Cce::pre_computation_tags,
+      tmpl::list<Cce::Tags::BondiJCauchyView, Cce::Tags::Psi0Match,
+                 Cce::Tags::Dy<Cce::Tags::Psi0Match>, Cce::Tags::Psi0,
+                 Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>,
+                 Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>>,
+                 Cce::Tags::DuRDividedByR>>;
   using cce_temporary_equations_tags = tmpl::remove_duplicates<tmpl::flatten<
       tmpl::transform<cce_integrand_tags,
                       tmpl::bind<Cce::integrand_temporary_tags, tmpl::_1>>>>;
@@ -100,4 +105,8 @@ struct CharacteristicExtractDefaults {
                                  swsh_vars_selector>,
       StepChoosers::ErrorControl<evolved_coordinates_variables_tag,
                                  coord_vars_selector>>;
+
+  using ccm_psi0 = tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>;
+  using ccm_dpsi0 = tmpl::list<
+      Cce::Tags::BoundaryValue<Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>>;
 };
