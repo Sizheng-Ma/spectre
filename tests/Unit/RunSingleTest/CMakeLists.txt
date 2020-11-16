@@ -32,14 +32,18 @@ add_spectre_executable(
 
   # The following lines list the source files with tests in them to be
   # compiled into the executable.
-  ../DataStructures/Test_DataVector.cpp
+  ../NumericalAlgorithms/Interpolation/Test_SendPsi0ToGh.cpp
   )
 
 # Modify which libraries to link for your test case.
 target_link_libraries(
   ${EXECUTABLE}
   PRIVATE
+  Cce
+  IO
+  GeneralRelativitySolutions
   DataStructures
+  GeneralizedHarmonic
   )
 
 # Core required libraries
