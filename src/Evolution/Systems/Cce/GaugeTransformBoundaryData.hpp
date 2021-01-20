@@ -576,7 +576,7 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiH> {
  * c \bar{\mathcal U}^{(0)} \right)
  * \f}
  *
- * see Eq. (79) in arXiv:2007.01339.
+ * see Eq. (79) of \cite Moxon2020gha.
  *
  * The time derivative of \f$\hat \omega\f$ is calculated from the equation
  * \f{align*}{

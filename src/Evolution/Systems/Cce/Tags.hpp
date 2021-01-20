@@ -134,7 +134,7 @@ struct Dr : db::PrefixTag, db::SimpleTag {
 
 /// The derivative with respect to \f$\lambda\f$,
 //  where \f$\lambda\f$ is an affine parameter along \f$l\f$, see
-//  Eq. (19a) in arXiv:2007.01339.
+//  Eq. (19a) of \cite Moxon2020gha.
 template <typename Tag>
 struct Dlambda : db::PrefixTag, db::SimpleTag {
   using type = typename Tag::type;
