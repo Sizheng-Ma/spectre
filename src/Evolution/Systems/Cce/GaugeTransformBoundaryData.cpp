@@ -726,6 +726,8 @@ void gauge_update_jacobian_from_coordinates_apply_impl(
 }
 }  // namespace detail
 
+
+
 void GaugeUpdateOmega::apply(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> omega,
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*> eth_omega,
