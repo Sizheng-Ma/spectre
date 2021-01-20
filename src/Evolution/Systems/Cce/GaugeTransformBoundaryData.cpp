@@ -580,7 +580,7 @@ void GaugeUpdateTimeDerivatives::apply(
                           get(*evolution_gauge_u_at_scri));
   interpolator.interpolate(make_not_null(&ome_inte),get(omega));
 
-  // Eq. (79) in arXiv:2007.01339
+  // Eq. (79) of \cite Moxon2020gha
   original_u_at_scri =
   0.5*(-get(gauge_cnohat)*conj(original_u_at_scri)
   +conj(get(gauge_dnohat))*original_u_at_scri);
