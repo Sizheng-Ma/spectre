@@ -156,6 +156,8 @@ SPECTRE_TEST_CASE(
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
+  ActionTesting::next_action<component>(make_not_null(&runner), 0);
+  ActionTesting::next_action<component>(make_not_null(&runner), 0);
 
   // apply the corresponding mutators to the `expected_box`
   db::mutate_apply<Cce::InitializeJ::InitializeJ::mutate_tags,
