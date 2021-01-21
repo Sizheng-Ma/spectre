@@ -74,8 +74,10 @@ struct mock_characteristic_evolution {
           GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>,
       ::Actions::MutateApply<
           GaugeUpdateInterpolator<Tags::InertialAngularCoords>>,
-      ::Actions::MutateApply<GaugeUpdateOmega>,
-      ::Actions::MutateApply<GaugeUpdateOmeganohat>,
+      ::Actions::MutateApply<
+          GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>,
+      ::Actions::MutateApply<GaugeUpdateOmega<
+          Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::GaugeOmeganohat>>,
       Initialization::Actions::RemoveOptionsAndTerminatePhase>;
   using initialization_tags =
       Parallel::get_initialization_tags<initialize_action_list>;
@@ -325,8 +327,12 @@ SPECTRE_TEST_CASE(
       make_not_null(&boundary_box));
   db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
       make_not_null(&boundary_box));
-  db::mutate_apply<GaugeUpdateOmega>(make_not_null(&boundary_box));
-  db::mutate_apply<GaugeUpdateOmeganohat>(make_not_null(&boundary_box));
+  db::mutate_apply<
+      GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
+      make_not_null(&boundary_box));
+  db::mutate_apply<GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
+                                    Tags::GaugeOmeganohat>>(
+      make_not_null(&boundary_box));
 
   tmpl::for_each<gauge_adjustments_setup_tags>([&boundary_box](auto tag_v) {
     using tag = typename decltype(tag_v)::type;

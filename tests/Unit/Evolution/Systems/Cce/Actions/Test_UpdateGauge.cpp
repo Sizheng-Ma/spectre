@@ -226,8 +226,12 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.UpdateGauge",
       make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
       make_not_null(&expected_box));
-  db::mutate_apply<GaugeUpdateOmega>(make_not_null(&expected_box));
-  db::mutate_apply<GaugeUpdateOmeganohat>(make_not_null(&expected_box));
+  db::mutate_apply<
+      GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
+      make_not_null(&expected_box));
+  db::mutate_apply<GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
+                                    Tags::GaugeOmeganohat>>(
+      make_not_null(&expected_box));
 
   tmpl::for_each<
       tmpl::append<real_tags_to_compute, swsh_tags_to_compute>>(

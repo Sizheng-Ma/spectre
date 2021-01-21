@@ -760,45 +760,18 @@ struct GaugeUpdateInterpolator {
  * \hat \omega = \frac{1}{2} \sqrt{\hat d \hat{\bar d} - \hat c \hat{\bar c}}.
  * \f}
  */
+template <typename GaugeC, typename GaugeD, typename GaugeOmega>
 struct GaugeUpdateOmega {
-  using argument_tags = tmpl::list<Tags::GaugeC, Tags::GaugeD, Tags::LMax>;
-  using return_tags =
-      tmpl::list<Tags::GaugeOmega,
-                 Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
-                                                  Spectral::Swsh::Tags::Eth>>;
+  using argument_tags = tmpl::list<GaugeC, GaugeD, Tags::LMax>;
+  using return_tags = tmpl::list<
+      GaugeOmega,
+      Spectral::Swsh::Tags::Derivative<GaugeOmega, Spectral::Swsh::Tags::Eth>>;
 
   static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> omega,
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*> eth_omega,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_c,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_d,
-      size_t l_max) noexcept;
-};
-
-/*!
- * \brief Update the quantity \f$\omega\f$ and \f$\eth \omega\f$
- * for updated spin-weighted Jacobian quantities \f$c\f$ and \f$d\f$.
- *
- * \details The conformal factor \f$\omega\f$ can be determined by the
- * angular determinant from the spin-weighted Jacobian factors as
- *
- * \f{align*}{
- * \omega = \frac{1}{2} \sqrt{d \bar d - c \bar c}.
- * \f}
- */
-struct GaugeUpdateOmeganohat {
-  using argument_tags = tmpl::list<Tags::GaugeCnohat,
-                                   Tags::GaugeDnohat, Tags::LMax>;
-  using return_tags =
-      tmpl::list<Tags::GaugeOmeganohat,
-                 Spectral::Swsh::Tags::Derivative<Tags::GaugeOmeganohat,
-                                                  Spectral::Swsh::Tags::Eth>>;
-
-  static void apply(
-      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> omeganohat,
-      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*> eth_omeganohat,
-      const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
       size_t l_max) noexcept;
 };
 
