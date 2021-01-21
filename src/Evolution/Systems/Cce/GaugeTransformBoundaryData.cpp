@@ -521,35 +521,35 @@ void GaugeUpdateTimeDerivatives::apply(
           computation_buffers));
 
   // Repeat previous calculations for partially flat Bondi-like coordinates
-  auto& xhat =
+  auto& x_inertial =
       get(get<::Tags::SpinWeighted<::Tags::TempScalar<8, ComplexDataVector>,
                                    std::integral_constant<int, 0>>>(
           computation_buffers));
-  auto& yhat =
+  auto& y_inertial =
       get(get<::Tags::SpinWeighted<::Tags::TempScalar<9, ComplexDataVector>,
                                    std::integral_constant<int, 0>>>(
           computation_buffers));
-  auto& zhat =
+  auto& z_inertial =
       get(get<::Tags::SpinWeighted<::Tags::TempScalar<10, ComplexDataVector>,
                                    std::integral_constant<int, 0>>>(
           computation_buffers));
 
-  xhat.data() =
+  x_inertial.data() =
       std::complex<double>(1.0, 0.0) * get<0>(cartesian_inertial_coordinates);
-  yhat.data() =
+  y_inertial.data() =
       std::complex<double>(1.0, 0.0) * get<1>(cartesian_inertial_coordinates);
-  zhat.data() =
+  z_inertial.data() =
       std::complex<double>(1.0, 0.0) * get<2>(cartesian_inertial_coordinates);
 
-  auto& eth_xhat =
+  auto& eth_x_inertial =
       get(get<::Tags::SpinWeighted<::Tags::TempScalar<11, ComplexDataVector>,
                                    std::integral_constant<int, 1>>>(
           computation_buffers));
-  auto& eth_yhat =
+  auto& eth_y_inertial =
       get(get<::Tags::SpinWeighted<::Tags::TempScalar<12, ComplexDataVector>,
                                    std::integral_constant<int, 1>>>(
           computation_buffers));
-  auto& eth_zhat =
+  auto& eth_z_inertial =
       get(get<::Tags::SpinWeighted<::Tags::TempScalar<13, ComplexDataVector>,
                                    std::integral_constant<int, 1>>>(
           computation_buffers));
@@ -559,10 +559,12 @@ void GaugeUpdateTimeDerivatives::apply(
                  Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Eth,
                  Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Ethbar>>(
       l_max, 1, make_not_null(&eth_x), make_not_null(&eth_y),
-      make_not_null(&eth_z), make_not_null(&eth_xhat), make_not_null(&eth_yhat),
-      make_not_null(&eth_zhat), make_not_null(&eth_evolution_gauge_u_at_scri),
-      make_not_null(&ethbar_evolution_gauge_u_at_scri), x, y, z, xhat, yhat,
-      zhat, get(*evolution_gauge_u_at_scri), get(*evolution_gauge_u_at_scri));
+      make_not_null(&eth_z), make_not_null(&eth_x_inertial),
+      make_not_null(&eth_y_inertial), make_not_null(&eth_z_inertial),
+      make_not_null(&eth_evolution_gauge_u_at_scri),
+      make_not_null(&ethbar_evolution_gauge_u_at_scri), x, y, z, x_inertial,
+      y_inertial, z_inertial, get(*evolution_gauge_u_at_scri),
+      get(*evolution_gauge_u_at_scri));
   get<0>(*cartesian_cauchy_du_x) =
       real(conj(get(*evolution_gauge_u_at_scri).data()) * eth_x.data());
   get<1>(*cartesian_cauchy_du_x) =
@@ -584,11 +586,11 @@ void GaugeUpdateTimeDerivatives::apply(
   original_u_at_scri.data() *= square(ome_inte.data());
 
   get<0>(*cartesian_inertial_du_x) =
-      -real(conj(original_u_at_scri.data()) * eth_xhat.data());
+      -real(conj(original_u_at_scri.data()) * eth_x_inertial.data());
   get<1>(*cartesian_inertial_du_x) =
-      -real(conj(original_u_at_scri.data()) * eth_yhat.data());
+      -real(conj(original_u_at_scri.data()) * eth_y_inertial.data());
   get<2>(*cartesian_inertial_du_x) =
-      -real(conj(original_u_at_scri.data()) * eth_zhat.data());
+      -real(conj(original_u_at_scri.data()) * eth_z_inertial.data());
 
   get(*du_omega) =
       0.25 *
