@@ -557,14 +557,12 @@ void GaugeUpdateTimeDerivatives::apply(
       tmpl::list<Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Eth,
                  Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Eth,
                  Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Eth,
-                 Spectral::Swsh::Tags::Eth,
-                 Spectral::Swsh::Tags::Ethbar>>(
+                 Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Ethbar>>(
       l_max, 1, make_not_null(&eth_x), make_not_null(&eth_y),
       make_not_null(&eth_z), make_not_null(&eth_xhat), make_not_null(&eth_yhat),
       make_not_null(&eth_zhat), make_not_null(&eth_evolution_gauge_u_at_scri),
-      make_not_null(&ethbar_evolution_gauge_u_at_scri),
-      x, y, z, xhat, yhat, zhat,
-      get(*evolution_gauge_u_at_scri), get(*evolution_gauge_u_at_scri));
+      make_not_null(&ethbar_evolution_gauge_u_at_scri), x, y, z, xhat, yhat,
+      zhat, get(*evolution_gauge_u_at_scri), get(*evolution_gauge_u_at_scri));
   get<0>(*cartesian_cauchy_du_x) =
       real(conj(get(*evolution_gauge_u_at_scri).data()) * eth_x.data());
   get<1>(*cartesian_cauchy_du_x) =
@@ -577,13 +575,13 @@ void GaugeUpdateTimeDerivatives::apply(
   SpinWeighted<ComplexDataVector, 1> original_u_at_scri;
   SpinWeighted<ComplexDataVector, 0> ome_inte;
   interpolator.interpolate(make_not_null(&original_u_at_scri),
-                          get(*evolution_gauge_u_at_scri));
-  interpolator.interpolate(make_not_null(&ome_inte),get(omega));
+                           get(*evolution_gauge_u_at_scri));
+  interpolator.interpolate(make_not_null(&ome_inte), get(omega));
 
   // Eq. (79) of \cite Moxon2020gha
   original_u_at_scri = 0.5 * (-get(gauge_cauchy_c) * conj(original_u_at_scri) +
                               conj(get(gauge_cauchy_d)) * original_u_at_scri);
-  original_u_at_scri.data()*=square(ome_inte.data());
+  original_u_at_scri.data() *= square(ome_inte.data());
 
   get<0>(*cartesian_inertial_du_x) =
       -real(conj(original_u_at_scri.data()) * eth_xhat.data());
@@ -745,13 +743,13 @@ void TestOmega::apply(
     const Spectral::Swsh::SwshInterpolator& interpolator_inertial) noexcept {
   SpinWeighted<ComplexDataVector, 0> product;
   SpinWeighted<ComplexDataVector, 0> omega_inte;
-  interpolator_inertial.interpolate(make_not_null(&omega_inte),get(omega));
+  interpolator_inertial.interpolate(make_not_null(&omega_inte), get(omega));
   product = get(omega_cauchy) * omega_inte;
 
   double l2norm = 0.0;
-  for(size_t i = 0; i < product.size(); ++i)
-   l2norm += norm(product.data()[i]-1.0);
-  l2norm/=product.size();
+  for (size_t i = 0; i < product.size(); ++i)
+    l2norm += norm(product.data()[i] - 1.0);
+  l2norm /= product.size();
   l2norm = sqrt(l2norm);
 }
 
