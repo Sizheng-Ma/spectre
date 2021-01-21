@@ -67,22 +67,23 @@ void InterpolateBondiJ::apply(
   SpinWeighted<ComplexDataVector, 2> target_angular_view;
   const SpinWeighted<ComplexDataVector, 2> source_angular_view;
   // Iterate for each spherical shell
-  for(size_t i = 0; i < number_of_radial_points; ++i) {
-    target_angular_view.set_data_ref(get(*cauchy_view_volume_j).data().data() +
-                  i * Spectral::Swsh::number_of_swsh_collocation_points(l_max),
-                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+  for (size_t i = 0; i < number_of_radial_points; ++i) {
+    target_angular_view.set_data_ref(
+        get(*cauchy_view_volume_j).data().data() +
+            i * Spectral::Swsh::number_of_swsh_collocation_points(l_max),
+        Spectral::Swsh::number_of_swsh_collocation_points(l_max));
 
-  make_const_view(make_not_null(&source_angular_view), get(volume_j),
-              i * number_of_angular_points,number_of_angular_points);
-  interpolator.interpolate(make_not_null(&target_angular_view),
-                           source_angular_view);
-  target_angular_view.data() =
-      target_angular_view.data() * conj(square(get(gauge_cauchy_d).data())) +
-      conj(target_angular_view.data()) * square(get(gauge_cauchy_c).data()) +
-      2.0 * get(gauge_cauchy_c).data() * conj(get(gauge_cauchy_d).data()) *
-          sqrt(1.0 +
-               target_angular_view.data() * conj(target_angular_view.data()));
-  target_angular_view.data() *= 0.25 / square(get(omega_cauchy).data());
+    make_const_view(make_not_null(&source_angular_view), get(volume_j),
+                    i * number_of_angular_points, number_of_angular_points);
+    interpolator.interpolate(make_not_null(&target_angular_view),
+                             source_angular_view);
+    target_angular_view.data() =
+        target_angular_view.data() * conj(square(get(gauge_cauchy_d).data())) +
+        conj(target_angular_view.data()) * square(get(gauge_cauchy_c).data()) +
+        2.0 * get(gauge_cauchy_c).data() * conj(get(gauge_cauchy_d).data()) *
+            sqrt(1.0 +
+                 target_angular_view.data() * conj(target_angular_view.data()));
+    target_angular_view.data() *= 0.25 / square(get(omega_cauchy).data());
   }
 }
 
@@ -104,12 +105,12 @@ void VolumeWeyl<Tags::Psi0Match>::apply(
   // Get bondi_r and bondi_k in the Cauchy coordinates
   // Note that bondi_r and bondi_k are available only as surface quantities
   SpinWeighted<ComplexDataVector, 0> bondi_r_cauchy;
-  interpolator.interpolate(make_not_null(&bondi_r_cauchy),get(bondi_r));
+  interpolator.interpolate(make_not_null(&bondi_r_cauchy), get(bondi_r));
   bondi_r_cauchy = bondi_r_cauchy * get(omega_cauchy);
 
   SpinWeighted<ComplexDataVector, 0> bondi_k_cauchy;
-  bondi_k_cauchy.data() = sqrt(1.0 + get(bondi_j_cauchy).data() *
-                               conj(get(bondi_j_cauchy).data()));
+  bondi_k_cauchy.data() =
+      sqrt(1.0 + get(bondi_j_cauchy).data() * conj(get(bondi_j_cauchy).data()));
 
   const SpinWeighted<ComplexDataVector, 2> bondi_j_cauchy_view;
   const SpinWeighted<ComplexDataVector, 2> dy_j_cauchy_view;
@@ -120,31 +121,26 @@ void VolumeWeyl<Tags::Psi0Match>::apply(
   SpinWeighted<ComplexDataVector, 2> psi0_view;
 
   // Iterate for each spherical shell
-  for(size_t i = 0; i < number_of_radial_points; ++i) {
+  for (size_t i = 0; i < number_of_radial_points; ++i) {
     make_const_view(make_not_null(&bondi_j_cauchy_view), get(bondi_j_cauchy),
-                  i * number_of_angular_points,
-                  number_of_angular_points);
+                    i * number_of_angular_points, number_of_angular_points);
     make_const_view(make_not_null(&dy_j_cauchy_view), get(dy_j_cauchy),
-                  i * number_of_angular_points,
-                  number_of_angular_points);
+                    i * number_of_angular_points, number_of_angular_points);
     make_const_view(make_not_null(&dy_dy_j_cauchy_view), get(dy_dy_j_cauchy),
-                  i * number_of_angular_points,
-                  number_of_angular_points);
+                    i * number_of_angular_points, number_of_angular_points);
     make_const_view(make_not_null(&bondi_k_cauchy_view), bondi_k_cauchy,
-                  i * number_of_angular_points,
-                  number_of_angular_points);
+                    i * number_of_angular_points, number_of_angular_points);
     make_const_view(make_not_null(&one_minus_y_view), get(one_minus_y),
-                  i * number_of_angular_points,
-                  number_of_angular_points);
+                    i * number_of_angular_points, number_of_angular_points);
 
-    psi0_view.set_data_ref(get(*psi_0).data().data() +
-      i * Spectral::Swsh::number_of_swsh_collocation_points(l_max),
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+    psi0_view.set_data_ref(
+        get(*psi_0).data().data() +
+            i * Spectral::Swsh::number_of_swsh_collocation_points(l_max),
+        Spectral::Swsh::number_of_swsh_collocation_points(l_max));
 
     weyl_psi0_impl(make_not_null(&psi0_view), bondi_j_cauchy_view,
-                 dy_j_cauchy_view,
-                 dy_dy_j_cauchy_view, bondi_k_cauchy_view,
-                 bondi_r_cauchy, one_minus_y_view);
+                   dy_j_cauchy_view, dy_dy_j_cauchy_view, bondi_k_cauchy_view,
+                   bondi_r_cauchy, one_minus_y_view);
   }
 }
 
@@ -165,7 +161,7 @@ void BoundaryWeyl::apply(
 
   // Get bondi_r and bondi_beta in the Cauchy coordinates
   SpinWeighted<ComplexDataVector, 0> bondi_r_cauchy;
-  interpolator.interpolate(make_not_null(&bondi_r_cauchy),get(bondi_r));
+  interpolator.interpolate(make_not_null(&bondi_r_cauchy), get(bondi_r));
   bondi_r_cauchy = bondi_r_cauchy * get(omega_cauchy);
 
   SpinWeighted<ComplexDataVector, 0> bondi_beta_cauchy;
@@ -178,23 +174,21 @@ void BoundaryWeyl::apply(
   const SpinWeighted<ComplexDataVector, 2> psi_0_boundary;
   const SpinWeighted<ComplexDataVector, 2> dy_psi_0_boundary;
 
-  //Take the boundary data
-  make_const_view(make_not_null(&psi_0_boundary), get(psi_0),
-                 0, number_of_angular_points);
-  make_const_view(make_not_null(&dy_psi_0_boundary), get(dy_psi_0),
-                 0, number_of_angular_points);
-  make_const_view(make_not_null(&one_minus_y_boundary), get(one_minus_y),
-                 0, number_of_angular_points);
-  make_const_view(make_not_null(&bondi_beta_cauchy_boundary),
-                 bondi_beta_cauchy, 0, number_of_angular_points);
+  // Take the boundary data
+  make_const_view(make_not_null(&psi_0_boundary), get(psi_0), 0,
+                  number_of_angular_points);
+  make_const_view(make_not_null(&dy_psi_0_boundary), get(dy_psi_0), 0,
+                  number_of_angular_points);
+  make_const_view(make_not_null(&one_minus_y_boundary), get(one_minus_y), 0,
+                  number_of_angular_points);
+  make_const_view(make_not_null(&bondi_beta_cauchy_boundary), bondi_beta_cauchy,
+                  0, number_of_angular_points);
 
   get(*psi_0_bound) = psi_0_boundary;
-  //TODO a better way?
-  SpinWeighted<ComplexDataVector, 2> radial_derivative;
-  radial_derivative.data() = dy_psi_0_boundary.data()*
-           square(one_minus_y_boundary.data())/(2.0 * bondi_r_cauchy.data()) *
-           exp(-2.0*bondi_beta_cauchy_boundary.data());
-  get(*dlambda_psi_0_bound) = radial_derivative;
+  get(*dlambda_psi_0_bound).data() =
+      dy_psi_0_boundary.data() * square(one_minus_y_boundary.data()) /
+      (2.0 * bondi_r_cauchy.data()) *
+      exp(-2.0 * bondi_beta_cauchy_boundary.data());
 }
 
 }  // namespace Cce
