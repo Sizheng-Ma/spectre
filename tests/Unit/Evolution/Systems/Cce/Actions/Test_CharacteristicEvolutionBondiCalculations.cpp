@@ -68,7 +68,7 @@ struct mock_characteristic_evolution {
           Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
           Tags::CauchyCartesianCoords>>,
       ::Actions::MutateApply<GaugeUpdateJacobianFromCoordinates<
-          Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+          Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
           Tags::InertialCartesianCoords>>,
       ::Actions::MutateApply<
           GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>,
@@ -77,7 +77,7 @@ struct mock_characteristic_evolution {
       ::Actions::MutateApply<
           GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>,
       ::Actions::MutateApply<GaugeUpdateOmega<
-          Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::GaugeOmeganohat>>,
+          Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::CauchyGaugeOmega>>,
       Initialization::Actions::RemoveOptionsAndTerminatePhase>;
   using initialization_tags =
       Parallel::get_initialization_tags<initialize_action_list>;
@@ -115,11 +115,11 @@ struct metavariables {
                      Tags::BondiU, Tags::BondiW, Tags::BondiH>,
           tmpl::bind<Tags::EvolutionGaugeBoundaryValue, tmpl::_1>>,
       Tags::BondiUAtScri, Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega,
-      Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::GaugeOmeganohat,
+      Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::CauchyGaugeOmega,
       Tags::Du<Tags::GaugeOmega>,
       Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
                                        Spectral::Swsh::Tags::Eth>,
-      Spectral::Swsh::Tags::Derivative<Tags::GaugeOmeganohat,
+      Spectral::Swsh::Tags::Derivative<Tags::CauchyGaugeOmega,
                                        Spectral::Swsh::Tags::Eth>>>;
 
   using const_global_cache_tags = tmpl::list<Tags::SpecifiedStartTime>;
@@ -321,7 +321,7 @@ SPECTRE_TEST_CASE(
       Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
       Tags::CauchyCartesianCoords>>(make_not_null(&boundary_box));
   db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-      Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+      Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
       Tags::InertialCartesianCoords>>(make_not_null(&boundary_box));
   db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
       make_not_null(&boundary_box));
@@ -330,8 +330,8 @@ SPECTRE_TEST_CASE(
   db::mutate_apply<
       GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
       make_not_null(&boundary_box));
-  db::mutate_apply<GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
-                                    Tags::GaugeOmeganohat>>(
+  db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                                    Tags::CauchyGaugeOmega>>(
       make_not_null(&boundary_box));
 
   tmpl::for_each<gauge_adjustments_setup_tags>([&boundary_box](auto tag_v) {

@@ -160,13 +160,13 @@ struct GaugeD : db::SimpleTag {
 
 /// The spin-weight 2 angular Jacobian factor in the partially
 /// flat Bondi-like coordinates.
-struct GaugeCnohat : db::SimpleTag {
+struct CauchyGaugeC : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
 };
 
 /// The spin-weight 0 angular Jacobian factor in the partially
 /// flat Bondi-like coordinates.
-struct GaugeDnohat : db::SimpleTag {
+struct CauchyGaugeD : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 
@@ -176,7 +176,7 @@ struct GaugeOmega : db::SimpleTag {
 };
 
 /// The conformal factor in the partially flat Bondi-like coordinates.
-struct GaugeOmeganohat : db::SimpleTag {
+struct CauchyGaugeOmega : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 

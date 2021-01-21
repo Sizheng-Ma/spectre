@@ -92,11 +92,11 @@ void test_gauge_transforms_via_inverse_coordinate_map(
                  ::Tags::dt<Tags::InertialCartesianCoords>>;
   using spin_weighted_boundary_tags = tmpl::flatten<tmpl::list<
       tmpl::list<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega,
-                 Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::GaugeOmeganohat,
+                 Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::CauchyGaugeOmega,
                  Tags::Du<Tags::GaugeOmega>,
                  Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
                                                   Spectral::Swsh::Tags::Eth>,
-                 Spectral::Swsh::Tags::Derivative<Tags::GaugeOmeganohat,
+                 Spectral::Swsh::Tags::Derivative<Tags::CauchyGaugeOmega,
                                                   Spectral::Swsh::Tags::Eth>,
                  Tags::BondiUAtScri>,
       Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>,
@@ -401,10 +401,10 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         Tags::CauchyCartesianCoords>>(make_not_null(&inverse_transform_box));
 
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-        Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+        Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
         Tags::InertialCartesianCoords>>(make_not_null(&forward_transform_box));
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-        Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+        Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
         Tags::InertialCartesianCoords>>(make_not_null(&inverse_transform_box));
 
     db::mutate_apply<
@@ -414,11 +414,11 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
         make_not_null(&inverse_transform_box));
 
-    db::mutate_apply<GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
-                                      Tags::GaugeOmeganohat>>(
+    db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                                      Tags::CauchyGaugeOmega>>(
         make_not_null(&forward_transform_box));
-    db::mutate_apply<GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
-                                      Tags::GaugeOmeganohat>>(
+    db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                                      Tags::CauchyGaugeOmega>>(
         make_not_null(&inverse_transform_box));
 
     const auto& forward_cauchy_angular_coordinates =
@@ -450,15 +450,15 @@ void test_gauge_transforms_via_inverse_coordinate_map(
     Scalar<SpinWeighted<ComplexDataVector, 0>> interpolated_forward_omega_cd{
         number_of_angular_grid_points};
     Scalar<SpinWeighted<ComplexDataVector, 0>>
-        interpolated_forward_omeganohat_cd{number_of_angular_grid_points};
+        interpolated_forward_omega_cauchy_cd{number_of_angular_grid_points};
 
     // check that the coordinates are actually inverses of one another.
     interpolator.interpolate(
         make_not_null(&get(interpolated_forward_omega_cd)),
         get(db::get<Tags::GaugeOmega>(inverse_transform_box)));
     interpolator_inertial.interpolate(
-        make_not_null(&get(interpolated_forward_omeganohat_cd)),
-        get(db::get<Tags::GaugeOmeganohat>(inverse_transform_box)));
+        make_not_null(&get(interpolated_forward_omega_cauchy_cd)),
+        get(db::get<Tags::CauchyGaugeOmega>(inverse_transform_box)));
 
     SpinWeighted<ComplexDataVector, 0>
         forward_and_inverse_interpolated_omega_cd{
@@ -468,20 +468,21 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         get(interpolated_forward_omega_cd));
 
     SpinWeighted<ComplexDataVector, 0>
-        forward_and_inverse_interpolated_omeganohat_cd{
+        forward_and_inverse_interpolated_omega_cauchy_cd{
             number_of_angular_grid_points};
     inverse_interpolator_inertial.interpolate(
-        make_not_null(&forward_and_inverse_interpolated_omeganohat_cd),
-        get(interpolated_forward_omeganohat_cd));
+        make_not_null(&forward_and_inverse_interpolated_omega_cauchy_cd),
+        get(interpolated_forward_omega_cauchy_cd));
 
     const auto& check_rhs =
         get(db::get<Tags::GaugeOmega>(inverse_transform_box)).data();
     CHECK_ITERABLE_APPROX(forward_and_inverse_interpolated_omega_cd.data(),
                           check_rhs);
-    const auto& check_rhs_nohat =
-        get(db::get<Tags::GaugeOmeganohat>(inverse_transform_box)).data();
-    CHECK_ITERABLE_APPROX(forward_and_inverse_interpolated_omeganohat_cd.data(),
-                          check_rhs_nohat);
+    const auto& check_rhs_cauchy =
+        get(db::get<Tags::CauchyGaugeOmega>(inverse_transform_box)).data();
+    CHECK_ITERABLE_APPROX(
+        forward_and_inverse_interpolated_omega_cauchy_cd.data(),
+        check_rhs_cauchy);
 
     interpolator.interpolate(
         make_not_null(&get(interpolated_forward_omega_cd)),
@@ -493,14 +494,14 @@ void test_gauge_transforms_via_inverse_coordinate_map(
                           another_check_rhs);
 
     interpolator_inertial.interpolate(
-        make_not_null(&get(interpolated_forward_omeganohat_cd)),
-        get(db::get<Tags::GaugeOmeganohat>(inverse_transform_box)));
-    const auto& inverse_omeganohat_cd =
-        db::get<Tags::GaugeOmeganohat>(forward_transform_box);
-    const auto another_check_rhs_nohat =
-        1.0 / (get(inverse_omeganohat_cd).data());
-    CHECK_ITERABLE_APPROX(get(interpolated_forward_omeganohat_cd).data(),
-                          another_check_rhs_nohat);
+        make_not_null(&get(interpolated_forward_omega_cauchy_cd)),
+        get(db::get<Tags::CauchyGaugeOmega>(inverse_transform_box)));
+    const auto& inverse_omega_cauchy_cd =
+        db::get<Tags::CauchyGaugeOmega>(forward_transform_box);
+    const auto another_check_rhs_cauchy =
+        1.0 / (get(inverse_omega_cauchy_cd).data());
+    CHECK_ITERABLE_APPROX(get(interpolated_forward_omega_cauchy_cd).data(),
+                          another_check_rhs_cauchy);
   }
 
   Approx interpolation_approx =

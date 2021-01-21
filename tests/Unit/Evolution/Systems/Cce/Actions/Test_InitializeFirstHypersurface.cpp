@@ -46,8 +46,9 @@ using real_boundary_tags_to_compute =
                Tags::InertialCartesianCoords, Tags::InertialAngularCoords,
                Tags::InertialRetardedTime>;
 
-using swsh_boundary_tags_to_compute = tmpl::list<Tags::GaugeC, Tags::GaugeD,
-                                      Tags::GaugeCnohat, Tags::GaugeDnohat>;
+using swsh_boundary_tags_to_compute =
+    tmpl::list<Tags::GaugeC, Tags::GaugeD, Tags::CauchyGaugeC,
+               Tags::CauchyGaugeD>;
 
 using swsh_volume_tags_to_compute = tmpl::list<Tags::BondiJ>;
 
@@ -79,7 +80,7 @@ struct mock_characteristic_evolution {
                   Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
                   Tags::CauchyCartesianCoords>>,
               ::Actions::MutateApply<GaugeUpdateJacobianFromCoordinates<
-                  Tags::GaugeCnohat, Tags::GaugeDnohat,
+                  Tags::CauchyGaugeC, Tags::CauchyGaugeD,
                   Tags::InertialAngularCoords,
                   Tags::InertialCartesianCoords>>>>>;
 };
@@ -173,7 +174,7 @@ SPECTRE_TEST_CASE(
       Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
       Tags::CauchyCartesianCoords>>(make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-      Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+      Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
       Tags::InertialCartesianCoords>>(make_not_null(&expected_box));
   db::mutate_apply<InitializeScriPlusValue<Tags::InertialRetardedTime>>(
       make_not_null(&expected_box), 1.5);

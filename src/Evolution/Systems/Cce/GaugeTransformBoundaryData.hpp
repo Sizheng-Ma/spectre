@@ -595,13 +595,13 @@ struct GaugeUpdateTimeDerivatives {
       tmpl::list<::Tags::dt<Tags::CauchyCartesianCoords>,
                  ::Tags::dt<Tags::InertialCartesianCoords>, Tags::BondiUAtScri,
                  Tags::BondiU, Tags::Du<Tags::GaugeOmega>>;
-  using argument_tags =
-      tmpl::list<Tags::CauchyCartesianCoords, Tags::InertialCartesianCoords,
-                 Tags::GaugeCnohat,
-                 Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
-                                                  Spectral::Swsh::Tags::Eth>,
-                 Tags::GaugeOmega, Tags::GaugeDnohat, Tags::LMax,
-         Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
+  using argument_tags = tmpl::list<
+      Tags::CauchyCartesianCoords, Tags::InertialCartesianCoords,
+      Tags::CauchyGaugeC,
+      Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
+                                       Spectral::Swsh::Tags::Eth>,
+      Tags::GaugeOmega, Tags::CauchyGaugeD, Tags::LMax,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
   static void apply(
       gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_cauchy_du_x,
       gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_inertial_du_x,
@@ -611,10 +611,10 @@ struct GaugeUpdateTimeDerivatives {
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_omega,
       const tnsr::i<DataVector, 3>& cartesian_cauchy_coordinates,
       const tnsr::i<DataVector, 3>& cartesian_inertial_coordinates,
-      const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cauchy_c,
       const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_omega,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_cauchy_d,
       size_t l_max,
       const Spectral::Swsh::SwshInterpolator& interpolator) noexcept;
 };
@@ -790,12 +790,12 @@ struct GaugeUpdateOmega {
  */
 struct TestOmega {
   using argument_tags = tmpl::list<
-        Tags::GaugeOmeganohat,Tags::GaugeOmega,
-        Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
+      Tags::CauchyGaugeOmega, Tags::GaugeOmega,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
   using return_tags = tmpl::list<>;
 
   static void apply(
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega_cauchy,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
       const Spectral::Swsh::SwshInterpolator& interpolator_inertial) noexcept;
 };

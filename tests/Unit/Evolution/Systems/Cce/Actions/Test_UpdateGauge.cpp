@@ -38,11 +38,11 @@ using real_tags_to_compute = tmpl::list<Tags::CauchyAngularCoords,
                                         Tags::InertialAngularCoords>;
 
 using swsh_tags_to_compute =
-    tmpl::list<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega,
-               Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::GaugeOmeganohat,
+    tmpl::list<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega, Tags::CauchyGaugeC,
+               Tags::CauchyGaugeD, Tags::CauchyGaugeOmega,
                Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
                                                 Spectral::Swsh::Tags::Eth>,
-               Spectral::Swsh::Tags::Derivative<Tags::GaugeOmeganohat,
+               Spectral::Swsh::Tags::Derivative<Tags::CauchyGaugeOmega,
                                                 Spectral::Swsh::Tags::Eth>>;
 
 using swsh_ccm_tags_to_generate = tmpl::list<Tags::BondiJ,Tags::OneMinusY>;
@@ -218,7 +218,7 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.UpdateGauge",
       Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
       Tags::CauchyCartesianCoords>>(make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-      Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+      Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
       Tags::InertialCartesianCoords>>(make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
       make_not_null(&expected_box));
@@ -227,8 +227,8 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.UpdateGauge",
   db::mutate_apply<
       GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
       make_not_null(&expected_box));
-  db::mutate_apply<GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
-                                    Tags::GaugeOmeganohat>>(
+  db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                                    Tags::CauchyGaugeOmega>>(
       make_not_null(&expected_box));
 
   tmpl::for_each<
