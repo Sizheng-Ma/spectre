@@ -245,7 +245,7 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.UpdateGauge",
 
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
 
-  db::mutate_apply<Interpolate_BondiJ>(make_not_null(&expected_box));
+  db::mutate_apply<InterpolateBondiJ>(make_not_null(&expected_box));
   db::mutate_apply<PreSwshDerivatives<Tags::Dy<
         Tags::BondiJ_Cauchyview>>>(make_not_null(&expected_box));
   db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::Dy<

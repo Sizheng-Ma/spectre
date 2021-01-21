@@ -50,7 +50,7 @@ void VolumeWeyl<Tags::Psi0>::apply(
                  get(dy_dy_j), get(bondi_k), get(bondi_r), get(one_minus_y));
 }
 
-void Interpolate_BondiJ::apply(
+void InterpolateBondiJ::apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
           cauchy_view_volume_j,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
@@ -102,6 +102,7 @@ void VolumeWeyl<Tags::Psi0Match>::apply(
       get(bondi_j_cauchy).size() / number_of_angular_points;
 
   // Get bondi_r and bondi_k in the Cauchy coordinates
+  // Note that bondi_r and bondi_k are available only as surface quantities
   SpinWeighted<ComplexDataVector, 0> bondi_r_cauchy;
   interpolator.interpolate(make_not_null(&bondi_r_cauchy),get(bondi_r));
   bondi_r_cauchy = bondi_r_cauchy * get(omeganohat);
@@ -191,7 +192,7 @@ void BoundaryWeyl::apply(
   //TODO a better way?
   SpinWeighted<ComplexDataVector, 2> radial_derivative;
   radial_derivative.data() = dy_psi_0_boundary.data()*
-           square(one_minus_y_boundary.data())/2.0/bondi_r_cauchy.data() *
+           square(one_minus_y_boundary.data())/(2.0 * bondi_r_cauchy.data()) *
            exp(-2.0*bondi_beta_cauchy_boundary.data());
   get(*dlambda_psi_0_bound) = radial_derivative;
 }
