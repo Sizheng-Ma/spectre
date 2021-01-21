@@ -474,7 +474,11 @@ void GaugeUpdateTimeDerivatives::apply(
                  ::Tags::SpinWeighted<::Tags::TempScalar<12, ComplexDataVector>,
                                       std::integral_constant<int, 1>>,
                  ::Tags::SpinWeighted<::Tags::TempScalar<13, ComplexDataVector>,
-                                      std::integral_constant<int, 1>>>>
+                                      std::integral_constant<int, 1>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<14, ComplexDataVector>,
+                                      std::integral_constant<int, 1>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<15, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>>>
       computation_buffers{number_of_angular_points};
 
   auto& x =
@@ -574,8 +578,14 @@ void GaugeUpdateTimeDerivatives::apply(
 
   // Interpolate evolution_gauge_u_at_scri and omega to the partially flat
   // Bondi-like coordinates
-  SpinWeighted<ComplexDataVector, 1> original_u_at_scri;
-  SpinWeighted<ComplexDataVector, 0> ome_inte;
+  auto& original_u_at_scri =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<14, ComplexDataVector>,
+                                   std::integral_constant<int, 1>>>(
+          computation_buffers));
+  auto& ome_inte =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<15, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
   interpolator.interpolate(make_not_null(&original_u_at_scri),
                            get(*evolution_gauge_u_at_scri));
   interpolator.interpolate(make_not_null(&ome_inte), get(omega));
