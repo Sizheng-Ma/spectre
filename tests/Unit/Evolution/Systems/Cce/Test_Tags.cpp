@@ -37,12 +37,12 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Tags", "[Unit][Cce]") {
   TestHelpers::db::test_simple_tag<Cce::Tags::BondiJCauchyView>(
       "J_Cauchy_view");
   TestHelpers::db::test_simple_tag<Cce::Tags::GaugeC>("GaugeC");
-  TestHelpers::db::test_simple_tag<Cce::Tags::GaugeCnohat>("GaugeCnohat");
+  TestHelpers::db::test_simple_tag<Cce::Tags::CauchyGaugeC>("CauchyGaugeC");
   TestHelpers::db::test_simple_tag<Cce::Tags::GaugeD>("GaugeD");
-  TestHelpers::db::test_simple_tag<Cce::Tags::GaugeDnohat>("GaugeDnohat");
+  TestHelpers::db::test_simple_tag<Cce::Tags::CauchyGaugeD>("CauchyGaugeD");
   TestHelpers::db::test_simple_tag<Cce::Tags::GaugeOmega>("GaugeOmega");
-  TestHelpers::db::test_simple_tag<Cce::Tags::GaugeOmeganohat>(
-      "GaugeOmeganohat");
+  TestHelpers::db::test_simple_tag<Cce::Tags::CauchyGaugeOmega>(
+      "CauchyGaugeOmega");
   TestHelpers::db::test_simple_tag<Cce::Tags::News>("News");
   TestHelpers::db::test_simple_tag<Cce::Tags::CauchyAngularCoords>(
       "CauchyAngularCoords");

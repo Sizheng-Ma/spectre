@@ -420,10 +420,10 @@ void GaugeUpdateTimeDerivatives::apply(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_omega,
     const tnsr::i<DataVector, 3>& cartesian_cauchy_coordinates,
     const tnsr::i<DataVector, 3>& cartesian_inertial_coordinates,
-    const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cauchy_c,
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_omega,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_cauchy_d,
     const size_t l_max,
     const Spectral::Swsh::SwshInterpolator& interpolator) noexcept {
   const size_t number_of_angular_points =
@@ -581,9 +581,8 @@ void GaugeUpdateTimeDerivatives::apply(
   interpolator.interpolate(make_not_null(&ome_inte),get(omega));
 
   // Eq. (79) of \cite Moxon2020gha
-  original_u_at_scri =
-  0.5*(-get(gauge_cnohat)*conj(original_u_at_scri)
-  +conj(get(gauge_dnohat))*original_u_at_scri);
+  original_u_at_scri = 0.5 * (-get(gauge_cauchy_c) * conj(original_u_at_scri) +
+                              conj(get(gauge_cauchy_d)) * original_u_at_scri);
   original_u_at_scri.data()*=square(ome_inte.data());
 
   get<0>(*cartesian_inertial_du_x) =
@@ -741,14 +740,13 @@ void GaugeUpdateOmega<GaugeC, GaugeD, GaugeOmega>::apply(
 }
 
 void TestOmega::apply(
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
-      const Spectral::Swsh::SwshInterpolator& interpolator_inertial) noexcept {
-
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega_cauchy,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+    const Spectral::Swsh::SwshInterpolator& interpolator_inertial) noexcept {
   SpinWeighted<ComplexDataVector, 0> product;
   SpinWeighted<ComplexDataVector, 0> omega_inte;
   interpolator_inertial.interpolate(make_not_null(&omega_inte),get(omega));
-  product = get(omeganohat)*omega_inte;
+  product = get(omega_cauchy) * omega_inte;
 
   double l2norm = 0.0;
   for(size_t i = 0; i < product.size(); ++i)
@@ -788,8 +786,8 @@ void InitializeGauge::apply(
 }
 
 template struct GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>;
-template struct GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
-                                 Tags::GaugeOmeganohat>;
+template struct GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                                 Tags::CauchyGaugeOmega>;
 }  // namespace Cce
 
 /// \endcond

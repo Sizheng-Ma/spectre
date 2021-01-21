@@ -51,14 +51,14 @@ void VolumeWeyl<Tags::Psi0>::apply(
 }
 
 void InterpolateBondiJ::apply(
-      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
-          cauchy_view_volume_j,
-      const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
-      const Scalar<SpinWeighted<ComplexDataVector, 2>>& volume_j,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
-      const Spectral::Swsh::SwshInterpolator& interpolator,
-      const size_t l_max) noexcept {
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
+        cauchy_view_volume_j,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cauchy_c,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& volume_j,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_cauchy_d,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega_cauchy,
+    const Spectral::Swsh::SwshInterpolator& interpolator,
+    const size_t l_max) noexcept {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
   const size_t number_of_radial_points =
@@ -76,13 +76,13 @@ void InterpolateBondiJ::apply(
               i * number_of_angular_points,number_of_angular_points);
   interpolator.interpolate(make_not_null(&target_angular_view),
                            source_angular_view);
-  target_angular_view.data() = target_angular_view.data() *
-       conj(square(get(gauge_dnohat).data())) +
-       conj(target_angular_view.data()) * square(get(gauge_cnohat).data())
-       + 2.0 * get(gauge_cnohat).data() * conj(get(gauge_dnohat).data()) *
-       sqrt(1.0 + target_angular_view.data() *
-                                            conj(target_angular_view.data()));
-  target_angular_view.data() *= 0.25/square(get(omeganohat).data());
+  target_angular_view.data() =
+      target_angular_view.data() * conj(square(get(gauge_cauchy_d).data())) +
+      conj(target_angular_view.data()) * square(get(gauge_cauchy_c).data()) +
+      2.0 * get(gauge_cauchy_c).data() * conj(get(gauge_cauchy_d).data()) *
+          sqrt(1.0 +
+               target_angular_view.data() * conj(target_angular_view.data()));
+  target_angular_view.data() *= 0.25 / square(get(omega_cauchy).data());
   }
 }
 
@@ -92,7 +92,7 @@ void VolumeWeyl<Tags::Psi0Match>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_j_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_dy_j_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
     const Spectral::Swsh::SwshInterpolator& interpolator,
     const size_t l_max) noexcept {
@@ -105,7 +105,7 @@ void VolumeWeyl<Tags::Psi0Match>::apply(
   // Note that bondi_r and bondi_k are available only as surface quantities
   SpinWeighted<ComplexDataVector, 0> bondi_r_cauchy;
   interpolator.interpolate(make_not_null(&bondi_r_cauchy),get(bondi_r));
-  bondi_r_cauchy = bondi_r_cauchy * get(omeganohat);
+  bondi_r_cauchy = bondi_r_cauchy * get(omega_cauchy);
 
   SpinWeighted<ComplexDataVector, 0> bondi_k_cauchy;
   bondi_k_cauchy.data() = sqrt(1.0 + get(bondi_j_cauchy).data() *
@@ -149,29 +149,29 @@ void VolumeWeyl<Tags::Psi0Match>::apply(
 }
 
 void BoundaryWeyl::apply(
-      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> psi_0_bound,
-      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
-                   dlambda_psi_0_bound,
-      const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi_0,
-      const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_psi_0,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_inertial,
-      const Spectral::Swsh::SwshInterpolator& interpolator,
-      const size_t l_max) noexcept {
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> psi_0_bound,
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
+        dlambda_psi_0_bound,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi_0,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_psi_0,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega_cauchy,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_inertial,
+    const Spectral::Swsh::SwshInterpolator& interpolator,
+    const size_t l_max) noexcept {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
 
   // Get bondi_r and bondi_beta in the Cauchy coordinates
   SpinWeighted<ComplexDataVector, 0> bondi_r_cauchy;
   interpolator.interpolate(make_not_null(&bondi_r_cauchy),get(bondi_r));
-  bondi_r_cauchy = bondi_r_cauchy * get(omeganohat);
+  bondi_r_cauchy = bondi_r_cauchy * get(omega_cauchy);
 
   SpinWeighted<ComplexDataVector, 0> bondi_beta_cauchy;
   interpolator.interpolate(make_not_null(&bondi_beta_cauchy),
                            get(bondi_beta_inertial));
-  bondi_beta_cauchy.data() -= 0.5 * log(get(omeganohat).data());
+  bondi_beta_cauchy.data() -= 0.5 * log(get(omega_cauchy).data());
 
   const SpinWeighted<ComplexDataVector, 0> one_minus_y_boundary;
   const SpinWeighted<ComplexDataVector, 0> bondi_beta_cauchy_boundary;

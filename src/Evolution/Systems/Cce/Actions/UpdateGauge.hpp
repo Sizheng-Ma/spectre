@@ -57,7 +57,7 @@ struct UpdateGauge {
         Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
         Tags::CauchyCartesianCoords>>(make_not_null(&box));
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-        Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
+        Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
         Tags::InertialCartesianCoords>>(make_not_null(&box));
     db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
         make_not_null(&box));
@@ -66,8 +66,8 @@ struct UpdateGauge {
     db::mutate_apply<
         GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
         make_not_null(&box));
-    db::mutate_apply<GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
-                                      Tags::GaugeOmeganohat>>(
+    db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                                      Tags::CauchyGaugeOmega>>(
         make_not_null(&box));
     return {std::move(box)};
   }
