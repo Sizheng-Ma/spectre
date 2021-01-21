@@ -47,13 +47,11 @@ using swsh_tags_to_compute =
 
 using swsh_ccm_tags_to_generate = tmpl::list<Tags::BondiJ,Tags::OneMinusY>;
 
-using swsh_ccm_tags_to_compute = tmpl::list<Tags::BondiJ_Cauchyview,
-                                 Tags::Dy<Tags::BondiJ_Cauchyview>,
-                                 Tags::Dy<Tags::Dy<Tags::BondiJ_Cauchyview>>,
-                                 Tags::Psi0Match, Tags::Dy<Tags::Psi0Match>,
-                                 Tags::BoundaryValue<Tags::Psi0Match>,
-                                 Tags::BoundaryValue<Tags::Dlambda
-                                                     <Tags::Psi0Match>>>;
+using swsh_ccm_tags_to_compute =
+    tmpl::list<Tags::BondiJCauchyView, Tags::Dy<Tags::BondiJCauchyView>,
+               Tags::Dy<Tags::Dy<Tags::BondiJCauchyView>>, Tags::Psi0Match,
+               Tags::Dy<Tags::Psi0Match>, Tags::BoundaryValue<Tags::Psi0Match>,
+               Tags::BoundaryValue<Tags::Dlambda<Tags::Psi0Match>>>;
 
 using swsh_boundary_ccm_tags_to_generate = tmpl::list<Tags::BondiR,
                                                       Tags::BondiBeta>;
@@ -246,10 +244,11 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.UpdateGauge",
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
 
   db::mutate_apply<InterpolateBondiJ>(make_not_null(&expected_box));
-  db::mutate_apply<PreSwshDerivatives<Tags::Dy<
-        Tags::BondiJ_Cauchyview>>>(make_not_null(&expected_box));
-  db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::Dy<
-        Tags::BondiJ_Cauchyview>>>>(make_not_null(&expected_box));
+  db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::BondiJCauchyView>>>(
+      make_not_null(&expected_box));
+  db::mutate_apply<
+      PreSwshDerivatives<Tags::Dy<Tags::Dy<Tags::BondiJCauchyView>>>>(
+      make_not_null(&expected_box));
   db::mutate_apply<VolumeWeyl<Tags::Psi0Match>>(make_not_null(&expected_box));
   db::mutate_apply<PreSwshDerivatives<Tags::Dy<
         Tags::Psi0Match>>>(make_not_null(&expected_box));

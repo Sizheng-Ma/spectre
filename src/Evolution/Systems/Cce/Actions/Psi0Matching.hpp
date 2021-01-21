@@ -39,10 +39,11 @@ struct CalculatePsi0 {
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) noexcept {
     db::mutate_apply<InterpolateBondiJ>(make_not_null(&box));
-    db::mutate_apply<PreSwshDerivatives<Tags::Dy<
-        Tags::BondiJ_Cauchyview>>>(make_not_null(&box));
-    db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::Dy<
-        Tags::BondiJ_Cauchyview>>>>( make_not_null(&box));
+    db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::BondiJCauchyView>>>(
+        make_not_null(&box));
+    db::mutate_apply<
+        PreSwshDerivatives<Tags::Dy<Tags::Dy<Tags::BondiJCauchyView>>>>(
+        make_not_null(&box));
     db::mutate_apply<VolumeWeyl<Tags::Psi0Match>>(make_not_null(&box));
     db::mutate_apply<PreSwshDerivatives<Tags::Dy<
         Tags::Psi0Match>>>(make_not_null(&box));

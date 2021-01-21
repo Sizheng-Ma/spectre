@@ -111,7 +111,7 @@ struct BondiW : db::SimpleTag {
 };
 
 /// Bondi parameter \f$\bar{J}\f$ in the Cauchy frame
-struct BondiJ_Cauchyview : db::SimpleTag {
+struct BondiJCauchyView : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
   static std::string name() noexcept { return "J_Cauchy_view"; }
 };
@@ -133,8 +133,8 @@ struct Dr : db::PrefixTag, db::SimpleTag {
 };
 
 /// The derivative with respect to \f$\lambda\f$,
-//  where \f$\lambda\f$ is an affine parameter along \f$l\f$, see
-//  Eq. (19a) of \cite Moxon2020gha.
+///  where \f$\lambda\f$ is an affine parameter along \f$l\f$, see
+///  Eq. (19a) of \cite Moxon2020gha.
 template <typename Tag>
 struct Dlambda : db::PrefixTag, db::SimpleTag {
   using type = typename Tag::type;
