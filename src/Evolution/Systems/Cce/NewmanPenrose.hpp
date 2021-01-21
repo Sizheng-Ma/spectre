@@ -88,8 +88,7 @@ struct VolumeWeyl<Tags::Psi0> {
  * \f}
  */
 struct InterpolateBondiJ {
-  using return_tags =
-      tmpl::list<Tags::BondiJ_Cauchyview>;
+  using return_tags = tmpl::list<Tags::BondiJCauchyView>;
   using argument_tags = tmpl::list<Tags::GaugeCnohat,
       Tags::BondiJ,Tags::GaugeDnohat,Tags::GaugeOmeganohat,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>,
@@ -134,11 +133,10 @@ struct InterpolateBondiJ {
 template <>
 struct VolumeWeyl<Tags::Psi0Match> {
   using return_tags = tmpl::list<Tags::Psi0Match>;
-  using argument_tags = tmpl::list<Tags::BondiJ_Cauchyview,
-      Tags::Dy<Tags::BondiJ_Cauchyview>,
-      Tags::Dy<Tags::Dy<Tags::BondiJ_Cauchyview>>,
-      Tags::BondiR,Tags::GaugeOmeganohat,
-      Tags::OneMinusY,
+  using argument_tags = tmpl::list<
+      Tags::BondiJCauchyView, Tags::Dy<Tags::BondiJCauchyView>,
+      Tags::Dy<Tags::Dy<Tags::BondiJCauchyView>>, Tags::BondiR,
+      Tags::GaugeOmeganohat, Tags::OneMinusY,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>,
       Tags::LMax>;
   static void apply(
