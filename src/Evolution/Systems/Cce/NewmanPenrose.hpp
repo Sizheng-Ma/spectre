@@ -87,7 +87,7 @@ struct VolumeWeyl<Tags::Psi0> {
  * \hat K = \sqrt{1+\hat J \bar{\hat J}}
  * \f}
  */
-struct Interpolate_BondiJ {
+struct InterpolateBondiJ {
   using return_tags =
       tmpl::list<Tags::BondiJ_Cauchyview>;
   using argument_tags = tmpl::list<Tags::GaugeCnohat,
