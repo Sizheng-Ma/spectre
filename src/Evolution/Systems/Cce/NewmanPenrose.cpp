@@ -185,11 +185,11 @@ void BoundaryWeyl::apply(
                   0, number_of_angular_points);
 
   get(*psi_0_bound) = psi_0_boundary;
-  //TODO a better way?
+  // TODO a better way?
   SpinWeighted<ComplexDataVector, 2> radial_derivative;
-  radial_derivative.data() = dy_psi_0_boundary.data()*
-           square(one_minus_y_boundary.data())/2.0/bondi_r_cauchy.data() *
-           exp(-2.0*bondi_beta_cauchy_boundary.data());
+  radial_derivative.data() =
+      dy_psi_0_boundary.data() * square(one_minus_y_boundary.data()) / 2.0 /
+      bondi_r_cauchy.data() * exp(-2.0 * bondi_beta_cauchy_boundary.data());
   get(*dlambda_psi_0_bound) = radial_derivative;
 }
 
