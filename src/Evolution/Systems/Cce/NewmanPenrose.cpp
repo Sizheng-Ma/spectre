@@ -151,28 +151,39 @@ void BoundaryWeyl::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi_0,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_psi_0,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega_cauchy,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_inertial,
-    const Spectral::Swsh::SwshInterpolator& interpolator,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r_cauchy,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_cauchy,
     const size_t l_max) noexcept {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
 
-  // Get bondi_r and bondi_beta in the Cauchy coordinates
-  SpinWeighted<ComplexDataVector, 0> bondi_r_cauchy;
-  interpolator.interpolate(make_not_null(&bondi_r_cauchy), get(bondi_r));
-  bondi_r_cauchy = bondi_r_cauchy * get(omega_cauchy);
+  Variables<
+      tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<1, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<2, ComplexDataVector>,
+                                      std::integral_constant<int, 2>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<3, ComplexDataVector>,
+                                      std::integral_constant<int, 2>>>>
+      computation_buffers{number_of_angular_points};
 
-  SpinWeighted<ComplexDataVector, 0> bondi_beta_cauchy;
-  interpolator.interpolate(make_not_null(&bondi_beta_cauchy),
-                           get(bondi_beta_inertial));
-  bondi_beta_cauchy.data() -= 0.5 * log(get(omega_cauchy).data());
-
-  const SpinWeighted<ComplexDataVector, 0> one_minus_y_boundary;
-  const SpinWeighted<ComplexDataVector, 0> bondi_beta_cauchy_boundary;
-  const SpinWeighted<ComplexDataVector, 2> psi_0_boundary;
-  const SpinWeighted<ComplexDataVector, 2> dy_psi_0_boundary;
+  const auto& one_minus_y_boundary =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
+  const auto& bondi_beta_cauchy_boundary =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<1, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
+  const auto& psi_0_boundary =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<2, ComplexDataVector>,
+                                   std::integral_constant<int, 2>>>(
+          computation_buffers));
+  const auto& dy_psi_0_boundary =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<3, ComplexDataVector>,
+                                   std::integral_constant<int, 2>>>(
+          computation_buffers));
 
   // Take the boundary data
   make_const_view(make_not_null(&psi_0_boundary), get(psi_0), 0,
@@ -181,15 +192,16 @@ void BoundaryWeyl::apply(
                   number_of_angular_points);
   make_const_view(make_not_null(&one_minus_y_boundary), get(one_minus_y), 0,
                   number_of_angular_points);
-  make_const_view(make_not_null(&bondi_beta_cauchy_boundary), bondi_beta_cauchy,
-                  0, number_of_angular_points);
+  make_const_view(make_not_null(&bondi_beta_cauchy_boundary),
+                  get(bondi_beta_cauchy), 0, number_of_angular_points);
 
   get(*psi_0_bound) = psi_0_boundary;
   // TODO a better way?
   SpinWeighted<ComplexDataVector, 2> radial_derivative;
-  radial_derivative.data() =
-      dy_psi_0_boundary.data() * square(one_minus_y_boundary.data()) / (2.0 *
-      bondi_r_cauchy.data()) * exp(-2.0 * bondi_beta_cauchy_boundary.data());
+  radial_derivative.data() = dy_psi_0_boundary.data() *
+                             square(one_minus_y_boundary.data()) /
+                             (2.0 * get(bondi_r_cauchy).data()) *
+                             exp(-2.0 * bondi_beta_cauchy_boundary.data());
   get(*dlambda_psi_0_bound) = radial_derivative;
 }
 
