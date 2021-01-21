@@ -31,7 +31,7 @@ namespace Actions {
  *
  * Internally, this dispatches to `GaugeUpdateAngularFromCartesian`,
  * `GaugeUpdateJacobianFromCoordinates`, `GaugeUpdateInterpolator`,
- * `GaugeUpdateOmega` and `GaugeUpdateOmeganohat` to perform the
+ * `GaugeUpdateOmega` to perform the
  * computations. Refer to the documentation for those mutators for mathematical
  * details.
  */
@@ -63,8 +63,12 @@ struct UpdateGauge {
         make_not_null(&box));
     db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
         make_not_null(&box));
-    db::mutate_apply<GaugeUpdateOmega>(make_not_null(&box));
-    db::mutate_apply<GaugeUpdateOmeganohat>(make_not_null(&box));
+    db::mutate_apply<
+        GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
+        make_not_null(&box));
+    db::mutate_apply<GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
+                                      Tags::GaugeOmeganohat>>(
+        make_not_null(&box));
     return {std::move(box)};
   }
 };

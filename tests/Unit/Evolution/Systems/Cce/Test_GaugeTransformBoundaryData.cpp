@@ -407,13 +407,19 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
         Tags::InertialCartesianCoords>>(make_not_null(&inverse_transform_box));
 
-    db::mutate_apply<GaugeUpdateOmega>(make_not_null(&forward_transform_box));
-    db::mutate_apply<GaugeUpdateOmega>(make_not_null(&inverse_transform_box));
+    db::mutate_apply<
+        GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
+        make_not_null(&forward_transform_box));
+    db::mutate_apply<
+        GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
+        make_not_null(&inverse_transform_box));
 
-    db::mutate_apply<GaugeUpdateOmeganohat>(make_not_null
-                                           (&forward_transform_box));
-    db::mutate_apply<GaugeUpdateOmeganohat>(make_not_null
-                                           (&inverse_transform_box));
+    db::mutate_apply<GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
+                                      Tags::GaugeOmeganohat>>(
+        make_not_null(&forward_transform_box));
+    db::mutate_apply<GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
+                                      Tags::GaugeOmeganohat>>(
+        make_not_null(&inverse_transform_box));
 
     const auto& forward_cauchy_angular_coordinates =
         db::get<Tags::CauchyAngularCoords>(forward_transform_box);

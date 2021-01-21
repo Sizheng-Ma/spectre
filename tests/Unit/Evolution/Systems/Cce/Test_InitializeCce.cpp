@@ -148,7 +148,9 @@ void test_initialize_j_zero_nonsmooth(
       Tags::CauchyCartesianCoords>>(box_to_initialize);
   db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
       box_to_initialize);
-  db::mutate_apply<GaugeUpdateOmega>(box_to_initialize);
+  db::mutate_apply<
+      GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
+      box_to_initialize);
 
   db::mutate_apply<GaugeAdjustedBoundaryValue<Tags::BondiJ>>(box_to_initialize);
 
@@ -288,7 +290,9 @@ void test_initialize_j_no_radiation(
       Tags::CauchyCartesianCoords>>(box_to_initialize);
   db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
       box_to_initialize);
-  db::mutate_apply<GaugeUpdateOmega>(box_to_initialize);
+  db::mutate_apply<
+      GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
+      box_to_initialize);
 
   db::mutate_apply<PrecomputeCceDependencies<Tags::EvolutionGaugeBoundaryValue,
                                              Tags::OneMinusY>>(

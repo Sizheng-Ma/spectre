@@ -726,7 +726,8 @@ void gauge_update_jacobian_from_coordinates_apply_impl(
 }
 }  // namespace detail
 
-void GaugeUpdateOmega::apply(
+template <typename GaugeC, typename GaugeD, typename GaugeOmega>
+void GaugeUpdateOmega<GaugeC, GaugeD, GaugeOmega>::apply(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> omega,
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*> eth_omega,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_c,
@@ -737,22 +738,6 @@ void GaugeUpdateOmega::apply(
 
   Spectral::Swsh::angular_derivatives<tmpl::list<Spectral::Swsh::Tags::Eth>>(
       l_max, 1, make_not_null(&get(*eth_omega)), get(*omega));
-}
-
-void GaugeUpdateOmeganohat::apply(
-    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> omeganohat,
-    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*>
-          eth_omeganohat,
-    const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
-    const size_t l_max) noexcept {
-  get(*omeganohat) = 0.5 * sqrt(get(gauge_dnohat).data() *
-                           conj(get(gauge_dnohat).data()) -
-                           get(gauge_cnohat).data() *
-                           conj(get(gauge_cnohat).data()));
-
-  Spectral::Swsh::angular_derivatives<tmpl::list<Spectral::Swsh::Tags::Eth>>(
-      l_max, 1, make_not_null(&get(*eth_omeganohat)), get(*omeganohat));
 }
 
 void TestOmega::apply(
@@ -802,6 +787,9 @@ void InitializeGauge::apply(
   get(*gauge_d).data() = 2.0;
 }
 
+template struct GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>;
+template struct GaugeUpdateOmega<Tags::GaugeCnohat, Tags::GaugeDnohat,
+                                 Tags::GaugeOmeganohat>;
 }  // namespace Cce
 
 /// \endcond
