@@ -218,8 +218,10 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.Psi0Matching",
       l_max);
 
   runner.set_phase(metavariables::Phase::Evolve);
-  // apply the `CalculatePsi0` action
+  // Obtain inertial angular coordinates and SwshInterpolator that are needed
+  // by `CalculatePsi0`. This action is tested in Test_UpdateGauge.cpp
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
+  // Apply the `CalculatePsi0` action
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
 
   db::mutate_apply<GaugeUpdateAngularFromCartesian<
@@ -227,6 +229,7 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.Psi0Matching",
       make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
       make_not_null(&expected_box));
+
   db::mutate_apply<InterpolateBondiJ>(make_not_null(&expected_box));
   db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::BondiJCauchyView>>>(
       make_not_null(&expected_box));
