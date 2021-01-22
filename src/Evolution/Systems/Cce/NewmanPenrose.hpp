@@ -134,21 +134,18 @@ struct InterpolateBondiJ {
 template <>
 struct VolumeWeyl<Tags::Psi0Match> {
   using return_tags = tmpl::list<Tags::Psi0Match>;
-  using argument_tags = tmpl::list<
-      Tags::BondiJCauchyView, Tags::Dy<Tags::BondiJCauchyView>,
-      Tags::Dy<Tags::Dy<Tags::BondiJCauchyView>>, Tags::BondiR,
-      Tags::CauchyGaugeOmega, Tags::OneMinusY,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>,
-      Tags::LMax>;
+  using argument_tags =
+      tmpl::list<Tags::BondiJCauchyView, Tags::Dy<Tags::BondiJCauchyView>,
+                 Tags::Dy<Tags::Dy<Tags::BondiJCauchyView>>,
+                 Tags::BoundaryValue<Tags::BondiR>, Tags::OneMinusY,
+                 Tags::LMax>;
   static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> psi_0,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& bondi_j_cauchy,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_j_cauchy,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_dy_j_cauchy,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega_cauchy,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r_cauchy,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
-      const Spectral::Swsh::SwshInterpolator& interpolator,
       const size_t l_max) noexcept;
 };
 
