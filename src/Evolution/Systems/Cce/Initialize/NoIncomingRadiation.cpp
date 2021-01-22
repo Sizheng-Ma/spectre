@@ -121,10 +121,10 @@ void NoIncomingRadiation::operator()(
         tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
         angular_cauchy_coordinates,
     const gsl::not_null<
-        tnsr::i<DataVector, 3>*> /*cartesian_inertial_coordinates*/,
+        tnsr::i<DataVector, 3>*> cartesian_inertial_coordinates,
     const gsl::not_null<
         tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
-    /*angular_inertial_coordinates*/,
+    angular_inertial_coordinates,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_j,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_dr_j,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& r, const size_t l_max,
@@ -167,6 +167,21 @@ void NoIncomingRadiation::operator()(
         angular_coordinate_tolerance_, max_iterations_,
         final_angular_coordinate_deviation);
   }
+
+  // The initialization of inertial coordinates of this scheme is complicated.
+  // Since inertial coordinates are infrequently used here, I just set them to
+  // 0.
+  get<0>(*angular_inertial_coordinates) = 0.0;
+  get<1>(*angular_inertial_coordinates) = 0.0;
+
+  get<0>(*cartesian_inertial_coordinates) =
+      sin(get<0>(*angular_inertial_coordinates)) *
+      cos(get<1>(*angular_inertial_coordinates));
+  get<1>(*cartesian_inertial_coordinates) =
+      sin(get<0>(*angular_inertial_coordinates)) *
+      sin(get<1>(*angular_inertial_coordinates));
+  get<2>(*cartesian_inertial_coordinates) =
+      cos(get<0>(*angular_inertial_coordinates));
 }
 
 void NoIncomingRadiation::pup(PUP::er& p) noexcept {
