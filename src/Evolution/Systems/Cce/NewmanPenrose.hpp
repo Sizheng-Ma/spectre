@@ -6,10 +6,10 @@
 #include "DataStructures/SpinWeighted.hpp"
 #include "DataStructures/Tensor/Tensor.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
-#include "Utilities/Gsl.hpp"
-#include "Utilities/TMPL.hpp"
 #include "NumericalAlgorithms/Spectral/SwshDerivatives.hpp"
 #include "NumericalAlgorithms/Spectral/SwshInterpolation.hpp"
+#include "Utilities/Gsl.hpp"
+#include "Utilities/TMPL.hpp"
 
 /// \cond
 class ComplexDataVector;
@@ -109,7 +109,7 @@ struct InterpolateBondiJ {
  * \brief Compute the Weyl scalar \f$\Psi_0\f$ in the volume for the purpose
  * of CCM, the quantity is in the Cauchy coordinates.
  *
- * \details \f$\Psi_0\f$ is given by:
+ * \details The Weyl scalar \f$\Psi_0\f$ is given by:
  *
  * \f{align*}{
  * \Psi_0 = \frac{(1 - y)^4}{16 r^2 K}
@@ -154,7 +154,8 @@ struct VolumeWeyl<Tags::Psi0Match> {
  * \f$\partial_\lambda \Psi_0\f$ on the inner boundary of CCE domain.
  * The quantities are in the Cauchy coordinates.
  *
- * \details \f$\partial_\lambda \Psi_0\f$ is given by
+ * \details The radial derivative of the Weyl scalar \f$\partial_\lambda
+ * \Psi_0\f$ is given by
  *
  * \f{align*}{
  * \partial_\lambda \Psi_0 = \frac{(1-y)^2}{2r}e^{-2\beta}
@@ -171,8 +172,9 @@ struct VolumeWeyl<Tags::Psi0Match> {
  * \f}
  */
 struct BoundaryWeyl {
-  using return_tags = tmpl::list<Tags::BoundaryValue<Tags::Psi0Match>,
-      Tags::BoundaryValue<Tags::Dlambda<Tags::Psi0Match>>>;
+  using return_tags =
+      tmpl::list<Tags::BoundaryValue<Tags::Psi0Match>,
+                 Tags::BoundaryValue<Tags::Dlambda<Tags::Psi0Match>>>;
   using argument_tags =
       tmpl::list<Tags::Psi0Match, Tags::Dy<Tags::Psi0Match>, Tags::OneMinusY,
                  Tags::BoundaryValue<Tags::BondiR>,
