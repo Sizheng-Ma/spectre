@@ -53,8 +53,9 @@ using swsh_ccm_tags_to_compute =
                Tags::Dy<Tags::Psi0Match>, Tags::BoundaryValue<Tags::Psi0Match>,
                Tags::BoundaryValue<Tags::Dlambda<Tags::Psi0Match>>>;
 
-using swsh_boundary_ccm_tags_to_generate = tmpl::list<Tags::BondiR,
-                                                      Tags::BondiBeta>;
+using swsh_boundary_ccm_tags_to_generate =
+    tmpl::list<Tags::BoundaryValue<Tags::BondiR>,
+               Tags::BoundaryValue<Tags::BondiBeta>>;
 
 template <typename Metavariables>
 struct mock_characteristic_evolution {
