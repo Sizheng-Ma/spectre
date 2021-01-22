@@ -92,36 +92,68 @@ void VolumeWeyl<Tags::Psi0Match>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& bondi_j_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_j_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_dy_j_cauchy,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega_cauchy,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
-    const Spectral::Swsh::SwshInterpolator& interpolator,
     const size_t l_max) noexcept {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
   const size_t number_of_radial_points =
       get(bondi_j_cauchy).size() / number_of_angular_points;
 
-  // Get bondi_r and bondi_k in the Cauchy coordinates
-  // Note that bondi_r and bondi_k are available only as surface quantities
-  SpinWeighted<ComplexDataVector, 0> bondi_r_cauchy;
-  interpolator.interpolate(make_not_null(&bondi_r_cauchy), get(bondi_r));
-  bondi_r_cauchy = bondi_r_cauchy * get(omega_cauchy);
+  Variables<
+      tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<1, ComplexDataVector>,
+                                      std::integral_constant<int, 2>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<2, ComplexDataVector>,
+                                      std::integral_constant<int, 2>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<3, ComplexDataVector>,
+                                      std::integral_constant<int, 2>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<4, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<5, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<6, ComplexDataVector>,
+                                      std::integral_constant<int, 2>>>>
+      computation_buffers{number_of_angular_points};
 
-  SpinWeighted<ComplexDataVector, 0> bondi_k_cauchy;
+  // Get bondi_k in the Cauchy coordinates
+  auto& bondi_k_cauchy =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
   bondi_k_cauchy.data() =
       sqrt(1.0 + get(bondi_j_cauchy).data() * conj(get(bondi_j_cauchy).data()));
 
-  const SpinWeighted<ComplexDataVector, 2> bondi_j_cauchy_view;
-  const SpinWeighted<ComplexDataVector, 2> dy_j_cauchy_view;
-  const SpinWeighted<ComplexDataVector, 2> dy_dy_j_cauchy_view;
-  const SpinWeighted<ComplexDataVector, 0> bondi_k_cauchy_view;
-  const SpinWeighted<ComplexDataVector, 0> one_minus_y_view;
-
-  SpinWeighted<ComplexDataVector, 2> psi0_view;
+  const auto& bondi_j_cauchy_view =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<1, ComplexDataVector>,
+                                   std::integral_constant<int, 2>>>(
+          computation_buffers));
+  const auto& dy_j_cauchy_view =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<2, ComplexDataVector>,
+                                   std::integral_constant<int, 2>>>(
+          computation_buffers));
+  const auto& dy_dy_j_cauchy_view =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<3, ComplexDataVector>,
+                                   std::integral_constant<int, 2>>>(
+          computation_buffers));
+  const auto& bondi_k_cauchy_view =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<4, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
+  const auto& one_minus_y_view =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<5, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
+  auto& psi0_view =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<6, ComplexDataVector>,
+                                   std::integral_constant<int, 2>>>(
+          computation_buffers));
 
   // Iterate for each spherical shell
   for (size_t i = 0; i < number_of_radial_points; ++i) {
+    // Note that bondi_r_cauchy, bondi_j_cauchy, dy_j_cauchy, dy_dy_j_cauchy,
+    // one_minus_y and bondi_k_cauchy are available only as surface quantities
     make_const_view(make_not_null(&bondi_j_cauchy_view), get(bondi_j_cauchy),
                     i * number_of_angular_points, number_of_angular_points);
     make_const_view(make_not_null(&dy_j_cauchy_view), get(dy_j_cauchy),
@@ -140,7 +172,7 @@ void VolumeWeyl<Tags::Psi0Match>::apply(
 
     weyl_psi0_impl(make_not_null(&psi0_view), bondi_j_cauchy_view,
                    dy_j_cauchy_view, dy_dy_j_cauchy_view, bondi_k_cauchy_view,
-                   bondi_r_cauchy, one_minus_y_view);
+                   get(bondi_r_cauchy), one_minus_y_view);
   }
 }
 
