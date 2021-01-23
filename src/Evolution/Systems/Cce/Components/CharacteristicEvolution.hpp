@@ -163,11 +163,11 @@ struct CharacteristicEvolution {
       Actions::RequestNextBoundaryData<
           typename Metavariables::cce_boundary_component,
           CharacteristicEvolution<Metavariables>>,
-      Actions::UpdateGauge, Actions::PrecomputeGlobalCceDependencies,
+      Actions::UpdateGauge<Metavariables::uses_inverse_coordinates>,
+      Actions::PrecomputeGlobalCceDependencies,
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
-      Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
-      Actions::CalculatePsi0,
+      Actions::FilterSwshVolumeQuantity<Tags::BondiH>, Actions::CalculatePsi0,
       compute_scri_quantities_and_observe, record_time_stepper_data_and_step,
       Actions::ExitIfEndTimeReached,
       Actions::ReceiveWorldtubeData<Metavariables>>;

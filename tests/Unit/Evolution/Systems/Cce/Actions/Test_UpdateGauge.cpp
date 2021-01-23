@@ -62,12 +62,14 @@ struct mock_characteristic_evolution {
       Parallel::PhaseActions<
           typename Metavariables::Phase, Metavariables::Phase::Initialization,
           tmpl::list<ActionTesting::InitializeDataBox<simple_tags>>>,
-      Parallel::PhaseActions<typename Metavariables::Phase,
-                             Metavariables::Phase::Evolve,
-                             tmpl::list<Actions::UpdateGauge>>>;
+      Parallel::PhaseActions<
+          typename Metavariables::Phase, Metavariables::Phase::Evolve,
+          tmpl::list<
+              Actions::UpdateGauge<Metavariables::uses_inverse_coordinates>>>>;
 };
 
 struct metavariables {
+  static constexpr bool uses_inverse_coordinates = true;
   using component_list =
       tmpl::list<mock_characteristic_evolution<metavariables>>;
   enum class Phase { Initialization, Evolve, Exit };
@@ -131,25 +133,28 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.UpdateGauge",
   db::mutate_apply<GaugeUpdateAngularFromCartesian<
       Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
       make_not_null(&expected_box));
-  db::mutate_apply<GaugeUpdateAngularFromCartesian<
-      Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
-      make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
       Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
       Tags::CauchyCartesianCoords>>(make_not_null(&expected_box));
-  db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-      Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
-      Tags::InertialCartesianCoords>>(make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
-      make_not_null(&expected_box));
-  db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
       make_not_null(&expected_box));
   db::mutate_apply<
       GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
       make_not_null(&expected_box));
-  db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
-                                    Tags::CauchyGaugeOmega>>(
-      make_not_null(&expected_box));
+
+  if (metavariables::uses_inverse_coordinates) {
+    db::mutate_apply<GaugeUpdateAngularFromCartesian<
+        Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+        make_not_null(&expected_box));
+    db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
+        Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
+        Tags::InertialCartesianCoords>>(make_not_null(&expected_box));
+    db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
+        make_not_null(&expected_box));
+    db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                                      Tags::CauchyGaugeOmega>>(
+        make_not_null(&expected_box));
+  }
 
   tmpl::for_each<
       tmpl::append<real_tags_to_compute, swsh_tags_to_compute>>(
@@ -191,28 +196,30 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.UpdateGauge",
   CHECK_ITERABLE_APPROX(interpolated_points_from_computed,
                         interpolated_points_from_expected);
 
+  if (metavariables::uses_inverse_coordinates) {
+    const Spectral::Swsh::SwshInterpolator& computed_interpolator_inertial =
+        ActionTesting::get_databox_tag<component,
+                                       Spectral::Swsh::Tags::SwshInterpolator<
+                                           Tags::InertialAngularCoords>>(runner,
+                                                                         0);
+    const Spectral::Swsh::SwshInterpolator& expected_interpolator_inertial =
+        db::get<Spectral::Swsh::Tags::SwshInterpolator<
+            Tags::InertialAngularCoords>>(expected_box);
 
-  const Spectral::Swsh::SwshInterpolator& computed_interpolator_inertial =
-      ActionTesting::get_databox_tag<
-          component,
-          Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>(
-          runner, 0);
-  const Spectral::Swsh::SwshInterpolator& expected_interpolator_inertial
-      = db::get<
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>(
-      expected_box);
-
-  SpinWeighted<ComplexDataVector, 2> interpolated_points_from_computed_inertial{
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
-  SpinWeighted<ComplexDataVector, 2> interpolated_points_from_expected_inertial{
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
-  computed_interpolator_inertial.interpolate(
-      make_not_null(&interpolated_points_from_computed_inertial),
-      Spectral::Swsh::libsharp_to_goldberg_modes(generated_modes, l_max));
-  expected_interpolator_inertial.interpolate(
-      make_not_null(&interpolated_points_from_expected_inertial),
-      Spectral::Swsh::libsharp_to_goldberg_modes(generated_modes, l_max));
-  CHECK_ITERABLE_APPROX(interpolated_points_from_computed_inertial,
-                        interpolated_points_from_expected_inertial);
+    SpinWeighted<ComplexDataVector, 2>
+        interpolated_points_from_computed_inertial{
+            Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
+    SpinWeighted<ComplexDataVector, 2>
+        interpolated_points_from_expected_inertial{
+            Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
+    computed_interpolator_inertial.interpolate(
+        make_not_null(&interpolated_points_from_computed_inertial),
+        Spectral::Swsh::libsharp_to_goldberg_modes(generated_modes, l_max));
+    expected_interpolator_inertial.interpolate(
+        make_not_null(&interpolated_points_from_expected_inertial),
+        Spectral::Swsh::libsharp_to_goldberg_modes(generated_modes, l_max));
+    CHECK_ITERABLE_APPROX(interpolated_points_from_computed_inertial,
+                          interpolated_points_from_expected_inertial);
+  }
 }
 }  // namespace Cce
