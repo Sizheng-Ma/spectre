@@ -37,7 +37,7 @@ namespace InitializeJ {
  * B &= - \frac{1}{2} R^3 (J|_{r = R} + R \partial_r J|_{r = R})
  * \f}
  */
-struct InverseCubic : InitializeJ {
+struct InverseCubic : InitializeJ<true> {
   using options = tmpl::list<>;
   static constexpr Options::String help = {
       "Initialization process where J is set to a simple Ansatz with a\n"

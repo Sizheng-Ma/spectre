@@ -181,12 +181,18 @@ struct ScriOutputDensity {
 };
 
 struct InitializeJ {
-  using type = std::unique_ptr<::Cce::InitializeJ::InitializeJ>;
+  using type = std::unique_ptr<::Cce::InitializeJ::InitializeJ<true>>;
   static constexpr Options::String help{
       "The initialization for the first hypersurface for J"};
   using group = Cce;
 };
 
+struct InitializeJ1 {
+  using type = std::unique_ptr<::Cce::InitializeJ::InitializeJ<false>>;
+  static constexpr Options::String help{
+      "The initialization for the first hypersurface for J"};
+  using group = Cce;
+};
 }  // namespace OptionTags
 
 namespace InitializationTags {
@@ -475,12 +481,25 @@ struct InterfaceManagerInterpolationStrategy : db::SimpleTag {
 };
 
 struct InitializeJ : db::SimpleTag {
-  using type = std::unique_ptr<::Cce::InitializeJ::InitializeJ>;
+  using type = std::unique_ptr<::Cce::InitializeJ::InitializeJ<true>>;
   using option_tags = tmpl::list<OptionTags::InitializeJ>;
 
   static constexpr bool pass_metavariables = false;
-  static std::unique_ptr<::Cce::InitializeJ::InitializeJ> create_from_options(
-      const std::unique_ptr<::Cce::InitializeJ::InitializeJ>&
+  static std::unique_ptr<::Cce::InitializeJ::InitializeJ<true>>
+  create_from_options(
+      const std::unique_ptr<::Cce::InitializeJ::InitializeJ<true>>&
+          initialize_j) noexcept {
+    return initialize_j->get_clone();
+  }
+};
+struct InitializeJ1 : db::SimpleTag {
+  using type = std::unique_ptr<::Cce::InitializeJ::InitializeJ<false>>;
+  using option_tags = tmpl::list<OptionTags::InitializeJ1>;
+
+  static constexpr bool pass_metavariables = false;
+  static std::unique_ptr<::Cce::InitializeJ::InitializeJ<false>>
+  create_from_options(
+      const std::unique_ptr<::Cce::InitializeJ::InitializeJ<false>>&
           initialize_j) noexcept {
     return initialize_j->get_clone();
   }
