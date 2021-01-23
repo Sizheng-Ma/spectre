@@ -35,9 +35,11 @@ namespace Actions {
  * computations. Refer to the documentation for those mutators for mathematical
  * details.
  */
+template <bool uses_inertial_coordinates>
 struct InitializeFirstHypersurface {
   using const_global_cache_tags =
-      tmpl::list<Tags::LMax, Tags::NumberOfRadialPoints, Tags::InitializeJ>;
+      tmpl::list<Tags::LMax, Tags::NumberOfRadialPoints, Tags::InitializeJ,
+                 Tags::InitializeJ1>;
 
   template <typename DbTags, typename... InboxTags, typename Metavariables,
             typename ArrayIndex, typename ActionList,
@@ -48,8 +50,11 @@ struct InitializeFirstHypersurface {
       const Parallel::GlobalCache<Metavariables>& /*cache*/,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) noexcept {
-    db::mutate_apply<InitializeJ::InitializeJ::mutate_tags,
-                     InitializeJ::InitializeJ::argument_tags>(
+    db::mutate_apply<InitializeJ::InitializeJ<true>::mutate_tags,
+                     InitializeJ::InitializeJ<true>::argument_tags>(
+        db::get<Tags::InitializeJ>(box), make_not_null(&box));
+    db::mutate_apply<InitializeJ::InitializeJ<false>::mutate_tags,
+                     InitializeJ::InitializeJ<false>::argument_tags>(
         db::get<Tags::InitializeJ>(box), make_not_null(&box));
     db::mutate_apply<InitializeScriPlusValue<Tags::InertialRetardedTime>>(
         make_not_null(&box),

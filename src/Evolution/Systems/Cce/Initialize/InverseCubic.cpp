@@ -21,8 +21,7 @@
 
 namespace Cce::InitializeJ {
 
-std::unique_ptr<InitializeJ> InverseCubic::get_clone() const
-    noexcept {
+std::unique_ptr<InitializeJ<true>> InverseCubic::get_clone() const noexcept {
   return std::make_unique<InverseCubic>();
 }
 
