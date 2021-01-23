@@ -35,6 +35,7 @@ namespace Actions {
  * computations. Refer to the documentation for those mutators for mathematical
  * details.
  */
+template <bool EvolveInertialCoordinates>
 struct UpdateGauge {
   using const_global_cache_tags = tmpl::list<Tags::LMax>;
 
@@ -50,25 +51,28 @@ struct UpdateGauge {
     db::mutate_apply<GaugeUpdateAngularFromCartesian<
         Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
         make_not_null(&box));
-    db::mutate_apply<GaugeUpdateAngularFromCartesian<
-        Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
-        make_not_null(&box));
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
         Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
         Tags::CauchyCartesianCoords>>(make_not_null(&box));
-    db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-        Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
-        Tags::InertialCartesianCoords>>(make_not_null(&box));
     db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
-        make_not_null(&box));
-    db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
         make_not_null(&box));
     db::mutate_apply<
         GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
         make_not_null(&box));
-    db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
-                                      Tags::CauchyGaugeOmega>>(
-        make_not_null(&box));
+
+    if (EvolveInertialCoordinates) {
+      db::mutate_apply<GaugeUpdateAngularFromCartesian<
+          Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+          make_not_null(&box));
+      db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
+          Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
+          Tags::InertialCartesianCoords>>(make_not_null(&box));
+      db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
+          make_not_null(&box));
+      db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                                        Tags::CauchyGaugeOmega>>(
+          make_not_null(&box));
+    }
     return {std::move(box)};
   }
 };

@@ -110,6 +110,8 @@ struct EvolutionMetavars {
 
   using observed_reduction_data_tags = tmpl::list<>;
 
+  static constexpr bool uses_inverse_coordinates = true;
+
   static constexpr Options::String help{
       "Perform Cauchy Characteristic Extraction using .h5 input data.\n"
       "Uses regularity-preserving formulation."};
