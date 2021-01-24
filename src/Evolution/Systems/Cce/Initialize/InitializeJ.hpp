@@ -148,8 +148,7 @@ struct InitializeJ<false> : public PUP::able {
 
   using mutate_tags =
       tmpl::list<Tags::BondiJ, Tags::CauchyCartesianCoords,
-                 Tags::CauchyAngularCoords, Tags::InertialCartesianCoords,
-                 Tags::InertialAngularCoords>;
+                 Tags::CauchyAngularCoords>;
   using argument_tags =
       tmpl::push_back<boundary_tags, Tags::LMax, Tags::NumberOfRadialPoints>;
 
@@ -166,10 +165,6 @@ struct InitializeJ<false> : public PUP::able {
       gsl::not_null<
           tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
           angular_cauchy_coordinates,
-      gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_inertial_coordinates,
-      gsl::not_null<
-          tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
-          angular_inertial_coordinates,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_j,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_dr_j,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& r, size_t l_max,

@@ -83,10 +83,6 @@ struct ZeroNonSmooth : InitializeJ<false> {
       gsl::not_null<
           tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
           angular_cauchy_coordinates,
-      gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_inertial_coordinates,
-      gsl::not_null<
-          tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
-          angular_inertial_coordinates,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_j,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_dr_j,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& r, size_t l_max,
