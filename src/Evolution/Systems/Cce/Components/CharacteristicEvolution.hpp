@@ -168,7 +168,9 @@ struct CharacteristicEvolution {
       Actions::PrecomputeGlobalCceDependencies,
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
-      Actions::FilterSwshVolumeQuantity<Tags::BondiH>, Actions::CalculatePsi0,
+      Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
+      tmpl::conditional_t<Metavariables::uses_inverse_coordinates,
+                          Actions::CalculatePsi0, tmpl::list<>>,
       compute_scri_quantities_and_observe, record_time_stepper_data_and_step,
       Actions::ExitIfEndTimeReached,
       Actions::ReceiveWorldtubeData<Metavariables>>;
