@@ -38,8 +38,8 @@ namespace Actions {
 template <bool uses_inertial_coordinates>
 struct InitializeFirstHypersurface {
   using const_global_cache_tags =
-      tmpl::list<Tags::LMax, Tags::NumberOfRadialPoints, Tags::InitializeJ,
-                 Tags::InitializeJ1>;
+      tmpl::list<Tags::LMax, Tags::NumberOfRadialPoints,
+                 Tags::InitializeJ<true>, Tags::InitializeJ<false>>;
 
   template <typename DbTags, typename... InboxTags, typename Metavariables,
             typename ArrayIndex, typename ActionList,
@@ -52,10 +52,10 @@ struct InitializeFirstHypersurface {
       const ParallelComponent* const /*meta*/) noexcept {
     db::mutate_apply<InitializeJ::InitializeJ<true>::mutate_tags,
                      InitializeJ::InitializeJ<true>::argument_tags>(
-        db::get<Tags::InitializeJ>(box), make_not_null(&box));
+        db::get<Tags::InitializeJ<true>>(box), make_not_null(&box));
     db::mutate_apply<InitializeJ::InitializeJ<false>::mutate_tags,
                      InitializeJ::InitializeJ<false>::argument_tags>(
-        db::get<Tags::InitializeJ>(box), make_not_null(&box));
+        db::get<Tags::InitializeJ<false>>(box), make_not_null(&box));
     db::mutate_apply<InitializeScriPlusValue<Tags::InertialRetardedTime>>(
         make_not_null(&box),
         db::get<::Tags::TimeStepId>(box).substep_time().value());
