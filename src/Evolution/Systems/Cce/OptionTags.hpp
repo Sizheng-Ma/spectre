@@ -189,15 +189,10 @@ struct ScriOutputDensity {
   using group = Cce;
 };
 
+template <bool uses_inertial_coordinates>
 struct InitializeJ {
-  using type = std::unique_ptr<::Cce::InitializeJ::InitializeJ<true>>;
-  static constexpr Options::String help{
-      "The initialization for the first hypersurface for J"};
-  using group = Cce;
-};
-
-struct InitializeJ1 {
-  using type = std::unique_ptr<::Cce::InitializeJ::InitializeJ<false>>;
+  using type = std::unique_ptr<
+      ::Cce::InitializeJ::InitializeJ<uses_inertial_coordinates>>;
   static constexpr Options::String help{
       "The initialization for the first hypersurface for J"};
   using group = Cce;
@@ -500,27 +495,18 @@ struct InterfaceManagerInterpolationStrategy : db::SimpleTag {
   }
 };
 
+template <bool uses_inertial_coordinates>
 struct InitializeJ : db::SimpleTag {
-  using type = std::unique_ptr<::Cce::InitializeJ::InitializeJ<true>>;
-  using option_tags = tmpl::list<OptionTags::InitializeJ>;
+  using type = std::unique_ptr<
+      ::Cce::InitializeJ::InitializeJ<uses_inertial_coordinates>>;
+  using option_tags =
+      tmpl::list<OptionTags::InitializeJ<uses_inertial_coordinates>>;
 
   static constexpr bool pass_metavariables = false;
-  static std::unique_ptr<::Cce::InitializeJ::InitializeJ<true>>
-  create_from_options(
-      const std::unique_ptr<::Cce::InitializeJ::InitializeJ<true>>&
-          initialize_j) noexcept {
-    return initialize_j->get_clone();
-  }
-};
-struct InitializeJ1 : db::SimpleTag {
-  using type = std::unique_ptr<::Cce::InitializeJ::InitializeJ<false>>;
-  using option_tags = tmpl::list<OptionTags::InitializeJ1>;
-
-  static constexpr bool pass_metavariables = false;
-  static std::unique_ptr<::Cce::InitializeJ::InitializeJ<false>>
-  create_from_options(
-      const std::unique_ptr<::Cce::InitializeJ::InitializeJ<false>>&
-          initialize_j) noexcept {
+  static std::unique_ptr<
+      ::Cce::InitializeJ::InitializeJ<uses_inertial_coordinates>>
+  create_from_options(const std::unique_ptr<::Cce::InitializeJ::InitializeJ<
+                          uses_inertial_coordinates>>& initialize_j) noexcept {
     return initialize_j->get_clone();
   }
 };
