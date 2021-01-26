@@ -132,7 +132,6 @@ struct EvolutionMetavars {
 
 static const std::vector<void (*)()> charm_init_node_funcs{
     &setup_error_handling, &disable_openblas_multithreading,
-    // FIXME
     &Parallel::register_derived_classes_with_charm<
         Cce::InitializeJ::InitializeJ<
             EvolutionMetavars::uses_inverse_coordinates>>,
