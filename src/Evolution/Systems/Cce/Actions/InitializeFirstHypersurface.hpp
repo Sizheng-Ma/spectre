@@ -39,10 +39,7 @@ template <bool uses_inertial_coordinates>
 struct InitializeFirstHypersurface {
   using const_global_cache_tags =
       tmpl::list<Tags::LMax, Tags::NumberOfRadialPoints,
-                 tmpl::conditional_t<uses_inertial_coordinates,
-                                     tmpl::list<Tags::InitializeJ<true>,
-                                                Tags::InitializeJ<false>>,
-                                     tmpl::list<Tags::InitializeJ<false>>>>;
+                 Tags::InitializeJ<uses_inertial_coordinates>>;
 
   template <typename DbTags, typename... InboxTags, typename Metavariables,
             typename ArrayIndex, typename ActionList,

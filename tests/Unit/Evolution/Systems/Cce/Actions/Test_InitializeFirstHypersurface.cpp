@@ -35,7 +35,6 @@
 namespace Cce {
 
 namespace {
-
 using swsh_boundary_tags_to_generate =
     tmpl::list<Tags::BoundaryValue<Tags::BondiJ>,
                Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>,
@@ -71,23 +70,31 @@ struct mock_characteristic_evolution {
       Parallel::PhaseActions<
           typename Metavariables::Phase, Metavariables::Phase::Testing,
           tmpl::list<
-              Actions::InitializeFirstHypersurface,
+              Actions::InitializeFirstHypersurface<
+                  metavariables::uses_inverse_coordinates>,
               ::Actions::MutateApply<GaugeUpdateAngularFromCartesian<
                   Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>,
-              ::Actions::MutateApply<GaugeUpdateAngularFromCartesian<
-                  Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>,
               ::Actions::MutateApply<GaugeUpdateJacobianFromCoordinates<
                   Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
                   Tags::CauchyCartesianCoords>>,
-              ::Actions::MutateApply<GaugeUpdateJacobianFromCoordinates<
-                  Tags::CauchyGaugeC, Tags::CauchyGaugeD,
-                  Tags::InertialAngularCoords,
-                  Tags::InertialCartesianCoords>>>>>;
+              tmpl::conditional_t<
+                  Metavariables::uses_inverse_coordinates,
+                  tmpl::list<
+                      ::Actions::MutateApply<GaugeUpdateAngularFromCartesian<
+                          Tags::InertialAngularCoords,
+                          Tags::InertialCartesianCoords>>,
+                      ::Actions::MutateApply<GaugeUpdateJacobianFromCoordinates<
+                          Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                          Tags::InertialAngularCoords,
+                          Tags::InertialCartesianCoords>>>,
+                  tmpl::list<>>>>>;
 };
 
 struct metavariables {
   using component_list =
       tmpl::list<mock_characteristic_evolution<metavariables>>;
+
+  static constexpr bool uses_inverse_coordinates = true;
 
   enum class Phase { Initialization, Testing, Exit };
 };
@@ -96,7 +103,8 @@ struct metavariables {
 SPECTRE_TEST_CASE(
     "Unit.Evolution.Systems.Cce.Actions.InitializeFirstHypersurface",
     "[Unit][Cce]") {
-  Parallel::register_derived_classes_with_charm<InitializeJ::InitializeJ>();
+  Parallel::register_derived_classes_with_charm<
+      InitializeJ::InitializeJ<metavariables::uses_inverse_coordinates>>();
 
   MAKE_GENERATOR(gen);
   // limited l_max distribution because test depends on an analytic
@@ -110,7 +118,8 @@ SPECTRE_TEST_CASE(
   using component = mock_characteristic_evolution<metavariables>;
   ActionTesting::MockRuntimeSystem<metavariables> runner{
       {l_max, number_of_radial_points,
-       std::make_unique<InitializeJ::InverseCubic>()}};
+       std::make_unique<InitializeJ::InverseCubic<
+           metavariables::uses_inverse_coordinates>>()}};
 
   Variables<real_boundary_tags_to_compute> real_variables{
       Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
@@ -157,25 +166,32 @@ SPECTRE_TEST_CASE(
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
-  ActionTesting::next_action<component>(make_not_null(&runner), 0);
-  ActionTesting::next_action<component>(make_not_null(&runner), 0);
+  if (metavariables::uses_inverse_coordinates) {
+    ActionTesting::next_action<component>(make_not_null(&runner), 0);
+    ActionTesting::next_action<component>(make_not_null(&runner), 0);
+  }
 
   // apply the corresponding mutators to the `expected_box`
-  db::mutate_apply<Cce::InitializeJ::InitializeJ::mutate_tags,
-                   Cce::InitializeJ::InitializeJ::argument_tags>(
-      Cce::InitializeJ::InverseCubic{}, make_not_null(&expected_box));
-  db::mutate_apply<GaugeUpdateAngularFromCartesian<
-      Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
+  db::mutate_apply<Cce::InitializeJ::InitializeJ<
+                       metavariables::uses_inverse_coordinates>::mutate_tags,
+                   Cce::InitializeJ::InitializeJ<
+                       metavariables::uses_inverse_coordinates>::argument_tags>(
+      Cce::InitializeJ::InverseCubic<metavariables::uses_inverse_coordinates>{},
       make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateAngularFromCartesian<
-      Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+      Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
       make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
       Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
       Tags::CauchyCartesianCoords>>(make_not_null(&expected_box));
-  db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-      Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
-      Tags::InertialCartesianCoords>>(make_not_null(&expected_box));
+  if (metavariables::uses_inverse_coordinates) {
+    db::mutate_apply<GaugeUpdateAngularFromCartesian<
+        Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+        make_not_null(&expected_box));
+    db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
+        Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
+        Tags::InertialCartesianCoords>>(make_not_null(&expected_box));
+  }
   db::mutate_apply<InitializeScriPlusValue<Tags::InertialRetardedTime>>(
       make_not_null(&expected_box), 1.5);
 
