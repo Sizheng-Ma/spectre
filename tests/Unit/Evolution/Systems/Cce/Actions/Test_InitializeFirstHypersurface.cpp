@@ -40,23 +40,29 @@ using swsh_boundary_tags_to_generate =
                Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>,
                Tags::BoundaryValue<Tags::BondiR>>;
 
-using real_boundary_tags_to_compute =
+using real_cauchy_boundary_tags_to_compute =
     tmpl::list<Tags::CauchyCartesianCoords, Tags::CauchyAngularCoords,
-               Tags::InertialCartesianCoords, Tags::InertialAngularCoords,
                Tags::InertialRetardedTime>;
 
-using swsh_boundary_tags_to_compute =
-    tmpl::list<Tags::GaugeC, Tags::GaugeD, Tags::CauchyGaugeC,
-               Tags::CauchyGaugeD>;
+using swsh_cauchy_boundary_tags_to_compute =
+    tmpl::list<Tags::GaugeC, Tags::GaugeD>;
+
+using real_inertial_boundary_tags_to_compute =
+    tmpl::list<Tags::InertialCartesianCoords, Tags::InertialAngularCoords>;
+
+using swsh_inertial_boundary_tags_to_compute =
+    tmpl::list<Tags::CauchyGaugeC, Tags::CauchyGaugeD>;
 
 using swsh_volume_tags_to_compute = tmpl::list<Tags::BondiJ>;
 
 template <typename Metavariables>
 struct mock_characteristic_evolution {
   using simple_tags = db::AddSimpleTags<
-      ::Tags::Variables<real_boundary_tags_to_compute>,
+      ::Tags::Variables<tmpl::append<real_cauchy_boundary_tags_to_compute,
+                                     real_inertial_boundary_tags_to_compute>>,
       ::Tags::Variables<tmpl::append<swsh_boundary_tags_to_generate,
-                                     swsh_boundary_tags_to_compute>>,
+                                     swsh_cauchy_boundary_tags_to_compute,
+                                     swsh_inertial_boundary_tags_to_compute>>,
       ::Tags::Variables<swsh_volume_tags_to_compute>, ::Tags::TimeStepId>;
 
   using metavariables = Metavariables;
@@ -77,7 +83,7 @@ struct mock_characteristic_evolution {
               ::Actions::MutateApply<GaugeUpdateJacobianFromCoordinates<
                   Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
                   Tags::CauchyCartesianCoords>>,
-              tmpl::conditional_t<
+              std::conditional_t<
                   Metavariables::uses_inverse_coordinates,
                   tmpl::list<
                       ::Actions::MutateApply<GaugeUpdateAngularFromCartesian<
@@ -90,21 +96,20 @@ struct mock_characteristic_evolution {
                   tmpl::list<>>>>>;
 };
 
+template <bool EvolveInertialCoordinates>
 struct metavariables {
-  using component_list =
-      tmpl::list<mock_characteristic_evolution<metavariables>>;
+  using component_list = tmpl::list<
+      mock_characteristic_evolution<metavariables<EvolveInertialCoordinates>>>;
 
-  static constexpr bool uses_inverse_coordinates = true;
+  static constexpr bool uses_inverse_coordinates = EvolveInertialCoordinates;
 
   enum class Phase { Initialization, Testing, Exit };
 };
-}  // namespace
 
-SPECTRE_TEST_CASE(
-    "Unit.Evolution.Systems.Cce.Actions.InitializeFirstHypersurface",
-    "[Unit][Cce]") {
+template <bool EvolveInertialCoordinates>
+void test_InitializeFirstHypersurface() noexcept {
   Parallel::register_derived_classes_with_charm<
-      InitializeJ::InitializeJ<metavariables::uses_inverse_coordinates>>();
+      InitializeJ::InitializeJ<EvolveInertialCoordinates>>();
 
   MAKE_GENERATOR(gen);
   // limited l_max distribution because test depends on an analytic
@@ -115,16 +120,19 @@ SPECTRE_TEST_CASE(
   UniformCustomDistribution<double> coefficient_distribution{-2.0, 2.0};
   CAPTURE(l_max);
 
-  using component = mock_characteristic_evolution<metavariables>;
-  ActionTesting::MockRuntimeSystem<metavariables> runner{
-      {l_max, number_of_radial_points,
-       std::make_unique<InitializeJ::InverseCubic<
-           metavariables::uses_inverse_coordinates>>()}};
+  using component =
+      mock_characteristic_evolution<metavariables<EvolveInertialCoordinates>>;
+  ActionTesting::MockRuntimeSystem<metavariables<EvolveInertialCoordinates>>
+      runner{{l_max, number_of_radial_points,
+              std::make_unique<
+                  InitializeJ::InverseCubic<EvolveInertialCoordinates>>()}};
 
-  Variables<real_boundary_tags_to_compute> real_variables{
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
+  Variables<tmpl::append<real_cauchy_boundary_tags_to_compute,
+                         real_inertial_boundary_tags_to_compute>>
+      real_variables{Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
   Variables<tmpl::append<swsh_boundary_tags_to_generate,
-                         swsh_boundary_tags_to_compute>>
+                         swsh_cauchy_boundary_tags_to_compute,
+                         swsh_inertial_boundary_tags_to_compute>>
       swsh_variables{Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
   Variables<swsh_volume_tags_to_compute> swsh_volume_variables{
       Spectral::Swsh::number_of_swsh_collocation_points(l_max) *
@@ -155,28 +163,28 @@ SPECTRE_TEST_CASE(
       {real_variables, swsh_variables, swsh_volume_variables, time_step_id});
 
   auto expected_box =
-      db::create<tmpl::push_back<component::simple_tags, Tags::LMax,
+      db::create<tmpl::push_back<typename component::simple_tags, Tags::LMax,
                                  Tags::NumberOfRadialPoints>>(
           std::move(real_variables), std::move(swsh_variables),
           std::move(swsh_volume_variables), time_step_id, l_max,
           number_of_radial_points);
 
-  runner.set_phase(metavariables::Phase::Testing);
+  runner.set_phase(metavariables<EvolveInertialCoordinates>::Phase::Testing);
   // apply the `InitializeFirstHypersurface` action
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
   ActionTesting::next_action<component>(make_not_null(&runner), 0);
-  if (metavariables::uses_inverse_coordinates) {
+  if (EvolveInertialCoordinates) {
     ActionTesting::next_action<component>(make_not_null(&runner), 0);
     ActionTesting::next_action<component>(make_not_null(&runner), 0);
   }
 
   // apply the corresponding mutators to the `expected_box`
-  db::mutate_apply<Cce::InitializeJ::InitializeJ<
-                       metavariables::uses_inverse_coordinates>::mutate_tags,
-                   Cce::InitializeJ::InitializeJ<
-                       metavariables::uses_inverse_coordinates>::argument_tags>(
-      Cce::InitializeJ::InverseCubic<metavariables::uses_inverse_coordinates>{},
+  db::mutate_apply<typename Cce::InitializeJ::InitializeJ<
+                       EvolveInertialCoordinates>::mutate_tags,
+                   typename Cce::InitializeJ::InitializeJ<
+                       EvolveInertialCoordinates>::argument_tags>(
+      Cce::InitializeJ::InverseCubic<EvolveInertialCoordinates>{},
       make_not_null(&expected_box));
   db::mutate_apply<GaugeUpdateAngularFromCartesian<
       Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
@@ -184,7 +192,7 @@ SPECTRE_TEST_CASE(
   db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
       Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
       Tags::CauchyCartesianCoords>>(make_not_null(&expected_box));
-  if (metavariables::uses_inverse_coordinates) {
+  if (EvolveInertialCoordinates) {
     db::mutate_apply<GaugeUpdateAngularFromCartesian<
         Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
         make_not_null(&expected_box));
@@ -195,10 +203,10 @@ SPECTRE_TEST_CASE(
   db::mutate_apply<InitializeScriPlusValue<Tags::InertialRetardedTime>>(
       make_not_null(&expected_box), 1.5);
 
-  tmpl::for_each<
-      tmpl::append<real_boundary_tags_to_compute, swsh_boundary_tags_to_compute,
-                   swsh_volume_tags_to_compute>>(
-      [&runner, &expected_box](auto tag_v) noexcept {
+  tmpl::for_each<tmpl::append<real_cauchy_boundary_tags_to_compute,
+                              swsh_cauchy_boundary_tags_to_compute,
+                              swsh_volume_tags_to_compute>>(
+      [&runner, &expected_box ](auto tag_v) noexcept {
         using tag = typename decltype(tag_v)::type;
         CAPTURE(db::tag_name<tag>());
         const auto& test_lhs =
@@ -206,5 +214,28 @@ SPECTRE_TEST_CASE(
         const auto& test_rhs = db::get<tag>(expected_box);
         CHECK_ITERABLE_APPROX(test_lhs, test_rhs);
       });
+
+  if (EvolveInertialCoordinates) {
+    tmpl::for_each<tmpl::append<real_inertial_boundary_tags_to_compute,
+                                swsh_inertial_boundary_tags_to_compute>>(
+        [&runner, &expected_box ](auto tag_v) noexcept {
+          using tag = typename decltype(tag_v)::type;
+          CAPTURE(db::tag_name<tag>());
+          const auto& test_lhs =
+              ActionTesting::get_databox_tag<component, tag>(runner, 0);
+          const auto& test_rhs = db::get<tag>(expected_box);
+          CHECK_ITERABLE_APPROX(test_lhs, test_rhs);
+        });
+  }
+}
+}  // namespace
+
+SPECTRE_TEST_CASE(
+    "Unit.Evolution.Systems.Cce.Actions.InitializeFirstHypersurface",
+    "[Unit][Cce]") {
+  // Evolve inertial coordinates
+  test_InitializeFirstHypersurface<true>();
+  // Do not evolve inertial coordinates
+  test_InitializeFirstHypersurface<false>();
 }
 }  // namespace Cce
