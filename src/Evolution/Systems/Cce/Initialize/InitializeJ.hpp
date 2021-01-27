@@ -84,6 +84,8 @@ struct NoIncomingRadiation;
 struct ZeroNonSmooth;
 template <bool uses_inertial_coordinates>
 struct InverseCubic;
+template <bool uses_inertial_coordinates>
+struct InitializeJ;
 /// \endcond
 
 /*!
@@ -102,9 +104,6 @@ struct InverseCubic;
  * use-cases and permits the `InitializeJ` generator to be placed in the
  * `GlobalCache`.
  */
-template <bool uses_inertial_coordinates>
-struct InitializeJ;
-
 template <>
 struct InitializeJ<true> : public PUP::able {
   using boundary_tags = tmpl::list<Tags::BoundaryValue<Tags::BondiJ>,
@@ -118,6 +117,8 @@ struct InitializeJ<true> : public PUP::able {
   using argument_tags =
       tmpl::push_back<boundary_tags, Tags::LMax, Tags::NumberOfRadialPoints>;
 
+  // The evolution of inertial coordinates are allowed only when InverseCubic is
+  // used
   using creatable_classes = tmpl::list<InverseCubic<true>>;
 
   WRAPPED_PUPable_abstract(InitializeJ);  // NOLINT
