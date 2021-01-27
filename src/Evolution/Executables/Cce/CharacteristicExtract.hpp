@@ -32,6 +32,8 @@
 struct EvolutionMetavars {
   using system = Cce::System;
 
+  static constexpr bool uses_inverse_coordinates = true;
+
   using evolved_swsh_tag = Cce::Tags::BondiJ;
   using evolved_swsh_dt_tag = Cce::Tags::BondiH;
   using evolved_coordinates_variables_tag =
@@ -99,7 +101,8 @@ struct EvolutionMetavars {
   using cce_transform_buffer_tags = Cce::all_transform_buffer_tags;
   using cce_swsh_derivative_tags = Cce::all_swsh_derivative_tags;
   using cce_angular_coordinate_tags =
-   tmpl::list<Cce::Tags::CauchyAngularCoords,Cce::Tags::InertialAngularCoords>;
+      tmpl::list<Cce::Tags::CauchyAngularCoords,
+                 Cce::Tags::InertialAngularCoords>;
 
   using cce_boundary_component = Cce::H5WorldtubeBoundary<EvolutionMetavars>;
 
@@ -109,8 +112,6 @@ struct EvolutionMetavars {
                  Cce::CharacteristicEvolution<EvolutionMetavars>>;
 
   using observed_reduction_data_tags = tmpl::list<>;
-
-  static constexpr bool uses_inverse_coordinates = true;
 
   static constexpr Options::String help{
       "Perform Cauchy Characteristic Extraction using .h5 input data.\n"

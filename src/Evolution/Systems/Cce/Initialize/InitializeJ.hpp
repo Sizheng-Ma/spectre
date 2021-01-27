@@ -110,10 +110,10 @@ struct InitializeJ<true> : public PUP::able {
                                    Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>,
                                    Tags::BoundaryValue<Tags::BondiR>>;
 
-  using mutate_tags = tmpl::list<Tags::BondiJ, Tags::CauchyCartesianCoords,
-                                 Tags::CauchyAngularCoords,
-                                 Tags::InertialCartesianCoords,
-                                 Tags::InertialAngularCoords>;
+  using mutate_tags =
+      tmpl::list<Tags::BondiJ, Tags::CauchyCartesianCoords,
+                 Tags::CauchyAngularCoords, Tags::InertialCartesianCoords,
+                 Tags::InertialAngularCoords>;
   using argument_tags =
       tmpl::push_back<boundary_tags, Tags::LMax, Tags::NumberOfRadialPoints>;
 
@@ -147,9 +147,8 @@ struct InitializeJ<false> : public PUP::able {
                                    Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>,
                                    Tags::BoundaryValue<Tags::BondiR>>;
 
-  using mutate_tags =
-      tmpl::list<Tags::BondiJ, Tags::CauchyCartesianCoords,
-                 Tags::CauchyAngularCoords>;
+  using mutate_tags = tmpl::list<Tags::BondiJ, Tags::CauchyCartesianCoords,
+                                 Tags::CauchyAngularCoords>;
   using argument_tags =
       tmpl::push_back<boundary_tags, Tags::LMax, Tags::NumberOfRadialPoints>;
 

@@ -60,7 +60,7 @@ struct UpdateGauge {
         GaugeUpdateOmega<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega>>(
         make_not_null(&box));
 
-    if (EvolveInertialCoordinates) {
+    if constexpr (EvolveInertialCoordinates) {
       db::mutate_apply<GaugeUpdateAngularFromCartesian<
           Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
           make_not_null(&box));
