@@ -163,6 +163,9 @@ struct test_metavariables {
   using component_list =
       tmpl::list<mock_gh_worldtube_boundary<test_metavariables>,
                  mock_characteristic_evolution<test_metavariables>>;
+
+  static constexpr bool uses_inverse_coordinates = false;
+
   enum class Phase { Initialization, Evolve, Exit };
 };
 }  // namespace
