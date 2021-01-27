@@ -55,6 +55,7 @@ namespace Actions {
  *  - `Tags::Variables<metavariables::cce_transform_buffer_tags>`
  *  - `Tags::Variables<metavariables::cce_swsh_derivative_tags>`
  *  - `Spectral::Swsh::Tags::SwshInterpolator< Tags::CauchyAngularCoords>`
+ *  - `Spectral::Swsh::Tags::SwshInterpolator< Tags::InertialAngularCoords>`
  * - Removes: nothing
  *
  * \note This action relies on the `SetupDataBox` aggregated initialization
@@ -99,7 +100,8 @@ struct InitializeCharacteristicEvolutionVariables {
       scri_variables_tag, volume_variables_tag,
       pre_swsh_derivatives_variables_tag, transform_buffer_variables_tag,
       swsh_derivative_variables_tag,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>>;
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
 
   using compute_tags = tmpl::list<>;
 
@@ -112,7 +114,6 @@ struct InitializeCharacteristicEvolutionVariables {
                     const ArrayIndex& /*array_index*/,
                     const ActionList /*meta*/,
                     const ParallelComponent* const /*meta*/) noexcept {
-
     const size_t l_max = db::get<Spectral::Swsh::Tags::LMaxBase>(box);
     const size_t number_of_radial_points =
         db::get<Spectral::Swsh::Tags::NumberOfRadialPointsBase>(box);
@@ -136,6 +137,7 @@ struct InitializeCharacteristicEvolutionVariables {
         typename transform_buffer_variables_tag::type{transform_buffer_size,
                                                       0.0},
         typename swsh_derivative_variables_tag::type{volume_size, 0.0},
+        Spectral::Swsh::SwshInterpolator{},
         Spectral::Swsh::SwshInterpolator{});
 
     return std::make_tuple(std::move(box));
