@@ -86,6 +86,7 @@ void InverseCubic<true>::operator()(
   get<2>(*cartesian_cauchy_coordinates) =
       cos(get<0>(*angular_cauchy_coordinates));
 
+  // Same as the Cauchy coordinates
   get<0>(*cartesian_inertial_coordinates) =
       sin(get<0>(*angular_inertial_coordinates)) *
       cos(get<1>(*angular_inertial_coordinates));
