@@ -82,7 +82,10 @@ struct GaugeAdjustInitialJ {
 /// \cond
 struct NoIncomingRadiation;
 struct ZeroNonSmooth;
+template <bool uses_inertial_coordinates>
 struct InverseCubic;
+template <bool uses_inertial_coordinates>
+struct InitializeJ;
 /// \endcond
 
 /*!
@@ -101,7 +104,45 @@ struct InverseCubic;
  * use-cases and permits the `InitializeJ` generator to be placed in the
  * `GlobalCache`.
  */
-struct InitializeJ : public PUP::able {
+template <>
+struct InitializeJ<true> : public PUP::able {
+  using boundary_tags = tmpl::list<Tags::BoundaryValue<Tags::BondiJ>,
+                                   Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>,
+                                   Tags::BoundaryValue<Tags::BondiR>>;
+
+  using mutate_tags =
+      tmpl::list<Tags::BondiJ, Tags::CauchyCartesianCoords,
+                 Tags::CauchyAngularCoords, Tags::InertialCartesianCoords,
+                 Tags::InertialAngularCoords>;
+  using argument_tags =
+      tmpl::push_back<boundary_tags, Tags::LMax, Tags::NumberOfRadialPoints>;
+
+  // The evolution of inertial coordinates are allowed only when InverseCubic is
+  // used
+  using creatable_classes = tmpl::list<InverseCubic<true>>;
+
+  WRAPPED_PUPable_abstract(InitializeJ);  // NOLINT
+
+  virtual std::unique_ptr<InitializeJ> get_clone() const noexcept = 0;
+
+  virtual void operator()(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> j,
+      gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_cauchy_coordinates,
+      gsl::not_null<
+          tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
+          angular_cauchy_coordinates,
+      gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_inertial_coordinates,
+      gsl::not_null<
+          tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
+          angular_inertial_coordinates,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_j,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_dr_j,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& r, size_t l_max,
+      size_t number_of_radial_points) const noexcept = 0;
+};
+
+template <>
+struct InitializeJ<false> : public PUP::able {
   using boundary_tags = tmpl::list<Tags::BoundaryValue<Tags::BondiJ>,
                                    Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>,
                                    Tags::BoundaryValue<Tags::BondiR>>;
@@ -112,11 +153,11 @@ struct InitializeJ : public PUP::able {
       tmpl::push_back<boundary_tags, Tags::LMax, Tags::NumberOfRadialPoints>;
 
   using creatable_classes =
-      tmpl::list<InverseCubic, NoIncomingRadiation, ZeroNonSmooth>;
+      tmpl::list<InverseCubic<false>, NoIncomingRadiation, ZeroNonSmooth>;
 
   WRAPPED_PUPable_abstract(InitializeJ);  // NOLINT
 
-  virtual std::unique_ptr<InitializeJ> get_clone() const noexcept = 0;
+  virtual std::unique_ptr<InitializeJ<false>> get_clone() const noexcept = 0;
 
   virtual void operator()(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> j,

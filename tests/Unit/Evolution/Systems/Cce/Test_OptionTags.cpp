@@ -71,7 +71,9 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.OptionTags", "[Unit][Cce]") {
       "InterfaceManagerInterpolationStrategy");
   TestHelpers::db::test_simple_tag<Cce::Tags::AnalyticBoundaryDataManager>(
       "AnalyticBoundaryDataManager");
-  TestHelpers::db::test_simple_tag<Cce::Tags::InitializeJ>("InitializeJ");
+  TestHelpers::db::test_simple_tag<Cce::Tags::InitializeJ<true>>("InitializeJ");
+  TestHelpers::db::test_simple_tag<Cce::Tags::InitializeJ<false>>(
+      "InitializeJ");
 
   CHECK(TestHelpers::test_creation<size_t, Cce::OptionTags::LMax>("8") == 8_st);
   CHECK(TestHelpers::test_creation<size_t, Cce::OptionTags::FilterLMax>("7") ==
@@ -125,8 +127,12 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.OptionTags", "[Unit][Cce]") {
   CHECK(TestHelpers::test_creation<size_t, Cce::OptionTags::ScriOutputDensity>(
             "6") == 6_st);
 
-  TestHelpers::test_creation<std::unique_ptr<::Cce::InitializeJ::InitializeJ>,
-                             Cce::OptionTags::InitializeJ>("InverseCubic");
+  TestHelpers::test_creation<
+      std::unique_ptr<::Cce::InitializeJ::InitializeJ<true>>,
+      Cce::OptionTags::InitializeJ<true>>("InverseCubic");
+  TestHelpers::test_creation<
+      std::unique_ptr<::Cce::InitializeJ::InitializeJ<false>>,
+      Cce::OptionTags::InitializeJ<false>>("InverseCubic");
   TestHelpers::test_creation<std::unique_ptr<::Cce::Solutions::WorldtubeData>,
                              Cce::OptionTags::AnalyticSolution>(
       "BouncingBlackHole:\n"

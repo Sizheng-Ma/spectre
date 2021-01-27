@@ -105,7 +105,8 @@ struct CharacteristicEvolution {
           typename Metavariables::cce_boundary_component,
           CharacteristicEvolution<Metavariables>>,
       Actions::ReceiveWorldtubeData<Metavariables>,
-      Actions::InitializeFirstHypersurface,
+      Actions::InitializeFirstHypersurface<
+          Metavariables::uses_inverse_coordinates>,
       Initialization::Actions::RemoveOptionsAndTerminatePhase>;
 
   using initialization_tags =

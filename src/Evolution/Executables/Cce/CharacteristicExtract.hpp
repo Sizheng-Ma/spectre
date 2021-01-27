@@ -32,11 +32,17 @@
 struct EvolutionMetavars {
   using system = Cce::System;
 
+  static constexpr bool uses_inverse_coordinates = false;
+
   using evolved_swsh_tag = Cce::Tags::BondiJ;
   using evolved_swsh_dt_tag = Cce::Tags::BondiH;
-  using evolved_coordinates_variables_tag =
-      Tags::Variables<tmpl::list<Cce::Tags::CauchyCartesianCoords,
-                                 Cce::Tags::InertialRetardedTime>>;
+  using evolved_coordinates_variables_tag = Tags::Variables<
+      std::conditional_t<uses_inverse_coordinates,
+                         tmpl::list<Cce::Tags::CauchyCartesianCoords,
+                                    Cce::Tags::InertialCartesianCoords,
+                                    Cce::Tags::InertialRetardedTime>,
+                         tmpl::list<Cce::Tags::CauchyCartesianCoords,
+                                    Cce::Tags::InertialRetardedTime>>>;
   using cce_boundary_communication_tags =
       Cce::Tags::characteristic_worldtube_boundary_tags<
           Cce::Tags::BoundaryValue>;
@@ -121,9 +127,11 @@ struct EvolutionMetavars {
 };
 
 static const std::vector<void (*)()> charm_init_node_funcs{
-    &setup_error_handling, &disable_openblas_multithreading,
+    &setup_error_handling,
+    &disable_openblas_multithreading,
     &Parallel::register_derived_classes_with_charm<
-        Cce::InitializeJ::InitializeJ>,
+        Cce::InitializeJ::InitializeJ<
+            EvolutionMetavars::uses_inverse_coordinates>>,
     &Parallel::register_derived_classes_with_charm<
         Cce::WorldtubeBufferUpdater<Cce::cce_metric_input_tags>>,
     &Parallel::register_derived_classes_with_charm<
