@@ -31,11 +31,11 @@
 namespace Cce {
 
 namespace {
-using real_tags_to_generate = tmpl::list<Tags::CauchyCartesianCoords,
-                                         Tags::InertialCartesianCoords>;
+using real_tags_to_generate =
+    tmpl::list<Tags::CauchyCartesianCoords, Tags::InertialCartesianCoords>;
 
-using real_tags_to_compute = tmpl::list<Tags::CauchyAngularCoords,
-                                        Tags::InertialAngularCoords>;
+using real_tags_to_compute =
+    tmpl::list<Tags::CauchyAngularCoords, Tags::InertialAngularCoords>;
 
 using swsh_tags_to_compute =
     tmpl::list<Tags::GaugeC, Tags::GaugeD, Tags::GaugeOmega, Tags::CauchyGaugeC,
@@ -48,8 +48,8 @@ using swsh_tags_to_compute =
 template <typename Metavariables>
 struct mock_characteristic_evolution {
   using simple_tags = tmpl::push_back<
-      db::AddSimpleTags<::Tags::Variables<tmpl::append<
-                            real_tags_to_generate, real_tags_to_compute>>,
+      db::AddSimpleTags<::Tags::Variables<tmpl::append<real_tags_to_generate,
+                                                       real_tags_to_compute>>,
                         ::Tags::Variables<swsh_tags_to_compute>>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
@@ -122,8 +122,8 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.UpdateGauge",
   auto expected_box = db::create<
       tmpl::append<component::simple_tags, db::AddSimpleTags<Tags::LMax>>>(
       std::move(real_variables), std::move(swsh_variables),
-      Spectral::Swsh::SwshInterpolator{},
-      Spectral::Swsh::SwshInterpolator{}, l_max);
+      Spectral::Swsh::SwshInterpolator{}, Spectral::Swsh::SwshInterpolator{},
+      l_max);
 
   runner.set_phase(metavariables::Phase::Evolve);
   // apply the `UpdateGauge` action
