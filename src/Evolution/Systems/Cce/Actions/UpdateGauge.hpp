@@ -57,8 +57,7 @@ struct UpdateGauge {
         Tags::GaugeC, Tags::GaugeD, Tags::CauchyAngularCoords,
         Tags::CauchyCartesianCoords>>(make_not_null(&box));
     db::mutate_apply<GaugeUpdateDampingFromCoordinates<
-        Tags::InertialDamping, Tags::InertialAngularCoords>>(
-        make_not_null(&box));
+        Tags::InertialDamping, Tags::CauchyAngularCoords>>(make_not_null(&box));
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
         Tags::GaugeCnohat, Tags::GaugeDnohat, Tags::InertialAngularCoords,
         Tags::InertialCartesianCoords>>(make_not_null(&box));

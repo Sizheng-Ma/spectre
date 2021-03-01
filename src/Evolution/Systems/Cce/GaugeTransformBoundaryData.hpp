@@ -595,13 +595,14 @@ struct GaugeUpdateTimeDerivatives {
       tmpl::list<::Tags::dt<Tags::CauchyCartesianCoords>,
                  ::Tags::dt<Tags::InertialCartesianCoords>, Tags::BondiUAtScri,
                  Tags::BondiU, Tags::Du<Tags::GaugeOmega>>;
-  using argument_tags =
-      tmpl::list<Tags::CauchyCartesianCoords, Tags::InertialCartesianCoords,
-                 Tags::GaugeCnohat,
-                 Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
-                                                  Spectral::Swsh::Tags::Eth>,
-                 Tags::GaugeOmega, Tags::GaugeDnohat, Tags::LMax,
-         Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
+  using argument_tags = tmpl::list<
+      Tags::CauchyCartesianCoords, Tags::InertialCartesianCoords,
+      Tags::GaugeCnohat, Tags::GaugeC,
+      Spectral::Swsh::Tags::Derivative<Tags::GaugeOmega,
+                                       Spectral::Swsh::Tags::Eth>,
+      Tags::GaugeOmega, Tags::GaugeDnohat, Tags::GaugeD, Tags::LMax,
+      Tags::InertialDamping, Tags::GaugeOmeganohat,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
   static void apply(
       gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_cauchy_du_x,
       gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_inertial_du_x,
@@ -612,10 +613,13 @@ struct GaugeUpdateTimeDerivatives {
       const tnsr::i<DataVector, 3>& cartesian_cauchy_coordinates,
       const tnsr::i<DataVector, 3>& cartesian_inertial_coordinates,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_c,
       const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_omega,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
-      size_t l_max,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_d, size_t l_max,
+      const Scalar<SpinWeighted<ComplexDataVector, 1>>& intertial_damping,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
       const Spectral::Swsh::SwshInterpolator& interpolator) noexcept;
 };
 

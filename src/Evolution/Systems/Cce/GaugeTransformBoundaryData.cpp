@@ -423,10 +423,14 @@ void GaugeUpdateTimeDerivatives::apply(
     const tnsr::i<DataVector, 3>& cartesian_cauchy_coordinates,
     const tnsr::i<DataVector, 3>& cartesian_inertial_coordinates,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_cnohat,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_c,
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_omega,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_dnohat,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_d,
     const size_t l_max,
+    const Scalar<SpinWeighted<ComplexDataVector, 1>>& intertial_damping,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
     const Spectral::Swsh::SwshInterpolator& interpolator) noexcept {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
@@ -577,10 +581,19 @@ void GaugeUpdateTimeDerivatives::apply(
   // Interpolate evolution_gauge_u_at_scri and omega to the partially flat
   // Bondi-like coordinates
   SpinWeighted<ComplexDataVector, 1> original_u_at_scri;
+  SpinWeighted<ComplexDataVector, 2> gauge_c_interpolate;
+  SpinWeighted<ComplexDataVector, 0> gauge_d_interpolate;
+  SpinWeighted<ComplexDataVector, 1> intertial_damping_interpolate;
   SpinWeighted<ComplexDataVector, 0> ome_inte;
+  SpinWeighted<ComplexDataVector, 0> damping_factor;
   interpolator.interpolate(make_not_null(&original_u_at_scri),
                           get(*evolution_gauge_u_at_scri));
   interpolator.interpolate(make_not_null(&ome_inte),get(omega));
+
+  interpolator.interpolate(make_not_null(&intertial_damping_interpolate),
+                           get(intertial_damping));
+  interpolator.interpolate(make_not_null(&gauge_c_interpolate), get(gauge_c));
+  interpolator.interpolate(make_not_null(&gauge_d_interpolate), get(gauge_d));
 
   // Eq. (79) in arXiv:2007.01339
   original_u_at_scri =
@@ -594,6 +607,38 @@ void GaugeUpdateTimeDerivatives::apply(
       -real(conj(original_u_at_scri.data()) * eth_yhat.data());
   get<2>(*cartesian_inertial_du_x) =
       -real(conj(original_u_at_scri.data()) * eth_zhat.data());
+
+  // damping_factor = abs(gauge_d_interpolate.data()*get(gauge_dnohat).data()
+  //+
+  //conj(gauge_c_interpolate).data()*get(gauge_cnohat).data()
+  //-std::complex<double>(4.0,
+  //0.0))
+  //+abs(gauge_c_interpolate.data()*get(gauge_dnohat).data()+
+  //conj(gauge_d_interpolate).data()*get(gauge_cnohat).data());
+  // damping_factor.data() = gauge_d_interpolate.data()*get(gauge_dnohat).data()
+  //+ conj(gauge_c_interpolate).data()*get(gauge_cnohat).data();
+
+  SpinWeighted<ComplexDataVector, 0> omega_inte;
+  interpolator.interpolate(make_not_null(&omega_inte), get(omega));
+  damping_factor = get(omeganohat) * omega_inte;
+  double l2norm = 0.;
+  for (size_t i = 0; i < damping_factor.size(); ++i) {
+    // l2norm += norm(damping_factor.data()[i]-4.0);
+
+    get<0>(*cartesian_inertial_du_x)[i] +=
+        -real(conj(get(intertial_damping).data()[i]) * eth_xhat.data()[i]) *
+        norm(damping_factor.data()[i] - 1.0);
+    get<1>(*cartesian_inertial_du_x)[i] +=
+        -real(conj(get(intertial_damping).data()[i]) * eth_yhat.data()[i]) *
+        norm(damping_factor.data()[i] - 1.0);
+    get<2>(*cartesian_inertial_du_x)[i] +=
+        -real(conj(get(intertial_damping).data()[i]) * eth_zhat.data()[i]) *
+        norm(damping_factor.data()[i] - 1.0);
+  }
+
+  // l2norm/=damping_factor.size();
+  // l2norm = sqrt(l2norm);
+  // Parallel::printf("norm: %e \n",l2norm);
 
   get(*du_omega) =
       0.25 *
