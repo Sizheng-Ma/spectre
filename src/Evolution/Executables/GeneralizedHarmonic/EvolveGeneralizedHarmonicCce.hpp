@@ -109,7 +109,7 @@ struct EvolutionMetavars
       Cce::Tags::BondiUAtScri, Cce::Tags::GaugeC, Cce::Tags::GaugeD,
       Cce::Tags::GaugeOmega, Cce::Tags::Du<Cce::Tags::GaugeOmega>,
       Cce::Tags::GaugeCnohat, Cce::Tags::GaugeDnohat,
-      Cce::Tags::GaugeOmeganohat,
+      Cce::Tags::GaugeOmeganohat, Cce::Tags::InertialDamping,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::GaugeOmega,
                                        Spectral::Swsh::Tags::Eth>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::GaugeOmeganohat,

@@ -669,6 +669,12 @@ void gauge_update_jacobian_from_coordinates_apply_impl(
         angular_source_coordinates,
     const tnsr::i<DataVector, 3>& cartesian_source_coordinates,
     size_t l_max) noexcept;
+
+void gauge_update_damping_from_coordinates_apply_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*>
+        gauge_factor_spin_1,
+    const tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>&
+        angular_source_coordinates) noexcept;
 }  // namespace detail
 
 /*!
@@ -717,6 +723,21 @@ struct GaugeUpdateJacobianFromCoordinates {
     detail::gauge_update_jacobian_from_coordinates_apply_impl(
         gauge_factor_spin_2, gauge_factor_spin_0, angular_source_coordinates,
         cartesian_source_coordinates, l_max);
+  }
+};
+
+template <typename GaugeFactorSpin1, typename AngularCoordinateTag>
+struct GaugeUpdateDampingFromCoordinates {
+  using return_tags = tmpl::list<GaugeFactorSpin1>;
+  using argument_tags = tmpl::list<AngularCoordinateTag>;
+
+  static void apply(
+      const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*>
+          gauge_factor_spin_1,
+      const tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>&
+          angular_source_coordinates) noexcept {
+    detail::gauge_update_damping_from_coordinates_apply_impl(
+        gauge_factor_spin_1, angular_source_coordinates);
   }
 };
 

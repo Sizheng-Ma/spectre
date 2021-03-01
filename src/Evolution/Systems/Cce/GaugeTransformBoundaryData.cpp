@@ -605,6 +605,17 @@ void GaugeUpdateTimeDerivatives::apply(
 }
 
 namespace detail {
+void gauge_update_damping_from_coordinates_apply_impl(
+    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*>
+        gauge_factor_spin_1,
+    const tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>&
+        angular_source_coordinates) noexcept {
+  get(*gauge_factor_spin_1).data() =
+      std::complex<double>(-1.0, 0.0) * get<1>(angular_source_coordinates) +
+      std::complex<double>(0.0, -1.0) * get<0>(angular_source_coordinates) *
+          sin(get<1>(angular_source_coordinates));
+}
+
 void gauge_update_jacobian_from_coordinates_apply_impl(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
         gauge_factor_spin_2,
