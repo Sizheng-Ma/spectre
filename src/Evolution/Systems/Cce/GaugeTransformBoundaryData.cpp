@@ -774,7 +774,7 @@ void TestOmega::apply(
    l2norm += norm(product.data()[i]-1.0);
   l2norm/=product.size();
   l2norm = sqrt(l2norm);
-  //Parallel::printf("%e \n",l2norm);
+  Parallel::printf("%e \n",l2norm);
 }
 
 void InitializeGauge::apply(
