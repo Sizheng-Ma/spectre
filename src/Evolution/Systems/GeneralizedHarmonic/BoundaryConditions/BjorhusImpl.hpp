@@ -802,11 +802,12 @@ ReturnType set_dt_v_minus<ReturnType, VolumeDim>::
                 (char_projected_rhs_dt_u_minus.get(a, b) +
                  char_speeds.at(3) * (U3m.get(a, b) - w_ccm.get(a, b) -
                                       tmp - mMuPhys * U3p.get(a, b)));
-                //Parallel::printf("wccm1: %e\n",w_ccm.get(a, b)[0]);
           }
         }
       }
     }
+      //Parallel::printf("wccm1: %e  U3m: %e U3p: %e\n",
+      //w_ccm.get(1, 1)[0],U3m.get(1, 1)[0],U3p.get(1, 1)[0]);
   } else {
     for (size_t c = 0; c <= VolumeDim; ++c) {
       for (size_t d = c; d <= VolumeDim; ++d) {
