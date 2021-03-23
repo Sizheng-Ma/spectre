@@ -45,6 +45,7 @@
 #include "Utilities/TMPL.hpp"
 #include "Utilities/TypeTraits/CreateHasTypeAlias.hpp"
 
+#include "Parallel/Printf.hpp"
 /// \cond
 namespace tuples {
 template <typename...>
@@ -1148,6 +1149,13 @@ void ComputeTimeDerivative<Metavariables>::send_data_for_fluxes(
   auto& receiver_proxy =
       Parallel::get_parallel_component<ParallelComponent>(*cache);
   const auto& element = db::get<domain::Tags::Element<volume_dim>>(box);
+
+  if(element.id().block_id()==0 && element.id().segment_ids()[0].index()==0
+     && element.id().segment_ids()[1].index()==0 &&
+     element.id().segment_ids()[2].index()==0) {
+  Parallel::printf("time %f\n", db::get<::Tags::TimeStepId>(box).
+                   substep_time().value());
+  }
 
   if constexpr (detail::has_boundary_correction_v<system>) {
     const auto& time_step_id = db::get<::Tags::TimeStepId>(box);
