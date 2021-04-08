@@ -74,7 +74,7 @@ void InverseCubic::operator()(
         one_minus_y_collocation[i] * one_minus_y_coefficient +
         pow<3>(one_minus_y_collocation[i]) * one_minus_y_cubed_coefficient
         + perturbed_j.data()
-        * 0.1 * exp(-pow(1.0-one_minus_y_collocation[i]+0.5,2.0)/0.3/0.3)
+        * 0.0 * exp(-pow(1.0-one_minus_y_collocation[i]+0.5,2.0)/0.3/0.3)
         * (2.0-one_minus_y_collocation[i]);
   }
   const auto& collocation = Spectral::Swsh::cached_collocation_metadata<
