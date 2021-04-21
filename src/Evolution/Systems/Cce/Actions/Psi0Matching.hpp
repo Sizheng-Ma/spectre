@@ -12,6 +12,8 @@
 #include "Evolution/Systems/Cce/NewmanPenrose.hpp"
 #include "Evolution/Systems/Cce/PreSwshDerivatives.hpp"
 
+#include "NumericalAlgorithms/Spectral/SwshFiltering.hpp"
+
 namespace Cce {
 namespace Actions {
 
@@ -39,6 +41,7 @@ struct CalculatePsi0 {
       const Parallel::GlobalCache<Metavariables>& /*cache*/,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) noexcept {
+    const size_t l_max = db::get<Tags::LMax>(box);
     db::mutate_apply<Interpolate_BondiJ>(make_not_null(&box));
     db::mutate_apply<PreSwshDerivatives<Tags::Dy<
         Tags::BondiJ_Cauchyview>>>(make_not_null(&box));
@@ -48,6 +51,17 @@ struct CalculatePsi0 {
     db::mutate_apply<PreSwshDerivatives<Tags::Dy<
         Tags::Psi0Match>>>(make_not_null(&box));
     db::mutate_apply<BoundaryWeyl>(make_not_null(&box));
+
+    db::mutate<Tags::BoundaryValue<Tags::Psi0Match>>(
+        make_not_null(&box),
+        [
+          &l_max
+        ](const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
+              psi_0_bound) noexcept {
+          Spectral::Swsh::filter_swsh_boundary_quantity(
+              make_not_null(&get(*psi_0_bound)), l_max, l_max-3);
+        });
+
     return {std::move(box)};
   }
 };
