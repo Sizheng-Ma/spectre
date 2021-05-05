@@ -208,7 +208,7 @@ struct GeneralizedHarmonicTemplateBase<
 
   using observe_fields = tmpl::append<
       tmpl::push_back<
-          analytic_solution_fields,
+          analytic_solution_fields, gr::Tags::Lapse<DataVector>,
           ::Tags::PointwiseL2Norm<
               GeneralizedHarmonic::Tags::GaugeConstraint<volume_dim, frame>>,
           ::Tags::PointwiseL2Norm<GeneralizedHarmonic::Tags::
