@@ -238,7 +238,14 @@ struct EvolutionMetavars
           tmpl::list<Cce::Actions::SendNextTimeToCce<CceWorldtubeTarget>,
                      intrp::Actions::InterpolateToTarget<CceWorldtubeTarget>>,
           tmpl::list<>>,
-      Actions::UpdateU<>>;
+      Actions::UpdateU<>,
+dg::Actions::Filter<
+          Filters::Exponential<0>,
+          tmpl::list<
+              gr::Tags::SpacetimeMetric<volume_dim, Frame::Inertial,
+                                        DataVector>,
+              GeneralizedHarmonic::Tags::Pi<volume_dim, Frame::Inertial>,
+              GeneralizedHarmonic::Tags::Phi<volume_dim, Frame::Inertial>>>>;
 
   // initialization actions are the same as the default, with the single
   // addition of initializing the interpolation points. Assumes that the last
