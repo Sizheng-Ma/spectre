@@ -125,6 +125,9 @@
 #include "Utilities/ProtocolHelpers.hpp"
 #include "Utilities/TMPL.hpp"
 
+#include "NumericalAlgorithms/LinearOperators/ExponentialFilter.hpp"
+#include "NumericalAlgorithms/LinearOperators/FilterAction.hpp"
+
 /// \cond
 namespace Frame {
 // IWYU pragma: no_forward_declare MathFunction
@@ -324,7 +327,15 @@ struct GeneralizedHarmonicTemplateBase<
           local_time_stepping, tmpl::list<>,
           tmpl::list<Actions::RecordTimeStepperData<>,
                      evolution::Actions::RunEventsAndDenseTriggers<>,
-                     Actions::UpdateU<>>>>;
+                     Actions::UpdateU<>,
+          dg::Actions::Filter<
+          Filters::Exponential<0>,
+          tmpl::list<
+              gr::Tags::SpacetimeMetric<volume_dim, Frame::Inertial,
+                                        DataVector>,
+              GeneralizedHarmonic::Tags::Pi<volume_dim, Frame::Inertial>,
+              GeneralizedHarmonic::Tags::Phi<volume_dim, Frame::Inertial>>>>
+>>;
 
   using initialization_actions = tmpl::list<
       Actions::SetupDataBox,
