@@ -188,3 +188,27 @@ target_link_libraries(
   PRIVATE
   GeneralRelativitySolutions
   )
+
+
+add_generalized_harmonic_executable(
+  Minkowski
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  false
+)
+target_link_libraries(
+  EvolveGhMinkowski
+  PRIVATE
+  GeneralRelativitySolutions
+  )
+add_generalized_harmonic_cce_executable(
+  Minkowski
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  false
+)
+target_link_libraries(
+  EvolveGhMinkowskiWithCce
+  PRIVATE
+  GeneralRelativitySolutions
+  )
