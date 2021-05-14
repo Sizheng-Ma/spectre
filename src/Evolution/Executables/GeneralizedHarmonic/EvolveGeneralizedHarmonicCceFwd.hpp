@@ -24,6 +24,9 @@ struct ConstraintPreservingPhysical;
 namespace gr {
 namespace Solutions {
 struct KerrSchild;
+
+template <size_t Dim>
+class Minkowski;
 }  // namespace Solutions
 }  // namespace gr
 namespace evolution {
