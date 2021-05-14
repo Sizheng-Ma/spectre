@@ -131,7 +131,14 @@ struct EvolutionMetavars
       evolution::dg::Actions::ApplyBoundaryCorrections<EvolutionMetavars>,
       tmpl::conditional_t<
           local_time_stepping, tmpl::list<>,
-          tmpl::list<Actions::RecordTimeStepperData<>, Actions::UpdateU<>>>>;
+          tmpl::list<Actions::RecordTimeStepperData<>, Actions::UpdateU<>,
+          dg::Actions::Filter<
+          Filters::Exponential<0>,
+          tmpl::list<
+              gr::Tags::SpacetimeMetric<volume_dim, Frame::Inertial,
+                                        DataVector>,
+              GeneralizedHarmonic::Tags::Pi<volume_dim, Frame::Inertial>,
+              GeneralizedHarmonic::Tags::Phi<volume_dim, Frame::Inertial>>>>>>;
 
   using typename GeneralizedHarmonicTemplateBase<
       EvolutionMetavars>::analytic_solution_tag;
