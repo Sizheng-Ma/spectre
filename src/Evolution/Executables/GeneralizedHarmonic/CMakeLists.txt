@@ -142,3 +142,65 @@ add_generalized_harmonic_cce_executable(
   true
   "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions;Importers"
 )
+
+
+add_generalized_harmonic_executable(
+  Minkowski
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  false
+  "${LIBS_TO_LINK};GeneralRelativitySolutions"
+)
+add_generalized_harmonic_cce_executable(
+  Minkowski
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  false
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions"
+)
+
+add_generalized_harmonic_executable(
+  MinkowskiNumericInitialData
+  evolution::NumericInitialData
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  false
+  "${LIBS_TO_LINK};GeneralRelativitySolutions;Importers"
+)
+add_generalized_harmonic_cce_executable(
+  MinkowskiNumericInitialData
+  evolution::NumericInitialData
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  false
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions;Importers"
+)
+
+add_generalized_harmonic_executable(
+  MinkowskiCPPBjorhus
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  GeneralizedHarmonic::BoundaryConditions::Bjorhus::ConstraintPreservingPhysical
+  true
+  "${LIBS_TO_LINK};GeneralRelativitySolutions"
+)
+add_generalized_harmonic_cce_executable(
+  MinkowskiCPPBjorhus
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  GeneralizedHarmonic::BoundaryConditions::Bjorhus::ConstraintPreservingPhysical
+  true
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions"
+)
+
+add_generalized_harmonic_executable(
+  MinkowskiNumericInitialDataCPPBjorhus
+  evolution::NumericInitialData
+  GeneralizedHarmonic::BoundaryConditions::Bjorhus::ConstraintPreservingPhysical
+  true
+  "${LIBS_TO_LINK};GeneralRelativitySolutions;Importers"
+)
+
+add_generalized_harmonic_cce_executable(
+  MinkowskiNumericInitialDataCPPBjorhus
+  evolution::NumericInitialData
+  GeneralizedHarmonic::BoundaryConditions::Bjorhus::ConstraintPreservingPhysical
+  true
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions;Importers"
+)
