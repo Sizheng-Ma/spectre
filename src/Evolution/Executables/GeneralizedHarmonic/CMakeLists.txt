@@ -212,3 +212,28 @@ target_link_libraries(
   PRIVATE
   GeneralRelativitySolutions
   )
+
+
+add_generalized_harmonic_executable(
+  MinkowskiNumericInitialData
+  evolution::NumericInitialData
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  false
+)
+target_link_libraries(
+  EvolveGhMinkowskiNumericInitialData
+  PRIVATE
+  GeneralRelativitySolutions
+  Importers
+  )
+add_generalized_harmonic_cce_executable(
+  MinkowskiNumericInitialData
+  evolution::NumericInitialData
+  GeneralizedHarmonic::Solutions::WrappedGr<gr::Solutions::Minkowski<3>>
+  false
+)
+target_link_libraries(
+  EvolveGhMinkowskiNumericInitialDataWithCce
+  PRIVATE
+  GeneralRelativitySolutions
+  )
