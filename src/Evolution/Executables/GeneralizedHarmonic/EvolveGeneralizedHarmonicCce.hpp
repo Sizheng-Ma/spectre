@@ -72,6 +72,8 @@
 #include "ParallelAlgorithms/Initialization/MutateAssign.hpp"
 #include "Evolution/Initialization/Evolution.hpp"
 #include "Evolution/Systems/GeneralizedHarmonic/BoundaryConditions/ReceivePsi0FromCce.hpp"
+#include "NumericalAlgorithms/LinearOperators/ExponentialFilter.hpp"
+#include "NumericalAlgorithms/LinearOperators/FilterAction.hpp"
 /// \cond
 namespace Frame {
 // IWYU pragma: no_forward_declare MathFunction
@@ -267,7 +269,14 @@ ReceiveCCEData<EvolutionMetavars>>,tmpl::list<>>,
                                             EvolutionMetavars>>,
                          tmpl::list<>>,
                      Actions::RecordTimeStepperData<>>>,
-      Actions::UpdateU<>>;
+      Actions::UpdateU<>,
+dg::Actions::Filter<
+          Filters::Exponential<0>,
+          tmpl::list<
+              gr::Tags::SpacetimeMetric<volume_dim, Frame::Inertial,
+                                        DataVector>,
+              GeneralizedHarmonic::Tags::Pi<volume_dim, Frame::Inertial>,
+              GeneralizedHarmonic::Tags::Phi<volume_dim, Frame::Inertial>>>>;
 
   // initialization actions are the same as the default, with the single
   // addition of initializing the interpolation points. Assumes that the last
