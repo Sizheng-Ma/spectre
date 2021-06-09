@@ -291,7 +291,7 @@ struct GeneralizedHarmonicTemplateBase<EvolutionMetavarsDerived<
           evolution::is_analytic_solution_v<boundary_conditions>,
           boundary_conditions,
           GeneralizedHarmonic::Solutions::WrappedGr<
-              gr::Solutions::KerrSchild>>>;
+              gr::Solutions::Minkowski<3>>>>;
   using analytic_solution_tag = Tags::AnalyticSolution<analytic_solution>;
   using boundary_condition_tag = analytic_solution_tag;
 
