@@ -1,4 +1,4 @@
-#!/usr/bin/env python
+#!/usr/bin/env python3
 
 # Distributed under the MIT License.
 # See LICENSE.txt for details.
