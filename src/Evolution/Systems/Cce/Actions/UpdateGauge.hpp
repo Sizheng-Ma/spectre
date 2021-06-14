@@ -34,7 +34,7 @@ namespace Actions {
  * `GaugeUpdateOmega` to perform the computations. Refer to the documentation
  * for those mutators for mathematical details.
  */
-template <bool EvolveInertialCoordinates>
+template <bool EvolvePartiallyFlatCartesianCoordinates>
 struct UpdateGauge {
   using const_global_cache_tags = tmpl::list<Tags::LMax>;
 
@@ -60,7 +60,7 @@ struct UpdateGauge {
         GaugeUpdateOmega<Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD,
                          Tags::PartiallyFlatGaugeOmega>>(make_not_null(&box));
 
-    if constexpr (EvolveInertialCoordinates) {
+    if constexpr (EvolvePartiallyFlatCartesianCoordinates) {
       db::mutate_apply<GaugeUpdateAngularFromCartesian<
           Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
           make_not_null(&box));
