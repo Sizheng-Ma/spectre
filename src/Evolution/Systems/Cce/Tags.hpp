@@ -149,12 +149,12 @@ struct Du : db::PrefixTag, db::SimpleTag {
 };
 
 /// The spin-weight 2 angular Jacobian factor
-struct GaugeC : db::SimpleTag {
+struct PartiallyFlatGaugeC : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
 };
 
 /// The spin-weight 0 angular Jacobian factor
-struct GaugeD : db::SimpleTag {
+struct PartiallyFlatGaugeD : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 
@@ -171,7 +171,7 @@ struct CauchyGaugeD : db::SimpleTag {
 };
 
 /// The conformal factor associated with an angular transformation
-struct GaugeOmega : db::SimpleTag {
+struct PartiallyFlatGaugeOmega : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 
