@@ -49,12 +49,12 @@ template <template <typename> class BoundaryComponent>
 struct EvolutionMetavars {
   using system = Cce::System;
 
-  static constexpr bool uses_inverse_coordinates = false;
+  static constexpr bool uses_partially_flat_cartesian_coordinates = false;
 
   using evolved_swsh_tag = Cce::Tags::BondiJ;
   using evolved_swsh_dt_tag = Cce::Tags::BondiH;
   using evolved_coordinates_variables_tag = Tags::Variables<
-      std::conditional_t<uses_inverse_coordinates,
+      std::conditional_t<uses_partially_flat_cartesian_coordinates,
                          tmpl::list<Cce::Tags::CauchyCartesianCoords,
                                     Cce::Tags::InertialCartesianCoords,
                                     Cce::Tags::InertialRetardedTime>,
@@ -75,7 +75,7 @@ struct EvolutionMetavars {
       Cce::Tags::PartiallyFlatGaugeD, Cce::Tags::PartiallyFlatGaugeOmega,
       Cce::Tags::Du<Cce::Tags::PartiallyFlatGaugeOmega>,
       std::conditional_t<
-          uses_inverse_coordinates,
+          uses_partially_flat_cartesian_coordinates,
           tmpl::list<
               Cce::Tags::CauchyGaugeC, Cce::Tags::CauchyGaugeD,
               Cce::Tags::CauchyGaugeOmega,
@@ -118,7 +118,7 @@ struct EvolutionMetavars {
   using cce_transform_buffer_tags = Cce::all_transform_buffer_tags;
   using cce_swsh_derivative_tags = Cce::all_swsh_derivative_tags;
   using cce_angular_coordinate_tags =
-      std::conditional_t<uses_inverse_coordinates,
+      std::conditional_t<uses_partially_flat_cartesian_coordinates,
                          tmpl::list<Cce::Tags::CauchyAngularCoords,
                                     Cce::Tags::InertialAngularCoords>,
                          tmpl::list<Cce::Tags::CauchyAngularCoords>>;
@@ -168,7 +168,7 @@ static const std::vector<void (*)()> charm_init_node_funcs{
     &setup_memory_allocation_failure_reporting,
     &disable_openblas_multithreading,
     &Cce::register_initialize_j_with_charm<
-        metavariables::uses_inverse_coordinates>,
+        metavariables::uses_partially_flat_cartesian_coordinates>,
     &Parallel::register_derived_classes_with_charm<
         Cce::WorldtubeBufferUpdater<Cce::cce_metric_input_tags>>,
     &Parallel::register_derived_classes_with_charm<

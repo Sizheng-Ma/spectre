@@ -72,8 +72,8 @@ struct mock_characteristic_evolution {
   using metavariables = Metavariables;
   using chare_type = ActionTesting::MockArrayChare;
   using array_index = size_t;
-  using const_global_cache_tags =
-      tmpl::list<Tags::InitializeJ<metavariables::uses_inverse_coordinates>>;
+  using const_global_cache_tags = tmpl::list<Tags::InitializeJ<
+      metavariables::uses_partially_flat_cartesian_coordinates>>;
 
   using phase_dependent_action_list = tmpl::list<
       Parallel::PhaseActions<
@@ -83,14 +83,14 @@ struct mock_characteristic_evolution {
           typename Metavariables::Phase, Metavariables::Phase::Testing,
           tmpl::list<
               Actions::InitializeFirstHypersurface<
-                  metavariables::uses_inverse_coordinates>,
+                  metavariables::uses_partially_flat_cartesian_coordinates>,
               ::Actions::MutateApply<GaugeUpdateAngularFromCartesian<
                   Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>,
               ::Actions::MutateApply<GaugeUpdateJacobianFromCoordinates<
                   Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD,
                   Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>,
               std::conditional_t<
-                  Metavariables::uses_inverse_coordinates,
+                  Metavariables::uses_partially_flat_cartesian_coordinates,
                   tmpl::list<
                       ::Actions::MutateApply<GaugeUpdateAngularFromCartesian<
                           Tags::InertialAngularCoords,
@@ -107,7 +107,8 @@ struct metavariables {
   using component_list = tmpl::list<
       mock_characteristic_evolution<metavariables<EvolveInertialCoordinates>>>;
 
-  static constexpr bool uses_inverse_coordinates = EvolveInertialCoordinates;
+  static constexpr bool uses_partially_flat_cartesian_coordinates =
+      EvolveInertialCoordinates;
 
   enum class Phase { Initialization, Testing, Exit };
 };
