@@ -47,12 +47,12 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Tags", "[Unit][Cce]") {
   TestHelpers::db::test_simple_tag<Cce::Tags::News>("News");
   TestHelpers::db::test_simple_tag<Cce::Tags::CauchyAngularCoords>(
       "CauchyAngularCoords");
-  TestHelpers::db::test_simple_tag<Cce::Tags::InertialAngularCoords>(
-      "InertialAngularCoords");
+  TestHelpers::db::test_simple_tag<Cce::Tags::PartiallyFlatAngularCoords>(
+      "PartiallyFlatAngularCoords");
   TestHelpers::db::test_simple_tag<Cce::Tags::CauchyCartesianCoords>(
       "CauchyCartesianCoords");
-  TestHelpers::db::test_simple_tag<Cce::Tags::InertialCartesianCoords>(
-      "InertialCartesianCoords");
+  TestHelpers::db::test_simple_tag<Cce::Tags::PartiallyFlatCartesianCoords>(
+      "PartiallyFlatCartesianCoords");
   TestHelpers::db::test_simple_tag<Cce::Tags::InertialRetardedTime>(
       "InertialRetardedTime");
   TestHelpers::db::test_simple_tag<Cce::Tags::ComplexInertialRetardedTime>(

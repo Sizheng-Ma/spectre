@@ -115,7 +115,7 @@ struct metavariables {
   using cce_transform_buffer_tags = all_transform_buffer_tags;
   using cce_swsh_derivative_tags = all_swsh_derivative_tags;
   using cce_angular_coordinate_tags =
-      tmpl::list<Tags::CauchyAngularCoords, Tags::InertialAngularCoords>;
+      tmpl::list<Tags::CauchyAngularCoords, Tags::PartiallyFlatAngularCoords>;
   using cce_scri_tags =
       tmpl::list<Cce::Tags::News, Cce::Tags::ScriPlus<Cce::Tags::Strain>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi0>,

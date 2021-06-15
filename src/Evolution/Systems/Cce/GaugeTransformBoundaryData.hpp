@@ -618,12 +618,12 @@ struct GaugeUpdateTimeDerivatives {
  * see Eq. (79) of \cite Moxon2020gha.
  */
 struct GaugeUpdateInertialTimeDerivatives {
-  using return_tags =
-      tmpl::list<::Tags::dt<Tags::InertialCartesianCoords>, Tags::BondiUAtScri>;
+  using return_tags = tmpl::list<::Tags::dt<Tags::PartiallyFlatCartesianCoords>,
+                                 Tags::BondiUAtScri>;
   using argument_tags = tmpl::list<
-      Tags::InertialCartesianCoords, Tags::CauchyGaugeC,
+      Tags::PartiallyFlatCartesianCoords, Tags::CauchyGaugeC,
       Tags::PartiallyFlatGaugeOmega, Tags::CauchyGaugeD, Tags::LMax,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>>;
   static void apply(
       gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_inertial_du_x,
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 1>>*>

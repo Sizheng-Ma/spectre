@@ -24,7 +24,7 @@ namespace Actions {
  * Cauchy and partially flat Bondi-like coordinates.
  *
  * \details This action is to be called after `Tags::CauchyCartesianCoords`
- * and `Tags::InertialCartesianCoords` have been updated, typically via a
+ * and `Tags::PartiallyFlatCartesianCoords` have been updated, typically via a
  * time step of a set of coordinate evolution equations. It prepares the
  * gauge quantities in the \ref DataBoxGroup for calls to the individual
  * `GaugeAdjustedBoundaryValue` specializations.
@@ -61,13 +61,16 @@ struct UpdateGauge {
                          Tags::PartiallyFlatGaugeOmega>>(make_not_null(&box));
 
     if constexpr (EvolvePartiallyFlatCartesianCoordinates) {
-      db::mutate_apply<GaugeUpdateAngularFromCartesian<
-          Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+      db::mutate_apply<
+          GaugeUpdateAngularFromCartesian<Tags::PartiallyFlatAngularCoords,
+                                          Tags::PartiallyFlatCartesianCoords>>(
           make_not_null(&box));
       db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-          Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
-          Tags::InertialCartesianCoords>>(make_not_null(&box));
-      db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
+          Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+          Tags::PartiallyFlatAngularCoords,
+          Tags::PartiallyFlatCartesianCoords>>(make_not_null(&box));
+      db::mutate_apply<
+          GaugeUpdateInterpolator<Tags::PartiallyFlatAngularCoords>>(
           make_not_null(&box));
       db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
                                         Tags::CauchyGaugeOmega>>(

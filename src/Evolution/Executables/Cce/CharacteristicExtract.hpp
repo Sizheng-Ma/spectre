@@ -56,7 +56,7 @@ struct EvolutionMetavars {
   using evolved_coordinates_variables_tag = Tags::Variables<
       std::conditional_t<uses_partially_flat_cartesian_coordinates,
                          tmpl::list<Cce::Tags::CauchyCartesianCoords,
-                                    Cce::Tags::InertialCartesianCoords,
+                                    Cce::Tags::PartiallyFlatCartesianCoords,
                                     Cce::Tags::InertialRetardedTime>,
                          tmpl::list<Cce::Tags::CauchyCartesianCoords,
                                     Cce::Tags::InertialRetardedTime>>>;
@@ -120,7 +120,7 @@ struct EvolutionMetavars {
   using cce_angular_coordinate_tags =
       std::conditional_t<uses_partially_flat_cartesian_coordinates,
                          tmpl::list<Cce::Tags::CauchyAngularCoords,
-                                    Cce::Tags::InertialAngularCoords>,
+                                    Cce::Tags::PartiallyFlatAngularCoords>,
                          tmpl::list<Cce::Tags::CauchyAngularCoords>>;
 
   using cce_boundary_component = BoundaryComponent<EvolutionMetavars>;

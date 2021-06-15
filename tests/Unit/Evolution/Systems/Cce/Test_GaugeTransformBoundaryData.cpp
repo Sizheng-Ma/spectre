@@ -87,9 +87,10 @@ void test_gauge_transforms_via_inverse_coordinate_map(
 
   using real_boundary_tags =
       tmpl::list<Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords,
-                 Tags::InertialAngularCoords, Tags::InertialCartesianCoords,
+                 Tags::PartiallyFlatAngularCoords,
+                 Tags::PartiallyFlatCartesianCoords,
                  ::Tags::dt<Tags::CauchyCartesianCoords>,
-                 ::Tags::dt<Tags::InertialCartesianCoords>>;
+                 ::Tags::dt<Tags::PartiallyFlatCartesianCoords>>;
   using spin_weighted_boundary_tags = tmpl::flatten<tmpl::list<
       tmpl::list<Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD,
                  Tags::PartiallyFlatGaugeOmega, Tags::CauchyGaugeC,
@@ -114,7 +115,8 @@ void test_gauge_transforms_via_inverse_coordinate_map(
       volume_spin_weighted_variables_tag, Tags::LMax,
       Tags::NumberOfRadialPoints,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>>(
+      Spectral::Swsh::Tags::SwshInterpolator<
+          Tags::PartiallyFlatAngularCoords>>>(
       typename coordinate_variables_tag::type{number_of_angular_grid_points},
       typename spin_weighted_variables_tag::type{number_of_angular_grid_points},
       typename volume_spin_weighted_variables_tag::type{
@@ -213,9 +215,9 @@ void test_gauge_transforms_via_inverse_coordinate_map(
             cos(get<0>(cauchy_angular_coordinates));
       });
 
-  db::mutate<Tags::InertialCartesianCoords>(
+  db::mutate<Tags::PartiallyFlatCartesianCoords>(
       make_not_null(&forward_transform_box),
-      [&l_max, &variation_amplitude_inertial ](
+      [&l_max, &variation_amplitude_inertial](
           const gsl::not_null<tnsr::i<DataVector, 3>*>
               inertial_cartesian_coordinates) noexcept {
         tnsr::i<DataVector, 2> inertial_angular_coordinates{
@@ -251,7 +253,8 @@ void test_gauge_transforms_via_inverse_coordinate_map(
       volume_spin_weighted_variables_tag, Tags::LMax,
       Tags::NumberOfRadialPoints,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>>(
+      Spectral::Swsh::Tags::SwshInterpolator<
+          Tags::PartiallyFlatAngularCoords>>>(
       typename coordinate_variables_tag::type{number_of_angular_grid_points},
       typename spin_weighted_variables_tag::type{number_of_angular_grid_points},
       typename volume_spin_weighted_variables_tag::type{
@@ -298,9 +301,9 @@ void test_gauge_transforms_via_inverse_coordinate_map(
             cos(get<0>(inverse_cauchy_angular_coordinates));
       });
 
-  db::mutate<Tags::InertialCartesianCoords>(
+  db::mutate<Tags::PartiallyFlatCartesianCoords>(
       make_not_null(&inverse_transform_box),
-      [&l_max, &variation_amplitude_inertial ](
+      [&l_max, &variation_amplitude_inertial](
           const gsl::not_null<tnsr::i<DataVector, 3>*>
               inverse_inertial_cartesian_coordinates) noexcept {
         tnsr::i<DataVector, 2> inverse_inertial_angular_coordinates{
@@ -346,14 +349,14 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
         make_not_null(&forward_transform_box));
     db::mutate_apply<GaugeUpdateAngularFromCartesian<
-        Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+        Tags::PartiallyFlatAngularCoords, Tags::PartiallyFlatCartesianCoords>>(
         make_not_null(&forward_transform_box));
     double angular_phi = 0.0;
     double angular_phi_inertial = 0.0;
     const auto& computed_angular_cauchy_coordinates =
         db::get<Tags::CauchyAngularCoords>(forward_transform_box);
     const auto& computed_angular_inertial_coordinates =
-        db::get<Tags::InertialAngularCoords>(forward_transform_box);
+        db::get<Tags::PartiallyFlatAngularCoords>(forward_transform_box);
     const auto& collocation = Spectral::Swsh::cached_collocation_metadata<
         Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max);
     for (const auto collocation_point : collocation) {
@@ -390,7 +393,7 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
         make_not_null(&inverse_transform_box));
     db::mutate_apply<GaugeUpdateAngularFromCartesian<
-        Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+        Tags::PartiallyFlatAngularCoords, Tags::PartiallyFlatCartesianCoords>>(
         make_not_null(&inverse_transform_box));
 
     db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
@@ -398,9 +401,9 @@ void test_gauge_transforms_via_inverse_coordinate_map(
     db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
         make_not_null(&inverse_transform_box));
 
-    db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
+    db::mutate_apply<GaugeUpdateInterpolator<Tags::PartiallyFlatAngularCoords>>(
         make_not_null(&forward_transform_box));
-    db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
+    db::mutate_apply<GaugeUpdateInterpolator<Tags::PartiallyFlatAngularCoords>>(
         make_not_null(&inverse_transform_box));
 
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
@@ -413,11 +416,13 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         make_not_null(&inverse_transform_box));
 
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-        Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
-        Tags::InertialCartesianCoords>>(make_not_null(&forward_transform_box));
+        Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+        Tags::PartiallyFlatAngularCoords, Tags::PartiallyFlatCartesianCoords>>(
+        make_not_null(&forward_transform_box));
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-        Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
-        Tags::InertialCartesianCoords>>(make_not_null(&inverse_transform_box));
+        Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+        Tags::PartiallyFlatAngularCoords, Tags::PartiallyFlatCartesianCoords>>(
+        make_not_null(&inverse_transform_box));
 
     db::mutate_apply<
         GaugeUpdateOmega<Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD,
@@ -441,9 +446,9 @@ void test_gauge_transforms_via_inverse_coordinate_map(
         db::get<Tags::CauchyAngularCoords>(inverse_transform_box);
 
     const auto& forward_inertial_angular_coordinates =
-        db::get<Tags::InertialAngularCoords>(forward_transform_box);
+        db::get<Tags::PartiallyFlatAngularCoords>(forward_transform_box);
     const auto& inverse_inertial_angular_coordinates =
-        db::get<Tags::InertialAngularCoords>(inverse_transform_box);
+        db::get<Tags::PartiallyFlatAngularCoords>(inverse_transform_box);
 
     const Spectral::Swsh::SwshInterpolator interpolator{
         get<0>(forward_cauchy_angular_coordinates),

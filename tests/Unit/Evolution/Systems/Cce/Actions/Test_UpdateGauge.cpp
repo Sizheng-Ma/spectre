@@ -32,10 +32,10 @@ namespace Cce {
 
 namespace {
 using real_tags_to_generate =
-    tmpl::list<Tags::CauchyCartesianCoords, Tags::InertialCartesianCoords>;
+    tmpl::list<Tags::CauchyCartesianCoords, Tags::PartiallyFlatCartesianCoords>;
 
 using real_tags_to_compute =
-    tmpl::list<Tags::CauchyAngularCoords, Tags::InertialAngularCoords>;
+    tmpl::list<Tags::CauchyAngularCoords, Tags::PartiallyFlatAngularCoords>;
 
 using swsh_tags_to_compute =
     tmpl::list<Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD,
@@ -53,7 +53,7 @@ struct mock_characteristic_evolution {
                                                        real_tags_to_compute>>,
                         ::Tags::Variables<swsh_tags_to_compute>>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
-      Spectral::Swsh::Tags::SwshInterpolator<Tags::InertialAngularCoords>>;
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>>;
 
   using metavariables = Metavariables;
   using chare_type = ActionTesting::MockArrayChare;
@@ -147,12 +147,13 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.UpdateGauge",
 
   if (metavariables::uses_partially_flat_cartesian_coordinates) {
     db::mutate_apply<GaugeUpdateAngularFromCartesian<
-        Tags::InertialAngularCoords, Tags::InertialCartesianCoords>>(
+        Tags::PartiallyFlatAngularCoords, Tags::PartiallyFlatCartesianCoords>>(
         make_not_null(&expected_box));
     db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-        Tags::CauchyGaugeC, Tags::CauchyGaugeD, Tags::InertialAngularCoords,
-        Tags::InertialCartesianCoords>>(make_not_null(&expected_box));
-    db::mutate_apply<GaugeUpdateInterpolator<Tags::InertialAngularCoords>>(
+        Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+        Tags::PartiallyFlatAngularCoords, Tags::PartiallyFlatCartesianCoords>>(
+        make_not_null(&expected_box));
+    db::mutate_apply<GaugeUpdateInterpolator<Tags::PartiallyFlatAngularCoords>>(
         make_not_null(&expected_box));
     db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
                                       Tags::CauchyGaugeOmega>>(
@@ -203,11 +204,11 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.UpdateGauge",
     const Spectral::Swsh::SwshInterpolator& computed_interpolator_inertial =
         ActionTesting::get_databox_tag<component,
                                        Spectral::Swsh::Tags::SwshInterpolator<
-                                           Tags::InertialAngularCoords>>(runner,
-                                                                         0);
+                                           Tags::PartiallyFlatAngularCoords>>(
+            runner, 0);
     const Spectral::Swsh::SwshInterpolator& expected_interpolator_inertial =
         db::get<Spectral::Swsh::Tags::SwshInterpolator<
-            Tags::InertialAngularCoords>>(expected_box);
+            Tags::PartiallyFlatAngularCoords>>(expected_box);
 
     SpinWeighted<ComplexDataVector, 2>
         interpolated_points_from_computed_inertial{

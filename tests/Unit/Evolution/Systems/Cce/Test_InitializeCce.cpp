@@ -354,9 +354,9 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.InitializeJ", "[Unit][Cce]") {
   using pre_swsh_derivatives_variables_tag = ::Tags::Variables<tmpl::list<
       Tags::BondiJ, Tags::Dy<Tags::BondiJ>, Tags::Dy<Tags::Dy<Tags::BondiJ>>,
       Tags::BondiK, Tags::BondiR, Tags::OneMinusY, Tags::Psi0>>;
-  using tensor_variables_tag = ::Tags::Variables<
-      tmpl::list<Tags::CauchyCartesianCoords, Tags::CauchyAngularCoords,
-                 Tags::InertialCartesianCoords, Tags::InertialAngularCoords>>;
+  using tensor_variables_tag = ::Tags::Variables<tmpl::list<
+      Tags::CauchyCartesianCoords, Tags::CauchyAngularCoords,
+      Tags::PartiallyFlatCartesianCoords, Tags::PartiallyFlatAngularCoords>>;
 
   const size_t number_of_boundary_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);

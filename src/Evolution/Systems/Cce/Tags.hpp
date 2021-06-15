@@ -191,7 +191,7 @@ struct CauchyAngularCoords : db::SimpleTag {
 };
 
 /// The angular coordinates for the partially flat Bondi-like coordinates.
-struct InertialAngularCoords : db::SimpleTag {
+struct PartiallyFlatAngularCoords : db::SimpleTag {
   using type = tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>;
 };
 
@@ -202,7 +202,7 @@ struct CauchyCartesianCoords : db::SimpleTag {
 };
 
 /// The partially flat Bondi-like coordinates.
-struct InertialCartesianCoords : db::SimpleTag {
+struct PartiallyFlatCartesianCoords : db::SimpleTag {
   using type = tnsr::i<DataVector, 3>;
 };
 
