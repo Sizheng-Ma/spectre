@@ -23,6 +23,7 @@ spectre_target_headers(
   HEADERS
   CCMHelper.hpp
   Characteristics.hpp
+  ComputeIncomingWave.hpp
   Constraints.hpp
   DuDtTempTags.hpp
   Equations.hpp

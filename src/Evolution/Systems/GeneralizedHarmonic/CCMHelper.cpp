@@ -11,7 +11,7 @@
 namespace GeneralizedHarmonic {
 
 template <size_t Dim, typename Frame>
-void InterpolatePsi0<Dim, Frame>::interpolate_psi0(
+void InterpolatePsi0<Dim, Frame>::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> psi0_inte,
     const typename domain::Tags::Coordinates<Dim, Frame>::type& inertial_coords,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi0,
@@ -28,7 +28,7 @@ void InterpolatePsi0<Dim, Frame>::interpolate_psi0(
 }
 
 template <size_t Dim, typename Frame>
-void AngularTetradForCCM<Dim, Frame>::get_m_vector(
+void AngularTetradForCCM<Dim, Frame>::apply(
     gsl::not_null<tnsr::a<ComplexDataVector, Dim, Frame>*> m,
     const typename domain::Tags::Coordinates<Dim, Frame>::type&
           inertial_coords) noexcept {
@@ -65,7 +65,7 @@ std::complex<double>(0.0,1.0) * sin(phi) * sin(theta)/sqrt(2.0);
 }
 
 template <size_t Dim, typename Frame>
-void IncomingWFromCCE<Dim, Frame>::wijfromcce(
+void IncomingWFromCCE<Dim, Frame>::apply(
     gsl::not_null<tnsr::aa<DataVector, Dim, Frame>*> w_ccm,
     const tnsr::a<ComplexDataVector, Dim, Frame>& m,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi0_cce) noexcept {

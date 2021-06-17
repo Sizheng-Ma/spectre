@@ -71,6 +71,7 @@
 #include "ParallelAlgorithms/Initialization/MutateAssign.hpp"
 #include "Evolution/Initialization/Evolution.hpp"
 #include "Evolution/Systems/GeneralizedHarmonic/BoundaryConditions/ReceivePsi0FromCce.hpp"
+#include "Evolution/Systems/GeneralizedHarmonic/ComputeIncomingWave.hpp"
 /// \cond
 namespace Frame {
 // IWYU pragma: no_forward_declare MathFunction
@@ -140,7 +141,9 @@ struct EvolutionMetavars
       tmpl::conditional_t<
           send_to_cce,
           tmpl::list<GeneralizedHarmonic::Actions::
-                     ReceiveCCEData<EvolutionMetavars>>,tmpl::list<>>,
+                     ReceiveCCEData<EvolutionMetavars>,
+                     GeneralizedHarmonic::Actions::CalculateWij
+                     <3,Frame::Inertial>>,tmpl::list<>>,
       evolution::dg::Actions::ApplyBoundaryCorrections<EvolutionMetavars>,
       tmpl::conditional_t<
           local_time_stepping, tmpl::list<>,
