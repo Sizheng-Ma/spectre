@@ -28,6 +28,10 @@
 #include "Utilities/Serialization/CharmPupable.hpp"
 #include "Utilities/TMPL.hpp"
 
+#include "Evolution/Systems/Cce/OptionTags.hpp"
+#include "Evolution/Systems/Cce/ReceiveTags.hpp"
+#include "Evolution/Systems/Cce/Tags.hpp"
+
 /// \cond
 namespace domain::Tags {
 template <size_t Dim, typename Frame>
@@ -170,7 +174,9 @@ class ConstraintPreservingBjorhus final : public BoundaryCondition<Dim> {
                                Frame::Inertial>,
                  ::Tags::deriv<Tags::Phi<DataVector, Dim>, tmpl::size_t<Dim>,
                                Frame::Inertial>>;
-  using dg_gridless_tags = tmpl::list<>;
+  using dg_gridless_tags = tmpl::list<
+      // GeneralizedHarmonic::Tags::CCMw<Dim, Frame::Inertial>,
+      Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>, Cce::Tags::LMax>;
 
   std::optional<std::string> dg_time_derivative(
       gsl::not_null<tnsr::aa<DataVector, Dim, Frame::Inertial>*>
@@ -211,7 +217,9 @@ class ConstraintPreservingBjorhus final : public BoundaryCondition<Dim> {
       // c.f. dg_interior_deriv_vars_tags
       const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_spacetime_metric,
       const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_pi,
-      const tnsr::ijaa<DataVector, Dim, Frame::Inertial>& d_phi) const;
+      const tnsr::ijaa<DataVector, Dim, Frame::Inertial>& d_phi,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi0,
+      size_t l_max) const;
 
  private:
   void compute_intermediate_vars(
