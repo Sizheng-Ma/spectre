@@ -24,11 +24,10 @@ namespace GeneralizedHarmonic {
 template <size_t Dim, typename Frame>
 struct InterpolatePsi0 {
   using return_tags = tmpl::list<Tags::Psi0FromCceInterpolate>;
-  using argument_tags =
-      tmpl::list<domain::Tags::Coordinates<Dim, Frame>,
-                 Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,
-                 Cce::Tags::LMax>;
-  static void interpolate_psi0(
+  using argument_tags = tmpl::list<domain::Tags::Coordinates<Dim, Frame>,
+                        Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,
+                        Cce::Tags::LMax>;
+  static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> psi0_inte,
       const typename domain::Tags::Coordinates<Dim, Frame>::type&
           inertial_coords,
@@ -41,7 +40,7 @@ struct AngularTetradForCCM {
   using return_tags = tmpl::list<Tags::AngularTetrad<Dim, Frame>>;
   using argument_tags = tmpl::list<domain::Tags::Coordinates<Dim, Frame>>;
 
-  static void get_m_vector(
+  static void apply(
       gsl::not_null<tnsr::a<ComplexDataVector, Dim, Frame>*> m,
       const typename domain::Tags::Coordinates<Dim, Frame>::type&
           inertial_coords) noexcept;
@@ -50,9 +49,9 @@ struct AngularTetradForCCM {
 template <size_t Dim, typename Frame>
 struct IncomingWFromCCE {
   using return_tags = tmpl::list<Tags::CCMw<Dim, Frame>>;
-  using argument_tags =
-      tmpl::list<Tags::AngularTetrad<Dim, Frame>, Tags::Psi0FromCceInterpolate>;
-  static void wijfromcce(
+  using argument_tags = tmpl::list<Tags::AngularTetrad<Dim, Frame>,
+                                   Tags::Psi0FromCceInterpolate>;
+  static void apply(
       gsl::not_null<tnsr::aa<DataVector, Dim, Frame>*> w_ccm,
       const tnsr::a<ComplexDataVector, Dim, Frame>& m,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi0_cce) noexcept;
