@@ -120,7 +120,8 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
     // c.f. dg_interior_deriv_vars_tags
     const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_spacetime_metric,
     const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_pi,
-    const tnsr::ijaa<DataVector, Dim, Frame::Inertial>& d_phi) const noexcept {
+    const tnsr::ijaa<DataVector, Dim, Frame::Inertial>& d_phi,
+    const tnsr::aa<DataVector, Dim, Frame::Inertial>& w_ccm) const noexcept {
   TempBuffer<tmpl::list<::Tags::TempI<0, Dim, Frame::Inertial, DataVector>,
                         ::Tags::Tempiaa<0, Dim, Frame::Inertial, DataVector>,
                         ::Tags::Tempiaa<1, Dim, Frame::Inertial, DataVector>,
@@ -261,7 +262,7 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
         inverse_spacetime_metric, three_index_constraint,
         char_projected_rhs_dt_v_psi, char_projected_rhs_dt_v_minus,
         constraint_char_zero_plus, constraint_char_zero_minus, phi, d_phi, d_pi,
-        char_speeds);
+        char_speeds, w_ccm);
   } else {
     ERROR("Failed to set dtVMinus. Input option \""
           << "\" Must be one of ConstraintPreserving or "

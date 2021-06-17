@@ -162,7 +162,8 @@ class ConstraintPreservingBjorhus final : public BoundaryCondition<Dim> {
                     Frame::Inertial>,
       ::Tags::deriv<Tags::Phi<Dim, Frame::Inertial>, tmpl::size_t<Dim>,
                     Frame::Inertial>>;
-  using dg_gridless_tags = tmpl::list<>;
+  using dg_gridless_tags = tmpl::list<GeneralizedHarmonic::
+                    Tags::CCMw<Dim, Frame::Inertial>>;
 
   std::optional<std::string> dg_time_derivative(
       gsl::not_null<tnsr::aa<DataVector, Dim, Frame::Inertial>*>
@@ -194,7 +195,8 @@ class ConstraintPreservingBjorhus final : public BoundaryCondition<Dim> {
       // c.f. dg_interior_deriv_vars_tags
       const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_spacetime_metric,
       const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_pi,
-      const tnsr::ijaa<DataVector, Dim, Frame::Inertial>& d_phi) const noexcept;
+      const tnsr::ijaa<DataVector, Dim, Frame::Inertial>& d_phi,
+      const tnsr::aa<DataVector, Dim, Frame::Inertial>& w_ccm) const noexcept;
 
  private:
   void compute_intermediate_vars(
