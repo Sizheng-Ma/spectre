@@ -22,6 +22,8 @@
 #include "Utilities/GenerateInstantiations.hpp"
 #include "Utilities/Gsl.hpp"
 
+#include "Parallel/Printf.hpp"
+
 namespace GeneralizedHarmonic::BoundaryConditions::Bjorhus {
 template <size_t VolumeDim, typename DataType>
 void constraint_preserving_bjorhus_corrections_dt_v_psi(
@@ -501,6 +503,8 @@ void add_physical_terms_to_dt_v_minus(
       }
     }
   }
+  Parallel::printf("wccm1: %e U3m: %e U3p: %e\n",
+        w_ccm.get(1,1)[0],U3m.get(1,1)[0],U3p.get(1,1)[0]);
 }
 }  // namespace detail
 
