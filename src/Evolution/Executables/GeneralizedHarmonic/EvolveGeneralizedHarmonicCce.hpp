@@ -115,10 +115,7 @@ struct EvolutionMetavars
   using interpolator_source_vars =
       tmpl::list<::gr::Tags::SpacetimeMetric<3, Frame::Inertial>,
                  ::GeneralizedHarmonic::Tags::Phi<3, Frame::Inertial>,
-                 ::GeneralizedHarmonic::Tags::Pi<3, Frame::Inertial>,
-                 ::Tags::dt<gr::Tags::SpacetimeMetric<volume_dim, frame>>,
-                 ::Tags::dt<GeneralizedHarmonic::Tags::Pi<volume_dim, frame>>,
-                 ::Tags::dt<GeneralizedHarmonic::Tags::Phi<volume_dim, frame>>>;
+                 ::GeneralizedHarmonic::Tags::Pi<3, Frame::Inertial>>;
 
   using dg_registration_list =
       tmpl::push_back<typename GeneralizedHarmonicTemplateBase<
@@ -232,7 +229,8 @@ struct EvolutionMetavars
     using compute_items_on_target = tmpl::list<>;
     using compute_target_points =
         intrp::TargetPoints::KerrHorizon<CceWorldtubeTarget, ::Frame::Inertial>;
-    using post_interpolation_callback = intrp::callbacks::SendGhWorldtubeData<
+    using post_interpolation_callback =
+        intrp::callbacks::SendGhWorldtubeDataWithoutTimeDerivs<
         Cce::CharacteristicEvolution<EvolutionMetavars>>;
     using vars_to_interpolate_to_target = tmpl::list<
         gr::Tags::SpacetimeMetric<volume_dim, frame>,
