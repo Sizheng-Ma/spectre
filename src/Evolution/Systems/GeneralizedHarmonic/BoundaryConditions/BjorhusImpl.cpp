@@ -504,7 +504,10 @@ void add_physical_terms_to_dt_v_minus(
     }
   }
   Parallel::printf("wccm1: %e U3m: %e U3p: %e\n",
-        w_ccm.get(1,1)[0],U3m.get(1,1)[0],U3p.get(1,1)[0]);
+        w_ccm.get(1,2)[20],U3m.get(1,2)[20],U3p.get(1,2)[20]);
+  //Parallel::printf("wccm1: %zu U3m: %zu U3p: %zu\n",
+  //      w_ccm.get(1,2).size(),U3m.get(1,2).size(),U3p.get(1,2).size());
+
 }
 }  // namespace detail
 
