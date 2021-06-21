@@ -27,6 +27,8 @@
 #include "Utilities/GenerateInstantiations.hpp"
 #include "Utilities/Gsl.hpp"
 
+#include "NumericalAlgorithms/Spectral/SwshInterpolation.hpp"
+
 namespace GeneralizedHarmonic::BoundaryConditions {
 namespace helpers {
 double min_characteristic_speed(
@@ -121,7 +123,54 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
     const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_spacetime_metric,
     const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_pi,
     const tnsr::ijaa<DataVector, Dim, Frame::Inertial>& d_phi,
-    const tnsr::aa<DataVector, Dim, Frame::Inertial>& w_ccm) const noexcept {
+    //const tnsr::aa<DataVector, Dim, Frame::Inertial>& w_ccm,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi0,
+      size_t l_max) const noexcept {
+
+  // FIXME upper or down index?
+  DataVector theta_coords(get_size(get<0>(coords)), 0.);
+  DataVector phi_coords(get_size(get<0>(coords)), 0.);
+  theta_coords = atan2(sqrt(square(coords.get(0))
+                    +square(coords.get(1))),
+          coords.get(2));
+  phi_coords = atan2(coords.get(1), coords.get(0));
+  Spectral::Swsh::SwshInterpolator interpolator{theta_coords,
+                        phi_coords, l_max};
+  SpinWeighted<ComplexDataVector, 2> psi0_inte;
+  interpolator.interpolate(make_not_null(&psi0_inte), get(psi0));
+  //tnsr::a<DataVector, Dim, Frame::Inertial> theta_vec;
+  //tnsr::a<DataVector, Dim, Frame::Inertial> phi_vec;
+  tnsr::a<ComplexDataVector, Dim, Frame::Inertial> m_vec;
+  //theta_vec.get(0) = 0.*cos(phi_coords);
+  //theta_vec.get(1) = cos(theta_coords) * cos(phi_coords);
+  //theta_vec.get(2) = cos(theta_coords) * sin(phi_coords);
+  //theta_vec.get(3) = -sin(theta_coords);
+
+  //phi_vec.get(0) = 0.*cos(phi_coords);
+  //phi_vec.get(1) = -sin(phi_coords);
+  //phi_vec.get(2) = cos(phi_coords);
+  //phi_vec.get(3) = 0.*cos(phi_coords);
+
+  (m_vec).get(0) = std::complex<double>(0.0,0.0)*cos(phi_coords) ;
+  (m_vec).get(2) = std::complex<double>(1.0,0.0) *
+                cos(theta_coords) * sin(phi_coords)/sqrt(2.0);
+  (m_vec).get(2) +=
+  std::complex<double>(0.0,1.0) * cos(phi_coords) * sin(theta_coords)/sqrt(2.0);
+  (m_vec).get(1) = std::complex<double>(1.0,0.0) *
+                cos(theta_coords) * cos(phi_coords)/sqrt(2.0);
+  (m_vec).get(1) -=
+  std::complex<double>(0.0,1.0) * sin(phi_coords) * sin(theta_coords)/sqrt(2.0);
+  (m_vec).get(3) = (std::complex<double>(-1.0,0.0) *
+                sin(theta_coords))/sqrt(2.0);
+  tnsr::aa<DataVector, Dim, Frame::Inertial> w_ccm;
+
+  for (size_t a = 0; a <= Dim; ++a)
+    {
+        for (size_t b = 0; b < a + 1; ++b)
+              (w_ccm).get(a,b) = 2.*real(conj(psi0_inte.data()) *
+                          m_vec.get(a) * m_vec.get(b));
+     }
+
   TempBuffer<tmpl::list<::Tags::TempI<0, Dim, Frame::Inertial, DataVector>,
                         ::Tags::Tempiaa<0, Dim, Frame::Inertial, DataVector>,
                         ::Tags::Tempiaa<1, Dim, Frame::Inertial, DataVector>,

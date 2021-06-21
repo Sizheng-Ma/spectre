@@ -141,9 +141,7 @@ struct EvolutionMetavars
       tmpl::conditional_t<
           send_to_cce,
           tmpl::list<GeneralizedHarmonic::Actions::
-                     ReceiveCCEData<EvolutionMetavars>,
-                     GeneralizedHarmonic::Actions::CalculateWij
-                     <3,Frame::Inertial>>,tmpl::list<>>,
+                     ReceiveCCEData<EvolutionMetavars>>,tmpl::list<>>,
       evolution::dg::Actions::ApplyBoundaryCorrections<EvolutionMetavars>,
       tmpl::conditional_t<
           local_time_stepping, tmpl::list<>,
