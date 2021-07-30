@@ -17,6 +17,7 @@
 #include "Evolution/Systems/Cce/Actions/InsertInterpolationScriData.hpp"
 #include "Evolution/Systems/Cce/Actions/RequestBoundaryData.hpp"
 #include "Evolution/Systems/Cce/Actions/ScriObserveInterpolated.hpp"
+#include "Evolution/Systems/Cce/Actions/SetEvolutionSlabSize.hpp"
 #include "Evolution/Systems/Cce/Actions/TimeManagement.hpp"
 #include "Evolution/Systems/Cce/Actions/UpdateGauge.hpp"
 #include "Evolution/Systems/Cce/LinearSolve.hpp"
@@ -194,7 +195,7 @@ struct CharacteristicEvolution {
       Actions::RequestBoundaryData<
           typename Metavariables::cce_boundary_component,
           CharacteristicEvolution<Metavariables>>,
-      ::Actions::Label<CceEvolutionLabelTag>,
+      ::Actions::Label<CceEvolutionLabelTag>, Actions::SetEvolutionSlabSize,
       Actions::ReceiveWorldtubeData<Metavariables>,
       Actions::InitializeFirstHypersurface<
           Metavariables::uses_partially_flat_cartesian_coordinates>,

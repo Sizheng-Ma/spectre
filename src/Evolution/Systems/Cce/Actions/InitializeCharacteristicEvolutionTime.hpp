@@ -133,6 +133,5 @@ struct InitializeCharacteristicEvolutionTime {
     return std::make_tuple(std::move(box));
   }
 };
-
 }  // namespace Actions
 }  // namespace Cce
