@@ -77,6 +77,8 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.OptionTags", "[Unit][Cce]") {
       "AnalyticInitializeJ");
   TestHelpers::db::test_simple_tag<Cce::Tags::OutputNoninertialNews>(
       "OutputNoninertialNews");
+  TestHelpers::db::test_simple_tag<Cce::Tags::InitialSlabSize>(
+      "InitialSlabSize");
   TestHelpers::db::test_simple_tag<
       Cce::Tags::CceEvolutionPrefix<::Tags::TimeStepper<TimeStepper>>>(
       "TimeStepper");

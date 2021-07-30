@@ -268,6 +268,17 @@ struct CceEvolutionPrefix : Tag {
   }
 };
 
+struct InitialSlabSize : db::SimpleTag {
+  using type = double;
+  using option_tags =
+      tmpl::list<OptionTags::CceEvolutionPrefix<::OptionTags::InitialSlabSize>>;
+
+  static constexpr bool pass_metavariables = false;
+  static double create_from_options(const double initial_slab_size) noexcept {
+    return initial_slab_size;
+  }
+};
+
 /// A tag that constructs a `MetricWorldtubeDataManager` from options
 struct H5WorldtubeBoundaryDataManager : db::SimpleTag {
   using type = std::unique_ptr<WorldtubeDataManager>;
