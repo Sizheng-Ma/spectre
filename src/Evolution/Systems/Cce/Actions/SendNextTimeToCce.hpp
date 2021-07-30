@@ -130,8 +130,7 @@ struct ReceiveNextElementTime {
                     const TimeStepId& next_time) noexcept {
     if constexpr (tmpl::list_contains_v<tmpl::list<DbTags...>,
                                         Tags::GhInterfaceManager>) {
-      db::mutate<Tags::GhInterfaceManager>(
-          make_not_null(&box),
+      auto insert_time_into_gh_interface_manager =
           [&cache, &time,
            &next_time](const gsl::not_null<
                        std::unique_ptr<InterfaceManagers::GhInterfaceManager>*>
@@ -149,7 +148,14 @@ struct ReceiveNextElementTime {
                       GhWorldtubeBoundary<Metavariables>>(cache),
                   get<0>(*gh_data), get<1>(*gh_data));
             }
-          });
+          };
+      if (SelfStart::is_self_starting(time)) {
+        db::mutate<Tags::SelfStartGhInterfaceManager>(
+            make_not_null(&box), insert_time_into_gh_interface_manager);
+      } else {
+        db::mutate<Tags::GhInterfaceManager>(
+            make_not_null(&box), insert_time_into_gh_interface_manager);
+      }
     } else {
       ERROR(
           "Tags::GhInterfaceManager must be present in the DataBox to execute "

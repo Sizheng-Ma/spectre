@@ -62,8 +62,7 @@ struct ReceiveGhWorldtubeData {
       const tnsr::iaa<DataVector, 3>& dt_phi = tnsr::iaa<DataVector, 3>{},
       const tnsr::aa<DataVector, 3>& dt_pi =
           tnsr::aa<DataVector, 3>{}) noexcept {
-    db::mutate<Tags::GhInterfaceManager>(
-        make_not_null(&box),
+    auto insert_gh_data_to_interface_manager =
         [&spacetime_metric, &phi, &pi, &dt_spacetime_metric, &dt_phi, &dt_pi,
          &time, &cache](const gsl::not_null<
                         std::unique_ptr<InterfaceManagers::GhInterfaceManager>*>
@@ -80,7 +79,14 @@ struct ReceiveGhWorldtubeData {
                     GhWorldtubeBoundary<Metavariables>>(cache),
                 get<0>(*gh_data), get<1>(*gh_data));
           }
-        });
+        };
+    if (SelfStart::is_self_starting(time)) {
+      db::mutate<Tags::SelfStartGhInterfaceManager>(
+          make_not_null(&box), insert_gh_data_to_interface_manager);
+    } else {
+      db::mutate<Tags::GhInterfaceManager>(make_not_null(&box),
+                                           insert_gh_data_to_interface_manager);
+    }
   }
 };
 }  // namespace Actions
