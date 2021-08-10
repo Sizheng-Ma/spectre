@@ -37,7 +37,7 @@ struct SendPsi0 {
               typename Metavariables::gh_dg_element_array>(cache),
           time,
           db::get<::Tags::Variables<typename Metavariables::ccm_psi0>>(box),
-          true);
+          false);
     }
   }
 };

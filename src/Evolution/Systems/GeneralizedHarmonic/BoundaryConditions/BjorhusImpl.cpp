@@ -23,6 +23,7 @@
 #include "Utilities/Gsl.hpp"
 
 #include "Parallel/Printf.hpp"
+#include "Utilities/MakeString.hpp"
 
 namespace GeneralizedHarmonic::BoundaryConditions::Bjorhus {
 template <size_t VolumeDim, typename DataType>
@@ -504,8 +505,14 @@ void add_physical_terms_to_dt_v_minus(
       }
     }
   }
-  //Parallel::printf("wccm1: %e U3m: %e U3p: %e\n",
-  //      w_ccm.get(1,2)[20],U3m.get(1,2)[20],U3p.get(1,2)[20]);
+  //Parallel::printf(MakeString{} << "size of w_ccm " << w_ccm.get(1, 2).size()
+  //                              << "\n");
+  //Parallel::printf(MakeString{} << "size of U3m " << U3m.get(1, 2).size()
+  //                              << "\n");
+  //Parallel::printf("wccm1: %e U3m: %e U3p: %e v_minus %e\n",
+  //      char_speeds[3]*w_ccm.get(1,2)[20],char_speeds[3]*U3m.get(1,2)[20],
+  //      char_speeds[3]*U3p.get(1,2)[20],
+  //      char_projected_rhs_dt_v_minus.get(1,2)[20]);
   //Parallel::printf("wccm1: %zu U3m: %zu U3p: %zu\n",
   //      w_ccm.get(1,2).size(),U3m.get(1,2).size(),U3p.get(1,2).size());
 

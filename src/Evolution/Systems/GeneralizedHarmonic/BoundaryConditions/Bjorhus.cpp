@@ -28,6 +28,7 @@
 #include "Utilities/Gsl.hpp"
 
 #include "NumericalAlgorithms/Spectral/SwshInterpolation.hpp"
+#include "Utilities/MakeString.hpp"
 
 namespace GeneralizedHarmonic::BoundaryConditions {
 namespace helpers {
@@ -142,6 +143,11 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
   Spectral::Swsh::SwshInterpolator interpolator{theta_coords,
                         phi_coords, l_max};
   SpinWeighted<ComplexDataVector, 2> psi0_inte;
+  //Parallel::printf(MakeString{} << "size of coords " <<
+  //get_size(get<0>(coords))
+  //                              << "\n");
+  //Parallel::printf(MakeString{} << "size of psi0 " << get(psi0).data().size()
+  //                              << "\n");
   interpolator.interpolate(make_not_null(&psi0_inte), get(psi0));
   //tnsr::a<DataVector, Dim, Frame::Inertial> theta_vec;
   //tnsr::a<DataVector, Dim, Frame::Inertial> phi_vec;

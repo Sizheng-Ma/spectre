@@ -26,7 +26,7 @@ struct ReceiveCCEData {
                                      Cce::ReceiveTags::BoundaryData<
                                          typename Metavariables::ccm_psi0>> and
                tmpl::list_contains_v<DbTags, ::Tags::TimeStepId>> = nullptr>
-  static std::tuple<db::DataBox<DbTags>&&, Parallel::AlgorithmExecution, size_t>
+  static std::tuple<db::DataBox<DbTags>&&, Parallel::AlgorithmExecution>
   // Is this BoundaryData correct?
   apply(db::DataBox<DbTags>& box, tuples::TaggedTuple<InboxTags...>& inboxes,
         const Parallel::GlobalCache<Metavariables>& /*cache*/,
@@ -35,9 +35,13 @@ struct ReceiveCCEData {
     auto& inbox = tuples::get<
         Cce::ReceiveTags::BoundaryData<typename Metavariables::ccm_psi0>>(
         inboxes);
+    const auto& element = db::get<domain::Tags::Element<3_st>>(box);
+    if (element.external_boundaries().size() == 0_st) {
+      inbox.clear();
+      return {std::move(box), Parallel::AlgorithmExecution::Continue};
+    }
     if (inbox.count(db::get<::Tags::TimeStepId>(box)) != 1) {
-      return {std::move(box), Parallel::AlgorithmExecution::Pause,
-              tmpl::index_of<ActionList, ReceiveCCEData>::value};
+      return {std::move(box), Parallel::AlgorithmExecution::Retry};
     }
     tmpl::for_each<typename Metavariables::ccm_psi0>(
         [&inbox, &box](auto tag_v) noexcept {
@@ -51,8 +55,7 @@ struct ReceiveCCEData {
               db::get<::Tags::TimeStepId>(box));
         });
     inbox.erase(db::get<::Tags::TimeStepId>(box));
-    return {std::move(box), Parallel::AlgorithmExecution::Continue,
-            tmpl::index_of<ActionList, ReceiveCCEData>::value + 1};
+    return {std::move(box), Parallel::AlgorithmExecution::Continue};
   }
   template <
       typename DbTags, typename... InboxTags, typename ArrayIndex,
