@@ -189,10 +189,10 @@ struct EvolutionMetavars
   // system; it will need to be reconsidered for local time-stepping in the ways
   // described above near the `local_time_stepping` variable.
   using step_actions = tmpl::list<
-      evolution::dg::Actions::ComputeTimeDerivative<EvolutionMetavars>,
       Cce::Actions::SendNextTimeToCce<CceWorldtubeTarget>,
       intrp::Actions::InterpolateToTarget<CceWorldtubeTarget>,
       GeneralizedHarmonic::Actions::ReceiveCCEData<EvolutionMetavars>,
+      evolution::dg::Actions::ComputeTimeDerivative<EvolutionMetavars>,
       evolution::dg::Actions::ApplyBoundaryCorrections<EvolutionMetavars>,
       tmpl::conditional_t<
           local_time_stepping, tmpl::list<>,
