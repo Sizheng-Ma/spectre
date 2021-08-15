@@ -5,6 +5,7 @@
 
 # Load system modules
 spectre_load_sys_modules() {
+    module load cpu/0.15.4
     module load gcc/10.2.0
     module load intel-mkl/2019.1.144
     module load gsl/2.5
@@ -19,6 +20,7 @@ spectre_unload_sys_modules() {
     module unload gsl/2.5
     module unload intel-mkl/2019.1.1
     module unload gcc/10.2.0
+    module unload cpu/0.15.4
 }
 
 
