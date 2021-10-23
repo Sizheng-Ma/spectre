@@ -4,8 +4,10 @@
 #pragma once
 
 #include <cstddef>
+#include <string>
 #include <tuple>
 #include <utility>
+#include <vector>
 
 #include "DataStructures/DataBox/DataBox.hpp"
 #include "Evolution/Systems/Cce/Actions/SendPsi0ToEvolution.hpp"
@@ -13,10 +15,22 @@
 #include "Evolution/Systems/Cce/PreSwshDerivatives.hpp"
 
 #include "NumericalAlgorithms/Spectral/SwshFiltering.hpp"
+#include "IO/Observer/WriteSimpleData.hpp"
+#include "Parallel/GlobalCache.hpp"
+#include "Parallel/Invoke.hpp"
+
+#include "Utilities/Gsl.hpp"
+#include "Utilities/MakeString.hpp"
+#include "Utilities/System/ParallelInfo.hpp"
+#include "Utilities/TMPL.hpp"
 
 namespace Cce {
 namespace Actions {
-
+namespace detail {
+struct ScriOutput1 {
+  static std::string name() noexcept { return "InnerPsi0"; }
+};
+}
 /*!
  * \ingroup ActionsGroup
  * \brief Calculates \f$\Psi_0\f$ and its radial derivative
@@ -83,6 +97,42 @@ struct TransferPsi0 {
         db::get<::Tags::TimeStepId>(box));
     return std::forward_as_tuple(std::move(box));
   }
+};
+
+template <typename ObserverWriterComponent>
+struct WritePsi0 {
+  template <typename DbTags, typename... InboxTags, typename Metavariables,
+            typename ArrayIndex, typename ActionList,
+            typename ParallelComponent>
+  static std::tuple<db::DataBox<DbTags>&&> apply(
+      db::DataBox<DbTags>& box,
+      const tuples::TaggedTuple<InboxTags...>& /*inboxes*/,
+      Parallel::GlobalCache<Metavariables>& cache,
+      const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
+      const ParallelComponent* const /*meta*/) noexcept {
+
+     auto& my_proxy =
+          Parallel::get_parallel_component<ParallelComponent>(cache);
+     auto observer_proxy =
+         Parallel::get_parallel_component<ObserverWriterComponent>(
+             cache)[static_cast<size_t>(
+             Parallel::my_node(*my_proxy.ckLocal()))];
+     auto psi0_observe = db::get<Tags::BoundaryValue<Tags::Psi0Match>>(box);
+     std::vector<std::string> file_legend(2);
+     std::vector<double> data_to_write(2);
+    //file_legend.reserve(2);
+    //file_legend.push_back("time1");
+    //file_legend.push_back("time2");
+    file_legend[0]="time1";
+    file_legend[1]="time2";
+    data_to_write[0]=real(get(psi0_observe).data()[0]);
+    data_to_write[1]=imag(get(psi0_observe).data()[0]);
+     Parallel::threaded_action<observers::ThreadedActions::WriteSimpleData>(
+         observer_proxy, file_legend, data_to_write,
+        "/" + detail::ScriOutput1::name());
+    return std::forward_as_tuple(std::move(box));
+   }
+
 };
 
 }  // namespace Actions
