@@ -50,6 +50,10 @@ template <>
 struct ScriOutput<Tags::Du<Tags::TimeIntegral<Tags::ScriPlus<Tags::Psi4>>>> {
   static std::string name() { return "Psi4"; }
 };
+template <>
+struct ScriOutput<Tags::BoundaryValue<Tags::Psi0Match>> {
+  static std::string name() { return "InnerPsi0"; }
+};
 
 using weyl_correction_list =
     tmpl::list<Tags::Du<Tags::TimeIntegral<Tags::ScriPlus<Tags::Psi4>>>,
@@ -225,6 +229,14 @@ struct ScriObserveInterpolated {
                                                       interpolation_time);
         }
       }
+
+auto psi0_observe = db::get<Tags::BoundaryValue<Tags::Psi0Match>>(box);
+              ScriObserveInterpolated::transform_and_write<
+                  Tags::BoundaryValue<Tags::Psi0Match>, 2, ParallelComponent>(
+                  get(psi0_observe).data(),
+                  interpolation_time, make_not_null(&goldberg_modes),
+                  make_not_null(&data_to_write), file_legend, l_max,
+                  observation_l_max, cache);
     }
     return {Parallel::AlgorithmExecution::Continue, std::nullopt};
   }
