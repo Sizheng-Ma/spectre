@@ -166,11 +166,11 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
   (m_vec).get(2) = std::complex<double>(1.0,0.0) *
                 cos(theta_coords) * sin(phi_coords)/sqrt(2.0);
   (m_vec).get(2) +=
-  std::complex<double>(0.0,1.0) * cos(phi_coords) * sin(theta_coords)/sqrt(2.0);
+  std::complex<double>(0.0,1.0) * cos(phi_coords) /sqrt(2.0);
   (m_vec).get(1) = std::complex<double>(1.0,0.0) *
                 cos(theta_coords) * cos(phi_coords)/sqrt(2.0);
   (m_vec).get(1) -=
-  std::complex<double>(0.0,1.0) * sin(phi_coords) * sin(theta_coords)/sqrt(2.0);
+  std::complex<double>(0.0,1.0) * sin(phi_coords) /sqrt(2.0);
   (m_vec).get(3) = (std::complex<double>(-1.0,0.0) *
                 sin(theta_coords))/sqrt(2.0);
   tnsr::aa<DataVector, Dim, Frame::Inertial> w_ccm;
