@@ -12,6 +12,9 @@
 #include "Utilities/Gsl.hpp"
 #include "Utilities/TMPL.hpp"
 
+#include "Utilities/MakeString.hpp"
+#include "Parallel/Printf.hpp"
+
 namespace Cce {
 
 void weyl_psi0_impl(
@@ -182,6 +185,18 @@ void BoundaryWeyl::apply(
                   number_of_angular_points);
   make_const_view(make_not_null(&bondi_beta_cauchy_boundary), bondi_beta_cauchy,
                   0, number_of_angular_points);
+  //Spectral::Swsh::SpinWeightedSphericalHarmonic y_22{2, 2_st, 2};
+  //const auto& collocation_metadata =
+  //    Spectral::Swsh::cached_collocation_metadata<
+  //        Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max);
+  //for (const auto collocation_point : collocation_metadata) {
+  //  const std::complex<double> y_22_factor =
+  //    y_22.evaluate(collocation_point.theta, collocation_point.phi);
+  //    Parallel::printf(MakeString{} << "theta1 " << collocation_point.theta <<
+  //    " phi " << collocation_point.phi << " y_22_factor "
+  //    << y_22_factor <<"\n");
+  //    get(*psi_0_bound).data()[collocation_point.offset] = 0.0 * y_22_factor;
+  //}
 
   get(*psi_0_bound) = psi_0_boundary;
   // TODO a better way?
