@@ -76,10 +76,12 @@ void InverseCubic<true>::operator()(
         (get(boundary_j).data() + get(r).data() * get(boundary_dr_j).data());
     angular_view_j =
         one_minus_y_collocation[i] * one_minus_y_coefficient +
-        pow<3>(one_minus_y_collocation[i]) * one_minus_y_cubed_coefficient
-        + perturbed_j.data()
-        * 0.0 * exp(-pow(1.0-one_minus_y_collocation[i]+0.5,2.0)/0.3/0.3)
-        * (2.0-one_minus_y_collocation[i]);
+        pow<3>(one_minus_y_collocation[i]) * one_minus_y_cubed_coefficient;
+
+if(one_minus_y_collocation[i]>=1.1 && one_minus_y_collocation[i]<=1.9){
+        angular_view_j+= perturbed_j.data()
+        * 0.0001 * exp(-pow(1.0-one_minus_y_collocation[i]+0.5,2.0)/0.3/0.3)
+        ;}
   }
   const auto& collocation = Spectral::Swsh::cached_collocation_metadata<
       Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max);
