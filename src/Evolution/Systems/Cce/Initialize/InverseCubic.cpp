@@ -19,6 +19,9 @@
 #include "Utilities/Gsl.hpp"
 #include "Utilities/TMPL.hpp"
 
+#include "Parallel/Printf.hpp"
+#include "Utilities/MakeString.hpp"
+
 namespace Cce::InitializeJ {
 
 std::unique_ptr<InitializeJ<true>> InverseCubic<true>::get_clone()
@@ -78,9 +81,13 @@ void InverseCubic<true>::operator()(
         one_minus_y_collocation[i] * one_minus_y_coefficient +
         pow<3>(one_minus_y_collocation[i]) * one_minus_y_cubed_coefficient;
 
+const int nn = 6;
 if(one_minus_y_collocation[i]>=1.1 && one_minus_y_collocation[i]<=1.9){
         angular_view_j+= perturbed_j.data()
-        * 0.0001 * exp(-pow(1.0-one_minus_y_collocation[i]+0.5,2.0)/0.3/0.3)
+        * 0.0001 * pow(4,nn)
+        * pow<nn>(one_minus_y_collocation[i]-1.1)
+        * pow<nn>(1.9 - one_minus_y_collocation[i]) /
+        pow(1.9-1.1,2*nn);
         ;}
   }
   const auto& collocation = Spectral::Swsh::cached_collocation_metadata<
