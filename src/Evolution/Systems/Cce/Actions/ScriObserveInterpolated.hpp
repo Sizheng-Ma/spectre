@@ -258,6 +258,30 @@ auto bondij_inter = db::get<Tags::BondiJ>(box);
                   interpolation_time, make_not_null(&goldberg_modes),
                   make_not_null(&data_to_writenew), file_legendnew, l_max,
                   cache);
+
+auto bondiu_inter = db::get<Tags::BondiU>(box);
+              ScriObserveInterpolated::transform_and_write_new<
+                  Tags::BondiU, 1, ParallelComponent>(
+                  get(bondiu_inter),
+                  interpolation_time, make_not_null(&goldberg_modes),
+                  make_not_null(&data_to_writenew), file_legendnew, l_max,
+                  cache);
+
+auto bondih_inter = db::get<Tags::BondiH>(box);
+              ScriObserveInterpolated::transform_and_write_new<
+                  Tags::BondiH, 2, ParallelComponent>(
+                  get(bondih_inter),
+                  interpolation_time, make_not_null(&goldberg_modes),
+                  make_not_null(&data_to_writenew), file_legendnew, l_max,
+                  cache);
+
+auto bondibeta_inter = db::get<Tags::BondiBeta>(box);
+              ScriObserveInterpolated::transform_and_write_new<
+                  Tags::BondiBeta, 0, ParallelComponent>(
+                  get(bondibeta_inter),
+                  interpolation_time, make_not_null(&goldberg_modes),
+                  make_not_null(&data_to_writenew), file_legendnew, l_max,
+                  cache);
 }
 {
 auto one_minus_y_inter = db::get<Tags::OneMinusY>(box);
