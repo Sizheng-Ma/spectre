@@ -236,11 +236,13 @@ auto psi0_observe = db::get<Tags::BoundaryValue<Tags::Psi0Match>>(box);
                   make_not_null(&data_to_write), file_legend, l_max,
                   observation_l_max, cache);
 
+
 auto bondij_inter = db::get<Tags::BondiJ>(box);
     const size_t number_of_angular_points =
         Spectral::Swsh::number_of_swsh_collocation_points(l_max);
     const size_t number_of_radial_points =
         get(bondij_inter).size() / number_of_angular_points;
+{
     std::vector<std::string> file_legendnew;
     file_legendnew.reserve(2 * number_of_radial_points + 1);
     file_legendnew.emplace_back("time");
@@ -249,12 +251,30 @@ auto bondij_inter = db::get<Tags::BondiJ>(box);
         file_legendnew.push_back(MakeString{} << "Imag R_" << i);
     }
     std::vector<double> data_to_writenew(2 * number_of_radial_points + 1);
+
               ScriObserveInterpolated::transform_and_write_new<
                   Tags::BondiJ, 2, ParallelComponent>(
                   get(bondij_inter),
                   interpolation_time, make_not_null(&goldberg_modes),
                   make_not_null(&data_to_writenew), file_legendnew, l_max,
                   cache);
+}
+{
+auto one_minus_y_inter = db::get<Tags::OneMinusY>(box);
+    std::vector<std::string> file_legendnewnew;
+    file_legendnewnew.reserve(number_of_radial_points + 1);
+    file_legendnewnew.emplace_back("time");
+    for (size_t i = 0; i < number_of_radial_points; ++i) {
+        file_legendnewnew.push_back(MakeString{} << "Real R_" << i);
+    }
+    std::vector<double> data_to_writenewnew(number_of_radial_points + 1);
+              ScriObserveInterpolated::transform_and_write_y<
+                  Tags::OneMinusY, 0, ParallelComponent>(
+                  get(one_minus_y_inter),
+                  interpolation_time,
+                  make_not_null(&data_to_writenewnew), file_legendnewnew, l_max,
+                  cache);
+}
     }
     return std::forward_as_tuple(std::move(box));
   }
@@ -318,6 +338,36 @@ auto bondij_inter = db::get<Tags::BondiJ>(box);
           Spectral::Swsh::swsh_transform(l_max, 1, to_transform), l_max);
       (*data_to_write_buffer)[2 * i + 1] = real(goldberg_modes.data()[8]);
       (*data_to_write_buffer)[2 * i + 2] = imag(goldberg_modes.data()[8]);
+    }
+
+    auto& my_proxy =
+         Parallel::get_parallel_component<ParallelComponent>(cache);
+    auto observer_proxy =
+        Parallel::get_parallel_component<ObserverWriterComponent>(
+            cache)[static_cast<size_t>(
+            Parallel::my_node(*my_proxy.ckLocal()))];
+    Parallel::threaded_action<observers::ThreadedActions::WriteSimpleData>(
+        observer_proxy, legend, *data_to_write_buffer,
+        "/" + detail::ScriOutput<Tag>::name());
+  }
+
+  template <typename Tag, int Spin, typename ParallelComponent,
+            typename Metavariables>
+  static void transform_and_write_y(
+      const SpinWeighted<ComplexDataVector, Spin>& data, const double time,
+      const gsl::not_null<std::vector<double>*> data_to_write_buffer,
+      const std::vector<std::string>& legend, const size_t l_max,
+      Parallel::GlobalCache<Metavariables>& cache) noexcept {
+    const size_t number_of_angular_points =
+        Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+    const size_t number_of_radial_points =
+        data.size() / number_of_angular_points;
+    const SpinWeighted<ComplexDataVector, Spin> to_transform;
+    (*data_to_write_buffer)[0] = time;
+    for (size_t i = 0; i < number_of_radial_points; ++i) {
+      make_const_view(make_not_null(&to_transform.data()), data.data(),
+                      i * number_of_angular_points, number_of_angular_points);
+      (*data_to_write_buffer)[i + 1] = real(to_transform.data()[0]);
     }
 
     auto& my_proxy =
