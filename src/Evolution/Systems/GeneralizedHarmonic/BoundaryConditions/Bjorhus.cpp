@@ -178,7 +178,7 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
   for (size_t a = 0; a <= Dim; ++a)
     {
         for (size_t b = 0; b < a + 1; ++b)
-              (w_ccm).get(a,b) = 2.*real(conj(psi0_inte.data()) *
+              (w_ccm).get(a,b) = 2.*2.*real(conj(psi0_inte.data()) *
                           m_vec.get(a) * m_vec.get(b));
      }
 
