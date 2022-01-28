@@ -128,6 +128,8 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
     const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_spacetime_metric,
     const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_pi,
     const tnsr::ijaa<DataVector, Dim, Frame::Inertial>& d_phi,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& tetrad_coeff_theta,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& tetrad_coeff_phi,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi0,
     size_t l_max) const {
   // FIXME upper or down index?
@@ -139,10 +141,10 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
   Spectral::Swsh::SwshInterpolator interpolator{theta_coords, phi_coords,
                                                 l_max};
   SpinWeighted<ComplexDataVector, 2> psi0_inte;
+  SpinWeighted<ComplexDataVector, 0> theta_coeff_inte;
+  SpinWeighted<ComplexDataVector, 2> phi_coeff_inte;
   // Parallel::printf(MakeString{} << "size of coords " <<
   // get_size(get<0>(coords))
-  //                               << "\n");
-  // Parallel::printf(MakeString{} << "size of psi0 " << get(psi0).data().size()
   //                               << "\n");
   interpolator.interpolate(make_not_null(&psi0_inte), get(psi0));
   // tnsr::a<DataVector, Dim, Frame::Inertial> theta_vec;
