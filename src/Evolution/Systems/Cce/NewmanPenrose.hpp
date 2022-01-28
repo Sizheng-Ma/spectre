@@ -133,7 +133,8 @@ struct Interpolate_BondiJ {
  */
 template <>
 struct VolumeWeyl<Tags::Psi0Match> {
-  using return_tags = tmpl::list<Tags::Psi0Match>;
+  using return_tags =
+      tmpl::list<Tags::Psi0Match, Tags::TetradCoeffTheta, Tags::TetradCoeffPhi>;
   using argument_tags = tmpl::list<
       Tags::BondiJCauchyView, Tags::Dy<Tags::BondiJCauchyView>,
       Tags::Dy<Tags::Dy<Tags::BondiJCauchyView>>, Tags::BondiR,
@@ -142,6 +143,10 @@ struct VolumeWeyl<Tags::Psi0Match> {
       Tags::LMax>;
   static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> psi_0,
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          tetrad_coeff_theta,
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          tetrad_coeff_phi,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& bondi_j_cauchy,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_j_cauchy,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_dy_j_cauchy,
@@ -176,17 +181,24 @@ struct VolumeWeyl<Tags::Psi0Match> {
 struct BoundaryWeyl {
   using return_tags =
       tmpl::list<Tags::BoundaryValue<Tags::Psi0Match>,
-                 Tags::BoundaryValue<Tags::Dlambda<Tags::Psi0Match>>>;
+                 Tags::BoundaryValue<Tags::Dlambda<Tags::Psi0Match>>,
+                 Tags::BoundaryValue<Tags::TetradCoeffTheta>,
+                 Tags::BoundaryValue<Tags::TetradCoeffPhi>>;
   using argument_tags = tmpl::list<
       Tags::Psi0Match, Tags::Dy<Tags::Psi0Match>, Tags::OneMinusY, Tags::BondiR,
       Tags::CauchyGaugeOmega, Tags::BondiBeta,
-      Tags::BoundaryValue<Tags::SpECNormalization>,
+      Tags::BoundaryValue<Tags::SpECNormalization>, Tags::TetradCoeffTheta,
+      Tags::TetradCoeffPhi,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>,
       Tags::LMax>;
   static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> psi_0_bound,
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
           dlambda_psi_0_bound,
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          tetrad_coeff_theta_bound,
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          tetrad_coeff_phi_bound,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi_0,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_psi_0,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
@@ -194,6 +206,8 @@ struct BoundaryWeyl {
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_inertial,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& spec_norm,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& tetrad_coeff_theta,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& tetrad_coeff_phi,
       const Spectral::Swsh::SwshInterpolator& interpolator,
       const size_t l_max) noexcept;
 };

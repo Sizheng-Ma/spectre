@@ -56,6 +56,7 @@ struct CalculatePsi0 {
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) noexcept {
     const size_t l_max = db::get<Tags::LMax>(box);
+    const double radius = db::get<InitializationTags::ExtractionRadius>(box);
     db::mutate_apply<Interpolate_BondiJ>(make_not_null(&box));
     db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::BondiJCauchyView>>>(
         make_not_null(&box));
@@ -63,6 +64,18 @@ struct CalculatePsi0 {
         PreSwshDerivatives<Tags::Dy<Tags::Dy<Tags::BondiJCauchyView>>>>(
         make_not_null(&box));
     db::mutate_apply<VolumeWeyl<Tags::Psi0Match>>(make_not_null(&box));
+    db::mutate<Tags::TetradCoeffTheta>(
+        make_not_null(&box),
+        [&radius](
+            const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+                theta_tetrad) noexcept {
+          get(*theta_tetrad).data() *= radius;
+        });
+    db::mutate<Tags::TetradCoeffPhi>(
+        make_not_null(&box),
+        [&radius](
+            const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+                phi_tetrad) noexcept { get(*phi_tetrad).data() *= radius; });
     db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::Psi0Match>>>(
         make_not_null(&box));
     db::mutate_apply<BoundaryWeyl>(make_not_null(&box));

@@ -86,7 +86,8 @@ struct CharacteristicExtractDefaults {
                  Cce::Tags::Dy<Cce::Tags::Psi0Match>, Cce::Tags::Psi0,
                  Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>,
                  Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>>,
-                 Cce::Tags::DuRDividedByR>>;
+                 Cce::Tags::DuRDividedByR, Cce::Tags::TetradCoeffTheta,
+                 Cce::Tags::TetradCoeffPhi>>;
   using cce_temporary_equations_tags = tmpl::remove_duplicates<tmpl::flatten<
       tmpl::transform<cce_integrand_tags,
                       tmpl::bind<Cce::integrand_temporary_tags, tmpl::_1>>>>;
@@ -107,6 +108,9 @@ struct CharacteristicExtractDefaults {
                                  coord_vars_selector>>;
 
   using ccm_psi0 = tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>;
+  using ccm_tetrad =
+      tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffTheta>,
+                 Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffPhi>>;
   using ccm_dpsi0 = tmpl::list<
       Cce::Tags::BoundaryValue<Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>>;
 };
