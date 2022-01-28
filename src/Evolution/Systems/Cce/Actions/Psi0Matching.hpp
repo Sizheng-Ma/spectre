@@ -42,6 +42,7 @@ struct CalculatePsi0AndDerivAtInnerBoundary {
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) {
     const size_t l_max = db::get<Tags::LMax>(box);
+    const double radius = db::get<InitializationTags::ExtractionRadius>(box);
     db::mutate_apply<TransformBondiJToCauchyCoords>(make_not_null(&box));
     db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::BondiJCauchyView>>>(
         make_not_null(&box));
@@ -49,6 +50,18 @@ struct CalculatePsi0AndDerivAtInnerBoundary {
         PreSwshDerivatives<Tags::Dy<Tags::Dy<Tags::BondiJCauchyView>>>>(
         make_not_null(&box));
     db::mutate_apply<VolumeWeyl<Tags::Psi0Match>>(make_not_null(&box));
+    db::mutate<Tags::TetradCoeffTheta>(
+        make_not_null(&box),
+        [&radius](
+            const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+                theta_tetrad) {
+          get(*theta_tetrad).data() *= radius;
+        });
+    db::mutate<Tags::TetradCoeffPhi>(
+        make_not_null(&box),
+        [&radius](
+            const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
+                phi_tetrad) { get(*phi_tetrad).data() *= radius; });
     db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::Psi0Match>>>(
         make_not_null(&box));
     db::mutate_apply<InnerBoundaryWeyl>(make_not_null(&box));
