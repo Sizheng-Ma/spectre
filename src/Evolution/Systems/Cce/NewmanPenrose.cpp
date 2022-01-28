@@ -58,8 +58,7 @@ void TransformBondiJToCauchyCoords::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& volume_j,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_cauchy_d,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega_cauchy,
-    const Spectral::Swsh::SwshInterpolator& interpolator,
-    const size_t l_max) {
+    const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max) {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
   const size_t number_of_radial_points =
@@ -90,6 +89,9 @@ void TransformBondiJToCauchyCoords::apply(
 
 void VolumeWeyl<Tags::Psi0Match>::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> psi_0,
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+        tetrad_coeff_theta,
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> tetrad_coeff_phi,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& bondi_j_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_j_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_dy_j_cauchy,
@@ -113,6 +115,8 @@ void VolumeWeyl<Tags::Psi0Match>::apply(
   const SpinWeighted<ComplexDataVector, 0> one_minus_y_view;
 
   SpinWeighted<ComplexDataVector, 2> psi0_view;
+  SpinWeighted<ComplexDataVector, 0> coeff_theta;
+  SpinWeighted<ComplexDataVector, 2> coeff_phi;
 
   // Iterate for each spherical shell
   for (size_t i = 0; i < number_of_radial_points; ++i) {
@@ -134,6 +138,22 @@ void VolumeWeyl<Tags::Psi0Match>::apply(
             i * Spectral::Swsh::number_of_swsh_collocation_points(l_max),
         Spectral::Swsh::number_of_swsh_collocation_points(l_max));
 
+    coeff_theta.set_data_ref(
+        get(*tetrad_coeff_theta).data().data() +
+            i * Spectral::Swsh::number_of_swsh_collocation_points(l_max),
+        Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+
+    coeff_phi.set_data_ref(
+        get(*tetrad_coeff_phi).data().data() +
+            i * Spectral::Swsh::number_of_swsh_collocation_points(l_max),
+        Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+
+    coeff_theta.data() = sqrt(1. + bondi_k_cauchy_view.data());
+    coeff_theta.data() /= (2. * get(bondi_r_cauchy).data());
+    coeff_phi.data() =
+        bondi_j_cauchy_view.data() / sqrt(1. + bondi_k_cauchy_view.data());
+    coeff_phi.data() /= (2. * get(bondi_r_cauchy).data());
+
     weyl_psi0_impl(make_not_null(&psi0_view), bondi_j_cauchy_view,
                    dy_j_cauchy_view, dy_dy_j_cauchy_view, bondi_k_cauchy_view,
                    get(bondi_r_cauchy), one_minus_y_view);
@@ -144,13 +164,19 @@ void InnerBoundaryWeyl::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> psi_0_boundary,
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
         dlambda_psi_0_boundary,
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+        tetrad_coeff_theta_boundary,
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
+        tetrad_coeff_phi_boundary,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi_0,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_psi_0,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& spec_norm,
-    const size_t l_max) {
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& tetrad_coeff_theta,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& tetrad_coeff_phi,
+    const double radius, const size_t l_max) {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
 
@@ -158,9 +184,15 @@ void InnerBoundaryWeyl::apply(
   const SpinWeighted<ComplexDataVector, 0> bondi_beta_cauchy_boundary;
   const SpinWeighted<ComplexDataVector, 2> psi_0_boundary_view;
   const SpinWeighted<ComplexDataVector, 2> dy_psi_0_boundary_view;
+  const SpinWeighted<ComplexDataVector, 0> coeff_theta;
+  const SpinWeighted<ComplexDataVector, 2> coeff_phi;
 
   // Take the boundary data
   make_const_view(make_not_null(&psi_0_boundary_view), get(psi_0), 0,
+                  number_of_angular_points);
+  make_const_view(make_not_null(&coeff_theta), get(tetrad_coeff_theta), 0,
+                  number_of_angular_points);
+  make_const_view(make_not_null(&coeff_phi), get(tetrad_coeff_phi), 0,
                   number_of_angular_points);
   make_const_view(make_not_null(&dy_psi_0_boundary_view), get(dy_psi_0), 0,
                   number_of_angular_points);
@@ -169,13 +201,16 @@ void InnerBoundaryWeyl::apply(
   make_const_view(make_not_null(&bondi_beta_cauchy_boundary),
                   get(bondi_beta_cauchy), 0, number_of_angular_points);
 
-  get(*psi_0_boundary).data() = pow(get(spec_norm).data(),2.0) *
-                                psi_0_boundary_view.data()*
+  get(*psi_0_boundary).data() = pow(get(spec_norm).data(), 2.0) *
+                                psi_0_boundary_view.data() *
                                 exp(-4.0 * bondi_beta_cauchy_boundary.data());
 
   get(*dlambda_psi_0_boundary) = dy_psi_0_boundary_view.data() *
-                              square(one_minus_y_boundary.data()) /
-                              (2.0 * get(bondi_r_cauchy).data()) *
-                              exp(-2.0 * bondi_beta_cauchy_boundary.data());
+                                 square(one_minus_y_boundary.data()) /
+                                 (2.0 * get(bondi_r_cauchy).data()) *
+                                 exp(-2.0 * bondi_beta_cauchy_boundary.data());
+
+  get(*tetrad_coeff_theta_boundary) = coeff_theta * radius;
+  get(*tetrad_coeff_phi_boundary) = coeff_phi * radius;
 }
 }  // namespace Cce

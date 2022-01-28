@@ -92,6 +92,7 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::BondiJCauchyView, Cce::Tags::Psi0Match,
       Cce::Tags::Dy<Cce::Tags::Psi0Match>,
       Cce::Tags::Psi0, Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>,
+      Cce::Tags::TetradCoeffTheta, Cce::Tags::TetradCoeffPhi,
       Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>>>;
 
   using cce_integration_independent_tags = tmpl::conditional_t<
@@ -123,5 +124,7 @@ struct CharacteristicExtractDefaults {
 
   using ccm_psi0 = tmpl::list<
       Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,
+      Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffTheta>,
+      Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffPhi>,
       Cce::Tags::BoundaryValue<Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>>;
 };
