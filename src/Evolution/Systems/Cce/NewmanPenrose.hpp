@@ -175,7 +175,8 @@ struct InnerBoundaryWeyl {
   using argument_tags =
       tmpl::list<Tags::Psi0Match, Tags::Dy<Tags::Psi0Match>, Tags::OneMinusY,
                  Tags::BoundaryValue<Tags::BondiR>,
-                 Tags::BoundaryValue<Tags::BondiBeta>, Tags::LMax>;
+                 Tags::BoundaryValue<Tags::BondiBeta>,
+                 Tags::BoundaryValue<Tags::SpECNormalization>, Tags::LMax>;
   static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> psi_0_boundary,
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
@@ -185,6 +186,7 @@ struct InnerBoundaryWeyl {
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r_cauchy,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_cauchy,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& spec_norm,
       const size_t l_max);
 };
 

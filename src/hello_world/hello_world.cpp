@@ -64,6 +64,7 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
                  Scalar<SpinWeighted<ComplexDataVector, 1>>& dr_u,
                  Scalar<SpinWeighted<ComplexDataVector, 0>>& bondiw,
                  Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r_r,
+                 Scalar<SpinWeighted<ComplexDataVector, 0>>& spec_norm,
                  const std::vector<std::vector<double>>& spacetime_metric,
                  const std::vector<std::vector<double>>& pi,
                  const std::vector<std::vector<std::vector<double>>>& phi,
@@ -241,7 +242,8 @@ void initialize_j(std::vector<std::complex<double>>& finalbondij,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>,
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
-             Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
+             Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>,
+             Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>>(
       [&spacetime_metric, &phi, &pi, &l_max, &radius](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
@@ -278,10 +280,14 @@ void initialize_j(std::vector<std::complex<double>>& finalbondij,
               du_j,
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>::type*>
-              du_r_r) {
+              du_r_r,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>::type*>
+              spec_norm) {
         gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
                     *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
-                    *du_r_r, spacetime_metric, pi, phi, l_max, radius);
+                    *du_r_r, *spec_norm, spacetime_metric, pi, phi, l_max,
+                    radius);
         // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
         //   get(*bondi_beta).data()[i] =
         //       bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
@@ -424,7 +430,8 @@ void ccm_functions(
              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>,
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
-             Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
+             Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>,
+             Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>>(
       [&spacetime_metric, &phi, &pi, &l_max, &radius](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
@@ -461,10 +468,14 @@ void ccm_functions(
               du_j,
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>::type*>
-              du_r_r) {
+              du_r_r,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>::type*>
+              spec_norm) {
         gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
                     *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
-                    *du_r_r, spacetime_metric, pi, phi, l_max, radius);
+                    *du_r_r, *spec_norm, spacetime_metric, pi, phi, l_max,
+                    radius);
       },
       make_not_null(&spectre_box));
 
@@ -774,6 +785,7 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
                  Scalar<SpinWeighted<ComplexDataVector, 1>>& dr_u,
                  Scalar<SpinWeighted<ComplexDataVector, 0>>& bondiw,
                  Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r_r,
+                 Scalar<SpinWeighted<ComplexDataVector, 0>>& spec_norm,
                  const std::vector<std::vector<double>>& spacetime_metric,
                  const std::vector<std::vector<double>>& pi,
                  const std::vector<std::vector<std::vector<double>>>& phi,
@@ -838,6 +850,8 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
   du_r =
       get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(blahblah);
   du_r_r = get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(blahblah);
+  spec_norm =
+      get<Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>>(blahblah);
 
   //   beta = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(spectre_box);
   //   dr_j = get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(
