@@ -10,6 +10,7 @@
 #include "DataStructures/DataBox/DataBox.hpp"
 #include "Evolution/Systems/Cce/NewmanPenrose.hpp"
 #include "Evolution/Systems/Cce/PreSwshDerivatives.hpp"
+#include "NumericalAlgorithms/Spectral/SwshFiltering.hpp"
 
 namespace Cce {
 namespace Actions {
@@ -45,10 +46,30 @@ struct CalculatePsi0AndDerivAtInnerBoundary {
       const Parallel::GlobalCache<Metavariables>& /*cache*/,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) {
+    const size_t l_max = db::get<Tags::LMax>(box);
+    const double radius = db::get<InitializationTags::ExtractionRadius>(box);
     tmpl::for_each<mutators>([&box](auto mutator_v) {
       using mutator = typename decltype(mutator_v)::type;
       db::mutate_apply<mutator>(make_not_null(&box));
     });
+    db::mutate<Tags::BoundaryValue<Tags::TetradCoeffTheta>>(
+        make_not_null(&box),
+        [&radius](
+            const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+                theta_tetrad) { get(*theta_tetrad).data() *= radius; });
+    db::mutate<Tags::BoundaryValue<Tags::TetradCoeffPhi>>(
+        make_not_null(&box),
+        [&radius](
+            const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
+                phi_tetrad) { get(*phi_tetrad).data() *= radius; });
+    db::mutate<Tags::BoundaryValue<Tags::Psi0Match>>(
+        make_not_null(&box),
+        [&l_max](
+            const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
+                psi_0_bound) {
+          Spectral::Swsh::filter_swsh_boundary_quantity(
+              make_not_null(&get(*psi_0_bound)), l_max, l_max - 3);
+        });
     return {Parallel::AlgorithmExecution::Continue, std::nullopt};
   }
 };
