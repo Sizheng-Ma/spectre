@@ -156,6 +156,7 @@ void BoundaryWeyl::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_inertial,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& spec_norm,
     const Spectral::Swsh::SwshInterpolator& interpolator,
     const size_t l_max) noexcept {
   const size_t number_of_angular_points =
@@ -198,7 +199,9 @@ void BoundaryWeyl::apply(
   //    get(*psi_0_bound).data()[collocation_point.offset] = 0.0 * y_22_factor;
   //}
 
-  get(*psi_0_bound) = psi_0_boundary;
+  get(*psi_0_bound).data() = pow(get(spec_norm).data(),2.0) *
+                             psi_0_boundary.data() *
+                             exp(-4.0 * bondi_beta_cauchy_boundary.data());
   // TODO a better way?
   SpinWeighted<ComplexDataVector, 2> radial_derivative;
   radial_derivative.data() =

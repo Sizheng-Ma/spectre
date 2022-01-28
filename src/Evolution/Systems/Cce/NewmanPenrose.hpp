@@ -180,6 +180,7 @@ struct BoundaryWeyl {
   using argument_tags = tmpl::list<
       Tags::Psi0Match, Tags::Dy<Tags::Psi0Match>, Tags::OneMinusY, Tags::BondiR,
       Tags::CauchyGaugeOmega, Tags::BondiBeta,
+      Tags::BoundaryValue<Tags::SpECNormalization>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>,
       Tags::LMax>;
   static void apply(
@@ -192,6 +193,7 @@ struct BoundaryWeyl {
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_inertial,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& spec_norm,
       const Spectral::Swsh::SwshInterpolator& interpolator,
       const size_t l_max) noexcept;
 };

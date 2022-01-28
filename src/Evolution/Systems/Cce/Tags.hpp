@@ -32,6 +32,10 @@ struct BondiBeta : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 
+struct SpECNormalization : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
+
 /// Bondi parameter \f$J\f$
 struct BondiJ : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
