@@ -149,6 +149,7 @@ void InnerBoundaryWeyl::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r_cauchy,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_cauchy,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& spec_norm,
     const size_t l_max) {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
@@ -168,7 +169,10 @@ void InnerBoundaryWeyl::apply(
   make_const_view(make_not_null(&bondi_beta_cauchy_boundary),
                   get(bondi_beta_cauchy), 0, number_of_angular_points);
 
-  get(*psi_0_boundary) = psi_0_boundary_view;
+  get(*psi_0_boundary).data() = pow(get(spec_norm).data(),2.0) *
+                                psi_0_boundary_view.data()*
+                                exp(-4.0 * bondi_beta_cauchy_boundary.data());
+
   get(*dlambda_psi_0_boundary) = dy_psi_0_boundary_view.data() *
                               square(one_minus_y_boundary.data()) /
                               (2.0 * get(bondi_r_cauchy).data()) *
