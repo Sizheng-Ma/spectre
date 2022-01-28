@@ -129,10 +129,11 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
     const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_spacetime_metric,
     const tnsr::iaa<DataVector, Dim, Frame::Inertial>& d_pi,
     const tnsr::ijaa<DataVector, Dim, Frame::Inertial>& d_phi,
-    //const tnsr::aa<DataVector, Dim, Frame::Inertial>& w_ccm,
+    // const tnsr::aa<DataVector, Dim, Frame::Inertial>& w_ccm,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& tetrad_coeff_theta,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& tetrad_coeff_phi,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi0,
-      size_t l_max) const noexcept {
-
+    size_t l_max) const noexcept {
   // FIXME upper or down index?
   DataVector theta_coords(get_size(get<0>(coords)), 0.);
   DataVector phi_coords(get_size(get<0>(coords)), 0.);
@@ -143,14 +144,28 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
   Spectral::Swsh::SwshInterpolator interpolator{theta_coords,
                         phi_coords, l_max};
   SpinWeighted<ComplexDataVector, 2> psi0_inte;
+  SpinWeighted<ComplexDataVector, 0> theta_coeff_inte;
+  SpinWeighted<ComplexDataVector, 2> phi_coeff_inte;
   //Parallel::printf(MakeString{} << "size of coords " <<
   //get_size(get<0>(coords))
   //                              << "\n");
-  //Parallel::printf(MakeString{} << "size of psi0 " << get(psi0).data().size()
-  //                              << "\n");
   interpolator.interpolate(make_not_null(&psi0_inte), get(psi0));
-  //tnsr::a<DataVector, Dim, Frame::Inertial> theta_vec;
-  //tnsr::a<DataVector, Dim, Frame::Inertial> phi_vec;
+  interpolator.interpolate(make_not_null(&theta_coeff_inte),
+                           get(tetrad_coeff_theta));
+  interpolator.interpolate(make_not_null(&phi_coeff_inte),
+                           get(tetrad_coeff_phi));
+  // Parallel::printf(MakeString{} << "psi " << get(psi0).data()[0]
+  //                              << "\n");
+  // Parallel::printf(MakeString{} << "psi " << get(psi0_inte).data()[0]
+  //                              << "\n");
+  // Parallel::printf(MakeString{} << "tetrad_coeff_theta " <<
+  // get(tetrad_coeff_theta).data()[0]
+  //                              << "\n");
+  // Parallel::printf(MakeString{} << "tetrad_coeff_phi " <<
+  // get(tetrad_coeff_phi).data()[0]
+  //                              << "\n");
+  // tnsr::a<DataVector, Dim, Frame::Inertial> theta_vec;
+  // tnsr::a<DataVector, Dim, Frame::Inertial> phi_vec;
   tnsr::a<ComplexDataVector, Dim, Frame::Inertial> m_vec;
   //theta_vec.get(0) = 0.*cos(phi_coords);
   //theta_vec.get(1) = cos(theta_coords) * cos(phi_coords);
@@ -163,16 +178,22 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
   //phi_vec.get(3) = 0.*cos(phi_coords);
 
   (m_vec).get(0) = std::complex<double>(0.0,0.0)*cos(phi_coords) ;
-  (m_vec).get(2) = std::complex<double>(1.0,0.0) *
-                cos(theta_coords) * sin(phi_coords)/sqrt(2.0);
-  (m_vec).get(2) +=
-  std::complex<double>(0.0,1.0) * cos(phi_coords) /sqrt(2.0);
-  (m_vec).get(1) = std::complex<double>(1.0,0.0) *
-                cos(theta_coords) * cos(phi_coords)/sqrt(2.0);
-  (m_vec).get(1) -=
-  std::complex<double>(0.0,1.0) * sin(phi_coords) /sqrt(2.0);
-  (m_vec).get(3) = (std::complex<double>(-1.0,0.0) *
-                sin(theta_coords))/sqrt(2.0);
+
+  (m_vec).get(1) = std::complex<double>(1.0, 0.0) *
+                   (theta_coeff_inte.data() - phi_coeff_inte.data()) *
+                   cos(theta_coords) * cos(phi_coords);
+  (m_vec).get(1) -= std::complex<double>(0.0, 1.0) * sin(phi_coords) *
+                    (theta_coeff_inte.data() + phi_coeff_inte.data());
+
+  (m_vec).get(2) = std::complex<double>(1.0, 0.0) *
+                   (theta_coeff_inte.data() - phi_coeff_inte.data()) *
+                   cos(theta_coords) * sin(phi_coords);
+  (m_vec).get(2) += std::complex<double>(0.0, 1.0) * cos(phi_coords) *
+                    (theta_coeff_inte.data() + phi_coeff_inte.data());
+
+  (m_vec).get(3) =
+      (std::complex<double>(-1.0, 0.0) *
+       (theta_coeff_inte.data() - phi_coeff_inte.data()) * sin(theta_coords));
   tnsr::aa<DataVector, Dim, Frame::Inertial> w_ccm;
 
   for (size_t a = 0; a <= Dim; ++a)

@@ -74,7 +74,7 @@ struct CalculatePsi0 {
     db::mutate<Tags::TetradCoeffPhi>(
         make_not_null(&box),
         [&radius](
-            const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+            const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
                 phi_tetrad) noexcept { get(*phi_tetrad).data() *= radius; });
     db::mutate_apply<PreSwshDerivatives<Tags::Dy<Tags::Psi0Match>>>(
         make_not_null(&box));

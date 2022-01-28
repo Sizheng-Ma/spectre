@@ -125,7 +125,7 @@ struct TetradCoeffTheta : db::SimpleTag {
 };
 
 struct TetradCoeffPhi : db::SimpleTag {
-  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+  using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
 };
 
 /// The derivative with respect to the numerical coordinate \f$y = 1 - 2R/r\f$,

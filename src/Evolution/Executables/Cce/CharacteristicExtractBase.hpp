@@ -107,9 +107,9 @@ struct CharacteristicExtractDefaults {
       StepChoosers::ErrorControl<evolved_coordinates_variables_tag,
                                  coord_vars_selector>>;
 
-  using ccm_psi0 = tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>;
-  using ccm_tetrad =
-      tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffTheta>,
+  using ccm_psi0 =
+      tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,
+                 Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffTheta>,
                  Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffPhi>>;
   using ccm_dpsi0 = tmpl::list<
       Cce::Tags::BoundaryValue<Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>>;
