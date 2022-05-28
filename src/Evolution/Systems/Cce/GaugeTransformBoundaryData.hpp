@@ -798,12 +798,18 @@ struct GaugeUpdateOmega {
 struct TestOmega {
   using argument_tags = tmpl::list<
       Tags::CauchyGaugeOmega, Tags::PartiallyFlatGaugeOmega,
+      Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD, Tags::CauchyGaugeC,
+      Tags::CauchyGaugeD,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>>;
   using return_tags = tmpl::list<>;
 
   static void apply(
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_c_inertial,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_d_inertial,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_c_cauchy,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_d_cauchy,
       const Spectral::Swsh::SwshInterpolator& interpolator_inertial);
 };
 
