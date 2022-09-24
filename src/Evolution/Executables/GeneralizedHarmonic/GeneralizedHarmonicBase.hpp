@@ -311,12 +311,12 @@ struct FactoryCreation : tt::ConformsTo<Options::protocols::FactoryCreation> {
 };
 }  // namespace detail
 
-template <template <size_t, bool> class EvolutionMetavarsDerived,
-          size_t VolumeDim, bool UseNumericalInitialData>
+template <template <size_t, bool, bool> class EvolutionMetavarsDerived,
+          size_t VolumeDim, bool UseNumericalInitialData, bool EvolveCcm>
 struct GeneralizedHarmonicTemplateBase<
-    EvolutionMetavarsDerived<VolumeDim, UseNumericalInitialData>> {
+    EvolutionMetavarsDerived<VolumeDim, UseNumericalInitialData, EvolveCcm>> {
   using derived_metavars =
-      EvolutionMetavarsDerived<VolumeDim, UseNumericalInitialData>;
+      EvolutionMetavarsDerived<VolumeDim, UseNumericalInitialData, EvolveCcm>;
   static constexpr size_t volume_dim = VolumeDim;
   using system = gh::System<volume_dim>;
   static constexpr bool local_time_stepping = false;
