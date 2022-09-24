@@ -73,13 +73,15 @@ class CProxy_GlobalCache;
 }  // namespace Parallel
 /// \endcond
 
-template <size_t VolumeDim, bool UseNumericalInitialData>
+template <size_t VolumeDim, bool UseNumericalInitialData, bool EvolveCcm>
 struct EvolutionMetavars
     : public GeneralizedHarmonicTemplateBase<
-          EvolutionMetavars<VolumeDim, UseNumericalInitialData>>,
-      public CharacteristicExtractDefaults<false> {
+          EvolutionMetavars<VolumeDim, UseNumericalInitialData, EvolveCcm>>,
+      public CharacteristicExtractDefaults<EvolveCcm> {
   using gh_base = GeneralizedHarmonicTemplateBase<
-      EvolutionMetavars<VolumeDim, UseNumericalInitialData>>;
+      EvolutionMetavars<VolumeDim, UseNumericalInitialData, EvolveCcm>>;
+  using cce_base = CharacteristicExtractDefaults<EvolveCcm>;
+  using cce_base::uses_partially_flat_cartesian_coordinates;
   using typename gh_base::initialize_initial_data_dependent_quantities_actions;
   using cce_boundary_component = Cce::GhWorldtubeBoundary<EvolutionMetavars>;
 
@@ -133,6 +135,7 @@ struct EvolutionMetavars
                       GeneralizedHarmonic::Tags::Phi<VolumeDim,
                                                      Frame::Inertial>>>>>>;
 
+  using typename cce_base::cce_step_choosers;
   struct factory_creation
       : tt::ConformsTo<Options::protocols::FactoryCreation> {
     using factory_classes = Options::add_factory_classes<
