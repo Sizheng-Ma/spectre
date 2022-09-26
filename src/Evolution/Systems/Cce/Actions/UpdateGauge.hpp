@@ -57,7 +57,8 @@ struct UpdateGauge {
                                          Tags::PartiallyFlatCartesianCoords>,
       GaugeUpdateInterpolator<Tags::PartiallyFlatAngularCoords>,
       GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
-                       Tags::CauchyGaugeOmega>>;
+                       Tags::CauchyGaugeOmega>,
+      TestOmega>;
 
   template <typename DbTags, typename... InboxTags, typename Metavariables,
             typename ArrayIndex, typename ActionList,
