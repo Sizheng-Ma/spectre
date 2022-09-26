@@ -783,6 +783,31 @@ struct GaugeUpdateOmega {
 };
 
 /*!
+ * \brief Test the stability of coordinates evolution \f$x (\hat x)\f$ and
+ * \f$\hat x (x)\f$
+ *
+ * \details Both the Cauchy coordinates \f$x (\hat x)\f$ and the asymptotically
+ * inertial coordinates \f$\hat x (x)\f$ are evolved in the code. One of them
+ * is expected to be the inverse of the other one. The stability of such
+ * relation is tested by an identity:
+ *
+ * \f{align*}{
+ * \omega (x) \hat \omega(\hat x(x)) =1
+ * \f}
+ */
+struct TestOmega {
+  using argument_tags = tmpl::list<
+      Tags::CauchyGaugeOmega, Tags::PartiallyFlatGaugeOmega,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>>;
+  using return_tags = tmpl::list<>;
+
+  static void apply(
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+      const Spectral::Swsh::SwshInterpolator& interpolator_inertial);
+};
+
+/*!
  * \brief Initialize to default values (identity transform) all of the angular
  * gauge quantities for the boundary gauge transforms.
  *
