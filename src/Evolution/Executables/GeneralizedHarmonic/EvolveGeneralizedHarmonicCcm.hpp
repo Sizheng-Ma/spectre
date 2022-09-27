@@ -62,6 +62,9 @@
 #include "Utilities/ErrorHandling/Error.hpp"
 #include "Utilities/ErrorHandling/FloatingPointExceptions.hpp"
 
+#include "Evolution/Initialization/Evolution.hpp"
+#include "Evolution/Systems/GeneralizedHarmonic/BoundaryConditions/ReceivePsi0FromCce.hpp"
+
 /// \cond
 namespace Frame {
 // IWYU pragma: no_forward_declare MathFunction
@@ -111,6 +114,10 @@ struct EvolutionMetavars
           DuringSelfStart,
           Cce::Actions::SendGhVarsToCce<CceWorldtubeTarget<true>>,
           Cce::Actions::SendGhVarsToCce<CceWorldtubeTarget<false>>>,
+      tmpl::conditional_t<
+         uses_partially_flat_cartesian_coordinates,
+         GeneralizedHarmonic::Actions::ReceiveCCEData<EvolutionMetavars>,
+         tmpl::list<>>,
       evolution::dg::Actions::ComputeTimeDerivative<
           VolumeDim, system, dg_step_choosers, local_time_stepping>,
       tmpl::conditional_t<
@@ -162,6 +169,7 @@ struct EvolutionMetavars
           domain::Tags::InverseJacobian<VolumeDim, Frame::ElementLogical,
                                         Frame::Inertial>,
           typename system::gradient_variables>>,
+      Initialization::Actions::InitializeCcmTags<EvolutionMetavars>,
       GeneralizedHarmonic::Actions::InitializeGhAnd3Plus1Variables<VolumeDim>,
       Initialization::Actions::AddComputeTags<
           tmpl::push_back<StepChoosers::step_chooser_compute_tags<
