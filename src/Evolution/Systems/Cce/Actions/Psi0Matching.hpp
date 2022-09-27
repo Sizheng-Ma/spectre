@@ -8,6 +8,7 @@
 #include <utility>
 
 #include "DataStructures/DataBox/DataBox.hpp"
+#include "Evolution/Systems/Cce/Actions/SendPsi0ToEvolution.hpp"
 #include "Evolution/Systems/Cce/NewmanPenrose.hpp"
 #include "Evolution/Systems/Cce/PreSwshDerivatives.hpp"
 
@@ -49,6 +50,24 @@ struct CalculatePsi0AndDerivAtInnerBoundary {
       using mutator = typename decltype(mutator_v)::type;
       db::mutate_apply<mutator>(make_not_null(&box));
     });
+    return {Parallel::AlgorithmExecution::Continue, std::nullopt};
+  }
+};
+
+template <typename CceComponent>
+struct TransferPsi0 {
+  template <typename DbTags, typename... InboxTags, typename Metavariables,
+            typename ArrayIndex, typename ActionList,
+            typename ParallelComponent>
+  static Parallel::iterable_action_return_t apply(
+      db::DataBox<DbTags>& box,
+      const tuples::TaggedTuple<InboxTags...>& /*inboxes*/,
+      Parallel::GlobalCache<Metavariables>& cache,
+      const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
+      const ParallelComponent* const /*meta*/) {
+    Parallel::simple_action<Actions::SendPsi0<Metavariables, CceComponent>>(
+        Parallel::get_parallel_component<CceComponent>(cache),
+        db::get<::Tags::TimeStepId>(box));
     return {Parallel::AlgorithmExecution::Continue, std::nullopt};
   }
 };

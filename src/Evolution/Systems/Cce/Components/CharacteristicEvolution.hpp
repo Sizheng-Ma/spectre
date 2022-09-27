@@ -183,7 +183,10 @@ struct CharacteristicEvolution {
       Actions::PrecomputeGlobalCceDependencies,
       tmpl::conditional_t<
           Metavariables::uses_partially_flat_cartesian_coordinates,
-          Actions::CalculatePsi0AndDerivAtInnerBoundary, tmpl::list<>>,
+          tmpl::list<
+              Actions::CalculatePsi0AndDerivAtInnerBoundary,
+              Actions::TransferPsi0<CharacteristicEvolution<Metavariables>>>,
+          tmpl::list<>>,
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
@@ -214,7 +217,10 @@ struct CharacteristicEvolution {
       Actions::PrecomputeGlobalCceDependencies,
       tmpl::conditional_t<
           Metavariables::uses_partially_flat_cartesian_coordinates,
-          Actions::CalculatePsi0AndDerivAtInnerBoundary, tmpl::list<>>,
+          tmpl::list<
+              Actions::CalculatePsi0AndDerivAtInnerBoundary,
+              Actions::TransferPsi0<CharacteristicEvolution<Metavariables>>>,
+          tmpl::list<>>,
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
