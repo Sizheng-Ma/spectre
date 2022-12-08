@@ -1,0 +1,215 @@
+# Distributed under the MIT License.
+# See LICENSE.txt for details.
+
+# Executable: EvolveGhCcmGaugeWaveNumericInitialData
+# Check: parse;execute
+# Timeout: 8
+# ExpectedOutput:
+#   GhKerrSchildVolume0.h5
+#   GhKerrSchildReductions.h5
+
+ResourceInfo:
+  AvoidGlobalProc0: false
+  Singletons:
+    CharacteristicEvolution:
+      Proc: Auto
+      Exclusive: false
+    CceWorldtubeTarget:
+      Proc: Auto
+      Exclusive: false
+    SelfStartCceWorldtubeTarget:
+      Proc: Auto
+      Exclusive: false
+    GhWorldtubeBoundary:
+      Proc: Auto
+      Exclusive: false
+
+Evolution:
+  InitialTime: 0.0
+  InitialTimeStep: 0.001
+  TimeStepper:
+    AdamsBashforthN:
+      Order: 3
+
+InitialData: &InitialData
+  GaugeWave:
+    Amplitude: 0
+    Wavelength: 10
+
+DomainCreator:
+  Shell:
+    InnerRadius: 1.9
+    OuterRadius: 41.
+    InitialGridPoints: [8,8]
+    InitialRefinement: 3
+    UseEquiangularMap: true
+    EquatorialCompression: None
+    WhichWedges: All
+    TimeDependence: None
+    RadialDistribution: [Logarithmic,Logarithmic,Logarithmic,Logarithmic]
+    RadialPartitioning: [6,12,26]
+    BoundaryConditions:
+      OuterBoundary:
+        ConstraintPreservingBjorhus:
+                Type: ConstraintPreservingPhysical
+      InnerBoundary:
+        DirichletAnalytic:
+          AnalyticPrescription: *InitialData
+
+EvolutionSystem:
+  GeneralizedHarmonic:
+    # The parameter choices here come from our experience with the Spectral
+    # Einstein Code (SpEC). They should be suitable for evolutions of a
+    # perturbation of a Kerr-Schild black hole.
+    GaugeCondition:
+      DampedHarmonic:
+        SpatialDecayWidth: 50.0
+        Amplitudes: [1.0, 1.0, 1.0]
+        Exponents: [4, 4, 4]
+    DampingFunctionGamma0:
+      GaussianPlusConstant:
+        Constant: 0.001
+        Amplitude: 3.0
+        Width: 11.313708499
+        Center: [0.0, 0.0, 0.0]
+    DampingFunctionGamma1:
+      GaussianPlusConstant:
+        Constant: -1.0
+        Amplitude: 0.0
+        Width: 11.313708499
+        Center: [0.0, 0.0, 0.0]
+    DampingFunctionGamma2:
+      GaussianPlusConstant:
+        Constant: 0.001
+        Amplitude: 1.0
+        Width: 11.313708499
+        Center: [0.0, 0.0, 0.0]
+
+SpatialDiscretization:
+  DiscontinuousGalerkin:
+    Formulation: StrongInertial
+    Quadrature: GaussLobatto
+  BoundaryCorrection:
+    UpwindPenalty:
+
+EventsAndTriggers:
+  - - Slabs:
+        EvenlySpaced:
+          Interval: 1
+          Offset: 0
+    - - ObserveNorms:
+          SubfileName: Norms
+          TensorsToObserve:
+          - Name: PointwiseL2Norm(GaugeConstraint)
+            NormType: L2Norm
+            Components: Sum
+  - - Slabs:
+        EvenlySpaced:
+          Interval: 100000
+          Offset: 0
+    - - ObserveFields:
+          SubfileName: VolumeData
+          VariablesToObserve:
+            - PointwiseL2Norm(GaugeConstraint)
+          InterpolateToMesh: None
+          CoordinatesFloatingPointType: Double
+          FloatingPointTypes: [Double]
+  - - Slabs:
+        Specified:
+          Values: [30000000000000000]
+    - - Completion
+
+EventsAndDenseTriggers:
+
+Observers:
+  VolumeFileName: "GhKerrSchildVolume"
+  ReductionFileName: "GhKerrSchildReductions"
+
+Cce:
+  Evolution:
+    TimeStepper:
+      AdamsBashforthN:
+        Order: 3
+    StepChoosers:
+      - Constant: 1.0
+      - Increase:
+          Factor: 2
+      - ErrorControl(SwshVars):
+          AbsoluteTolerance: 1e-8
+          RelativeTolerance: 1e-6
+          MaxFactor: 2
+          MinFactor: 0.25
+          SafetyFactor: 0.9
+      - ErrorControl(CoordVars):
+          AbsoluteTolerance: 1e-8
+          RelativeTolerance: 1e-7
+          MaxFactor: 2
+          MinFactor: 0.25
+          SafetyFactor: 0.9
+    StepController:
+      BinaryFraction
+
+  LMax: &Lresoluation 24
+  ExtractionRadius: &ExtractRadius 40.6
+  NumberOfRadialPoints: 12
+  ObservationLMax: 4
+
+  InitializeJ:
+    InverseCubic
+
+  StartTime: 0.0
+
+  Filtering:
+    RadialFilterHalfPower: 24
+    RadialFilterAlpha: 35.0
+    FilterLMax: 22
+
+  ScriInterpOrder: 5
+  ScriOutputDensity: 1
+
+  GhInterfaceManager:
+    BoundaryInterpolator:
+      BarycentricRationalSpanInterpolator:
+        MinOrder: 1
+        MaxOrder: 10
+
+InterpolationTargets:
+  CceWorldtubeTarget:
+        Lmax: *Lresoluation
+        Center: [0.0, 0.0, 0.0]
+        Radius: *ExtractRadius
+        AngularOrdering: Cce
+  SelfStartCceWorldtubeTarget:
+        Lmax: *Lresoluation
+        Center: [0.0, 0.0, 0.0]
+        Radius: *ExtractRadius
+        AngularOrdering: Cce
+
+PhaseChangeAndTriggers:
+  - - Slabs:
+        Specified:
+          Values: [5,55,105]
+    - - VisitAndReturn(LoadBalancing)
+  - - Slabs:
+       EvenlySpaced:
+         Interval: 100
+         Offset: 0
+    - - CheckpointAndExitAfterWallclock:
+          WallclockHours: 23.4
+
+Filtering:
+  ExpFilter0:
+    Alpha: 36.0
+    HalfPower: 150
+    DisableForDebugging: true
+
+Importers:
+  NumericInitialData:
+    FileGlob: "id_spectre.h5"
+    Subgroup: "element_data"
+    ObservationValue: 0.0
+    Variables:
+      SpacetimeMetric: SpacetimeMetric
+      Pi: Pi
+      Phi: Phi
+
