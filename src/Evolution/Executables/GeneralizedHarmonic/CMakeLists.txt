@@ -23,6 +23,17 @@ function(add_generalized_harmonic_ccm_executable_without_horizon
     )
 endfunction(add_generalized_harmonic_ccm_executable_without_horizon)
 
+function(add_generalized_harmonic_ccm_executable_with_horizon
+  EXECUTABLE_NAME INITIAL_DATA EVOLVE_CCM LIBS_TO_LINK)
+  add_spectre_parallel_executable(
+    "EvolveGh${EXECUTABLE_NAME}"
+    EvolveGeneralizedHarmonicCcmSingleBlackHole
+    Evolution/Executables/GeneralizedHarmonic
+    "EvolutionMetavars<3, ${INITIAL_DATA}, ${EVOLVE_CCM}>"
+    "${LIBS_TO_LINK}"
+    )
+endfunction(add_generalized_harmonic_ccm_executable_with_horizon)
+
 set(LIBS_TO_LINK
   CoordinateMaps
   DiscontinuousGalerkin
@@ -109,6 +120,34 @@ add_generalized_harmonic_ccm_executable_without_horizon(
 
 add_generalized_harmonic_ccm_executable_without_horizon(
   CcmGaugeWaveNumericInitialData
+  true
+  true
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions;Importers"
+)
+
+add_generalized_harmonic_ccm_executable_with_horizon(
+  CceSingleBlackHole
+  false
+  false
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions"
+)
+
+add_generalized_harmonic_ccm_executable_with_horizon(
+  CceSingleBlackHoleNumericInitialData
+  true
+  false
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions;Importers"
+)
+
+add_generalized_harmonic_ccm_executable_with_horizon(
+  CcmSingleBlackHole
+  false
+  true
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions"
+)
+
+add_generalized_harmonic_ccm_executable_with_horizon(
+  CcmSingleBlackHoleNumericInitialData
   true
   true
   "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions;Importers"
