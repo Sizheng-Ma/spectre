@@ -24,6 +24,6 @@ namespace evolution {
 struct NumericInitialData;
 }  // namespace evolution
 
-template <size_t VolumeDim, bool UseNumericalInitialData>
+template <size_t VolumeDim, bool UseNumericalInitialData, bool EvolveCcm>
 struct EvolutionMetavars;
 /// \endcond

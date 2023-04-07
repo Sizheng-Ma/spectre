@@ -1,0 +1,198 @@
+# Distributed under the MIT License.
+# See LICENSE.txt for details.
+
+# Executable: EvolveGhCceGaugeWave
+# Check: parse
+
+ResourceInfo:
+  AvoidGlobalProc0: false
+  Singletons:
+    CharacteristicEvolution:
+      Proc: Auto
+      Exclusive: false
+    CceWorldtubeTarget:
+      Proc: Auto
+      Exclusive: false
+    SelfStartCceWorldtubeTarget:
+      Proc: Auto
+      Exclusive: false
+    GhWorldtubeBoundary:
+      Proc: Auto
+      Exclusive: false
+
+Evolution:
+  InitialTime: 0.0
+  InitialTimeStep: 0.002
+  TimeStepper:
+    AdamsBashforthN:
+      Order: 3
+
+InitialData: &InitialData
+  GaugeWave:
+    Amplitude: 0
+    Wavelength: 10
+
+DomainCreator:
+  Shell:
+    InnerRadius: 1.9
+    OuterRadius: 10.
+    InitialGridPoints: [2,2]
+    InitialRefinement: 0
+    UseEquiangularMap: true
+    EquatorialCompression: None
+    WhichWedges: All
+    TimeDependence: None
+    RadialDistribution: [Logarithmic,Logarithmic]
+    RadialPartitioning: [5]
+    BoundaryConditions:
+      OuterBoundary:
+        ConstraintPreservingBjorhus:
+                Type: ConstraintPreservingPhysical
+      InnerBoundary:
+        DirichletAnalytic:
+          AnalyticPrescription: *InitialData
+
+EvolutionSystem:
+  GeneralizedHarmonic:
+    GaugeCondition:
+      DampedHarmonic:
+        SpatialDecayWidth: 50.0
+        Amplitudes: [1.0, 1.0, 1.0]
+        Exponents: [4, 4, 4]
+    DampingFunctionGamma0:
+      GaussianPlusConstant:
+        Constant: 1.0
+        Amplitude: 0.0
+        Width: 1.0
+        Center: [0.0, 0.0, 0.0]
+    DampingFunctionGamma1:
+      GaussianPlusConstant:
+        Constant: -1.0
+        Amplitude: 0.0
+        Width: 1.0
+        Center: [0.0, 0.0, 0.0]
+    DampingFunctionGamma2:
+      GaussianPlusConstant:
+        Constant: 1.0
+        Amplitude: 0.0
+        Width: 1.0
+        Center: [0.0, 0.0, 0.0]
+
+SpatialDiscretization:
+  DiscontinuousGalerkin:
+    Formulation: StrongInertial
+    Quadrature: GaussLobatto
+  BoundaryCorrection:
+    UpwindPenalty:
+
+EventsAndTriggers:
+  - - Slabs:
+        EvenlySpaced:
+          Interval: 1
+          Offset: 0
+    - - ObserveNorms:
+          SubfileName: Norms
+          TensorsToObserve:
+            - Name: PointwiseL2Norm(GaugeConstraint)
+              NormType: L2Norm
+              Components: Sum
+  - - Slabs:
+        EvenlySpaced:
+          Interval: 5
+          Offset: 0
+    - - ObserveFields:
+          SubfileName: VolumeData
+          VariablesToObserve:
+            - SpacetimeMetric
+            - Pi
+            - Phi
+            - PointwiseL2Norm(GaugeConstraint)
+            - PointwiseL2Norm(ThreeIndexConstraint)
+            - PointwiseL2Norm(FourIndexConstraint)
+          InterpolateToMesh: None
+          CoordinatesFloatingPointType: Double
+          FloatingPointTypes: [Double]
+  - - Slabs:
+        Specified:
+          Values: [80000000]
+    - - Completion
+
+EventsAndDenseTriggers:
+
+Observers:
+  VolumeFileName: "GhGaugeWave3DCceVolume"
+  ReductionFileName: "GhGaugeWave3DCceReductions"
+
+Cce:
+  Evolution:
+    TimeStepper:
+      AdamsBashforthN:
+        Order: 3
+    StepChoosers:
+      - Constant: 1.0
+      - Increase:
+          Factor: 2
+      - ErrorControl(SwshVars):
+          AbsoluteTolerance: 1e-8
+          RelativeTolerance: 1e-6
+          MaxFactor: 2
+          MinFactor: 0.25
+          SafetyFactor: 0.9
+      - ErrorControl(CoordVars):
+          AbsoluteTolerance: 1e-8
+          RelativeTolerance: 1e-7
+          MaxFactor: 2
+          MinFactor: 0.25
+          SafetyFactor: 0.9
+    StepController:
+      BinaryFraction
+
+  LMax: &Lresoluation 12
+  ExtractionRadius: &ExtractRadius 8
+  NumberOfRadialPoints: 12
+  ObservationLMax: 8
+
+  InitializeJ:
+    InverseCubic
+
+  StartTime: 0.0
+
+  Filtering:
+    RadialFilterHalfPower: 24
+    RadialFilterAlpha: 35.0
+    FilterLMax: 10
+
+  ScriInterpOrder: 5
+  ScriOutputDensity: 1
+
+  GhInterfaceManager:
+    BoundaryInterpolator:
+      BarycentricRationalSpanInterpolator:
+        MinOrder: 1
+        MaxOrder: 10
+
+InterpolationTargets:
+  CceWorldtubeTarget:
+        Lmax: *Lresoluation
+        Center: [0.0, 0.0, 0.0]
+        Radius: *ExtractRadius
+        AngularOrdering: Cce
+  SelfStartCceWorldtubeTarget:
+        Lmax: *Lresoluation
+        Center: [0.0, 0.0, 0.0]
+        Radius: *ExtractRadius
+        AngularOrdering: Cce
+
+PhaseChangeAndTriggers:
+  - - Slabs:
+       EvenlySpaced:
+         Interval: 100
+         Offset: 0
+    - - CheckpointAndExitAfterWallclock:
+          WallclockHours: None
+
+Filtering:
+  ExpFilter0:
+    Alpha: 36.0
+    HalfPower: 64
+    DisableForDebugging: true

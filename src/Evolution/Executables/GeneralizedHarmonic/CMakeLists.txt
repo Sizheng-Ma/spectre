@@ -12,16 +12,27 @@ function(add_generalized_harmonic_executable_without_horizon
     )
 endfunction(add_generalized_harmonic_executable_without_horizon)
 
-function(add_generalized_harmonic_cce_executable_without_horizon
-  EXECUTABLE_NAME INITIAL_DATA LIBS_TO_LINK)
+function(add_generalized_harmonic_ccm_executable_without_horizon
+  EXECUTABLE_NAME INITIAL_DATA EVOLVE_CCM LIBS_TO_LINK)
   add_spectre_parallel_executable(
-    "EvolveGhCce${EXECUTABLE_NAME}"
-    EvolveGeneralizedHarmonicCce
+    "EvolveGh${EXECUTABLE_NAME}"
+    EvolveGeneralizedHarmonicCcm
     Evolution/Executables/GeneralizedHarmonic
-    "EvolutionMetavars<3, ${INITIAL_DATA}>"
+    "EvolutionMetavars<3, ${INITIAL_DATA}, ${EVOLVE_CCM}>"
     "${LIBS_TO_LINK}"
     )
-endfunction(add_generalized_harmonic_cce_executable_without_horizon)
+endfunction(add_generalized_harmonic_ccm_executable_without_horizon)
+
+function(add_generalized_harmonic_ccm_executable_with_horizon
+  EXECUTABLE_NAME INITIAL_DATA EVOLVE_CCM LIBS_TO_LINK)
+  add_spectre_parallel_executable(
+    "EvolveGh${EXECUTABLE_NAME}"
+    EvolveGeneralizedHarmonicCcmSingleBlackHole
+    Evolution/Executables/GeneralizedHarmonic
+    "EvolutionMetavars<3, ${INITIAL_DATA}, ${EVOLVE_CCM}>"
+    "${LIBS_TO_LINK}"
+    )
+endfunction(add_generalized_harmonic_ccm_executable_with_horizon)
 
 set(LIBS_TO_LINK
   CoordinateMaps
@@ -85,14 +96,58 @@ add_spectre_parallel_executable(
   "${LIBS_TO_LINK};Cce;ControlSystem;GeneralRelativitySolutions;Importers"
 )
 
-add_generalized_harmonic_cce_executable_without_horizon(
-  GaugeWave
+add_generalized_harmonic_ccm_executable_without_horizon(
+  CceGaugeWave
+  false
   false
   "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions"
 )
 
-add_generalized_harmonic_cce_executable_without_horizon(
-  GaugeWaveNumericInitialData
+add_generalized_harmonic_ccm_executable_without_horizon(
+  CceGaugeWaveNumericInitialData
+  true
+  false
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions;Importers"
+)
+
+add_generalized_harmonic_ccm_executable_without_horizon(
+  CcmGaugeWave
+  false
+  true
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions"
+)
+
+add_generalized_harmonic_ccm_executable_without_horizon(
+  CcmGaugeWaveNumericInitialData
+  true
+  true
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions;Importers"
+)
+
+add_generalized_harmonic_ccm_executable_with_horizon(
+  CceSingleBlackHole
+  false
+  false
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions"
+)
+
+add_generalized_harmonic_ccm_executable_with_horizon(
+  CceSingleBlackHoleNumericInitialData
+  true
+  false
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions;Importers"
+)
+
+add_generalized_harmonic_ccm_executable_with_horizon(
+  CcmSingleBlackHole
+  false
+  true
+  "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions"
+)
+
+add_generalized_harmonic_ccm_executable_with_horizon(
+  CcmSingleBlackHoleNumericInitialData
+  true
   true
   "${LIBS_TO_LINK};Cce;GeneralRelativitySolutions;Importers"
 )

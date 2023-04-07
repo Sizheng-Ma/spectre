@@ -77,6 +77,7 @@ struct UpdateGauge {
       db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
                                         Tags::CauchyGaugeOmega>>(
           make_not_null(&box));
+      db::mutate_apply<TestOmega>(make_not_null(&box));
     }
     return {Parallel::AlgorithmExecution::Continue, std::nullopt};
   }

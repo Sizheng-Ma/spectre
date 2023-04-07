@@ -13,6 +13,7 @@
 #include "NumericalAlgorithms/Spectral/SwshDerivatives.hpp"
 #include "NumericalAlgorithms/Spectral/SwshInterpolation.hpp"
 
+#include "Parallel/Printf.hpp"
 
 namespace Cce {
 
@@ -749,6 +750,48 @@ void GaugeUpdateOmega<GaugeC, GaugeD, GaugeOmega>::apply(
 
   Spectral::Swsh::angular_derivatives<tmpl::list<Spectral::Swsh::Tags::Eth>>(
       l_max, 1, make_not_null(&get(*eth_omega)), get(*omega));
+}
+
+void TestOmega::apply(
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_c_inertial,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_d_inertial,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_c_cauchy,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& gauge_d_cauchy,
+    const Spectral::Swsh::SwshInterpolator& interpolator_inertial) {
+  SpinWeighted<ComplexDataVector, 0> product;
+  SpinWeighted<ComplexDataVector, 2> productc;
+  SpinWeighted<ComplexDataVector, 0> productd;
+  SpinWeighted<ComplexDataVector, 0> omega_inte;
+  SpinWeighted<ComplexDataVector, 0> gauge_d_inertial_inte;
+  SpinWeighted<ComplexDataVector, 2> gauge_c_inertial_inte;
+  interpolator_inertial.interpolate(make_not_null(&omega_inte), get(omega));
+  interpolator_inertial.interpolate(make_not_null(&gauge_d_inertial_inte),
+                                    get(gauge_d_inertial));
+  interpolator_inertial.interpolate(make_not_null(&gauge_c_inertial_inte),
+                                    get(gauge_c_inertial));
+  product = get(omeganohat) * omega_inte;
+  productd = conj(gauge_d_inertial_inte) / omega_inte / omega_inte /
+                 get(gauge_d_cauchy) - 1.0;
+  productc =
+      gauge_c_inertial_inte / omega_inte / omega_inte + get(gauge_c_cauchy);
+
+  double l2norm = 0.0;
+  double l2normd = 0.0;
+  double l2normc = 0.0;
+  for (size_t i = 0; i < product.size(); ++i) {
+    l2norm += norm(product.data()[i] - 1.0);
+    l2normd += norm(productd.data()[i]);
+    l2normc += norm(productc.data()[i]);
+  }
+  l2norm /= product.size();
+  l2norm = sqrt(l2norm);
+  l2normd /= productd.size();
+  l2normd = sqrt(l2normd);
+  l2normc /= productc.size();
+  l2normc = sqrt(l2normc);
+  Parallel::printf("%e %e %e\n", l2norm, l2normc, l2normd);
 }
 
 void InitializeGauge::apply(
