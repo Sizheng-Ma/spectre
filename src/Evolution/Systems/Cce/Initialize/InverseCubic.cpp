@@ -54,7 +54,7 @@ void InverseCubic<true>::operator()(
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
 
-  Spectral::Swsh::SpinWeightedSphericalHarmonic y_22{2, 2_st, 2};
+  Spectral::Swsh::SpinWeightedSphericalHarmonic y_22{2, 2_st, 0};
   const auto& collocation_metadata =
       Spectral::Swsh::cached_collocation_metadata<
           Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max);
@@ -81,14 +81,14 @@ void InverseCubic<true>::operator()(
         one_minus_y_collocation[i] * one_minus_y_coefficient +
         pow<3>(one_minus_y_collocation[i]) * one_minus_y_cubed_coefficient;
 
-double ycenter=-0.8;
-double ymin=-0.95;
-double ymax=-0.5;
-double width=0.07;
+double ycenter=-0.0;
+double ymin=-0.8;
+double ymax=0.8;
+double width=0.15;
 if(one_minus_y_collocation[i]>=(1.-ymax) &&
    one_minus_y_collocation[i]<=(1.-ymin)){
   angular_view_j+= perturbed_j.data()
-  * 0.0 * exp(-pow(1.0-one_minus_y_collocation[i]-ycenter,2.0)/width/width)
+  * 0.000 * exp(-pow(1.0-one_minus_y_collocation[i]-ycenter,2.0)/width/width)
   * (one_minus_y_collocation[i]-1.0+ymax)
   * (1.-one_minus_y_collocation[i]-ymin) * 4.0 / pow((ymax-ymin),2.0)
   ;}
@@ -116,6 +116,19 @@ void InverseCubic<false>::operator()(
       1.0 - Spectral::collocation_points<Spectral::Basis::Legendre,
                                          Spectral::Quadrature::GaussLobatto>(
                 number_of_radial_points);
+  const size_t number_of_angular_points =
+      Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+
+  Spectral::Swsh::SpinWeightedSphericalHarmonic y_22{2, 2_st, 0};
+  const auto& collocation_metadata =
+      Spectral::Swsh::cached_collocation_metadata<
+          Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max);
+  SpinWeighted<ComplexDataVector, 2> perturbed_j{number_of_angular_points};
+  for (const auto collocation_point : collocation_metadata) {
+    const std::complex<double> y_22_factor =
+      y_22.evaluate(collocation_point.theta, collocation_point.phi);
+      perturbed_j.data()[collocation_point.offset] = y_22_factor;
+  }
   for (size_t i = 0; i < number_of_radial_points; i++) {
     ComplexDataVector angular_view_j{
         get(*j).data().data() + get(boundary_j).size() * i,
@@ -132,6 +145,17 @@ void InverseCubic<false>::operator()(
     angular_view_j =
         one_minus_y_collocation[i] * one_minus_y_coefficient +
         pow<3>(one_minus_y_collocation[i]) * one_minus_y_cubed_coefficient;
+double ycenter=-0.0;
+double ymin=-0.8;
+double ymax=0.8;
+double width=0.15;
+if(one_minus_y_collocation[i]>=(1.-ymax) &&
+   one_minus_y_collocation[i]<=(1.-ymin)){
+  angular_view_j+= perturbed_j.data()
+  * 0.001 * exp(-pow(1.0-one_minus_y_collocation[i]-ycenter,2.0)/width/width)
+  * (one_minus_y_collocation[i]-1.0+ymax)
+  * (1.-one_minus_y_collocation[i]-ymin) * 4.0 / pow((ymax-ymin),2.0)
+  ;}
   }
   Spectral::Swsh::create_angular_and_cartesian_coordinates(
       cartesian_cauchy_coordinates, angular_cauchy_coordinates, l_max);
