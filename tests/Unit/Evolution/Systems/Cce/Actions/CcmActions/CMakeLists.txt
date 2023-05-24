@@ -5,6 +5,7 @@ set(LIBRARY "Test_Cce_Actions_CcmActions")
 
 set(LIBRARY_SOURCES
   Test_Psi0Matching.cpp
+  Test_SendPsi0ToGh.cpp
   )
 
 add_test_library(
