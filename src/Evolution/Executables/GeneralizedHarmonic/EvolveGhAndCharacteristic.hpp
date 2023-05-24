@@ -11,6 +11,8 @@
 #include "Domain/FunctionsOfTime/RegisterDerivedWithCharm.hpp"
 #include "Evolution/Executables/Cce/CharacteristicExtractBase.hpp"
 #include "Evolution/Executables/GeneralizedHarmonic/GeneralizedHarmonicBase.hpp"
+#include "Evolution/Systems/Cce/Actions/CcmActions/InitializeCcmTagsinGH.hpp"
+#include "Evolution/Systems/Cce/Actions/CcmActions/ReceivePsi0FromCce.hpp"
 #include "Evolution/Systems/Cce/Actions/SendGhVarsToCce.hpp"
 #include "Evolution/Systems/Cce/Callbacks/SendGhWorldtubeData.hpp"
 #include "Evolution/Systems/Cce/Components/CharacteristicEvolution.hpp"
@@ -109,6 +111,9 @@ struct EvolutionMetavars : public GeneralizedHarmonicTemplateBase<VolumeDim>,
           DuringSelfStart,
           Cce::Actions::SendGhVarsToCce<CceWorldtubeTarget<true>>,
           Cce::Actions::SendGhVarsToCce<CceWorldtubeTarget<false>>>,
+      tmpl::conditional_t<EvolveCcm,
+                          Cce::Actions::ReceiveCCEData<EvolutionMetavars>,
+                          tmpl::list<>>,
       evolution::dg::Actions::ComputeTimeDerivative<
           volume_dim, system, dg_step_choosers, local_time_stepping>,
       tmpl::conditional_t<
@@ -153,6 +158,9 @@ struct EvolutionMetavars : public GeneralizedHarmonicTemplateBase<VolumeDim>,
           domain::Tags::InverseJacobian<volume_dim, Frame::ElementLogical,
                                         Frame::Inertial>,
           typename system::gradient_variables>>,
+      tmpl::conditional_t<EvolveCcm,
+                          Cce::Actions::InitializeCcmTags<EvolutionMetavars>,
+                          tmpl::list<>>,
       gh::Actions::InitializeGhAnd3Plus1Variables<volume_dim>,
       Initialization::Actions::AddComputeTags<
           tmpl::push_back<StepChoosers::step_chooser_compute_tags<
