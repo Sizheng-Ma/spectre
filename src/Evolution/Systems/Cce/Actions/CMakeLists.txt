@@ -21,7 +21,6 @@ spectre_target_headers(
   InitializeFirstHypersurface.hpp
   InitializeWorldtubeBoundary.hpp
   InsertInterpolationScriData.hpp
-  Psi0Matching.hpp
   ReceiveGhWorldtubeData.hpp
   ReceiveWorldtubeData.hpp
   RequestBoundaryData.hpp
@@ -30,3 +29,6 @@ spectre_target_headers(
   TimeManagement.hpp
   UpdateGauge.hpp
   )
+
+  add_subdirectory(CcmActions)
+

@@ -1,6 +1,8 @@
 # Distributed under the MIT License.
 # See LICENSE.txt for details.
 
+add_subdirectory(CcmActions)
+
 set(LIBRARY "Test_Cce_Actions")
 
 set(LIBRARY_SOURCES
@@ -14,7 +16,6 @@ set(LIBRARY_SOURCES
   Test_H5BoundaryCommunication.cpp
   Test_InitializeCharacteristicEvolution.cpp
   Test_InitializeWorldtubeBoundary.cpp
-  Test_Psi0Matching.cpp
   Test_RequestBoundaryData.cpp
   Test_SendGhVarsToCce.cpp
   Test_ScriObserveInterpolated.cpp

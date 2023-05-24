@@ -11,7 +11,7 @@
 #include "DataStructures/ComplexModalVector.hpp"
 #include "DataStructures/SpinWeighted.hpp"
 #include "DataStructures/Variables.hpp"
-#include "Evolution/Systems/Cce/Actions/Psi0Matching.hpp"
+#include "Evolution/Systems/Cce/Actions/CcmActions/Psi0Matching.hpp"
 #include "Evolution/Systems/Cce/Components/CharacteristicEvolution.hpp"
 #include "Evolution/Systems/Cce/OptionTags.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
@@ -109,7 +109,7 @@ struct metavariables {
 // (e) Compares MockRuntimeSystem's databox vs expected_box.
 // This test cannot catch any error in any of the individual mutators. The
 // correctness of the mutators is tested in Test_NewmanPenrose.cpp
-SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.Psi0Matching",
+SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.CcmActions.Psi0Matching",
                   "[Unit][Cce]") {
   MAKE_GENERATOR(gen);
   // limited l_max distribution because test depends on an analytic
@@ -138,81 +138,78 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.Psi0Matching",
       swsh_boundary_variables{
           Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
 
-  tmpl::for_each<real_tags_to_generate>([
-    &real_variables, &gen, &coefficient_distribution, &l_max
-  ](auto tag_v) {
-    using tag = typename decltype(tag_v)::type;
-    SpinWeighted<ComplexModalVector, 0> generated_modes{
-        Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max)};
-    SpinWeighted<ComplexDataVector, 0> generated_data{
-        Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
-    for (auto& tensor_component : get<tag>(real_variables)) {
-      Spectral::Swsh::TestHelpers::generate_swsh_modes<0>(
-          make_not_null(&generated_modes.data()), make_not_null(&gen),
-          make_not_null(&coefficient_distribution), 1, l_max);
-      Spectral::Swsh::inverse_swsh_transform(
-          l_max, 1, make_not_null(&generated_data), generated_modes);
-      // aggressive filter to make the uniformly generated random modes
-      // somewhat reasonable
-      Spectral::Swsh::filter_swsh_boundary_quantity(
-          make_not_null(&generated_data), l_max, l_max / 2);
-      tensor_component = real(generated_data.data());
-    }
-  });
+  tmpl::for_each<real_tags_to_generate>(
+      [&real_variables, &gen, &coefficient_distribution, &l_max](auto tag_v) {
+        using tag = typename decltype(tag_v)::type;
+        SpinWeighted<ComplexModalVector, 0> generated_modes{
+            Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max)};
+        SpinWeighted<ComplexDataVector, 0> generated_data{
+            Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
+        for (auto& tensor_component : get<tag>(real_variables)) {
+          Spectral::Swsh::TestHelpers::generate_swsh_modes<0>(
+              make_not_null(&generated_modes.data()), make_not_null(&gen),
+              make_not_null(&coefficient_distribution), 1, l_max);
+          Spectral::Swsh::inverse_swsh_transform(
+              l_max, 1, make_not_null(&generated_data), generated_modes);
+          // aggressive filter to make the uniformly generated random modes
+          // somewhat reasonable
+          Spectral::Swsh::filter_swsh_boundary_quantity(
+              make_not_null(&generated_data), l_max, l_max / 2);
+          tensor_component = real(generated_data.data());
+        }
+      });
 
-  tmpl::for_each<swsh_volume_tags_to_generate>([&swsh_volume_variables, &gen,
-                                                &coefficient_distribution,
-                                                &l_max,
-                                                &number_of_radial_points](
-                                                   auto tag_v) {
-    using tag = typename decltype(tag_v)::type;
-    const size_t number_of_angular_points =
-        Spectral::Swsh::number_of_swsh_collocation_points(l_max);
-    SpinWeighted<ComplexModalVector, 0> generated_modes{
-        Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max)};
-    SpinWeighted<ComplexDataVector, 0> generated_data{
-        Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
-    for (auto& tensor_component : get<tag>(swsh_volume_variables)) {
-      SpinWeighted<ComplexDataVector, 2> angular_view_j;
-      for (size_t i = 0; i < number_of_radial_points; ++i) {
-        Spectral::Swsh::TestHelpers::generate_swsh_modes<0>(
-            make_not_null(&generated_modes.data()), make_not_null(&gen),
-            make_not_null(&coefficient_distribution), 1, l_max);
-        Spectral::Swsh::inverse_swsh_transform(
-            l_max, 1, make_not_null(&generated_data), generated_modes);
-        // aggressive filter to make the uniformly generated random modes
-        // somewhat reasonable
-        Spectral::Swsh::filter_swsh_boundary_quantity(
-            make_not_null(&generated_data), l_max, l_max / 2);
-        angular_view_j.set_data_ref(
-            tensor_component.data().data() + i * number_of_angular_points,
-            number_of_angular_points);
-        angular_view_j.data() = generated_data.data();
-      }
-    }
-  });
+  tmpl::for_each<swsh_volume_tags_to_generate>(
+      [&swsh_volume_variables, &gen, &coefficient_distribution, &l_max,
+       &number_of_radial_points](auto tag_v) {
+        using tag = typename decltype(tag_v)::type;
+        const size_t number_of_angular_points =
+            Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+        SpinWeighted<ComplexModalVector, 0> generated_modes{
+            Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max)};
+        SpinWeighted<ComplexDataVector, 0> generated_data{
+            Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
+        for (auto& tensor_component : get<tag>(swsh_volume_variables)) {
+          SpinWeighted<ComplexDataVector, 2> angular_view_j;
+          for (size_t i = 0; i < number_of_radial_points; ++i) {
+            Spectral::Swsh::TestHelpers::generate_swsh_modes<0>(
+                make_not_null(&generated_modes.data()), make_not_null(&gen),
+                make_not_null(&coefficient_distribution), 1, l_max);
+            Spectral::Swsh::inverse_swsh_transform(
+                l_max, 1, make_not_null(&generated_data), generated_modes);
+            // aggressive filter to make the uniformly generated random modes
+            // somewhat reasonable
+            Spectral::Swsh::filter_swsh_boundary_quantity(
+                make_not_null(&generated_data), l_max, l_max / 2);
+            angular_view_j.set_data_ref(
+                tensor_component.data().data() + i * number_of_angular_points,
+                number_of_angular_points);
+            angular_view_j.data() = generated_data.data();
+          }
+        }
+      });
 
-  tmpl::for_each<swsh_boundary_tags_to_generate>([
-    &swsh_boundary_variables, &gen, &coefficient_distribution, &l_max
-  ](auto tag_v) {
-    using tag = typename decltype(tag_v)::type;
-    SpinWeighted<ComplexModalVector, 0> generated_modes{
-        Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max)};
-    SpinWeighted<ComplexDataVector, 0> generated_data{
-        Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
-    for (auto& tensor_component : get<tag>(swsh_boundary_variables)) {
-      Spectral::Swsh::TestHelpers::generate_swsh_modes<0>(
-          make_not_null(&generated_modes.data()), make_not_null(&gen),
-          make_not_null(&coefficient_distribution), 1, l_max);
-      Spectral::Swsh::inverse_swsh_transform(
-          l_max, 1, make_not_null(&generated_data), generated_modes);
-      // aggressive filter to make the uniformly generated random modes
-      // somewhat reasonable
-      Spectral::Swsh::filter_swsh_boundary_quantity(
-          make_not_null(&generated_data), l_max, l_max / 2);
-      tensor_component = generated_data.data();
-    }
-  });
+  tmpl::for_each<swsh_boundary_tags_to_generate>(
+      [&swsh_boundary_variables, &gen, &coefficient_distribution,
+       &l_max](auto tag_v) {
+        using tag = typename decltype(tag_v)::type;
+        SpinWeighted<ComplexModalVector, 0> generated_modes{
+            Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max)};
+        SpinWeighted<ComplexDataVector, 0> generated_data{
+            Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
+        for (auto& tensor_component : get<tag>(swsh_boundary_variables)) {
+          Spectral::Swsh::TestHelpers::generate_swsh_modes<0>(
+              make_not_null(&generated_modes.data()), make_not_null(&gen),
+              make_not_null(&coefficient_distribution), 1, l_max);
+          Spectral::Swsh::inverse_swsh_transform(
+              l_max, 1, make_not_null(&generated_data), generated_modes);
+          // aggressive filter to make the uniformly generated random modes
+          // somewhat reasonable
+          Spectral::Swsh::filter_swsh_boundary_quantity(
+              make_not_null(&generated_data), l_max, l_max / 2);
+          tensor_component = generated_data.data();
+        }
+      });
 
   // (b) Puts those variables in two places: the
   // MockRuntimeSystem runner and a databox called expected_box.
@@ -266,7 +263,7 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.Actions.Psi0Matching",
       });
 
   tmpl::for_each<swsh_boundary_tags_to_compute>(
-      [&runner, &expected_box ](auto tag_v) {
+      [&runner, &expected_box](auto tag_v) {
         using tag = typename decltype(tag_v)::type;
         const auto& action_result =
             ActionTesting::get_databox_tag<component, tag>(runner, 0);
