@@ -8,7 +8,6 @@
 #include <utility>
 
 #include "DataStructures/DataBox/DataBox.hpp"
-#include "Evolution/Systems/Cce/Actions/CcmActions/SendPsi0ToEvolution.hpp"
 #include "Evolution/Systems/Cce/NewmanPenrose.hpp"
 #include "Evolution/Systems/Cce/PreSwshDerivatives.hpp"
 

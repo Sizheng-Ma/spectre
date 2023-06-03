@@ -8,12 +8,15 @@
 #include <utility>
 
 #include "DataStructures/DataBox/DataBox.hpp"
-#include "Evolution/Systems/Cce/Actions/CcmActions/SendPsi0ToEvolution.hpp"
 #include "Evolution/Systems/Cce/NewmanPenrose.hpp"
 #include "Evolution/Systems/Cce/PreSwshDerivatives.hpp"
 
 namespace Cce {
 namespace Actions {
+namespace detail {
+CREATE_HAS_TYPE_ALIAS(gh_dg_element_array)
+CREATE_HAS_TYPE_ALIAS_V(gh_dg_element_array)
+}  // namespace detail
 
 /*!
  * \ingroup ActionsGroup
@@ -54,6 +57,8 @@ struct CalculatePsi0AndDerivAtInnerBoundary {
   }
 };
 
+struct SendPsi0;
+
 template <typename CceComponent>
 struct TransferPsi0 {
   template <typename DbTags, typename... InboxTags, typename Metavariables,
@@ -65,10 +70,28 @@ struct TransferPsi0 {
       Parallel::GlobalCache<Metavariables>& cache,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) {
-    Parallel::simple_action<Actions::SendPsi0<Metavariables, CceComponent>>(
+    Parallel::simple_action<SendPsi0>(
         Parallel::get_parallel_component<CceComponent>(cache),
         db::get<::Tags::TimeStepId>(box));
     return {Parallel::AlgorithmExecution::Continue, std::nullopt};
+  }
+};
+
+struct SendPsi0 {
+  template <typename ParallelComponent, typename... DbTags,
+            typename Metavariables, typename ArrayIndex>
+  static void apply(db::DataBox<tmpl::list<DbTags...>>& box,
+                    Parallel::GlobalCache<Metavariables>& cache,
+                    const ArrayIndex& /*array_index*/, const TimeStepId& time) {
+    if constexpr (detail::has_gh_dg_element_array_v<Metavariables>) {
+      Parallel::receive_data<
+          Cce::ReceiveTags::BoundaryData<typename Metavariables::ccm_psi0>>(
+          Parallel::get_parallel_component<
+              typename Metavariables::gh_dg_element_array>(cache),
+          time,
+          db::get<::Tags::Variables<typename Metavariables::ccm_psi0>>(box),
+          false);
+    }
   }
 };
 }  // namespace Actions

@@ -8,5 +8,4 @@ spectre_target_headers(
   InitializeCcmTagsinGH.hpp
   Psi0Matching.hpp
   ReceivePsi0FromCce.hpp
-  SendPsi0ToEvolution.hpp
   )
