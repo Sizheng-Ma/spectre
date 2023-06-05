@@ -22,4 +22,9 @@ target_link_libraries(
  ${LIBRARY}
  PUBLIC
  Utilities
+ Parallel
+ DataStructures
+ Charmxx::charmxx
+ SystemUtilities
+ CharmModuleInit
  )
