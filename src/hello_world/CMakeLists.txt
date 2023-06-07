@@ -27,4 +27,15 @@ target_link_libraries(
  Charmxx::charmxx
  SystemUtilities
  CharmModuleInit
+ Boost::boost
  )
+
+# # add_custom_command
+# add_custom_command(
+# OUTPUT "libnew.a"
+# COMMAND ar cqt libnew.a libSystemUtilities.a
+# #COMMAND ${CMAKE_COMMAND} -E ar cqT -libSystemUtilities.a -l${CHARM_LDXX_FLAGS_FOR_ARCHIVE}
+# )
+
+# add_library(SizhengHelloWorld libnew.a)
+
