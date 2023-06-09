@@ -27,3 +27,15 @@ void print_data_vector() {
   DataVector a{1.0, 2.3, 8.9};
   Parallel::printf("%s\n", a);
 }
+
+void ccm_functions(std::vector<double>& psi0, const std::vector<double>& gh) {
+  DataVector gh_read{gh.size()};
+    Parallel::printf("%d\n", gh.size());
+  for(unsigned int i = 0; i < gh.size(); i++) {
+    gh_read.at(i)=gh.at(i);
+    Parallel::printf("%f\n", gh.at(i));
+  }
+  DataVector dv_psi0{psi0.data(), psi0.size()};
+  dv_psi0=gh_read;
+  Parallel::printf("%s\n", gh_read);
+}
