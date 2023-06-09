@@ -3,13 +3,12 @@
 
 #pragma once
 
-// #include "DataStructures/DataVector.hpp"
-// #include "Parallel/Printf.hpp"
-// #include "Utilities/TMPL.hpp"
+#include <vector>
 
 void myprint();
 int mynewfunction(int a);
 void print_data_vector();
+void ccm_functions(std::vector<double>& psi0, const std::vector<double>& gh);
 
 // struct test {
 //   using a = tmpl::list<>;
