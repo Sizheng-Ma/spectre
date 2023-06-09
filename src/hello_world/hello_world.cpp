@@ -29,13 +29,11 @@ void print_data_vector() {
 }
 
 void ccm_functions(std::vector<double>& psi0, const std::vector<double>& gh) {
-  DataVector gh_read{gh.size()};
-    Parallel::printf("%d\n", gh.size());
-  for(unsigned int i = 0; i < gh.size(); i++) {
-    gh_read.at(i)=gh.at(i);
-    Parallel::printf("%f\n", gh.at(i));
+  const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
+
+  DataVector dv_psi0 = gh_read * 2.;
+
+  for (unsigned int i = 0; i < dv_psi0.size(); i++) {
+    psi0.push_back(dv_psi0.at(i));
   }
-  DataVector dv_psi0{psi0.data(), psi0.size()};
-  dv_psi0=gh_read;
-  Parallel::printf("%s\n", gh_read);
 }
