@@ -9,8 +9,13 @@
 
 #include "DataStructures/DataVector.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
+#include "Evolution/Systems/Cce/WorldtubeBufferUpdater.hpp"
 #include "Evolution/Systems/Cce/WorldtubeDataManager.hpp"
 #include "Informer/InfoFromBuild.hpp"
+#include "NumericalAlgorithms/Interpolation/BarycentricRationalSpanInterpolator.hpp"
+#include "NumericalAlgorithms/Interpolation/CubicSpanInterpolator.hpp"
+#include "NumericalAlgorithms/Interpolation/LinearSpanInterpolator.hpp"
+#include "NumericalAlgorithms/Interpolation/SpanInterpolator.hpp"
 #include "Parallel/Printf.hpp"
 
 // Charm looks for this function but since we build without a main function or
@@ -48,7 +53,13 @@ void print_data_vector() {
 void ccm_functions(std::vector<double>& psi0, const std::vector<double>& gh) {
   const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
+  // std::unique_ptr<intrp::SpanInterpolator> interpolator;
+
+  // std::unique_ptr<Cce::WorldtubeBufferUpdater<Cce::cce_bondi_input_tags>>
+  //     buffer_updater;
+
   Cce::BondiWorldtubeDataManager q;
+  std::cout << q.get_l_max() << std::endl;
   // Cce::Tags::BondiBeta q;
 
   DataVector dv_psi0 = gh_read * 2.;
