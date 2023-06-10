@@ -28,6 +28,8 @@ target_link_libraries(
  SystemUtilities
  CharmModuleInit
  Boost::boost
+ Spectral
+ H5
  )
 
 # # add_custom_command
