@@ -101,22 +101,50 @@ void ccm_functions(std::vector<double>& psi0,
   const size_t l_max = 1;
   const size_t boundary_size =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+  const size_t number_of_radial_points = 2;
+  const size_t volume_size = boundary_size * number_of_radial_points;
+  const size_t transform_buffer_size =
+      number_of_radial_points *
+      Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max);
   using spec_tags = Cce::Tags::characteristic_worldtube_boundary_tags<
       Cce::Tags::BoundaryValue>;
 
   using Metavariables = MyEvolutionMetavars;
 
+  using initialize_action =
+      Cce::Actions::InitializeCharacteristicEvolutionVariables<Metavariables>;
   using simple_tags_for_evolution =
-      Cce::Actions::InitializeCharacteristicEvolutionVariables<
-          Metavariables>::simple_tags_for_evolution;
+      initialize_action::simple_tags_for_evolution;
 
   auto spectre_box = db::create<db::AddSimpleTags<simple_tags_for_evolution>>();
 
-  //   Initialization::mutate_assign<db::AddSimpleTags<
-  //       tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>>>(
+  //   Initialization::mutate_assign<
+  //       tmpl::list<initialize_action::boundary_value_variables_tag>>(
   //       make_not_null(&spectre_box),
-  //
-  //       Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type{l_max});
+  //       typename initialize_action::boundary_value_variables_tag::type{
+  //           boundary_size});
+  Initialization::mutate_assign<simple_tags_for_evolution>(
+      make_not_null(&spectre_box),
+      typename initialize_action::boundary_value_variables_tag::type{
+          boundary_size},
+      typename initialize_action::coordinate_variables_tag::type{boundary_size},
+      typename initialize_action::dt_coordinate_variables_tag::type{
+          boundary_size},
+      typename initialize_action::evolved_swsh_variables_tag::type{volume_size},
+      typename initialize_action::evolved_swsh_dt_variables_tag::type{
+          volume_size},
+      typename initialize_action::angular_coordinates_variables_tag::type{
+          boundary_size},
+      typename initialize_action::scri_variables_tag::type{boundary_size},
+      typename initialize_action::volume_variables_tag::type{volume_size},
+      typename initialize_action::pre_swsh_derivatives_variables_tag::type{
+          volume_size, 0.0},
+      typename initialize_action::transform_buffer_variables_tag::type{
+          transform_buffer_size, 0.0},
+      typename initialize_action::swsh_derivative_variables_tag::type{
+          volume_size, 0.0},
+      Spectral::Swsh::SwshInterpolator{}, Spectral::Swsh::SwshInterpolator{},
+      typename initialize_action::ccm_tag::type{boundary_size});
 
   //   db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(
   //       make_not_null(&spectre_box),
