@@ -118,11 +118,6 @@ void ccm_functions(std::vector<double>& psi0,
 
   auto spectre_box = db::create<db::AddSimpleTags<simple_tags_for_evolution>>();
 
-  //   Initialization::mutate_assign<
-  //       tmpl::list<initialize_action::boundary_value_variables_tag>>(
-  //       make_not_null(&spectre_box),
-  //       typename initialize_action::boundary_value_variables_tag::type{
-  //           boundary_size});
   Initialization::mutate_assign<simple_tags_for_evolution>(
       make_not_null(&spectre_box),
       typename initialize_action::boundary_value_variables_tag::type{
@@ -146,17 +141,66 @@ void ccm_functions(std::vector<double>& psi0,
       Spectral::Swsh::SwshInterpolator{}, Spectral::Swsh::SwshInterpolator{},
       typename initialize_action::ccm_tag::type{boundary_size});
 
-  //   db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(
-  //       make_not_null(&spectre_box),
-  //       [&bondi_beta_spec](
-  //           const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector,
-  //           0>>*>
-  //               bondi_beta) {
-  //         for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
-  //           //   get(*bondi_beta).data()[i] =
-  //           //   bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
-  //         }
-  //       });
+  db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>,
+             Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>,
+             Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiH>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiR>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiU>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(
+      make_not_null(&spectre_box),
+      [&bondi_beta_spec, &bondi_dr_j_spec, &bondi_du_r_spec, bondi_h_spec,
+       bondi_j_spec, bondi_q_spec, bondi_r_spec, bondi_u_spec, bondi_w_spec](
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
+              bondi_beta,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>::type*>
+              bondi_dr_j,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type*>
+              bondi_du_r,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiH>::type*>
+              bondi_h,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>::type*>
+              bondi_j,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>::type*>
+              bondi_q,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiR>::type*>
+              bondi_r,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiU>::type*>
+              bondi_u,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>::type*>
+              bondi_w) {
+        for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
+          get(*bondi_beta).data()[i] =
+              bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_dr_j).data()[i] =
+              bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_du_r).data()[i] =
+              bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_h).data()[i] =
+              bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_j).data()[i] =
+              bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_q).data()[i] =
+              bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_r).data()[i] =
+              bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_u).data()[i] =
+              bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_w).data()[i] =
+              bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
+        }
+      });
 
   Variables<spec_tags> boundary_variables{
       Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
