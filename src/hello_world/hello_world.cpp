@@ -8,6 +8,7 @@
 #include <string>
 
 #include "DataStructures/DataVector.hpp"
+#include "Evolution/Systems/Cce/BoundaryData.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "Evolution/Systems/Cce/WorldtubeBufferUpdater.hpp"
 #include "Evolution/Systems/Cce/WorldtubeDataManager.hpp"
@@ -17,6 +18,7 @@
 #include "NumericalAlgorithms/Interpolation/LinearSpanInterpolator.hpp"
 #include "NumericalAlgorithms/Interpolation/SpanInterpolator.hpp"
 #include "Parallel/Printf.hpp"
+#include "Utilities/MakeString.hpp"
 
 // Charm looks for this function but since we build without a main function or
 // main module we just have it be empty
@@ -39,13 +41,9 @@ std::vector<char> get_archive() {
   return {'N', 'o', 't', ' ', 's', 'u', 'p', 'p', 'o', 'r', 't', 'e', 'd'};
 }
 
-std::string get_environment_variables() {
-  return "Not supported in Python";
-}
+std::string get_environment_variables() { return "Not supported in Python"; }
 
-std::string get_build_info() {
-  return "Not supported in Python";
-}
+std::string get_build_info() { return "Not supported in Python"; }
 
 std::string get_paths() { return "Not supported in Python."; }
 }  // namespace formaline
@@ -66,21 +64,77 @@ void print_data_vector() {
   Parallel::printf("%s\n", a);
 }
 
-void ccm_functions(std::vector<double>& psi0, const std::vector<double>& gh) {
-  const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
+void ccm_functions(std::vector<double>& psi0,
+                   const std::vector<double>& bondi_beta_spec,
+                   const std::vector<double>& bondi_dr_j_spec,
+                   const std::vector<double>& bondi_du_r_spec,
+                   const std::vector<double>& bondi_h_spec,
+                   const std::vector<double>& bondi_j_spec,
+                   const std::vector<double>& bondi_q_spec,
+                   const std::vector<double>& bondi_r_spec,
+                   const std::vector<double>& bondi_u_spec,
+                   const std::vector<double>& bondi_w_spec) {
+  // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
-  // std::unique_ptr<intrp::SpanInterpolator> interpolator;
+  const size_t l_max = 1;
 
-  // std::unique_ptr<Cce::WorldtubeBufferUpdater<Cce::cce_bondi_input_tags>>
-  //     buffer_updater;
+  using spec_tags = Cce::Tags::characteristic_worldtube_boundary_tags<
+      Cce::Tags::BoundaryValue>;
 
+  Variables<spec_tags> boundary_variables{
+      Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
+
+  auto& bondi_beta = get(
+      get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(boundary_variables));
+  auto& bondi_dr_j =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(
+          boundary_variables));
+  auto& bondi_du_r =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
+          boundary_variables));
+  auto& bondi_h =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiH>>(boundary_variables));
+  auto& bondi_j =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>>(boundary_variables));
+  auto& bondi_q =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>>(boundary_variables));
+  auto& bondi_r =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>>(boundary_variables));
+  auto& bondi_u =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(boundary_variables));
+  auto& bondi_w =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(boundary_variables));
+
+  for (unsigned int i = 0; i < bondi_j_spec.size(); i++) {
+    bondi_beta.data()[i] =
+        bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
+    bondi_dr_j.data()[i] =
+        bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
+    bondi_du_r.data()[i] =
+        bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
+    bondi_h.data()[i] = bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
+    bondi_j.data()[i] = bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
+    bondi_q.data()[i] = bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
+    bondi_r.data()[i] = bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
+    bondi_u.data()[i] = bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
+    bondi_w.data()[i] = bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
+  }
+  std::cout << get(get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
+                       boundary_variables))
+                   .data()
+            << std::endl;
   Cce::BondiWorldtubeDataManager q;
-  std::cout << q.get_l_max() << std::endl;
+  q.populate_hypersurface_boundary_data_spec(&boundary_variables);
+  std::cout << get(get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
+                       boundary_variables))
+                   .data()
+            << std::endl;
+  // std::cout << q.get_l_max() << std::endl;
   // Cce::Tags::BondiBeta q;
 
-  DataVector dv_psi0 = gh_read * 2.;
+  // DataVector dv_psi0 = gh_read * 2.;
 
-  for (unsigned int i = 0; i < dv_psi0.size(); i++) {
-    psi0.push_back(dv_psi0.at(i));
-  }
+  // for (unsigned int i = 0; i < dv_psi0.size(); i++) {
+  //   psi0.push_back(dv_psi0.at(i));
+  // }
 }

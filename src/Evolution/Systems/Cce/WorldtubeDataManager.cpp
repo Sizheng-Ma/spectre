@@ -102,19 +102,18 @@ bool MetricWorldtubeDataManager::populate_hypersurface_boundary_data(
       buffer_updater_->get_time_buffer().data() + interpolation_time_span.first,
       interpolation_span_size};
 
-  auto interpolate_from_column = [&time, &time_points, &buffer_span_size,
-                                  &interpolation_time_span,
-                                  &interpolation_span_size,
-                                  this](auto data, const size_t column) {
-    auto interp_val = interpolator_->interpolate(
-        gsl::span<const double>(time_points.data(), time_points.size()),
-        gsl::span<const std::complex<double>>(
-            data + column * buffer_span_size +
-                (interpolation_time_span.first - time_span_start_),
-            interpolation_span_size),
-        time);
-    return interp_val;
-  };
+  auto interpolate_from_column =
+      [&time, &time_points, &buffer_span_size, &interpolation_time_span,
+       &interpolation_span_size, this](auto data, const size_t column) {
+        auto interp_val = interpolator_->interpolate(
+            gsl::span<const double>(time_points.data(), time_points.size()),
+            gsl::span<const std::complex<double>>(
+                data + column * buffer_span_size +
+                    (interpolation_time_span.first - time_span_start_),
+                interpolation_span_size),
+            time);
+        return interp_val;
+      };
 
   // the ComplexModalVectors should be provided from the buffer_updater_ in
   // 'Goldberg' format, so we iterate over modes and convert to libsharp
@@ -303,6 +302,42 @@ BondiWorldtubeDataManager::BondiWorldtubeDataManager(
       square(l_max + 1) *
       (buffer_depth_ +
        2 * interpolator_->required_number_of_points_before_and_after())};
+}
+
+bool BondiWorldtubeDataManager::populate_hypersurface_boundary_data_spec(
+    const gsl::not_null<Variables<
+        Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>*>
+        boundary_data_variables) const {
+  const auto& du_r = get(get<Tags::BoundaryValue<Tags::Du<Tags::BondiR>>>(
+      *boundary_data_variables));
+  const auto& bondi_r =
+      get(get<Tags::BoundaryValue<Tags::BondiR>>(*boundary_data_variables));
+
+  get(get<Tags::BoundaryValue<Tags::DuRDividedByR>>(*boundary_data_variables)) =
+      du_r / bondi_r;
+
+  // there's only a couple of tags desired by the core computation that aren't
+  // stored in the 'reduced' format, so we perform the remaining computation
+  // in-line here.
+  const auto& du_bondi_j = get(get<Tags::BoundaryValue<Tags::Du<Tags::BondiJ>>>(
+      *boundary_data_variables));
+  const auto& dr_bondi_j = get(get<Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>>(
+      *boundary_data_variables));
+  get(get<Tags::BoundaryValue<Tags::BondiH>>(*boundary_data_variables)) =
+      du_bondi_j + du_r * dr_bondi_j;
+
+  const auto& bondi_j =
+      get(get<Tags::BoundaryValue<Tags::BondiJ>>(*boundary_data_variables));
+  const auto& bondi_beta =
+      get(get<Tags::BoundaryValue<Tags::BondiBeta>>(*boundary_data_variables));
+  const auto& bondi_q =
+      get(get<Tags::BoundaryValue<Tags::BondiQ>>(*boundary_data_variables));
+  const auto& bondi_k = sqrt(1.0 + bondi_j * conj(bondi_j));
+  get(get<Tags::BoundaryValue<Tags::Dr<Tags::BondiU>>>(
+      *boundary_data_variables)) =
+      exp(2.0 * bondi_beta.data()) / square(bondi_r.data()) *
+      (bondi_k.data() * bondi_q.data() - bondi_j.data() * conj(bondi_q.data()));
+  return true;
 }
 
 bool BondiWorldtubeDataManager::populate_hypersurface_boundary_data(
