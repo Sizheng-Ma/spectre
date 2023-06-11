@@ -210,6 +210,10 @@ class BondiWorldtubeDataManager : public WorldtubeDataManager {
           Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>*>
           boundary_data_variables,
       double time, gsl::not_null<Parallel::NodeLock*> hdf5_lock) const override;
+  bool populate_hypersurface_boundary_data_spec(
+      gsl::not_null<Variables<
+          Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>*>
+          boundary_data_variables) const;
 
   std::unique_ptr<WorldtubeDataManager> get_clone() const override;
 
