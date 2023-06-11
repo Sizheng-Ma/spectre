@@ -8,6 +8,8 @@
 #include <string>
 
 #include "DataStructures/DataVector.hpp"
+#include "Evolution/Executables/Cce/CharacteristicExtractBase.hpp"
+#include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionVariables.hpp"
 #include "Evolution/Systems/Cce/BoundaryData.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "Evolution/Systems/Cce/WorldtubeBufferUpdater.hpp"
@@ -17,7 +19,14 @@
 #include "NumericalAlgorithms/Interpolation/CubicSpanInterpolator.hpp"
 #include "NumericalAlgorithms/Interpolation/LinearSpanInterpolator.hpp"
 #include "NumericalAlgorithms/Interpolation/SpanInterpolator.hpp"
+#include "Options/Options.hpp"
+#include "Options/Protocols/FactoryCreation.hpp"
 #include "Parallel/Printf.hpp"
+#include "ParallelAlgorithms/Initialization/MutateAssign.hpp"
+#include "Time/StepChoosers/Factory.hpp"
+#include "Time/Tags.hpp"
+#include "Time/TimeSteppers/Factory.hpp"
+#include "Time/TimeSteppers/LtsTimeStepper.hpp"
 #include "Utilities/MakeString.hpp"
 
 // Charm looks for this function but since we build without a main function or
@@ -64,6 +73,19 @@ void print_data_vector() {
   Parallel::printf("%s\n", a);
 }
 
+struct MyEvolutionMetavars : CharacteristicExtractDefaults<true> {
+  struct factory_creation
+      : tt::ConformsTo<Options::protocols::FactoryCreation> {
+    using factory_classes = tmpl::map<
+        tmpl::pair<LtsTimeStepper, TimeSteppers::lts_time_steppers>,
+        tmpl::pair<StepChooser<StepChooserUse::LtsStep>, cce_step_choosers>,
+        tmpl::pair<TimeSequence<double>,
+                   TimeSequences::all_time_sequences<double>>,
+        tmpl::pair<TimeSequence<std::uint64_t>,
+                   TimeSequences::all_time_sequences<std::uint64_t>>>;
+  };
+};
+
 void ccm_functions(std::vector<double>& psi0,
                    const std::vector<double>& bondi_beta_spec,
                    const std::vector<double>& bondi_dr_j_spec,
@@ -77,9 +99,36 @@ void ccm_functions(std::vector<double>& psi0,
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t l_max = 1;
-
+  const size_t boundary_size =
+      Spectral::Swsh::number_of_swsh_collocation_points(l_max);
   using spec_tags = Cce::Tags::characteristic_worldtube_boundary_tags<
       Cce::Tags::BoundaryValue>;
+
+  using Metavariables = MyEvolutionMetavars;
+
+  using simple_tags_for_evolution =
+      Cce::Actions::InitializeCharacteristicEvolutionVariables<
+          Metavariables>::simple_tags_for_evolution;
+
+  auto spectre_box = db::create<db::AddSimpleTags<simple_tags_for_evolution>>();
+
+  //   Initialization::mutate_assign<db::AddSimpleTags<
+  //       tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>>>(
+  //       make_not_null(&spectre_box),
+  //
+  //       Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type{l_max});
+
+  //   db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(
+  //       make_not_null(&spectre_box),
+  //       [&bondi_beta_spec](
+  //           const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector,
+  //           0>>*>
+  //               bondi_beta) {
+  //         for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
+  //           //   get(*bondi_beta).data()[i] =
+  //           //   bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
+  //         }
+  //       });
 
   Variables<spec_tags> boundary_variables{
       Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
