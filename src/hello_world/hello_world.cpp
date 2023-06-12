@@ -106,8 +106,8 @@ void ccm_functions(std::vector<double>& psi0,
   const size_t transform_buffer_size =
       number_of_radial_points *
       Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max);
-  using spec_tags = Cce::Tags::characteristic_worldtube_boundary_tags<
-      Cce::Tags::BoundaryValue>;
+  //   using spec_tags = Cce::Tags::characteristic_worldtube_boundary_tags<
+  //   Cce::Tags::BoundaryValue>;
 
   using Metavariables = MyEvolutionMetavars;
 
@@ -202,52 +202,25 @@ void ccm_functions(std::vector<double>& psi0,
         }
       });
 
-  Variables<spec_tags> boundary_variables{
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
-
-  auto& bondi_beta = get(
-      get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(boundary_variables));
-  auto& bondi_dr_j =
-      get(get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(
-          boundary_variables));
-  auto& bondi_du_r =
-      get(get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
-          boundary_variables));
-  auto& bondi_h =
-      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiH>>(boundary_variables));
-  auto& bondi_j =
-      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>>(boundary_variables));
-  auto& bondi_q =
-      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>>(boundary_variables));
-  auto& bondi_r =
-      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>>(boundary_variables));
-  auto& bondi_u =
-      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(boundary_variables));
-  auto& bondi_w =
-      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(boundary_variables));
-
-  for (unsigned int i = 0; i < bondi_j_spec.size(); i++) {
-    bondi_beta.data()[i] =
-        bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
-    bondi_dr_j.data()[i] =
-        bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-    bondi_du_r.data()[i] =
-        bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-    bondi_h.data()[i] = bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
-    bondi_j.data()[i] = bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-    bondi_q.data()[i] = bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
-    bondi_r.data()[i] = bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-    bondi_u.data()[i] = bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
-    bondi_w.data()[i] = bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
-  }
-  std::cout << get(get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
-                       boundary_variables))
+  std::cout << get(db::get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
+                       spectre_box))
                    .data()
             << std::endl;
-  Cce::BondiWorldtubeDataManager q;
-  q.populate_hypersurface_boundary_data_spec(&boundary_variables);
+
+  db::mutate<initialize_action::boundary_value_variables_tag>(
+      make_not_null(&spectre_box),
+      [](const gsl::not_null<
+          initialize_action::boundary_value_variables_tag::type*>
+             boundary_variables) {
+        Cce::BondiWorldtubeDataManager q;
+        auto blah = (*boundary_variables)
+                        .reference_subset<
+                            Metavariables::cce_boundary_communication_tags>();
+        q.populate_hypersurface_boundary_data_spec(make_not_null(&blah));
+      });
+
   std::cout << get(get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
-                       boundary_variables))
+                       spectre_box))
                    .data()
             << std::endl;
   // std::cout << q.get_l_max() << std::endl;
