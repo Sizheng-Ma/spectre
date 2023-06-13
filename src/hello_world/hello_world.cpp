@@ -137,7 +137,8 @@ void ccm_functions(std::vector<double>& psi0,
   initialize_scri::initialize_impl(
       make_not_null(&spectre_box),
       typename Metavariables::scri_values_to_observe{});
-  /****************************Initialization*************************************/
+
+  /****************************Get_Boundary_Data*************************************/
 
   db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>,
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>,
@@ -223,11 +224,13 @@ void ccm_functions(std::vector<double>& psi0,
             << std::endl;
 
   ;
+  /****************************Construct_Bondi_J*************************************/
+  std::cout << get(db::get<Cce::Tags::BondiJ>(spectre_box)).data() << std::endl;
+
   db::mutate_apply<typename Cce::InitializeJ::InitializeJ<true>::mutate_tags,
                    typename Cce::InitializeJ::InitializeJ<true>::argument_tags>(
       Cce::InitializeJ::InverseCubic<true>(), make_not_null(&spectre_box));
-  // std::cout << q.get_l_max() << std::endl;
-  // Cce::Tags::BondiBeta q;
+  std::cout << get(db::get<Cce::Tags::BondiJ>(spectre_box)).data() << std::endl;
 
   // DataVector dv_psi0 = gh_read * 2.;
 
