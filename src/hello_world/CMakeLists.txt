@@ -30,6 +30,7 @@ target_link_libraries(
  Boost::boost
  Spectral
  H5
+ Libxsmm
  )
 
 # # add_custom_command
