@@ -12,6 +12,7 @@
 #include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionScri.hpp"
 #include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionVariables.hpp"
 #include "Evolution/Systems/Cce/BoundaryData.hpp"
+#include "Evolution/Systems/Cce/Initialize/InitializeJ.hpp"
 #include "Evolution/Systems/Cce/OptionTags.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "Evolution/Systems/Cce/WorldtubeBufferUpdater.hpp"
@@ -220,6 +221,11 @@ void ccm_functions(std::vector<double>& psi0,
                        spectre_box))
                    .data()
             << std::endl;
+
+  ;
+  db::mutate_apply<typename Cce::InitializeJ::InitializeJ<true>::mutate_tags,
+                   typename Cce::InitializeJ::InitializeJ<true>::argument_tags>(
+      Cce::InitializeJ::InverseCubic<true>(), make_not_null(&spectre_box));
   // std::cout << q.get_l_max() << std::endl;
   // Cce::Tags::BondiBeta q;
 
