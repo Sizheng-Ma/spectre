@@ -11,6 +11,7 @@
 #include "Evolution/Executables/Cce/CharacteristicExtractBase.hpp"
 #include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionScri.hpp"
 #include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionVariables.hpp"
+#include "Evolution/Systems/Cce/Actions/UpdateGauge.hpp"
 #include "Evolution/Systems/Cce/BoundaryData.hpp"
 #include "Evolution/Systems/Cce/Initialize/InitializeJ.hpp"
 #include "Evolution/Systems/Cce/OptionTags.hpp"
@@ -231,6 +232,19 @@ void ccm_functions(std::vector<double>& psi0,
                    typename Cce::InitializeJ::InitializeJ<true>::argument_tags>(
       Cce::InitializeJ::InverseCubic<true>(), make_not_null(&spectre_box));
   std::cout << get(db::get<Cce::Tags::BondiJ>(spectre_box)).data() << std::endl;
+
+  /****************************UpdateGauge*************************************/
+  tmpl::for_each<Cce::Actions::UpdateGauge<true>::cce_mutators>(
+      [&spectre_box](auto mutator_v) {
+        using mutator = typename decltype(mutator_v)::type;
+        db::mutate_apply<mutator>(make_not_null(&spectre_box));
+      });
+
+  tmpl::for_each<Cce::Actions::UpdateGauge<true>::ccm_mutators>(
+      [&spectre_box](auto mutator_v) {
+        using mutator = typename decltype(mutator_v)::type;
+        db::mutate_apply<mutator>(make_not_null(&spectre_box));
+      });
 
   // DataVector dv_psi0 = gh_read * 2.;
 
