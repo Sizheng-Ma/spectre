@@ -9,8 +9,10 @@
 
 #include "DataStructures/DataVector.hpp"
 #include "Evolution/Executables/Cce/CharacteristicExtractBase.hpp"
+#include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionScri.hpp"
 #include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionVariables.hpp"
 #include "Evolution/Systems/Cce/BoundaryData.hpp"
+#include "Evolution/Systems/Cce/OptionTags.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "Evolution/Systems/Cce/WorldtubeBufferUpdater.hpp"
 #include "Evolution/Systems/Cce/WorldtubeDataManager.hpp"
@@ -19,6 +21,7 @@
 #include "NumericalAlgorithms/Interpolation/CubicSpanInterpolator.hpp"
 #include "NumericalAlgorithms/Interpolation/LinearSpanInterpolator.hpp"
 #include "NumericalAlgorithms/Interpolation/SpanInterpolator.hpp"
+#include "NumericalAlgorithms/Spectral/SwshTags.hpp"
 #include "Options/Options.hpp"
 #include "Options/Protocols/FactoryCreation.hpp"
 #include "Parallel/Printf.hpp"
@@ -74,6 +77,7 @@ void print_data_vector() {
 }
 
 struct MyEvolutionMetavars : CharacteristicExtractDefaults<true> {
+  using cce_boundary_component = tmpl::list<>;
   struct factory_creation
       : tt::ConformsTo<Options::protocols::FactoryCreation> {
     using factory_classes = tmpl::map<
@@ -99,6 +103,7 @@ void ccm_functions(std::vector<double>& psi0,
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t l_max = 1;
+  const size_t scri_interpolation_order = 5;
   const size_t boundary_size =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
   const size_t number_of_radial_points = 2;
@@ -106,18 +111,30 @@ void ccm_functions(std::vector<double>& psi0,
   const size_t transform_buffer_size =
       number_of_radial_points *
       Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max);
-  //   using spec_tags = Cce::Tags::characteristic_worldtube_boundary_tags<
-  //   Cce::Tags::BoundaryValue>;
 
   using Metavariables = MyEvolutionMetavars;
 
   using initialize_action =
       Cce::Actions::InitializeCharacteristicEvolutionVariables<Metavariables>;
+  using initialize_scri = Cce::Actions::InitializeCharacteristicEvolutionScri<
+      Metavariables::scri_values_to_observe,
+      Metavariables::cce_boundary_component>;
   using simple_tags_for_evolution =
       initialize_action::simple_tags_for_evolution;
+  using simple_tags_for_scri = initialize_scri::simple_tags;
+  using from_cache = tmpl::list<Cce::InitializationTags::ScriInterpolationOrder,
+                                Cce::Tags::LMax>;
+  using simple_tags =
+      tmpl::append<from_cache, simple_tags_for_evolution, simple_tags_for_scri>;
 
-  auto spectre_box = db::create<db::AddSimpleTags<simple_tags_for_evolution>>();
+  auto spectre_box = db::create<db::AddSimpleTags<simple_tags>>();
 
+  /****************************Initialization*************************************/
+  Initialization::mutate_assign<from_cache>(
+      make_not_null(&spectre_box),
+      Cce::InitializationTags::ScriInterpolationOrder::type{
+          scri_interpolation_order},
+      Cce::Tags::LMax::type{l_max});
   Initialization::mutate_assign<simple_tags_for_evolution>(
       make_not_null(&spectre_box),
       typename initialize_action::boundary_value_variables_tag::type{
@@ -140,6 +157,11 @@ void ccm_functions(std::vector<double>& psi0,
           volume_size, 0.0},
       Spectral::Swsh::SwshInterpolator{}, Spectral::Swsh::SwshInterpolator{},
       typename initialize_action::ccm_tag::type{boundary_size});
+
+  initialize_scri::initialize_impl(
+      make_not_null(&spectre_box),
+      typename Metavariables::scri_values_to_observe{});
+  /****************************Initialization*************************************/
 
   db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>,
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>,
