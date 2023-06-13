@@ -147,7 +147,6 @@ void ccm_functions(std::vector<double>& psi0,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiR>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiU>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(
-      make_not_null(&spectre_box),
       [&bondi_beta_spec, &bondi_dr_j_spec, &bondi_du_r_spec, bondi_h_spec,
        bondi_j_spec, bondi_q_spec, bondi_r_spec, bondi_u_spec, bondi_w_spec](
           const gsl::not_null<
@@ -197,7 +196,8 @@ void ccm_functions(std::vector<double>& psi0,
           get(*bondi_w).data()[i] =
               bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
         }
-      });
+      },
+      make_not_null(&spectre_box));
 
   std::cout << get(db::get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
                        spectre_box))
@@ -205,7 +205,6 @@ void ccm_functions(std::vector<double>& psi0,
             << std::endl;
 
   db::mutate<initialize_action::boundary_value_variables_tag>(
-      make_not_null(&spectre_box),
       [](const gsl::not_null<
           initialize_action::boundary_value_variables_tag::type*>
              boundary_variables) {
@@ -214,7 +213,8 @@ void ccm_functions(std::vector<double>& psi0,
                         .reference_subset<
                             Metavariables::cce_boundary_communication_tags>();
         q.populate_hypersurface_boundary_data_spec(make_not_null(&blah));
-      });
+      },
+      make_not_null(&spectre_box));
 
   std::cout << get(get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
                        spectre_box))
