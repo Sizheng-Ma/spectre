@@ -40,6 +40,25 @@ template <bool EvolveCcm>
 struct UpdateGauge {
   using const_global_cache_tags = tmpl::list<Tags::LMax>;
 
+  using cce_mutators = tmpl::list<
+      GaugeUpdateAngularFromCartesian<Tags::CauchyAngularCoords,
+                                      Tags::CauchyCartesianCoords>,
+      GaugeUpdateJacobianFromCoordinates<
+          Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD,
+          Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>,
+      GaugeUpdateInterpolator<Tags::CauchyAngularCoords>,
+      GaugeUpdateOmega<Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD,
+                       Tags::PartiallyFlatGaugeOmega>>;
+  using ccm_mutators = tmpl::list<
+      GaugeUpdateAngularFromCartesian<Tags::PartiallyFlatAngularCoords,
+                                      Tags::PartiallyFlatCartesianCoords>,
+      GaugeUpdateJacobianFromCoordinates<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                                         Tags::PartiallyFlatAngularCoords,
+                                         Tags::PartiallyFlatCartesianCoords>,
+      GaugeUpdateInterpolator<Tags::PartiallyFlatAngularCoords>,
+      GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
+                       Tags::CauchyGaugeOmega>>;
+
   template <typename DbTags, typename... InboxTags, typename Metavariables,
             typename ArrayIndex, typename ActionList,
             typename ParallelComponent>
@@ -49,34 +68,16 @@ struct UpdateGauge {
       const Parallel::GlobalCache<Metavariables>& /*cache*/,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) {
-    db::mutate_apply<GaugeUpdateAngularFromCartesian<
-        Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
-        make_not_null(&box));
-    db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-        Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD,
-        Tags::CauchyAngularCoords, Tags::CauchyCartesianCoords>>(
-        make_not_null(&box));
-    db::mutate_apply<GaugeUpdateInterpolator<Tags::CauchyAngularCoords>>(
-        make_not_null(&box));
-    db::mutate_apply<
-        GaugeUpdateOmega<Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD,
-                         Tags::PartiallyFlatGaugeOmega>>(make_not_null(&box));
+    tmpl::for_each<cce_mutators>([&box](auto mutator_v) {
+      using mutator = typename decltype(mutator_v)::type;
+      db::mutate_apply<mutator>(make_not_null(&box));
+    });
 
     if constexpr (EvolveCcm) {
-      db::mutate_apply<
-          GaugeUpdateAngularFromCartesian<Tags::PartiallyFlatAngularCoords,
-                                          Tags::PartiallyFlatCartesianCoords>>(
-          make_not_null(&box));
-      db::mutate_apply<GaugeUpdateJacobianFromCoordinates<
-          Tags::CauchyGaugeC, Tags::CauchyGaugeD,
-          Tags::PartiallyFlatAngularCoords,
-          Tags::PartiallyFlatCartesianCoords>>(make_not_null(&box));
-      db::mutate_apply<
-          GaugeUpdateInterpolator<Tags::PartiallyFlatAngularCoords>>(
-          make_not_null(&box));
-      db::mutate_apply<GaugeUpdateOmega<Tags::CauchyGaugeC, Tags::CauchyGaugeD,
-                                        Tags::CauchyGaugeOmega>>(
-          make_not_null(&box));
+      tmpl::for_each<ccm_mutators>([&box](auto mutator_v) {
+        using mutator = typename decltype(mutator_v)::type;
+        db::mutate_apply<mutator>(make_not_null(&box));
+      });
     }
     return {Parallel::AlgorithmExecution::Continue, std::nullopt};
   }
