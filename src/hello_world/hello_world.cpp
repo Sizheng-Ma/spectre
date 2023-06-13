@@ -15,6 +15,7 @@
 #include "Evolution/Systems/Cce/BoundaryData.hpp"
 #include "Evolution/Systems/Cce/Initialize/InitializeJ.hpp"
 #include "Evolution/Systems/Cce/OptionTags.hpp"
+#include "Evolution/Systems/Cce/PrecomputeCceDependencies.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "Evolution/Systems/Cce/WorldtubeBufferUpdater.hpp"
 #include "Evolution/Systems/Cce/WorldtubeDataManager.hpp"
@@ -245,6 +246,16 @@ void ccm_functions(std::vector<double>& psi0,
         using mutator = typename decltype(mutator_v)::type;
         db::mutate_apply<mutator>(make_not_null(&spectre_box));
       });
+
+  /****************************PrecomputeGlobalCceDependencies*************************************/
+  tmpl::for_each<Cce::gauge_adjustments_setup_tags>([&spectre_box](auto tag_v) {
+    using tag = typename decltype(tag_v)::type;
+    db::mutate_apply<Cce::GaugeAdjustedBoundaryValue<tag>>(
+        make_not_null(&spectre_box));
+  });
+
+  Cce::mutate_all_precompute_cce_dependencies<
+      Cce::Tags::EvolutionGaugeBoundaryValue>(make_not_null(&spectre_box));
 
   // DataVector dv_psi0 = gh_read * 2.;
 
