@@ -104,13 +104,7 @@ void ccm_functions(std::vector<double>& psi0,
 
   const size_t l_max = 1;
   const size_t scri_interpolation_order = 5;
-  const size_t boundary_size =
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max);
   const size_t number_of_radial_points = 2;
-  const size_t volume_size = boundary_size * number_of_radial_points;
-  const size_t transform_buffer_size =
-      number_of_radial_points *
-      Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max);
 
   using Metavariables = MyEvolutionMetavars;
 
@@ -122,8 +116,9 @@ void ccm_functions(std::vector<double>& psi0,
   using simple_tags_for_evolution =
       initialize_action::simple_tags_for_evolution;
   using simple_tags_for_scri = initialize_scri::simple_tags;
-  using from_cache = tmpl::list<Cce::InitializationTags::ScriInterpolationOrder,
-                                Cce::Tags::LMax>;
+  using from_cache =
+      tmpl::list<Cce::InitializationTags::ScriInterpolationOrder,
+                 Cce::Tags::LMax, Cce::Tags::NumberOfRadialPoints>;
   using simple_tags =
       tmpl::append<from_cache, simple_tags_for_evolution, simple_tags_for_scri>;
 
@@ -134,29 +129,9 @@ void ccm_functions(std::vector<double>& psi0,
       make_not_null(&spectre_box),
       Cce::InitializationTags::ScriInterpolationOrder::type{
           scri_interpolation_order},
-      Cce::Tags::LMax::type{l_max});
-  Initialization::mutate_assign<simple_tags_for_evolution>(
-      make_not_null(&spectre_box),
-      typename initialize_action::boundary_value_variables_tag::type{
-          boundary_size},
-      typename initialize_action::coordinate_variables_tag::type{boundary_size},
-      typename initialize_action::dt_coordinate_variables_tag::type{
-          boundary_size},
-      typename initialize_action::evolved_swsh_variables_tag::type{volume_size},
-      typename initialize_action::evolved_swsh_dt_variables_tag::type{
-          volume_size},
-      typename initialize_action::angular_coordinates_variables_tag::type{
-          boundary_size},
-      typename initialize_action::scri_variables_tag::type{boundary_size},
-      typename initialize_action::volume_variables_tag::type{volume_size},
-      typename initialize_action::pre_swsh_derivatives_variables_tag::type{
-          volume_size, 0.0},
-      typename initialize_action::transform_buffer_variables_tag::type{
-          transform_buffer_size, 0.0},
-      typename initialize_action::swsh_derivative_variables_tag::type{
-          volume_size, 0.0},
-      Spectral::Swsh::SwshInterpolator{}, Spectral::Swsh::SwshInterpolator{},
-      typename initialize_action::ccm_tag::type{boundary_size});
+      Cce::Tags::LMax::type{l_max},
+      Cce::OptionTags::NumberOfRadialPoints::type{number_of_radial_points});
+  initialize_action::initialize_impl(make_not_null(&spectre_box));
 
   initialize_scri::initialize_impl(
       make_not_null(&spectre_box),
