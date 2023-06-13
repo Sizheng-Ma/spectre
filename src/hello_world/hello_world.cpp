@@ -11,6 +11,7 @@
 #include "Evolution/Executables/Cce/CharacteristicExtractBase.hpp"
 #include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionScri.hpp"
 #include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionVariables.hpp"
+#include "Evolution/Systems/Cce/Actions/Psi0Matching.hpp"
 #include "Evolution/Systems/Cce/Actions/UpdateGauge.hpp"
 #include "Evolution/Systems/Cce/BoundaryData.hpp"
 #include "Evolution/Systems/Cce/Initialize/InitializeJ.hpp"
@@ -256,6 +257,15 @@ void ccm_functions(std::vector<double>& psi0,
 
   Cce::mutate_all_precompute_cce_dependencies<
       Cce::Tags::EvolutionGaugeBoundaryValue>(make_not_null(&spectre_box));
+
+  /****************************CalculatePsi0AndDerivAtInnerBoundary*************************************/
+  tmpl::for_each<Cce::Actions::CalculatePsi0AndDerivAtInnerBoundary::mutators>(
+      [&spectre_box](auto mutator_v) {
+        using mutator = typename decltype(mutator_v)::type;
+        db::mutate_apply<mutator>(make_not_null(&spectre_box));
+      });
+
+  ;
 
   // DataVector dv_psi0 = gh_read * 2.;
 
