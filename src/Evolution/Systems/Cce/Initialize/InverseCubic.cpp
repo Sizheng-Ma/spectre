@@ -28,7 +28,7 @@ std::unique_ptr<InitializeJ<false>> InverseCubic<false>::get_clone() const {
   return std::make_unique<InverseCubic>();
 }
 
-void InverseCubic<true>::operator()(
+void InverseCubic<true>::apply(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> j,
     const gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_cauchy_coordinates,
     const gsl::not_null<
@@ -42,7 +42,7 @@ void InverseCubic<true>::operator()(
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_dr_j,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& r,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& /*beta*/,
-    const size_t l_max, const size_t number_of_radial_points) const {
+    const size_t l_max, const size_t number_of_radial_points) {
   const DataVector one_minus_y_collocation =
       1.0 - Spectral::collocation_points<Spectral::Basis::Legendre,
                                          Spectral::Quadrature::GaussLobatto>(
