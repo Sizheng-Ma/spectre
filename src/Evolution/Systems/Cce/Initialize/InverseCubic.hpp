@@ -69,7 +69,7 @@ struct InverseCubic<true> : InitializeJ<true> {
       size_t number_of_radial_points,
       gsl::not_null<Parallel::NodeLock*> hdf5_lock) const override;
 
-  void operator()(
+  static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> j,
       gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_cauchy_coordinates,
       gsl::not_null<
@@ -83,7 +83,7 @@ struct InverseCubic<true> : InitializeJ<true> {
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& boundary_dr_j,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& r,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& beta, size_t l_max,
-      size_t number_of_radial_points) const;
+      size_t number_of_radial_points);
 
   void pup(PUP::er& /*p*/) override;
 };
