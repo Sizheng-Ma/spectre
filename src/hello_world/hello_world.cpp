@@ -14,6 +14,7 @@
 #include "Evolution/Systems/Cce/Actions/Psi0Matching.hpp"
 #include "Evolution/Systems/Cce/Actions/UpdateGauge.hpp"
 #include "Evolution/Systems/Cce/BoundaryData.hpp"
+#include "Evolution/Systems/Cce/Components/CharacteristicEvolution.hpp"
 #include "Evolution/Systems/Cce/Initialize/InitializeJ.hpp"
 #include "Evolution/Systems/Cce/OptionTags.hpp"
 #include "Evolution/Systems/Cce/PrecomputeCceDependencies.hpp"
@@ -82,6 +83,7 @@ void print_data_vector() {
 
 struct MyEvolutionMetavars : CharacteristicExtractDefaults<true> {
   using cce_boundary_component = tmpl::list<>;
+  static constexpr bool local_time_stepping = false;
   struct factory_creation
       : tt::ConformsTo<Options::protocols::FactoryCreation> {
     using factory_classes = tmpl::map<
@@ -106,7 +108,7 @@ void ccm_functions(std::vector<double>& psi0,
                    const std::vector<double>& bondi_w_spec) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
-  const size_t l_max = 1;
+  const size_t l_max = 3;
   const size_t scri_interpolation_order = 5;
   const size_t number_of_radial_points = 2;
 
@@ -142,7 +144,6 @@ void ccm_functions(std::vector<double>& psi0,
       typename Metavariables::scri_values_to_observe{});
 
   /****************************Get_Boundary_Data*************************************/
-
   db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>,
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>,
@@ -233,7 +234,6 @@ void ccm_functions(std::vector<double>& psi0,
   db::mutate_apply<typename Cce::InitializeJ::InitializeJ<true>::mutate_tags,
                    typename Cce::InitializeJ::InitializeJ<true>::argument_tags>(
       Cce::InitializeJ::InverseCubic<true>(), make_not_null(&spectre_box));
-  std::cout << get(db::get<Cce::Tags::BondiJ>(spectre_box)).data() << std::endl;
 
   /****************************UpdateGauge*************************************/
   tmpl::for_each<Cce::Actions::UpdateGauge<true>::cce_mutators>(
@@ -264,8 +264,6 @@ void ccm_functions(std::vector<double>& psi0,
         using mutator = typename decltype(mutator_v)::type;
         db::mutate_apply<mutator>(make_not_null(&spectre_box));
       });
-
-  ;
 
   // DataVector dv_psi0 = gh_read * 2.;
 
