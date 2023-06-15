@@ -50,6 +50,11 @@ struct CalculateScriInputs {
       const Parallel::GlobalCache<Metavariables>& /*cache*/,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) {
+    apply(box);
+    return {Parallel::AlgorithmExecution::Continue, std::nullopt};
+  }
+  template <typename DbTags>
+  static void apply(db::DataBox<DbTags>& box) {
     tmpl::for_each<
         tmpl::append<all_pre_swsh_derivative_tags_for_scri,
                      all_boundary_pre_swsh_derivative_tags_for_scri>>(
@@ -66,14 +71,14 @@ struct CalculateScriInputs {
     boundary_derivative_impl(box, db::get<Tags::LMax>(box),
                              all_boundary_swsh_derivative_tags_for_scri{});
 
-    tmpl::for_each<
-        all_swsh_derivative_tags_for_scri>([&box](auto derivative_tag_v) {
-      using derivative_tag = typename decltype(derivative_tag_v)::type;
-      ::Cce::detail::apply_swsh_jacobian_helper<derivative_tag>(
-          make_not_null(&box), typename ApplySwshJacobianInplace<
-                                   derivative_tag>::on_demand_argument_tags{});
-    });
-    return {Parallel::AlgorithmExecution::Continue, std::nullopt};
+    tmpl::for_each<all_swsh_derivative_tags_for_scri>(
+        [&box](auto derivative_tag_v) {
+          using derivative_tag = typename decltype(derivative_tag_v)::type;
+          ::Cce::detail::apply_swsh_jacobian_helper<derivative_tag>(
+              make_not_null(&box),
+              typename ApplySwshJacobianInplace<
+                  derivative_tag>::on_demand_argument_tags{});
+        });
   }
 
   template <typename DbTags, typename... TagPack>

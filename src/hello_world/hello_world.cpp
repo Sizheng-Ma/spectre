@@ -315,6 +315,13 @@ void ccm_functions(std::vector<double>& psi0,
 
   /****************************FilterSwshVolumeQuantity*************************************/
   Cce::Actions::FilterSwshVolumeQuantity<Cce::Tags::BondiH>::apply(spectre_box);
+
+  /*************************compute_scri_quantities_and_observe*****************************/
+  db::mutate_apply<
+      Cce::CalculateScriPlusValue<::Tags::dt<Cce::Tags::InertialRetardedTime>>>(
+      make_not_null(&spectre_box));
+
+  Cce::Actions::CalculateScriInputs::apply(spectre_box);
   // DataVector dv_psi0 = gh_read * 2.;
 
   // for (unsigned int i = 0; i < dv_psi0.size(); i++) {
