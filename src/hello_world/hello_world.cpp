@@ -6,6 +6,7 @@
 #include <boost/preprocessor.hpp>
 #include <iostream>
 #include <string>
+#include <type_traits>
 
 #include "DataStructures/DataVector.hpp"
 #include "Evolution/Executables/Cce/CharacteristicExtractBase.hpp"
@@ -15,9 +16,12 @@
 #include "Evolution/Systems/Cce/Actions/UpdateGauge.hpp"
 #include "Evolution/Systems/Cce/BoundaryData.hpp"
 #include "Evolution/Systems/Cce/Components/CharacteristicEvolution.hpp"
+#include "Evolution/Systems/Cce/Equations.hpp"
 #include "Evolution/Systems/Cce/Initialize/InitializeJ.hpp"
 #include "Evolution/Systems/Cce/OptionTags.hpp"
+#include "Evolution/Systems/Cce/PreSwshDerivatives.hpp"
 #include "Evolution/Systems/Cce/PrecomputeCceDependencies.hpp"
+#include "Evolution/Systems/Cce/SwshDerivatives.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "Evolution/Systems/Cce/WorldtubeBufferUpdater.hpp"
 #include "Evolution/Systems/Cce/WorldtubeDataManager.hpp"
@@ -264,6 +268,42 @@ void ccm_functions(std::vector<double>& psi0,
         using mutator = typename decltype(mutator_v)::type;
         db::mutate_apply<mutator>(make_not_null(&spectre_box));
       });
+
+  /****************************hypersurface_computation*************************************/
+  ;
+  tmpl::for_each<Cce::bondi_hypersurface_step_tags>([&spectre_box](
+                                                        auto tag_v1) {
+    using BondiTag = typename decltype(tag_v1)::type;
+    db::mutate_apply<Cce::GaugeAdjustedBoundaryValue<BondiTag>>(
+        make_not_null(&spectre_box));
+    Cce::mutate_all_pre_swsh_derivatives_for_tag<BondiTag>(
+        make_not_null(&spectre_box));
+    Cce::mutate_all_swsh_derivatives_for_tag<BondiTag>(
+        make_not_null(&spectre_box));
+
+    tmpl::for_each<
+        Cce::integrand_terms_to_compute_for_bondi_variable<BondiTag>>(
+        [&spectre_box](auto tag_v) {
+          using tag = typename decltype(tag_v)::type;
+          db::mutate_apply<Cce::ComputeBondiIntegrand<tag>>(
+              make_not_null(&spectre_box));
+        });
+    db::mutate_apply<Cce::RadialIntegrateBondi<
+        Cce::Tags::EvolutionGaugeBoundaryValue, BondiTag>>(
+        make_not_null(&spectre_box));
+    if constexpr (std::is_same_v<BondiTag, Cce::Tags::BondiU>) {
+      db::mutate_apply<Cce::GaugeUpdateTimeDerivatives>(
+          make_not_null(&spectre_box));
+      db::mutate_apply<Cce::GaugeUpdateInertialTimeDerivatives>(
+          make_not_null(&spectre_box));
+      db::mutate_apply<
+          Cce::GaugeAdjustedBoundaryValue<Cce::Tags::DuRDividedByR>>(
+          make_not_null(&spectre_box));
+      db::mutate_apply<Cce::PrecomputeCceDependencies<
+          Cce::Tags::EvolutionGaugeBoundaryValue, Cce::Tags::DuRDividedByR>>(
+          make_not_null(&spectre_box));
+    };
+  });
 
   // DataVector dv_psi0 = gh_read * 2.;
 
