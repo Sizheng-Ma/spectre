@@ -239,7 +239,6 @@ void ccm_functions(std::vector<double>& psi0,
                    .data()
             << std::endl;
 
-  ;
   /****************************Construct_Bondi_J*************************************/
   std::cout << get(db::get<Cce::Tags::BondiJ>(spectre_box)).data() << std::endl;
 
@@ -329,6 +328,8 @@ void ccm_functions(std::vector<double>& psi0,
   });
 
   // I don't have InsertInterpolationScriData and ScriObserveInterpolated
+  std::cout << "final: BondiH "
+            << get(get<Cce::Tags::BondiH>(spectre_box)).data() << std::endl;
   // DataVector dv_psi0 = gh_read * 2.;
 
   // for (unsigned int i = 0; i < dv_psi0.size(); i++) {
