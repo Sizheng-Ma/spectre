@@ -54,6 +54,11 @@ struct FilterSwshVolumeQuantity {
       const Parallel::GlobalCache<Metavariables>& /*cache*/,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) {
+    apply(box);
+    return {Parallel::AlgorithmExecution::Continue, std::nullopt};
+  }
+  template <typename... DbTags>
+  static void apply(db::DataBox<tmpl::list<DbTags...>>& box) {
     const size_t l_max = db::get<Tags::LMax>(box);
     const size_t l_filter_start = get<Tags::FilterLMax>(box);
     const double radial_filter_alpha = get<Tags::RadialFilterAlpha>(box);
@@ -68,7 +73,6 @@ struct FilterSwshVolumeQuantity {
               radial_filter_alpha, radial_filter_half_power);
         },
         make_not_null(&box));
-    return {Parallel::AlgorithmExecution::Continue, std::nullopt};
   }
 };
 

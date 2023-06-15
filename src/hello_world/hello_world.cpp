@@ -113,8 +113,11 @@ void ccm_functions(std::vector<double>& psi0,
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t l_max = 3;
+  const size_t filter_l_max = 1;
   const size_t scri_interpolation_order = 5;
   const size_t number_of_radial_points = 2;
+  const double radial_filter_alpha = 35.0;
+  const size_t radial_filter_half_power = 24;
 
   using Metavariables = MyEvolutionMetavars;
 
@@ -128,7 +131,9 @@ void ccm_functions(std::vector<double>& psi0,
   using simple_tags_for_scri = initialize_scri::simple_tags;
   using from_cache =
       tmpl::list<Cce::InitializationTags::ScriInterpolationOrder,
-                 Cce::Tags::LMax, Cce::Tags::NumberOfRadialPoints>;
+                 Cce::Tags::LMax, Cce::Tags::NumberOfRadialPoints,
+                 Cce::Tags::FilterLMax, Cce::Tags::RadialFilterAlpha,
+                 Cce::Tags::RadialFilterHalfPower>;
   using simple_tags =
       tmpl::append<from_cache, simple_tags_for_evolution, simple_tags_for_scri>;
 
@@ -140,7 +145,10 @@ void ccm_functions(std::vector<double>& psi0,
       Cce::InitializationTags::ScriInterpolationOrder::type{
           scri_interpolation_order},
       Cce::Tags::LMax::type{l_max},
-      Cce::OptionTags::NumberOfRadialPoints::type{number_of_radial_points});
+      Cce::OptionTags::NumberOfRadialPoints::type{number_of_radial_points},
+      Cce::Tags::FilterLMax::type{filter_l_max},
+      Cce::Tags::RadialFilterAlpha::type{radial_filter_alpha},
+      Cce::Tags::RadialFilterHalfPower::type{radial_filter_half_power});
   initialize_action::initialize_impl(make_not_null(&spectre_box));
 
   initialize_scri::initialize_impl(
@@ -305,6 +313,8 @@ void ccm_functions(std::vector<double>& psi0,
     };
   });
 
+  /****************************FilterSwshVolumeQuantity*************************************/
+  Cce::Actions::FilterSwshVolumeQuantity<Cce::Tags::BondiH>::apply(spectre_box);
   // DataVector dv_psi0 = gh_read * 2.;
 
   // for (unsigned int i = 0; i < dv_psi0.size(); i++) {
