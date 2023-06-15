@@ -322,6 +322,13 @@ void ccm_functions(std::vector<double>& psi0,
       make_not_null(&spectre_box));
 
   Cce::Actions::CalculateScriInputs::apply(spectre_box);
+  tmpl::for_each<Metavariables::cce_scri_tags>([&spectre_box](auto tag_v) {
+    using tag = typename decltype(tag_v)::type;
+    db::mutate_apply<Cce::CalculateScriPlusValue<tag>>(
+        make_not_null(&spectre_box));
+  });
+
+  // I don't have InsertInterpolationScriData and ScriObserveInterpolated
   // DataVector dv_psi0 = gh_read * 2.;
 
   // for (unsigned int i = 0; i < dv_psi0.size(); i++) {

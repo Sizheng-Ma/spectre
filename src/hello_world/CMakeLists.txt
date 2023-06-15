@@ -31,6 +31,7 @@ target_link_libraries(
  Spectral
  H5
  Libxsmm
+ Cce
  )
 
 # # add_custom_command
