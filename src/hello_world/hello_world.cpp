@@ -100,6 +100,150 @@ struct MyEvolutionMetavars : CharacteristicExtractDefaults<true> {
   };
 };
 
+void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
+                  const std::vector<double>& bondi_beta_spec,
+                  const std::vector<double>& bondi_dr_j_spec,
+                  const std::vector<double>& bondi_du_r_spec,
+                  const std::vector<double>& bondi_h_spec,
+                  const std::vector<double>& bondi_j_spec,
+                  const std::vector<double>& bondi_q_spec,
+                  const std::vector<double>& bondi_r_spec,
+                  const std::vector<double>& bondi_u_spec,
+                  const std::vector<double>& bondi_w_spec) {
+  // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
+
+  const size_t l_max = 3;
+  const size_t filter_l_max = 1;
+  const size_t scri_interpolation_order = 5;
+  const size_t number_of_radial_points = 2;
+  const double radial_filter_alpha = 35.0;
+  const size_t radial_filter_half_power = 24;
+
+  using Metavariables = MyEvolutionMetavars;
+
+  using initialize_action =
+      Cce::Actions::InitializeCharacteristicEvolutionVariables<Metavariables>;
+  using initialize_scri = Cce::Actions::InitializeCharacteristicEvolutionScri<
+      Metavariables::scri_values_to_observe,
+      Metavariables::cce_boundary_component>;
+  using simple_tags_for_evolution =
+      initialize_action::simple_tags_for_evolution;
+  using simple_tags_for_scri = initialize_scri::simple_tags;
+  using from_cache =
+      tmpl::list<Cce::InitializationTags::ScriInterpolationOrder,
+                 Cce::Tags::LMax, Cce::Tags::NumberOfRadialPoints,
+                 Cce::Tags::FilterLMax, Cce::Tags::RadialFilterAlpha,
+                 Cce::Tags::RadialFilterHalfPower>;
+  using simple_tags =
+      tmpl::append<from_cache, simple_tags_for_evolution, simple_tags_for_scri>;
+
+  auto spectre_box = db::create<db::AddSimpleTags<simple_tags>>();
+
+  /****************************Initialization*************************************/
+  Initialization::mutate_assign<from_cache>(
+      make_not_null(&spectre_box),
+      Cce::InitializationTags::ScriInterpolationOrder::type{
+          scri_interpolation_order},
+      Cce::Tags::LMax::type{l_max},
+      Cce::OptionTags::NumberOfRadialPoints::type{number_of_radial_points},
+      Cce::Tags::FilterLMax::type{filter_l_max},
+      Cce::Tags::RadialFilterAlpha::type{radial_filter_alpha},
+      Cce::Tags::RadialFilterHalfPower::type{radial_filter_half_power});
+  initialize_action::initialize_impl(make_not_null(&spectre_box));
+
+  initialize_scri::initialize_impl(
+      make_not_null(&spectre_box),
+      typename Metavariables::scri_values_to_observe{});
+
+  /****************************Get_Boundary_Data*************************************/
+  db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>,
+             Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>,
+             Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiH>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiR>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiU>,
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(
+      [&bondi_beta_spec, &bondi_dr_j_spec, &bondi_du_r_spec, bondi_h_spec,
+       bondi_j_spec, bondi_q_spec, bondi_r_spec, bondi_u_spec, bondi_w_spec](
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
+              bondi_beta,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>::type*>
+              bondi_dr_j,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type*>
+              bondi_du_r,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiH>::type*>
+              bondi_h,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>::type*>
+              bondi_j,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>::type*>
+              bondi_q,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiR>::type*>
+              bondi_r,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiU>::type*>
+              bondi_u,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>::type*>
+              bondi_w) {
+        for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
+          get(*bondi_beta).data()[i] =
+              bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_dr_j).data()[i] =
+              bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_du_r).data()[i] =
+              bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_h).data()[i] =
+              bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_j).data()[i] =
+              bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_q).data()[i] =
+              bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_r).data()[i] =
+              bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_u).data()[i] =
+              bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
+          get(*bondi_w).data()[i] =
+              bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
+        }
+      },
+      make_not_null(&spectre_box));
+
+  db::mutate<initialize_action::boundary_value_variables_tag>(
+      [](const gsl::not_null<
+          initialize_action::boundary_value_variables_tag::type*>
+             boundary_variables) {
+        Cce::BondiWorldtubeDataManager q;
+        auto blah = (*boundary_variables)
+                        .reference_subset<
+                            Metavariables::cce_boundary_communication_tags>();
+        q.populate_hypersurface_boundary_data_spec(make_not_null(&blah));
+      },
+      make_not_null(&spectre_box));
+
+  /****************************Construct_Bondi_J*************************************/
+
+  db::mutate_apply<typename Cce::InitializeJ::InitializeJ<true>::mutate_tags,
+                   typename Cce::InitializeJ::InitializeJ<true>::argument_tags>(
+      Cce::InitializeJ::InverseCubic<true>(), make_not_null(&spectre_box));
+  std::cout << "final: BondiJ size: "
+            << get(get<Cce::Tags::BondiJ>(spectre_box)).size() << " "
+            << get(get<Cce::Tags::BondiJ>(spectre_box)).data() << std::endl;
+  auto& j_initial_data = get(get<Cce::Tags::BondiJ>(spectre_box));
+  for (unsigned int i = 0; i < j_initial_data.size(); i++) {
+    re_j.push_back(real(j_initial_data.data())[i]);
+    im_j.push_back(real(j_initial_data.data())[i]);
+  }
+}
+
 void ccm_functions(std::vector<double>& psi0,
                    const std::vector<double>& bondi_beta_spec,
                    const std::vector<double>& bondi_dr_j_spec,
@@ -328,7 +472,8 @@ void ccm_functions(std::vector<double>& psi0,
   });
 
   // I don't have InsertInterpolationScriData and ScriObserveInterpolated
-  std::cout << "final: BondiH "
+  std::cout << "final: BondiH size: "
+            << get(get<Cce::Tags::BondiH>(spectre_box)).size() << " "
             << get(get<Cce::Tags::BondiH>(spectre_box)).data() << std::endl;
   // DataVector dv_psi0 = gh_read * 2.;
 
