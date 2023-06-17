@@ -244,7 +244,7 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
   }
 }
 
-void ccm_functions(std::vector<double>& psi0,
+void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    const std::vector<double>& bondi_beta_spec,
                    const std::vector<double>& bondi_dr_j_spec,
                    const std::vector<double>& bondi_du_r_spec,
@@ -475,6 +475,11 @@ void ccm_functions(std::vector<double>& psi0,
   std::cout << "final: BondiH size: "
             << get(get<Cce::Tags::BondiH>(spectre_box)).size() << " "
             << get(get<Cce::Tags::BondiH>(spectre_box)).data() << std::endl;
+  auto& final_h = get(get<Cce::Tags::BondiH>(spectre_box));
+  for (unsigned int i = 0; i < final_h.size(); i++) {
+    re_h.push_back(real(final_h.data())[i]);
+    im_h.push_back(real(final_h.data())[i]);
+  }
   // DataVector dv_psi0 = gh_read * 2.;
 
   // for (unsigned int i = 0; i < dv_psi0.size(); i++) {
