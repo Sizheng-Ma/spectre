@@ -115,12 +115,11 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
                   const std::vector<std::complex<double>>& bondi_r_spec,
                   const std::vector<std::complex<double>>& bondi_u_spec,
                   const std::vector<std::complex<double>>& bondi_w_spec,
-                  const size_t l_max) {
+                  const size_t l_max, const size_t number_of_radial_points) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
   const size_t scri_interpolation_order = 5;
-  const size_t number_of_radial_points = 2;
   const double radial_filter_alpha = 35.0;
   const size_t radial_filter_half_power = 24;
 
@@ -259,12 +258,11 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    const std::vector<std::complex<double>>& bondi_r_spec,
                    const std::vector<std::complex<double>>& bondi_u_spec,
                    const std::vector<std::complex<double>>& bondi_w_spec,
-                   const size_t l_max) {
+                   const size_t l_max, const size_t number_of_radial_points) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
   const size_t scri_interpolation_order = 5;
-  const size_t number_of_radial_points = 2;
   const double radial_filter_alpha = 35.0;
   const size_t radial_filter_half_power = 24;
 
