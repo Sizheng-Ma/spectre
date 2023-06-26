@@ -9,6 +9,7 @@
 void myprint();
 int mynewfunction(int a);
 void print_data_vector();
+size_t get_vector_size(const size_t l_max);
 void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
                   const std::vector<std::complex<double>>& bondi_beta_spec,
                   const std::vector<std::complex<double>>& bondi_dr_j_spec,
