@@ -106,11 +106,14 @@ size_t get_vector_size(const size_t l_max) {
   return Spectral::Swsh::number_of_swsh_collocation_points(l_max);
 };
 
-void transpose_wt_data(std::vector<double>& data_transposed,
-                       const std::vector<double>& data, const size_t l_max) {
+std::vector<double> transpose_wt_data(const std::vector<double>& data,
+                                      const size_t l_max) {
   const size_t theta_extent = l_max + 1;
   const size_t phi_extent = 2 * l_max + 1;
-  transpose(make_not_null(&data_transposed), data, theta_extent, phi_extent);
+  auto data_transposed = data;
+  // TODO: check this
+  transpose(make_not_null(&data_transposed), data, phi_extent, theta_extent);
+  return data_transposed;
 }
 
 void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
