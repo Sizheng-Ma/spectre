@@ -6,13 +6,28 @@
 #include <complex>
 #include <vector>
 
+#include "DataStructures/DataVector.hpp"
+#include "DataStructures/Tensor/TypeAliases.hpp"
+
 void myprint();
 int mynewfunction(int a);
 void print_data_vector();
 size_t get_vector_size(const size_t l_max);
 std::vector<double> transpose_wt_data(const std::vector<double>& data,
                                       const size_t l_max);
-void std_vector_to_DataVector(const std::vector<double>& pitt,const std::vector<double>& pitx,const std::vector<double>& pity,const std::vector<double>& pitz,const std::vector<double>& pixx,const std::vector<double>& pixy,const std::vector<double>& pixz,const std::vector<double>& piyy,const std::vector<double>& piyz,const std::vector<double>& pizz);
+void std_vector_to_DataVector(
+    tnsr::aa<DataVector, 3>& pi, const std::vector<double>& pitt,
+    const std::vector<double>& pitx, const std::vector<double>& pity,
+    const std::vector<double>& pitz, const std::vector<double>& pixx,
+    const std::vector<double>& pixy, const std::vector<double>& pixz,
+    const std::vector<double>& piyy, const std::vector<double>& piyz,
+    const std::vector<double>& pizz);
+void gh_to_bondi(
+    const std::vector<double>& pitt, const std::vector<double>& pitx,
+    const std::vector<double>& pity, const std::vector<double>& pitz,
+    const std::vector<double>& pixx, const std::vector<double>& pixy,
+    const std::vector<double>& pixz, const std::vector<double>& piyy,
+    const std::vector<double>& piyz, const std::vector<double>& pizz);
 void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
                   const std::vector<std::complex<double>>& bondi_beta_spec,
                   const std::vector<std::complex<double>>& bondi_dr_j_spec,

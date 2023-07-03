@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "DataStructures/DataVector.hpp"
+#include "DataStructures/Tensor/TypeAliases.hpp"
 #include "DataStructures/Transpose.hpp"
 #include "Evolution/Executables/Cce/CharacteristicExtractBase.hpp"
 #include "Evolution/Systems/Cce/Actions/InitializeCharacteristicEvolutionScri.hpp"
@@ -501,9 +502,13 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
   // }
 }
 
-void std_vector_to_DataVector(const std::vector<double>& pitt,const std::vector<double>& pitx,const std::vector<double>& pity,const std::vector<double>& pitz,const std::vector<double>& pixx,const std::vector<double>& pixy,const std::vector<double>& pixz,const std::vector<double>& piyy,const std::vector<double>& piyz,const std::vector<double>& pizz) {
-  // create_bondi_boundary_data
-  tnsr::aa<DataVector, 3> pi;
+void std_vector_to_DataVector(
+    tnsr::aa<DataVector, 3>& pi, const std::vector<double>& pitt,
+    const std::vector<double>& pitx, const std::vector<double>& pity,
+    const std::vector<double>& pitz, const std::vector<double>& pixx,
+    const std::vector<double>& pixy, const std::vector<double>& pixz,
+    const std::vector<double>& piyy, const std::vector<double>& piyz,
+    const std::vector<double>& pizz) {
   const auto size = pitt.size();
   DataVector my_pitt{size};
   DataVector my_pitx{size};
@@ -517,15 +522,15 @@ void std_vector_to_DataVector(const std::vector<double>& pitt,const std::vector<
   DataVector my_pizz{size};
   for (unsigned int i = 0; i < pitt.size(); i++) {
     my_pitt[i] = pitt.at(i);
-    my_pitx[i] = pitt.at(i);
-    my_pity[i] = pitt.at(i);
-    my_pitz[i] = pitt.at(i);
-    my_pixx[i] = pitt.at(i);
-    my_pixy[i] = pitt.at(i);
-    my_pixz[i] = pitt.at(i);
-    my_piyy[i] = pitt.at(i);
-    my_piyz[i] = pitt.at(i);
-    my_pizz[i] = pitt.at(i);
+    my_pitx[i] = pitx.at(i);
+    my_pity[i] = pity.at(i);
+    my_pitz[i] = pitz.at(i);
+    my_pixx[i] = pixx.at(i);
+    my_pixy[i] = pixy.at(i);
+    my_pixz[i] = pixz.at(i);
+    my_piyy[i] = piyy.at(i);
+    my_piyz[i] = piyz.at(i);
+    my_pizz[i] = pizz.at(i);
   }
   get<0, 0>(pi) = my_pitt;
   get<0, 1>(pi) = my_pitx;
@@ -537,4 +542,21 @@ void std_vector_to_DataVector(const std::vector<double>& pitt,const std::vector<
   get<2, 2>(pi) = my_piyy;
   get<2, 3>(pi) = my_piyz;
   get<3, 3>(pi) = my_pizz;
+}
+
+void gh_to_bondi(
+    const std::vector<double>& pitt, const std::vector<double>& pitx,
+    const std::vector<double>& pity, const std::vector<double>& pitz,
+    const std::vector<double>& pixx, const std::vector<double>& pixy,
+    const std::vector<double>& pixz, const std::vector<double>& piyy,
+    const std::vector<double>& piyz, const std::vector<double>& pizz) {
+  // create_bondi_boundary_data
+  tnsr::aa<DataVector, 3> pi;
+  tnsr::aa<DataVector, 3> spacetime_metric;
+  tnsr::iaa<DataVector, 3> phi;
+  std_vector_to_DataVector(pi, pitt, pitx, pity, pitz, pixx, pixy, pixz, piyy,
+                           piyz, pizz);
+  std_vector_to_DataVector(spacetime_metric, pitt, pitx, pity, pitz, pixx, pixy,
+                           pixz, piyy, piyz, pizz);
+  std::cout << "pi " << get<0, 0>(pi) << std::endl;
 }
