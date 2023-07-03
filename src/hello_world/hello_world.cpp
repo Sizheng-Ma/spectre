@@ -10,6 +10,7 @@
 #include <type_traits>
 
 #include "DataStructures/DataVector.hpp"
+#include "DataStructures/SpinWeighted.hpp"
 #include "DataStructures/Tensor/TypeAliases.hpp"
 #include "DataStructures/Transpose.hpp"
 #include "Evolution/Executables/Cce/CharacteristicExtractBase.hpp"
@@ -269,7 +270,10 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    const std::vector<std::complex<double>>& bondi_r_spec,
                    const std::vector<std::complex<double>>& bondi_u_spec,
                    const std::vector<std::complex<double>>& bondi_w_spec,
-                   const size_t l_max, const size_t number_of_radial_points) {
+                   const size_t l_max, const size_t number_of_radial_points,
+                   const std::vector<std::vector<double>>& spacetime_metric,
+                   const std::vector<std::vector<double>>& pi,
+                   const std::vector<std::vector<std::vector<double>>>& phi) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
@@ -323,8 +327,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiR>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiU>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(
-      [&bondi_beta_spec, &bondi_dr_j_spec, &bondi_du_r_spec, bondi_h_spec,
-       bondi_j_spec, bondi_q_spec, bondi_r_spec, bondi_u_spec, bondi_w_spec](
+      [&spacetime_metric, &phi, &pi, &l_max](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
               bondi_beta,
@@ -352,26 +355,29 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiW>::type*>
               bondi_w) {
-        for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
-          get(*bondi_beta).data()[i] =
-              bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_dr_j).data()[i] =
-              bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_du_r).data()[i] =
-              bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_h).data()[i] =
-              bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_j).data()[i] =
-              bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_q).data()[i] =
-              bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_r).data()[i] =
-              bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_u).data()[i] =
-              bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_w).data()[i] =
-              bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
-        }
+        gh_to_bondi(*bondi_beta, *bondi_dr_j, *bondi_du_r, *bondi_h, *bondi_j,
+                    *bondi_q, *bondi_r, *bondi_u, *bondi_w, spacetime_metric,
+                    pi, phi, l_max);
+        // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
+        //   //   get(*bondi_beta).data()[i] =
+        //   //       bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   //   get(*bondi_dr_j).data()[i] =
+        //   //       bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   //   get(*bondi_du_r).data()[i] =
+        //   //       bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   //   get(*bondi_h).data()[i] =
+        //   //       bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   //   get(*bondi_j).data()[i] =
+        //   //       bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   //   get(*bondi_q).data()[i] =
+        //   //       bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   //   get(*bondi_r).data()[i] =
+        //   //       bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   //   get(*bondi_u).data()[i] =
+        //   //       bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   //   get(*bondi_w).data()[i] =
+        //   //       bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
+        // }
       },
       make_not_null(&spectre_box));
 
@@ -539,7 +545,16 @@ void tri_std_vector_to_DataVector(
   }
 }
 
-void gh_to_bondi(const std::vector<std::vector<double>>& spacetime_metric,
+void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
+                 Scalar<SpinWeighted<ComplexDataVector, 2>>& dr_j,
+                 Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r,
+                 Scalar<SpinWeighted<ComplexDataVector, 2>>& bondih,
+                 Scalar<SpinWeighted<ComplexDataVector, 2>>& bondij,
+                 Scalar<SpinWeighted<ComplexDataVector, 1>>& bondiq,
+                 Scalar<SpinWeighted<ComplexDataVector, 0>>& bondir,
+                 Scalar<SpinWeighted<ComplexDataVector, 1>>& bondiu,
+                 Scalar<SpinWeighted<ComplexDataVector, 0>>& bondiw,
+                 const std::vector<std::vector<double>>& spacetime_metric,
                  const std::vector<std::vector<double>>& pi,
                  const std::vector<std::vector<std::vector<double>>>& phi,
                  const size_t l_max) {
@@ -551,10 +566,6 @@ void gh_to_bondi(const std::vector<std::vector<double>>& spacetime_metric,
   std_vector_to_DataVector(pi_datavector, pi);
   std_vector_to_DataVector(spacetime_metric_datavector, spacetime_metric);
   tri_std_vector_to_DataVector(phi_datavector, phi);
-  std::cout << "pi " << pi_datavector.get(3, 0) << std::endl;
-  std::cout << "phi " << phi_datavector.get(0, 3, 0) << std::endl;
-  std::cout << "spacetime " << spacetime_metric_datavector.get(3, 0)
-            << std::endl;
   using initialize_action =
       Cce::Actions::InitializeCharacteristicEvolutionVariables<
           MyEvolutionMetavars>;
@@ -584,4 +595,15 @@ void gh_to_bondi(const std::vector<std::vector<double>>& spacetime_metric,
       },
       make_not_null(&spectre_box));
 
+  beta = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(spectre_box);
+  dr_j = get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(
+      spectre_box);
+  du_r = get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
+      spectre_box);
+  bondih = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiH>>(spectre_box);
+  bondij = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>>(spectre_box);
+  bondiq = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>>(spectre_box);
+  bondir = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>>(spectre_box);
+  bondiu = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(spectre_box);
+  bondiw = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(spectre_box);
 }
