@@ -541,7 +541,8 @@ void tri_std_vector_to_DataVector(
 
 void gh_to_bondi(const std::vector<std::vector<double>>& spacetime_metric,
                  const std::vector<std::vector<double>>& pi,
-                 const std::vector<std::vector<std::vector<double>>>& phi) {
+                 const std::vector<std::vector<std::vector<double>>>& phi,
+                 const size_t l_max) {
   // create_bondi_boundary_data
   const auto size = pi.at(0).size();
   tnsr::aa<DataVector, 3> pi_datavector{size};
@@ -550,7 +551,37 @@ void gh_to_bondi(const std::vector<std::vector<double>>& spacetime_metric,
   std_vector_to_DataVector(pi_datavector, pi);
   std_vector_to_DataVector(spacetime_metric_datavector, spacetime_metric);
   tri_std_vector_to_DataVector(phi_datavector, phi);
-  std::cout << "pi " << get<3, 0>(pi_datavector) << std::endl;
-  std::cout << "spacetime " << get<3, 0>(spacetime_metric_datavector)
+  std::cout << "pi " << pi_datavector.get(3, 0) << std::endl;
+  std::cout << "phi " << phi_datavector.get(0, 3, 0) << std::endl;
+  std::cout << "spacetime " << spacetime_metric_datavector.get(3, 0)
             << std::endl;
+  using initialize_action =
+      Cce::Actions::InitializeCharacteristicEvolutionVariables<
+          MyEvolutionMetavars>;
+  auto spectre_box = db::create<
+      db::AddSimpleTags<initialize_action::simple_tags_for_evolution>>();
+
+  size_t boundary_size = get_vector_size(l_max);
+  using boundary_value_variables_tag = ::Tags::Variables<tmpl::append<
+      typename MyEvolutionMetavars::cce_boundary_communication_tags,
+      typename MyEvolutionMetavars::cce_gauge_boundary_tags>>;
+  Initialization::mutate_assign<tmpl::list<boundary_value_variables_tag>>(
+      make_not_null(&spectre_box),
+      typename boundary_value_variables_tag::type{boundary_size});
+
+  db::mutate<initialize_action::boundary_value_variables_tag>(
+      [&l_max, &phi_datavector, &pi_datavector, &spacetime_metric_datavector](
+          const gsl::not_null<
+              initialize_action::boundary_value_variables_tag::type*>
+              boundary_variables) {
+        auto blah =
+            (*boundary_variables)
+                .reference_subset<
+                    MyEvolutionMetavars::cce_boundary_communication_tags>();
+        Cce::create_bondi_boundary_data(make_not_null(&blah), phi_datavector,
+                                        pi_datavector,
+                                        spacetime_metric_datavector, 10, l_max);
+      },
+      make_not_null(&spectre_box));
+
 }
