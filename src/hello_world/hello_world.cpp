@@ -502,61 +502,55 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
   // }
 }
 
-void std_vector_to_DataVector(
-    tnsr::aa<DataVector, 3>& pi, const std::vector<double>& pitt,
-    const std::vector<double>& pitx, const std::vector<double>& pity,
-    const std::vector<double>& pitz, const std::vector<double>& pixx,
-    const std::vector<double>& pixy, const std::vector<double>& pixz,
-    const std::vector<double>& piyy, const std::vector<double>& piyz,
-    const std::vector<double>& pizz) {
-  const auto size = pitt.size();
-  DataVector my_pitt{size};
-  DataVector my_pitx{size};
-  DataVector my_pity{size};
-  DataVector my_pitz{size};
-  DataVector my_pixx{size};
-  DataVector my_pixy{size};
-  DataVector my_pixz{size};
-  DataVector my_piyy{size};
-  DataVector my_piyz{size};
-  DataVector my_pizz{size};
-  for (unsigned int i = 0; i < pitt.size(); i++) {
-    my_pitt[i] = pitt.at(i);
-    my_pitx[i] = pitx.at(i);
-    my_pity[i] = pity.at(i);
-    my_pitz[i] = pitz.at(i);
-    my_pixx[i] = pixx.at(i);
-    my_pixy[i] = pixy.at(i);
-    my_pixz[i] = pixz.at(i);
-    my_piyy[i] = piyy.at(i);
-    my_piyz[i] = piyz.at(i);
-    my_pizz[i] = pizz.at(i);
+void std_vector_to_DataVector(tnsr::aa<DataVector, 3>& pi,
+                              const std::vector<std::vector<double>>& data) {
+  const auto size = data.at(0).size();
+  for (unsigned int i = 0; i < size; i++) {
+    get<0, 0>(pi)[i] = data.at(0)[i];
+    get<0, 1>(pi)[i] = data.at(1)[i];
+    get<0, 2>(pi)[i] = data.at(2)[i];
+    get<0, 3>(pi)[i] = data.at(3)[i];
+    get<1, 1>(pi)[i] = data.at(4)[i];
+    get<1, 2>(pi)[i] = data.at(5)[i];
+    get<1, 3>(pi)[i] = data.at(6)[i];
+    get<2, 2>(pi)[i] = data.at(7)[i];
+    get<2, 3>(pi)[i] = data.at(8)[i];
+    get<3, 3>(pi)[i] = data.at(9)[i];
   }
-  get<0, 0>(pi) = my_pitt;
-  get<0, 1>(pi) = my_pitx;
-  get<0, 2>(pi) = my_pity;
-  get<0, 3>(pi) = my_pitz;
-  get<1, 1>(pi) = my_pixx;
-  get<1, 2>(pi) = my_pixy;
-  get<1, 3>(pi) = my_pixz;
-  get<2, 2>(pi) = my_piyy;
-  get<2, 3>(pi) = my_piyz;
-  get<3, 3>(pi) = my_pizz;
 }
 
-void gh_to_bondi(
-    const std::vector<double>& pitt, const std::vector<double>& pitx,
-    const std::vector<double>& pity, const std::vector<double>& pitz,
-    const std::vector<double>& pixx, const std::vector<double>& pixy,
-    const std::vector<double>& pixz, const std::vector<double>& piyy,
-    const std::vector<double>& piyz, const std::vector<double>& pizz) {
+void tri_std_vector_to_DataVector(
+    tnsr::iaa<DataVector, 3>& pi,
+    const std::vector<std::vector<std::vector<double>>>& data) {
+  const auto size = data.at(0).at(0).size();
+  for (size_t ijj = 0; ijj < 3; ++ijj) {
+    for (size_t i = 0; i < size; i++) {
+      pi.get(ijj, 0, 0)[i] = data.at(ijj).at(0)[i];
+      pi.get(ijj, 0, 1)[i] = data.at(ijj).at(1)[i];
+      pi.get(ijj, 0, 2)[i] = data.at(ijj).at(2)[i];
+      pi.get(ijj, 0, 3)[i] = data.at(ijj).at(3)[i];
+      pi.get(ijj, 1, 1)[i] = data.at(ijj).at(4)[i];
+      pi.get(ijj, 1, 2)[i] = data.at(ijj).at(5)[i];
+      pi.get(ijj, 1, 3)[i] = data.at(ijj).at(6)[i];
+      pi.get(ijj, 2, 2)[i] = data.at(ijj).at(7)[i];
+      pi.get(ijj, 2, 3)[i] = data.at(ijj).at(8)[i];
+      pi.get(ijj, 3, 3)[i] = data.at(ijj).at(9)[i];
+    }
+  }
+}
+
+void gh_to_bondi(const std::vector<std::vector<double>>& spacetime_metric,
+                 const std::vector<std::vector<double>>& pi,
+                 const std::vector<std::vector<std::vector<double>>>& phi) {
   // create_bondi_boundary_data
-  tnsr::aa<DataVector, 3> pi;
-  tnsr::aa<DataVector, 3> spacetime_metric;
-  tnsr::iaa<DataVector, 3> phi;
-  std_vector_to_DataVector(pi, pitt, pitx, pity, pitz, pixx, pixy, pixz, piyy,
-                           piyz, pizz);
-  std_vector_to_DataVector(spacetime_metric, pitt, pitx, pity, pitz, pixx, pixy,
-                           pixz, piyy, piyz, pizz);
-  std::cout << "pi " << get<0, 0>(pi) << std::endl;
+  const auto size = pi.at(0).size();
+  tnsr::aa<DataVector, 3> pi_datavector{size};
+  tnsr::aa<DataVector, 3> spacetime_metric_datavector{size};
+  tnsr::iaa<DataVector, 3> phi_datavector{size};
+  std_vector_to_DataVector(pi_datavector, pi);
+  std_vector_to_DataVector(spacetime_metric_datavector, spacetime_metric);
+  tri_std_vector_to_DataVector(phi_datavector, phi);
+  std::cout << "pi " << get<3, 0>(pi_datavector) << std::endl;
+  std::cout << "spacetime " << get<3, 0>(spacetime_metric_datavector)
+            << std::endl;
 }
