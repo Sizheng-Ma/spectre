@@ -45,6 +45,25 @@
 #include "Time/TimeSteppers/LtsTimeStepper.hpp"
 #include "Utilities/MakeString.hpp"
 
+void std_vector_to_DataVector(tnsr::aa<DataVector, 3>& pi,
+                              const std::vector<std::vector<double>>& data);
+void tri_std_vector_to_DataVector(
+    tnsr::iaa<DataVector, 3>& pi,
+    const std::vector<std::vector<std::vector<double>>>& data);
+void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
+                 Scalar<SpinWeighted<ComplexDataVector, 2>>& dr_j,
+                 Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r,
+                 Scalar<SpinWeighted<ComplexDataVector, 2>>& bondih,
+                 Scalar<SpinWeighted<ComplexDataVector, 2>>& bondij,
+                 Scalar<SpinWeighted<ComplexDataVector, 1>>& bondiq,
+                 Scalar<SpinWeighted<ComplexDataVector, 0>>& bondir,
+                 Scalar<SpinWeighted<ComplexDataVector, 1>>& bondiu,
+                 Scalar<SpinWeighted<ComplexDataVector, 0>>& bondiw,
+                 const std::vector<std::vector<double>>& spacetime_metric,
+                 const std::vector<std::vector<double>>& pi,
+                 const std::vector<std::vector<std::vector<double>>>& phi,
+                 const size_t l_max);
+
 // Charm looks for this function but since we build without a main function or
 // main module we just have it be empty
 extern "C" void CkRegisterMainModule(void) {}
