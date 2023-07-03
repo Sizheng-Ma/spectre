@@ -119,16 +119,10 @@ std::vector<double> transpose_wt_data(const std::vector<double>& data,
 }
 
 void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
-                  const std::vector<std::complex<double>>& bondi_beta_spec,
-                  const std::vector<std::complex<double>>& bondi_dr_j_spec,
-                  const std::vector<std::complex<double>>& bondi_du_r_spec,
-                  const std::vector<std::complex<double>>& bondi_h_spec,
-                  const std::vector<std::complex<double>>& bondi_j_spec,
-                  const std::vector<std::complex<double>>& bondi_q_spec,
-                  const std::vector<std::complex<double>>& bondi_r_spec,
-                  const std::vector<std::complex<double>>& bondi_u_spec,
-                  const std::vector<std::complex<double>>& bondi_w_spec,
-                  const size_t l_max, const size_t number_of_radial_points) {
+                  const size_t l_max, const size_t number_of_radial_points,
+                  const std::vector<std::vector<double>>& spacetime_metric,
+                  const std::vector<std::vector<double>>& pi,
+                  const std::vector<std::vector<std::vector<double>>>& phi) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
@@ -182,8 +176,7 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiR>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiU>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(
-      [&bondi_beta_spec, &bondi_dr_j_spec, &bondi_du_r_spec, bondi_h_spec,
-       bondi_j_spec, bondi_q_spec, bondi_r_spec, bondi_u_spec, bondi_w_spec](
+      [&spacetime_metric, &phi, &pi, &l_max](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
               bondi_beta,
@@ -211,26 +204,29 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiW>::type*>
               bondi_w) {
-        for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
-          get(*bondi_beta).data()[i] =
-              bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_dr_j).data()[i] =
-              bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_du_r).data()[i] =
-              bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_h).data()[i] =
-              bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_j).data()[i] =
-              bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_q).data()[i] =
-              bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_r).data()[i] =
-              bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_u).data()[i] =
-              bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
-          get(*bondi_w).data()[i] =
-              bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
-        }
+        gh_to_bondi(*bondi_beta, *bondi_dr_j, *bondi_du_r, *bondi_h, *bondi_j,
+                    *bondi_q, *bondi_r, *bondi_u, *bondi_w, spacetime_metric,
+                    pi, phi, l_max);
+        // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
+        //   get(*bondi_beta).data()[i] =
+        //       bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   get(*bondi_dr_j).data()[i] =
+        //       bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   get(*bondi_du_r).data()[i] =
+        //       bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   get(*bondi_h).data()[i] =
+        //       bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   get(*bondi_j).data()[i] =
+        //       bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   get(*bondi_q).data()[i] =
+        //       bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   get(*bondi_r).data()[i] =
+        //       bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   get(*bondi_u).data()[i] =
+        //       bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
+        //   get(*bondi_w).data()[i] =
+        //       bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
+        // }
       },
       make_not_null(&spectre_box));
 
