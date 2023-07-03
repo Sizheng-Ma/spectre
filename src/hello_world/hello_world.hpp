@@ -22,7 +22,7 @@ void tri_std_vector_to_DataVector(
     const std::vector<std::vector<std::vector<double>>>& data);
 void gh_to_bondi(const std::vector<std::vector<double>>& spacetime_metric,
                  const std::vector<std::vector<double>>& pi,
-                 const std::vector<std::vector<std::vector<double>>>& phi);
+                 const std::vector<std::vector<std::vector<double>>>& phi,const size_t l_max);
 void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
                   const std::vector<std::complex<double>>& bondi_beta_spec,
                   const std::vector<std::complex<double>>& bondi_dr_j_spec,
