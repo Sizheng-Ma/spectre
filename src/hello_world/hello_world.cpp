@@ -500,3 +500,41 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
   //   psi0.push_back(dv_psi0.at(i));
   // }
 }
+
+void std_vector_to_DataVector(const std::vector<double>& pitt,const std::vector<double>& pitx,const std::vector<double>& pity,const std::vector<double>& pitz,const std::vector<double>& pixx,const std::vector<double>& pixy,const std::vector<double>& pixz,const std::vector<double>& piyy,const std::vector<double>& piyz,const std::vector<double>& pizz) {
+  // create_bondi_boundary_data
+  tnsr::aa<DataVector, 3> pi;
+  const auto size = pitt.size();
+  DataVector my_pitt{size};
+  DataVector my_pitx{size};
+  DataVector my_pity{size};
+  DataVector my_pitz{size};
+  DataVector my_pixx{size};
+  DataVector my_pixy{size};
+  DataVector my_pixz{size};
+  DataVector my_piyy{size};
+  DataVector my_piyz{size};
+  DataVector my_pizz{size};
+  for (unsigned int i = 0; i < pitt.size(); i++) {
+    my_pitt[i] = pitt.at(i);
+    my_pitx[i] = pitt.at(i);
+    my_pity[i] = pitt.at(i);
+    my_pitz[i] = pitt.at(i);
+    my_pixx[i] = pitt.at(i);
+    my_pixy[i] = pitt.at(i);
+    my_pixz[i] = pitt.at(i);
+    my_piyy[i] = pitt.at(i);
+    my_piyz[i] = pitt.at(i);
+    my_pizz[i] = pitt.at(i);
+  }
+  get<0, 0>(pi) = my_pitt;
+  get<0, 1>(pi) = my_pitx;
+  get<0, 2>(pi) = my_pity;
+  get<0, 3>(pi) = my_pitz;
+  get<1, 1>(pi) = my_pixx;
+  get<1, 2>(pi) = my_pixy;
+  get<1, 3>(pi) = my_pixz;
+  get<2, 2>(pi) = my_piyy;
+  get<2, 3>(pi) = my_piyz;
+  get<3, 3>(pi) = my_pizz;
+}
