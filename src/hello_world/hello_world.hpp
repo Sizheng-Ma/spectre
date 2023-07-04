@@ -17,12 +17,12 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
                   const size_t l_max, const size_t number_of_radial_points,
                   const std::vector<std::vector<double>>& spacetime_metric,
                   const std::vector<std::vector<double>>& pi,
-                  const std::vector<std::vector<std::vector<double>>>& phi);
+                  const std::vector<std::vector<std::vector<double>>>& phi, const double radius);
 void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    const size_t l_max, const size_t number_of_radial_points,
                    const std::vector<std::vector<double>>& spacetime_metric,
                    const std::vector<std::vector<double>>& pi,
-                   const std::vector<std::vector<std::vector<double>>>& phi);
+                   const std::vector<std::vector<std::vector<double>>>& phi, const double radius);
 
 // struct test {
 //   using a = tmpl::list<>;
