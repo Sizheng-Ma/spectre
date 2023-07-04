@@ -62,7 +62,7 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
                  const std::vector<std::vector<double>>& spacetime_metric,
                  const std::vector<std::vector<double>>& pi,
                  const std::vector<std::vector<std::vector<double>>>& phi,
-                 const size_t l_max);
+                 const size_t l_max, const double radius);
 
 // Charm looks for this function but since we build without a main function or
 // main module we just have it be empty
@@ -141,7 +141,8 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
                   const size_t l_max, const size_t number_of_radial_points,
                   const std::vector<std::vector<double>>& spacetime_metric,
                   const std::vector<std::vector<double>>& pi,
-                  const std::vector<std::vector<std::vector<double>>>& phi) {
+                  const std::vector<std::vector<std::vector<double>>>& phi,
+                  const double radius) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
@@ -195,7 +196,7 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiR>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiU>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(
-      [&spacetime_metric, &phi, &pi, &l_max](
+      [&spacetime_metric, &phi, &pi, &l_max, &radius](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
               bondi_beta,
@@ -225,7 +226,7 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
               bondi_w) {
         gh_to_bondi(*bondi_beta, *bondi_dr_j, *bondi_du_r, *bondi_h, *bondi_j,
                     *bondi_q, *bondi_r, *bondi_u, *bondi_w, spacetime_metric,
-                    pi, phi, l_max);
+                    pi, phi, l_max, radius);
         // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
         //   get(*bondi_beta).data()[i] =
         //       bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
@@ -279,7 +280,8 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    const size_t l_max, const size_t number_of_radial_points,
                    const std::vector<std::vector<double>>& spacetime_metric,
                    const std::vector<std::vector<double>>& pi,
-                   const std::vector<std::vector<std::vector<double>>>& phi) {
+                   const std::vector<std::vector<std::vector<double>>>& phi,
+                   const double radius) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
@@ -333,7 +335,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiR>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiU>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(
-      [&spacetime_metric, &phi, &pi, &l_max](
+      [&spacetime_metric, &phi, &pi, &l_max, &radius](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
               bondi_beta,
@@ -363,7 +365,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
               bondi_w) {
         gh_to_bondi(*bondi_beta, *bondi_dr_j, *bondi_du_r, *bondi_h, *bondi_j,
                     *bondi_q, *bondi_r, *bondi_u, *bondi_w, spacetime_metric,
-                    pi, phi, l_max);
+                    pi, phi, l_max, radius);
         // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
         //   //   get(*bondi_beta).data()[i] =
         //   //       bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
@@ -563,7 +565,7 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
                  const std::vector<std::vector<double>>& spacetime_metric,
                  const std::vector<std::vector<double>>& pi,
                  const std::vector<std::vector<std::vector<double>>>& phi,
-                 const size_t l_max) {
+                 const size_t l_max, const double radius) {
   // create_bondi_boundary_data
   const auto size = pi.at(0).size();
   tnsr::aa<DataVector, 3> pi_datavector{size};
@@ -587,17 +589,17 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
       typename boundary_value_variables_tag::type{boundary_size});
 
   db::mutate<initialize_action::boundary_value_variables_tag>(
-      [&l_max, &phi_datavector, &pi_datavector, &spacetime_metric_datavector](
-          const gsl::not_null<
-              initialize_action::boundary_value_variables_tag::type*>
-              boundary_variables) {
+      [&l_max, &phi_datavector, &pi_datavector, &spacetime_metric_datavector,
+       &radius](const gsl::not_null<
+                initialize_action::boundary_value_variables_tag::type*>
+                    boundary_variables) {
         auto blah =
             (*boundary_variables)
                 .reference_subset<
                     MyEvolutionMetavars::cce_boundary_communication_tags>();
-        Cce::create_bondi_boundary_data(make_not_null(&blah), phi_datavector,
-                                        pi_datavector,
-                                        spacetime_metric_datavector, 10, l_max);
+        Cce::create_bondi_boundary_data(
+            make_not_null(&blah), phi_datavector, pi_datavector,
+            spacetime_metric_datavector, radius, l_max);
       },
       make_not_null(&spectre_box));
 
