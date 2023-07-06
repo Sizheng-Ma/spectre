@@ -52,20 +52,23 @@ void tri_std_vector_to_DataVector(
     const std::vector<std::vector<std::vector<double>>>& data);
 void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
                  Scalar<SpinWeighted<ComplexDataVector, 2>>& dr_j,
+                 Scalar<SpinWeighted<ComplexDataVector, 2>>& du_j,
                  Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r,
                  Scalar<SpinWeighted<ComplexDataVector, 2>>& bondih,
                  Scalar<SpinWeighted<ComplexDataVector, 2>>& bondij,
                  Scalar<SpinWeighted<ComplexDataVector, 1>>& bondiq,
                  Scalar<SpinWeighted<ComplexDataVector, 0>>& bondir,
                  Scalar<SpinWeighted<ComplexDataVector, 1>>& bondiu,
+                 Scalar<SpinWeighted<ComplexDataVector, 1>>& dr_u,
                  Scalar<SpinWeighted<ComplexDataVector, 0>>& bondiw,
+                 Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r_r,
                  const std::vector<std::vector<double>>& spacetime_metric,
                  const std::vector<std::vector<double>>& pi,
                  const std::vector<std::vector<std::vector<double>>>& phi,
                  const size_t l_max, const double radius);
 
-// Charm looks for this function but since we build without a main function or
-// main module we just have it be empty
+// Charm looks for this function but since we build without a main function
+// or main module we just have it be empty
 extern "C" void CkRegisterMainModule(void) {}
 
 std::string link_date() { return std::string(__TIMESTAMP__); }
@@ -200,7 +203,10 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiR>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiU>,
-             Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiW>,
+             Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>,
+             Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
+             Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
       [&spacetime_metric, &phi, &pi, &l_max, &radius](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
@@ -228,10 +234,19 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
               bondi_u,
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiW>::type*>
-              bondi_w) {
-        gh_to_bondi(*bondi_beta, *bondi_dr_j, *bondi_du_r, *bondi_h, *bondi_j,
-                    *bondi_q, *bondi_r, *bondi_u, *bondi_w, spacetime_metric,
-                    pi, phi, l_max, radius);
+              bondi_w,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>::type*>
+              dr_u,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>::type*>
+              du_j,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type*>
+              du_r_r) {
+        gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
+                    *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
+                    *du_r_r, spacetime_metric, pi, phi, l_max, radius);
         // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
         //   get(*bondi_beta).data()[i] =
         //       bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
@@ -255,17 +270,17 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
       },
       make_not_null(&spectre_box));
 
-  db::mutate<initialize_action::boundary_value_variables_tag>(
-      [](const gsl::not_null<
-          initialize_action::boundary_value_variables_tag::type*>
-             boundary_variables) {
-        Cce::BondiWorldtubeDataManager q;
-        auto blah = (*boundary_variables)
-                        .reference_subset<
-                            Metavariables::cce_boundary_communication_tags>();
-        q.populate_hypersurface_boundary_data_spec(make_not_null(&blah));
-      },
-      make_not_null(&spectre_box));
+  //   db::mutate<initialize_action::boundary_value_variables_tag>(
+  //       [](const gsl::not_null<
+  //           initialize_action::boundary_value_variables_tag::type*>
+  //              boundary_variables) {
+  //         Cce::BondiWorldtubeDataManager q;
+  //         auto blah = (*boundary_variables)
+  //                         .reference_subset<
+  //                             Metavariables::cce_boundary_communication_tags>();
+  //         q.populate_hypersurface_boundary_data_spec(make_not_null(&blah));
+  //       },
+  //       make_not_null(&spectre_box));
 
   /****************************Construct_Bondi_J*************************************/
 
@@ -361,7 +376,10 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiR>,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiU>,
-             Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(
+             Cce::Tags::BoundaryValue<Cce::Tags::BondiW>,
+             Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>,
+             Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
+             Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
       [&spacetime_metric, &phi, &pi, &l_max, &radius](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
@@ -389,10 +407,19 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
               bondi_u,
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiW>::type*>
-              bondi_w) {
-        gh_to_bondi(*bondi_beta, *bondi_dr_j, *bondi_du_r, *bondi_h, *bondi_j,
-                    *bondi_q, *bondi_r, *bondi_u, *bondi_w, spacetime_metric,
-                    pi, phi, l_max, radius);
+              bondi_w,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>::type*>
+              dr_u,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>::type*>
+              du_j,
+          const gsl::not_null<
+              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type*>
+              du_r_r) {
+        gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
+                    *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
+                    *du_r_r, spacetime_metric, pi, phi, l_max, radius);
         // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
         //   //   get(*bondi_beta).data()[i] =
         //   //       bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
@@ -422,17 +449,17 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
   //                    .data()
   //             << std::endl;
 
-  db::mutate<initialize_action::boundary_value_variables_tag>(
-      [](const gsl::not_null<
-          initialize_action::boundary_value_variables_tag::type*>
-             boundary_variables) {
-        Cce::BondiWorldtubeDataManager q;
-        auto blah = (*boundary_variables)
-                        .reference_subset<
-                            Metavariables::cce_boundary_communication_tags>();
-        q.populate_hypersurface_boundary_data_spec(make_not_null(&blah));
-      },
-      make_not_null(&spectre_box));
+  //   db::mutate<initialize_action::boundary_value_variables_tag>(
+  //       [](const gsl::not_null<
+  //           initialize_action::boundary_value_variables_tag::type*>
+  //              boundary_variables) {
+  //         Cce::BondiWorldtubeDataManager q;
+  //         auto blah = (*boundary_variables)
+  //                         .reference_subset<
+  //                             Metavariables::cce_boundary_communication_tags>();
+  //         q.populate_hypersurface_boundary_data_spec(make_not_null(&blah));
+  //       },
+  //       make_not_null(&spectre_box));
 
   //   std::cout << get(get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
   //                        spectre_box))
@@ -623,13 +650,16 @@ void tri_std_vector_to_DataVector(
 
 void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
                  Scalar<SpinWeighted<ComplexDataVector, 2>>& dr_j,
+                 Scalar<SpinWeighted<ComplexDataVector, 2>>& du_j,
                  Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r,
                  Scalar<SpinWeighted<ComplexDataVector, 2>>& bondih,
                  Scalar<SpinWeighted<ComplexDataVector, 2>>& bondij,
                  Scalar<SpinWeighted<ComplexDataVector, 1>>& bondiq,
                  Scalar<SpinWeighted<ComplexDataVector, 0>>& bondir,
                  Scalar<SpinWeighted<ComplexDataVector, 1>>& bondiu,
+                 Scalar<SpinWeighted<ComplexDataVector, 1>>& dr_u,
                  Scalar<SpinWeighted<ComplexDataVector, 0>>& bondiw,
+                 Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r_r,
                  const std::vector<std::vector<double>>& spacetime_metric,
                  const std::vector<std::vector<double>>& pi,
                  const std::vector<std::vector<std::vector<double>>>& phi,
@@ -679,16 +709,21 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
                                   radius, l_max);
 
   beta = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(blahblah);
+  bondiu = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(blahblah);
+  dr_u =
+      get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>>(blahblah);
+  bondiq = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>>(blahblah);
+  bondiw = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(blahblah);
+  bondij = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>>(blahblah);
   dr_j =
       get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(blahblah);
+  bondih = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiH>>(blahblah);
+  du_j =
+      get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>>(blahblah);
+  bondir = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>>(blahblah);
   du_r =
       get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(blahblah);
-  bondih = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiH>>(blahblah);
-  bondij = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>>(blahblah);
-  bondiq = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>>(blahblah);
-  bondir = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>>(blahblah);
-  bondiu = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(blahblah);
-  bondiw = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(blahblah);
+  du_r_r = get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(blahblah);
 
   //   beta = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(spectre_box);
   //   dr_j = get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(
