@@ -138,7 +138,12 @@ std::vector<double> transpose_wt_data(const std::vector<double>& data,
 }
 
 void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
-                  const size_t l_max, const size_t number_of_radial_points,
+                  std::vector<double>& cauchy_x, std::vector<double>& cauchy_y,
+                  std::vector<double>& cauchy_z,
+                  std::vector<double>& inertial_x,
+                  std::vector<double>& inertial_y,
+                  std::vector<double>& inertial_z, const size_t l_max,
+                  const size_t number_of_radial_points,
                   const std::vector<std::vector<double>>& spacetime_metric,
                   const std::vector<std::vector<double>>& pi,
                   const std::vector<std::vector<std::vector<double>>>& phi,
@@ -273,6 +278,19 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
   for (unsigned int i = 0; i < j_initial_data.size(); i++) {
     re_j.push_back(real(j_initial_data.data())[i]);
     im_j.push_back(real(j_initial_data.data())[i]);
+  }
+
+  /****************************Construct_coordinates*************************************/
+  auto& cauchy_cart = db::get<Cce::Tags::CauchyCartesianCoords>(spectre_box);
+  auto& inertial_cart =
+      db::get<Cce::Tags::PartiallyFlatCartesianCoords>(spectre_box);
+  for (unsigned int i = 0; i < cauchy_cart.get(0).size(); i++) {
+    cauchy_x.push_back(cauchy_cart.get(0)[i]);
+    cauchy_y.push_back(cauchy_cart.get(1)[i]);
+    cauchy_z.push_back(cauchy_cart.get(2)[i]);
+    inertial_x.push_back(inertial_cart.get(0)[i]);
+    inertial_y.push_back(inertial_cart.get(1)[i]);
+    inertial_z.push_back(inertial_cart.get(2)[i]);
   }
 }
 

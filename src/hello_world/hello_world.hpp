@@ -14,6 +14,12 @@ std::vector<double> transpose_wt_data(const std::vector<double>& data,
                                       const size_t l_max);
 
 void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
+                   std::vector<double>& cauchy_x,
+                   std::vector<double>& cauchy_y,
+                   std::vector<double>& cauchy_z,
+                   std::vector<double>& inertial_x,
+                   std::vector<double>& inertial_y,
+                   std::vector<double>& inertial_z, 
                   const size_t l_max, const size_t number_of_radial_points,
                   const std::vector<std::vector<double>>& spacetime_metric,
                   const std::vector<std::vector<double>>& pi,
