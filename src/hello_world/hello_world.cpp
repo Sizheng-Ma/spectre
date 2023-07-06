@@ -305,7 +305,10 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    const std::vector<std::vector<double>>& spacetime_metric,
                    const std::vector<std::vector<double>>& pi,
                    const std::vector<std::vector<std::vector<double>>>& phi,
-                   const double radius) {
+                   const double radius, const std::vector<double>& re_j,
+                   const std::vector<double>& im_j,
+                   const std::vector<std::vector<double>>& cauchy_cart,
+                   const std::vector<std::vector<double>>& inertial_cart) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
@@ -440,12 +443,43 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
   //   std::cout << get(db::get<Cce::Tags::BondiJ>(spectre_box)).data() <<
   //   std::endl;
 
-  db::mutate_apply<typename Cce::InitializeJ::InitializeJ<true>::mutate_tags,
-                   typename Cce::InitializeJ::InitializeJ<true>::argument_tags>(
-      Cce::InitializeJ::InverseCubic<true>(), make_not_null(&spectre_box));
+  //   db::mutate_apply<typename
+  //   Cce::InitializeJ::InitializeJ<true>::mutate_tags,
+  //                    typename
+  //                    Cce::InitializeJ::InitializeJ<true>::argument_tags>(
+  //       Cce::InitializeJ::InverseCubic<true>(), make_not_null(&spectre_box));
+  db::mutate<Cce::Tags::BondiJ, Cce::Tags::CauchyCartesianCoords,
+             Cce::Tags::PartiallyFlatCartesianCoords>(
+      [&cauchy_cart, &inertial_cart, &re_j, &im_j](
+          const gsl::not_null<Cce::Tags::BondiJ::type*> bondi_j,
+          const gsl::not_null<Cce::Tags::CauchyCartesianCoords::type*>
+              spectre_cauchy_cart,
+          const gsl::not_null<Cce::Tags::PartiallyFlatCartesianCoords::type*>
+              spectre_inertial_cart) {
+        for (int jij = 0; jij < cauchy_cart[0].size(); jij++) {
+          get<0>(*spectre_cauchy_cart)[jij] = cauchy_cart[0][jij];
+          get<0>(*spectre_inertial_cart)[jij] = inertial_cart[0][jij];
+          get<1>(*spectre_cauchy_cart)[jij] = cauchy_cart[1][jij];
+          get<1>(*spectre_inertial_cart)[jij] = inertial_cart[1][jij];
+          get<2>(*spectre_cauchy_cart)[jij] = cauchy_cart[2][jij];
+          get<2>(*spectre_inertial_cart)[jij] = inertial_cart[2][jij];
+        }
+        for (int jij = 0; jij < re_j.size(); jij++) {
+          get(*bondi_j).data()[jij] =
+              re_j[jij] * std::complex<double>(1.0, 0.0) +
+              im_j[jij] * std::complex<double>(0.0, 1.0);
+        }
+      },
+      make_not_null(&spectre_box));
 
   /****************************UpdateGauge*************************************/
   tmpl::for_each<Cce::Actions::UpdateGauge<true>::cce_mutators>(
+      [&spectre_box](auto mutator_v) {
+        using mutator = typename decltype(mutator_v)::type;
+        db::mutate_apply<mutator>(make_not_null(&spectre_box));
+      });
+
+  tmpl::for_each<Cce::Actions::UpdateGauge<true>::ccm_mutators>(
       [&spectre_box](auto mutator_v) {
         using mutator = typename decltype(mutator_v)::type;
         db::mutate_apply<mutator>(make_not_null(&spectre_box));
@@ -455,12 +489,6 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
       db::get<::Tags::dt<Cce::Tags::CauchyCartesianCoords>>(spectre_box);
   auto& dt_inertial_cart =
       db::get<::Tags::dt<Cce::Tags::PartiallyFlatCartesianCoords>>(spectre_box);
-
-  tmpl::for_each<Cce::Actions::UpdateGauge<true>::ccm_mutators>(
-      [&spectre_box](auto mutator_v) {
-        using mutator = typename decltype(mutator_v)::type;
-        db::mutate_apply<mutator>(make_not_null(&spectre_box));
-      });
 
   /****************************PrecomputeGlobalCceDependencies*************************************/
   tmpl::for_each<Cce::gauge_adjustments_setup_tags>([&spectre_box](auto tag_v) {
