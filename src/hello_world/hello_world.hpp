@@ -14,16 +14,16 @@ std::vector<double> transpose_wt_data(const std::vector<double>& data,
                                       const size_t l_max);
 
 void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
-                   std::vector<double>& cauchy_x,
-                   std::vector<double>& cauchy_y,
-                   std::vector<double>& cauchy_z,
-                   std::vector<double>& inertial_x,
-                   std::vector<double>& inertial_y,
-                   std::vector<double>& inertial_z, 
-                  const size_t l_max, const size_t number_of_radial_points,
+                  std::vector<double>& cauchy_x, std::vector<double>& cauchy_y,
+                  std::vector<double>& cauchy_z,
+                  std::vector<double>& inertial_x,
+                  std::vector<double>& inertial_y,
+                  std::vector<double>& inertial_z, const size_t l_max,
+                  const size_t number_of_radial_points,
                   const std::vector<std::vector<double>>& spacetime_metric,
                   const std::vector<std::vector<double>>& pi,
-                  const std::vector<std::vector<std::vector<double>>>& phi, const double radius);
+                  const std::vector<std::vector<std::vector<double>>>& phi,
+                  const double radius);
 void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    std::vector<double>& dt_cauchy_x,
                    std::vector<double>& dt_cauchy_y,
@@ -35,7 +35,10 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    const std::vector<std::vector<double>>& spacetime_metric,
                    const std::vector<std::vector<double>>& pi,
                    const std::vector<std::vector<std::vector<double>>>& phi,
-                   const double radius);
+                   const double radius, const std::vector<double>& re_j,
+                   const std::vector<double>& im_j,
+                   const std::vector<std::vector<double>>& cauchy_cart,
+                   const std::vector<std::vector<double>>& inertial_cart);
 
 // struct test {
 //   using a = tmpl::list<>;
