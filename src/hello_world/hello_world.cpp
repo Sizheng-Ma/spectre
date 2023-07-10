@@ -315,7 +315,8 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    std::vector<double>& dt_cauchy_z,
                    std::vector<double>& dt_inertial_x,
                    std::vector<double>& dt_inertial_y,
-                   std::vector<double>& dt_inertial_z, const size_t l_max,
+                   std::vector<double>& dt_inertial_z,
+                   std::vector<double>& dt_u_scri, const size_t l_max,
                    const size_t number_of_radial_points,
                    const std::vector<std::vector<double>>& spacetime_metric,
                    const std::vector<std::vector<double>>& pi,
@@ -602,6 +603,12 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
     dt_inertial_x.push_back(dt_inertial_cart.get(0)[i]);
     dt_inertial_y.push_back(dt_inertial_cart.get(1)[i]);
     dt_inertial_z.push_back(dt_inertial_cart.get(2)[i]);
+  }
+
+  auto& du_t = get<::Tags::dt<Cce::Tags::InertialRetardedTime>>(spectre_box);
+
+  for (unsigned int i = 0; i < du_t.get().size(); i++) {
+    dt_u_scri.push_back(du_t.get()[i]);
   }
 
   // DataVector dv_psi0 = gh_read * 2.;
