@@ -316,6 +316,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    std::vector<double>& dt_inertial_x,
                    std::vector<double>& dt_inertial_y,
                    std::vector<double>& dt_inertial_z,
+                   std::vector<double>& re_psi3, std::vector<double>& im_psi3,
                    std::vector<double>& dt_u_scri, const size_t l_max,
                    const size_t number_of_radial_points,
                    const std::vector<std::vector<double>>& spacetime_metric,
@@ -609,6 +610,13 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
 
   for (unsigned int i = 0; i < du_t.get().size(); i++) {
     dt_u_scri.push_back(du_t.get()[i]);
+  }
+
+  auto& psi3 = get<Cce::Tags::ScriPlus<Cce::Tags::Psi3>>(spectre_box);
+
+  for (unsigned int i = 0; i < psi3.size(); i++) {
+    re_psi3.push_back(real(get(psi3).data())[i]);
+    im_psi3.push_back(real(get(psi3).data())[i]);
   }
 
   // DataVector dv_psi0 = gh_read * 2.;
