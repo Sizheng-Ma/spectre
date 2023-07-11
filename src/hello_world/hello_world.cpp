@@ -287,8 +287,9 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
   db::mutate_apply<typename Cce::InitializeJ::InitializeJ<true>::mutate_tags,
                    typename Cce::InitializeJ::InitializeJ<true>::argument_tags>(
       Cce::InitializeJ::InverseCubic<true>(), make_not_null(&spectre_box));
-  std::cout << "final: BondiJ size: "
-            << get(get<Cce::Tags::BondiJ>(spectre_box)).size() << std::endl;
+  //   std::cout << "final: BondiJ size: "
+  //             << get(get<Cce::Tags::BondiJ>(spectre_box)).size() <<
+  //             std::endl;
   auto& j_initial_data = get(get<Cce::Tags::BondiJ>(spectre_box));
   for (unsigned int i = 0; i < j_initial_data.size(); i++) {
     re_j.push_back(real(j_initial_data.data())[i]);
@@ -589,8 +590,9 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
 
   /*************************after_cce*****************************/
   // I don't have InsertInterpolationScriData and ScriObserveInterpolated
-  std::cout << "final: BondiH size: "
-            << get(get<Cce::Tags::BondiH>(spectre_box)).size() << std::endl;
+  //   std::cout << "final: BondiH size: "
+  //             << get(get<Cce::Tags::BondiH>(spectre_box)).size() <<
+  //             std::endl;
   auto& final_h = get(get<Cce::Tags::BondiH>(spectre_box));
   for (unsigned int i = 0; i < final_h.size(); i++) {
     re_h.push_back(real(final_h.data())[i]);
@@ -616,8 +618,11 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
 
   for (unsigned int i = 0; i < psi3.size(); i++) {
     re_psi3.push_back(real(get(psi3).data())[i]);
-    im_psi3.push_back(real(get(psi3).data())[i]);
+    im_psi3.push_back(imag(get(psi3).data())[i]);
   }
+
+  std::cout << real(get(psi3).data())[0] << " " << imag(get(psi3).data())[0]
+            << std::endl;
 
   // DataVector dv_psi0 = gh_read * 2.;
 
