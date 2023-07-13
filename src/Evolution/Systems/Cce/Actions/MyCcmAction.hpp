@@ -124,7 +124,8 @@ struct MyCCMAction {
                     bondi_dr_u_bdry, bondi_du_j_bdry, bondi_du_r_bdry);
 
     auto bondi_h = db::get<Tags::BondiH>(box);
-    std::cout << re_h.at(0) << "true " << get(bondi_h).data()[0] << std::endl;
+    std::cout << re_h.at(0) << " true "
+              << real(get(bondi_h).data())[0] - re_h.at(0) << std::endl;
     return {Parallel ::AlgorithmExecution::Continue, std::nullopt};
   }
 };
