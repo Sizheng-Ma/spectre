@@ -81,8 +81,8 @@ void ccm_functions11(
         cce_dr_u,
     const Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>::type&
         cce_du_j,
-    const Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type&
-        cce_du_r) {
+    const Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>::type&
+        bondi_du_r_bdry_DuRDividedByR) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
@@ -141,7 +141,7 @@ void ccm_functions11(
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
       [&l_max, &radius, &cce_bondi_beta, &cce_bondi_dr_j, &cce_du_R,
        &cce_bondi_h, &cce_bondi_j, &cce_bondi_q, &cce_bondi_R, &cce_bondi_u,
-       &cce_bondi_w, &cce_dr_u, &cce_du_j, &cce_du_r](
+       &cce_bondi_w, &cce_dr_u, &cce_du_j, &bondi_du_r_bdry_DuRDividedByR](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
               bondi_beta,
@@ -176,7 +176,7 @@ void ccm_functions11(
               Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>::type*>
               du_j,
           const gsl::not_null<
-              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type*>
+              Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>::type*>
               du_r_r) {
         *bondi_beta = cce_bondi_beta;
         *bondi_dr_j = cce_bondi_dr_j;
@@ -189,7 +189,7 @@ void ccm_functions11(
         *bondi_w = cce_bondi_w;
         *dr_u = cce_dr_u;
         *du_j = cce_du_j;
-        *du_r_r = cce_du_r;
+        *du_r_r = bondi_du_r_bdry_DuRDividedByR;
       },
       make_not_null(&spectre_box));
 

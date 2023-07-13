@@ -4,6 +4,7 @@
 #include "Evolution/Systems/Cce/AnalyticBoundaryDataManager.hpp"
 
 #include <cstddef>
+#include <iostream>
 #include <utility>
 
 #include "Evolution/Systems/Cce/AnalyticSolutions/WorldtubeData.hpp"
@@ -31,6 +32,13 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
   const auto& phi = get<gh::Tags::Phi<DataVector, 3>>(boundary_tuple);
   create_bondi_boundary_data(boundary_data_variables, phi, pi, spacetime_metric,
                              extraction_radius_, l_max_);
+
+  // auto& bondi_beta_bdry =
+  // get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(
+  //     *boundary_data_variables);
+
+  // std::cout << "original beta " << std::setprecision(15)
+  //           << get(bondi_beta_bdry).data()[0] << " ";
   return true;
 }
 
