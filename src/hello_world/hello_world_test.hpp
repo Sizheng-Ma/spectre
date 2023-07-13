@@ -29,5 +29,5 @@ void ccm_functions11(
         cce_dr_u,
     const Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>::type&
         cce_du_j,
-    const Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type&
-        cce_du_r);
+    const Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>::type&
+        bondi_du_r_bdry_DuRDividedByR);
