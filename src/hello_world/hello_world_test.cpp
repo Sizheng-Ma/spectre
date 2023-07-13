@@ -60,14 +60,15 @@ struct MyEvolutionMetavars : CharacteristicExtractDefaults<true> {
   };
 };
 
-void ccm_functions11(std::vector<double>& re_h, std::vector<double>& im_h,
-                     const size_t l_max, const size_t number_of_radial_points,
-                     const double radius, const std::vector<double>& re_j,
-                     const std::vector<double>& im_j,
-                     const std::vector<std::vector<double>>& cauchy_cart,
-                     const std::vector<std::vector<double>>& inertial_cart,
-                     const Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type&
-                         cce_bondi_beta) {
+void ccm_functions11(
+    std::vector<double>& re_h, std::vector<double>& im_h, const size_t l_max,
+    const size_t number_of_radial_points, const double radius,
+    const std::vector<double>& re_j, const std::vector<double>& im_j,
+    const std::vector<std::vector<double>>& cauchy_cart,
+    const std::vector<std::vector<double>>& inertial_cart,
+    const Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type& cce_bondi_beta,
+    const Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>::type&
+        cce_bondi_dr_j) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
@@ -124,7 +125,7 @@ void ccm_functions11(std::vector<double>& re_h, std::vector<double>& im_h,
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
-      [&l_max, &radius, &cce_bondi_beta](
+      [&l_max, &radius, &cce_bondi_beta, &cce_bondi_dr_j](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
               bondi_beta,
@@ -162,11 +163,8 @@ void ccm_functions11(std::vector<double>& re_h, std::vector<double>& im_h,
               Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type*>
               du_r_r) {
         *bondi_beta = cce_bondi_beta;
+        *bondi_dr_j = cce_bondi_dr_j;
         // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
-        //   get(*bondi_beta).data()[i] =
-        //       bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_dr_j).data()[i] =
-        //       bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
         //   get(*bondi_du_r).data()[i] =
         //       bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
         //   get(*bondi_h).data()[i] =
