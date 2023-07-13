@@ -13,6 +13,7 @@ set(LIBS_TO_LINK
   Parallel
   Serialization
   Utilities
+  SizhengHelloWorld
   )
 
 add_spectre_parallel_executable(
