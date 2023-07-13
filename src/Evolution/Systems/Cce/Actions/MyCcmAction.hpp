@@ -76,8 +76,12 @@ struct MyCCMAction {
     auto& bondi_beta =
         db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(box);
 
+    auto& dr_j =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(
+            box);
+
     ccm_functions11(re_h, im_h, l_max, number_of_radial_points, radius, re_j,
-                    im_j, cauchy_cart_std, inertial_cart_std, bondi_beta);
+                    im_j, cauchy_cart_std, inertial_cart_std, bondi_beta, dr_j);
 
     auto bondi_h = db::get<Tags::BondiH>(box);
     std::cout << re_h.at(0) << "true " << get(bondi_h).data()[0] << std::endl;
