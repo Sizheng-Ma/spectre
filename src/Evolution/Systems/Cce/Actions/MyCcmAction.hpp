@@ -73,15 +73,55 @@ struct MyCCMAction {
     std::vector<double> re_h;
     std::vector<double> im_h;
 
-    auto& bondi_beta =
+    auto& bondi_beta_bdry =
         db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(box);
 
-    auto& dr_j =
+    auto& dr_j_bdry =
         db::get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(
             box);
 
+    auto& du_r_bdry =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
+            box);
+
+    auto& bondi_h_bdry =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiH>>(box);
+
+    auto& bondi_j_bdry =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>>(box);
+
+    auto& bondi_q_bdry =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>>(box);
+
+    auto& bondi_r_bdry =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>>(box);
+
+    auto& bondi_u_bdry =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(box);
+
+    auto& bondi_w_bdry =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(box);
+
+    auto& bondi_dr_u_bdry =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>>(
+            box);
+
+    auto& bondi_du_j_bdry =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>>(
+            box);
+
+    auto& bondi_du_r_bdry =
+        db::get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
+            box);
+
+    // db::get<::Tags::Variables<typename
+    // Metavariables::cce_boundary_communication_tags>>(box);
+
     ccm_functions11(re_h, im_h, l_max, number_of_radial_points, radius, re_j,
-                    im_j, cauchy_cart_std, inertial_cart_std, bondi_beta, dr_j);
+                    im_j, cauchy_cart_std, inertial_cart_std, bondi_beta_bdry,
+                    dr_j_bdry, du_r_bdry, bondi_h_bdry, bondi_j_bdry,
+                    bondi_q_bdry, bondi_r_bdry, bondi_u_bdry, bondi_w_bdry,
+                    bondi_dr_u_bdry, bondi_du_j_bdry, bondi_du_r_bdry);
 
     auto bondi_h = db::get<Tags::BondiH>(box);
     std::cout << re_h.at(0) << "true " << get(bondi_h).data()[0] << std::endl;

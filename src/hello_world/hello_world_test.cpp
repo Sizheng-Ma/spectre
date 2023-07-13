@@ -68,7 +68,21 @@ void ccm_functions11(
     const std::vector<std::vector<double>>& inertial_cart,
     const Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type& cce_bondi_beta,
     const Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>::type&
-        cce_bondi_dr_j) {
+        cce_bondi_dr_j,
+    const Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type&
+        cce_du_R,
+    const Cce::Tags::BoundaryValue<Cce::Tags::BondiH>::type& cce_bondi_h,
+    const Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>::type& cce_bondi_j,
+    const Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>::type& cce_bondi_q,
+    const Cce::Tags::BoundaryValue<Cce::Tags::BondiR>::type& cce_bondi_R,
+    const Cce::Tags::BoundaryValue<Cce::Tags::BondiU>::type& cce_bondi_u,
+    const Cce::Tags::BoundaryValue<Cce::Tags::BondiW>::type& cce_bondi_w,
+    const Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>::type&
+        cce_dr_u,
+    const Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>::type&
+        cce_du_j,
+    const Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type&
+        cce_du_r) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
@@ -125,7 +139,9 @@ void ccm_functions11(
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
-      [&l_max, &radius, &cce_bondi_beta, &cce_bondi_dr_j](
+      [&l_max, &radius, &cce_bondi_beta, &cce_bondi_dr_j, &cce_du_R,
+       &cce_bondi_h, &cce_bondi_j, &cce_bondi_q, &cce_bondi_R, &cce_bondi_u,
+       &cce_bondi_w, &cce_dr_u, &cce_du_j, &cce_du_r](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
               bondi_beta,
@@ -164,22 +180,16 @@ void ccm_functions11(
               du_r_r) {
         *bondi_beta = cce_bondi_beta;
         *bondi_dr_j = cce_bondi_dr_j;
-        // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
-        //   get(*bondi_du_r).data()[i] =
-        //       bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_h).data()[i] =
-        //       bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_j).data()[i] =
-        //       bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_q).data()[i] =
-        //       bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_r).data()[i] =
-        //       bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_u).data()[i] =
-        //       bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_w).data()[i] =
-        //       bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
-        // }
+        *bondi_du_r = cce_du_R;
+        *bondi_h = cce_bondi_h;
+        *bondi_j = cce_bondi_j;
+        *bondi_q = cce_bondi_q;
+        *bondi_r = cce_bondi_R;
+        *bondi_u = cce_bondi_u;
+        *bondi_w = cce_bondi_w;
+        *dr_u = cce_dr_u;
+        *du_j = cce_du_j;
+        *du_r_r = cce_du_r;
       },
       make_not_null(&spectre_box));
 
