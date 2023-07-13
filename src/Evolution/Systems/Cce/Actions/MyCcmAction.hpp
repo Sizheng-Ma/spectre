@@ -110,9 +110,8 @@ struct MyCCMAction {
         db::get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>>(
             box);
 
-    auto& bondi_du_r_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
-            box);
+    auto& bondi_du_r_bdry_DuRDividedByR =
+        db::get<Tags::BoundaryValue<Tags::DuRDividedByR>>(box);
 
     // db::get<::Tags::Variables<typename
     // Metavariables::cce_boundary_communication_tags>>(box);
@@ -121,11 +120,17 @@ struct MyCCMAction {
                     im_j, cauchy_cart_std, inertial_cart_std, bondi_beta_bdry,
                     dr_j_bdry, du_r_bdry, bondi_h_bdry, bondi_j_bdry,
                     bondi_q_bdry, bondi_r_bdry, bondi_u_bdry, bondi_w_bdry,
-                    bondi_dr_u_bdry, bondi_du_j_bdry, bondi_du_r_bdry);
+                    bondi_dr_u_bdry, bondi_du_j_bdry,
+                    bondi_du_r_bdry_DuRDividedByR);
 
     auto bondi_h = db::get<Tags::BondiH>(box);
-    std::cout << re_h.at(0) << " true "
-              << real(get(bondi_h).data())[0] - re_h.at(0) << std::endl;
+    // BondiBeta
+    std::cout << "my beta " << std::setprecision(15) << get(du_r_bdry).data()[0]
+              << " " << get(bondi_du_r_bdry_DuRDividedByR).data()[0]
+              << std::endl;
+    std::cout << std::endl;
+    // std::cout << re_h.at(0) << " true "
+    //           << real(get(bondi_h).data())[0] - re_h.at(0) << std::endl;
     return {Parallel ::AlgorithmExecution::Continue, std::nullopt};
   }
 };
