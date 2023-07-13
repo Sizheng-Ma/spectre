@@ -61,18 +61,7 @@ struct MyEvolutionMetavars : CharacteristicExtractDefaults<true> {
 };
 
 void ccm_functions11(std::vector<double>& re_h, std::vector<double>& im_h,
-                     std::vector<double>& dt_cauchy_x,
-                     std::vector<double>& dt_cauchy_y,
-                     std::vector<double>& dt_cauchy_z,
-                     std::vector<double>& dt_inertial_x,
-                     std::vector<double>& dt_inertial_y,
-                     std::vector<double>& dt_inertial_z,
-                     std::vector<double>& re_psi3, std::vector<double>& im_psi3,
-                     std::vector<double>& dt_u_scri, const size_t l_max,
-                     const size_t number_of_radial_points,
-                     const std::vector<std::vector<double>>& spacetime_metric,
-                     const std::vector<std::vector<double>>& pi,
-                     const std::vector<std::vector<std::vector<double>>>& phi,
+                     const size_t l_max, const size_t number_of_radial_points,
                      const double radius, const std::vector<double>& re_j,
                      const std::vector<double>& im_j,
                      const std::vector<std::vector<double>>& cauchy_cart,
@@ -133,7 +122,7 @@ void ccm_functions11(std::vector<double>& re_h, std::vector<double>& im_h,
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
-      [&spacetime_metric, &phi, &pi, &l_max, &radius](
+      [&l_max, &radius](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
               bondi_beta,
@@ -313,27 +302,5 @@ void ccm_functions11(std::vector<double>& re_h, std::vector<double>& im_h,
   for (unsigned int i = 0; i < final_h.size(); i++) {
     re_h.push_back(real(final_h.data())[i]);
     im_h.push_back(real(final_h.data())[i]);
-  }
-
-  for (unsigned int i = 0; i < dt_cauchy_cart.get(0).size(); i++) {
-    dt_cauchy_x.push_back(dt_cauchy_cart.get(0)[i]);
-    dt_cauchy_y.push_back(dt_cauchy_cart.get(1)[i]);
-    dt_cauchy_z.push_back(dt_cauchy_cart.get(2)[i]);
-    dt_inertial_x.push_back(dt_inertial_cart.get(0)[i]);
-    dt_inertial_y.push_back(dt_inertial_cart.get(1)[i]);
-    dt_inertial_z.push_back(dt_inertial_cart.get(2)[i]);
-  }
-
-  auto& du_t = get<::Tags::dt<Cce::Tags::InertialRetardedTime>>(spectre_box);
-
-  for (unsigned int i = 0; i < du_t.get().size(); i++) {
-    dt_u_scri.push_back(du_t.get()[i]);
-  }
-
-  auto& psi3 = get<Cce::Tags::ScriPlus<Cce::Tags::Psi3>>(spectre_box);
-
-  for (unsigned int i = 0; i < psi3.size(); i++) {
-    re_psi3.push_back(real(get(psi3).data())[i]);
-    im_psi3.push_back(imag(get(psi3).data())[i]);
   }
 }

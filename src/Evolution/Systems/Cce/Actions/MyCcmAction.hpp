@@ -70,16 +70,11 @@ struct MyCCMAction {
     std::vector<std::vector<double>> inertial_cart_std{
         cauchy_cartx, cauchy_carty, cauchy_cartz};
 
-    std::vector<double> re_h, im_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z,
-        dt_inertial_x, dt_inertial_y, dt_inertial_z, re_psi3, im_psi3,
-        dt_u_scri;
+    std::vector<double> re_h;
+    std::vector<double> im_h;
 
-    // AnalyticTestCharacteristicExtract
-    ccm_functions11(re_h, im_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z,
-                    dt_inertial_x, dt_inertial_y, dt_inertial_z, re_psi3,
-                    im_psi3, dt_u_scri, l_max, number_of_radial_points,
-                    spacetime_metric, pi, phi, radius, re_j, im_j,
-                    cauchy_cart_std, inertial_cart_std);
+    ccm_functions11(re_h, im_h, l_max, number_of_radial_points, radius, re_j,
+                    im_j, cauchy_cart_std, inertial_cart_std);
 
     auto bondi_h = db::get<Tags::BondiH>(box);
     std::cout << re_h.at(0) << "true " << get(bondi_h).data()[0] << std::endl;
