@@ -165,6 +165,16 @@ struct CharacteristicEvolution {
           observers::ObserverWriter<Metavariables>,
           typename Metavariables::cce_boundary_component>>;
 
+  using compute_scri_quantities_and_observe_new = tmpl::list<
+      tmpl::transform<
+          typename metavariables::scri_values_to_observe,
+          tmpl::bind<
+              Actions::InsertInterpolationScriData, tmpl::_1,
+              tmpl::pin<typename Metavariables::cce_boundary_component>>>,
+      Actions::ScriObserveInterpolated<
+          observers::ObserverWriter<Metavariables>,
+          typename Metavariables::cce_boundary_component>>;
+
   using self_start_extract_action_list = tmpl::list<
       Actions::RequestBoundaryData<
           typename Metavariables::cce_boundary_component,
@@ -215,7 +225,28 @@ struct CharacteristicEvolution {
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
-      compute_scri_quantities_and_observe, Actions::MyCCMAction,
+      compute_scri_quantities_and_observe,
+      ::Actions::RecordTimeStepperData<cce_system>,
+      ::Actions::UpdateU<cce_system>,
+      ::Actions::ChangeStepSize<typename Metavariables::cce_step_choosers>,
+      // We cannot know our next step for certain until after we've performed
+      // step size selection, as we may need to reject a step.
+      Actions::RequestNextBoundaryData<
+          typename Metavariables::cce_boundary_component,
+          CharacteristicEvolution<Metavariables>>,
+      ::Actions::AdvanceTime, Actions::ExitIfEndTimeReached,
+      ::Actions::Goto<CceEvolutionLabelTag>>;
+
+  using extract_action_list_new = tmpl::list<
+      Actions::RequestBoundaryData<
+          typename Metavariables::cce_boundary_component,
+          CharacteristicEvolution<Metavariables>>,
+      ::Actions::Label<CceEvolutionLabelTag>,
+      Actions::ReceiveWorldtubeData<Metavariables>,
+      Actions::InitializeFirstHypersurface<
+          Metavariables::evolve_ccm,
+          typename Metavariables::cce_boundary_component>,
+      Actions::MyCCMAction, compute_scri_quantities_and_observe_new,
       ::Actions::RecordTimeStepperData<cce_system>,
       ::Actions::UpdateU<cce_system>,
       ::Actions::ChangeStepSize<typename Metavariables::cce_step_choosers>,
