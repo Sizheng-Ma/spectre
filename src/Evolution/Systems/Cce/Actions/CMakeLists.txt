@@ -29,4 +29,5 @@ spectre_target_headers(
   SendGhVarsToCce.hpp
   TimeManagement.hpp
   UpdateGauge.hpp
+  MyCcmAction.hpp
   )
