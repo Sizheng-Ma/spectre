@@ -14,6 +14,7 @@ set(LIBS_TO_LINK
   Parallel
   Serialization
   Utilities
+  SizhengHelloWorld
   )
 
 function(add_cce_executable EXECUTABLE BOUNDARY_COMPONENT)

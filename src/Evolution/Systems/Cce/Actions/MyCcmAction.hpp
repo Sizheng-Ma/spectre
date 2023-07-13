@@ -25,23 +25,61 @@ struct MyCCMAction {
     auto l_max = db::get<Tags::LMax>(box);
     auto number_of_radial_points = db::get<Tags::NumberOfRadialPoints>(box);
     auto radius = db::get<InitializationTags::ExtractionRadius>(box);
-    // ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
-    //            std::vector<double>& dt_cauchy_x,
-    //            std::vector<double>& dt_cauchy_y,
-    //            std::vector<double>& dt_cauchy_z,
-    //            std::vector<double>& dt_inertial_x,
-    //            std::vector<double>& dt_inertial_y,
-    //            std::vector<double>& dt_inertial_z,
-    //            std::vector<double>& re_psi3, std::vector<double>& im_psi3,
-    //            std::vector<double>& dt_u_scri, const size_t l_max,
-    //            const size_t number_of_radial_points,
-    //            const std::vector<std::vector<double>>& spacetime_metric,
-    //            const std::vector<std::vector<double>>& pi,
-    //            const std::vector<std::vector<std::vector<double>>>& phi,
-    //            const double radius, const std::vector<double>& re_j,
-    //            const std::vector<double>& im_j,
-    //            const std::vector<std::vector<double>>& cauchy_cart,
-    //            const std::vector<std::vector<double>>& inertial_cart);
+
+    auto bondi_j = db::get<Tags::BondiJ>(box);
+    auto cauchy_cart = db::get<Tags::CauchyCartesianCoords>(box);
+
+    const size_t boundary_size =
+        Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+    std::vector<double> test(boundary_size, 1.);
+    std::vector<double> mtest(boundary_size, -1.);
+    std::vector<double> zero(boundary_size, 0);
+
+    std::vector<std::vector<double>> pi{zero, zero, zero, zero, zero,
+                                        zero, zero, zero, zero, zero};
+    std::vector<std::vector<double>> spacetime_metric{
+        mtest, zero, zero, zero, test, zero, zero, test, zero, test};
+    std::vector<std::vector<std::vector<double>>> phi{pi, pi, pi};
+
+    std::vector<double> re_j;
+    std::vector<double> im_j;
+
+    for (int iii = 0; iii < get(bondi_j).data().size(); iii++) {
+      re_j.push_back(real(get(bondi_j).data())[iii]);
+    }
+    for (int iii = 0; iii < get(bondi_j).data().size(); iii++) {
+      im_j.push_back(imag(get(bondi_j).data())[iii]);
+    }
+
+    std::vector<double> cauchy_cartx;
+    std::vector<double> cauchy_carty;
+    std::vector<double> cauchy_cartz;
+
+    for (int iii = 0; iii < boundary_size; iii++) {
+      cauchy_cartx.push_back(get<0>(cauchy_cart).data()[iii]);
+    }
+    for (int iii = 0; iii < boundary_size; iii++) {
+      cauchy_carty.push_back(get<1>(cauchy_cart).data()[iii]);
+    }
+    for (int iii = 0; iii < boundary_size; iii++) {
+      cauchy_cartz.push_back(get<2>(cauchy_cart).data()[iii]);
+    }
+
+    std::vector<std::vector<double>> cauchy_cart_std{cauchy_cartx, cauchy_carty,
+                                                     cauchy_cartz};
+    std::vector<std::vector<double>> inertial_cart_std{
+        cauchy_cartx, cauchy_carty, cauchy_cartz};
+
+    std::vector<double> re_h, im_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z,
+        dt_inertial_x, dt_inertial_y, dt_inertial_z, re_psi3, im_psi3,
+        dt_u_scri;
+
+    // AnalyticTestCharacteristicExtract
+    ccm_functions(re_h, im_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z,
+                  dt_inertial_x, dt_inertial_y, dt_inertial_z, re_psi3, im_psi3,
+                  dt_u_scri, l_max, number_of_radial_points, spacetime_metric,
+                  pi, phi, radius, re_j, im_j, cauchy_cart_std,
+                  inertial_cart_std);
     return {Parallel ::AlgorithmExecution::Continue, std::nullopt};
   }
 };
