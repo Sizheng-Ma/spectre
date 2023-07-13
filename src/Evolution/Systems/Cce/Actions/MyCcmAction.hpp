@@ -44,10 +44,10 @@ struct MyCCMAction {
     std::vector<double> re_j;
     std::vector<double> im_j;
 
-    for (int iii = 0; iii < get(bondi_j).data().size(); iii++) {
+    for (size_t iii = 0; iii < get(bondi_j).data().size(); iii++) {
       re_j.push_back(real(get(bondi_j).data())[iii]);
     }
-    for (int iii = 0; iii < get(bondi_j).data().size(); iii++) {
+    for (size_t iii = 0; iii < get(bondi_j).data().size(); iii++) {
       im_j.push_back(imag(get(bondi_j).data())[iii]);
     }
 
@@ -55,13 +55,13 @@ struct MyCCMAction {
     std::vector<double> cauchy_carty;
     std::vector<double> cauchy_cartz;
 
-    for (int iii = 0; iii < boundary_size; iii++) {
+    for (size_t iii = 0; iii < boundary_size; iii++) {
       cauchy_cartx.push_back(get<0>(cauchy_cart).data()[iii]);
     }
-    for (int iii = 0; iii < boundary_size; iii++) {
+    for (size_t iii = 0; iii < boundary_size; iii++) {
       cauchy_carty.push_back(get<1>(cauchy_cart).data()[iii]);
     }
-    for (int iii = 0; iii < boundary_size; iii++) {
+    for (size_t iii = 0; iii < boundary_size; iii++) {
       cauchy_cartz.push_back(get<2>(cauchy_cart).data()[iii]);
     }
 
@@ -80,6 +80,9 @@ struct MyCCMAction {
                   dt_u_scri, l_max, number_of_radial_points, spacetime_metric,
                   pi, phi, radius, re_j, im_j, cauchy_cart_std,
                   inertial_cart_std);
+
+    auto bondi_h = db::get<Tags::BondiH>(box);
+    std::cout << re_h.at(0) << "true " << get(bondi_h).data()[0] << std::endl;
     return {Parallel ::AlgorithmExecution::Continue, std::nullopt};
   }
 };
