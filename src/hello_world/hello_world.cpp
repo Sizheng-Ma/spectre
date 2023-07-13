@@ -242,7 +242,7 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
               Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>::type*>
               du_j,
           const gsl::not_null<
-              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type*>
+              Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>::type*>
               du_r_r) {
         gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
                     *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
@@ -418,7 +418,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
               Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>::type*>
               du_j,
           const gsl::not_null<
-              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type*>
+              Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>::type*>
               du_r_r) {
         gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
                     *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
