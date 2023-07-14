@@ -125,12 +125,15 @@ struct MyCCMAction {
 
     auto bondi_h = db::get<Tags::BondiH>(box);
     // BondiBeta
-    std::cout << "my beta " << std::setprecision(15) << get(du_r_bdry).data()[0]
-              << " " << get(bondi_du_r_bdry_DuRDividedByR).data()[0]
-              << std::endl;
-    std::cout << std::endl;
     // std::cout << re_h.at(0) << " true "
     //           << real(get(bondi_h).data())[0] - re_h.at(0) << std::endl;
+    auto GaugeOmega = db::get<Cce::Tags::PartiallyFlatGaugeOmega>(box);
+    auto GaugeOmegadot = db::get<Spectral::Swsh::Tags::Derivative<
+        Cce::Tags::PartiallyFlatGaugeOmega, Spectral::Swsh::Tags::Eth>>(box);
+    std::cout << "my beta " << std::setprecision(30)
+              << get(GaugeOmega).data()[0] << " "
+              << get(GaugeOmegadot).data()[0] << std::endl;
+    std::cout << std::endl;
     return {Parallel ::AlgorithmExecution::Continue, std::nullopt};
   }
 };

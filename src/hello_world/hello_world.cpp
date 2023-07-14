@@ -515,11 +515,6 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
         db::mutate_apply<mutator>(make_not_null(&spectre_box));
       });
 
-  auto& dt_cauchy_cart =
-      db::get<::Tags::dt<Cce::Tags::CauchyCartesianCoords>>(spectre_box);
-  auto& dt_inertial_cart =
-      db::get<::Tags::dt<Cce::Tags::PartiallyFlatCartesianCoords>>(spectre_box);
-
   /****************************PrecomputeGlobalCceDependencies*************************************/
   tmpl::for_each<Cce::gauge_adjustments_setup_tags>([&spectre_box](auto tag_v) {
     using tag = typename decltype(tag_v)::type;
@@ -598,6 +593,12 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
     re_h.push_back(real(final_h.data())[i]);
     im_h.push_back(real(final_h.data())[i]);
   }
+  
+  auto& dt_cauchy_cart =
+      db::get<::Tags::dt<Cce::Tags::CauchyCartesianCoords>>(spectre_box);
+  auto& dt_inertial_cart =
+      db::get<::Tags::dt<Cce::Tags::PartiallyFlatCartesianCoords>>(spectre_box);
+
 
   for (unsigned int i = 0; i < dt_cauchy_cart.get(0).size(); i++) {
     dt_cauchy_x.push_back(dt_cauchy_cart.get(0)[i]);

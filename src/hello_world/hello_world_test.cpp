@@ -230,6 +230,12 @@ void ccm_functions11(
         using mutator = typename decltype(mutator_v)::type;
         db::mutate_apply<mutator>(make_not_null(&spectre_box));
       });
+  auto GaugeOmega = db::get<Cce::Tags::PartiallyFlatGaugeOmega>(spectre_box);
+  auto GaugeOmegadot = db::get<Spectral::Swsh::Tags::Derivative<
+      Cce::Tags::PartiallyFlatGaugeOmega, Spectral::Swsh::Tags::Eth>>(
+      spectre_box);
+  std::cout << std::setprecision(30) << get(GaugeOmega).data()[0] << " "
+            << get(GaugeOmegadot).data()[0] << " ";
 
   auto& dt_cauchy_cart =
       db::get<::Tags::dt<Cce::Tags::CauchyCartesianCoords>>(spectre_box);
