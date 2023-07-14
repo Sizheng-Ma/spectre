@@ -61,7 +61,9 @@ struct MyEvolutionMetavars : CharacteristicExtractDefaults<true> {
 };
 
 void ccm_functions11(
-    std::vector<double>& re_h, std::vector<double>& im_h, const size_t l_max,
+    std::vector<double>& re_h, std::vector<double>& im_h,
+    std::vector<double>& dt_cauchy_x, std::vector<double>& dt_cauchy_y,
+    std::vector<double>& dt_cauchy_z, std::vector<double>& dt_u_scri,const size_t l_max,
     const size_t number_of_radial_points, const double radius,
     const std::vector<double>& re_j, const std::vector<double>& im_j,
     const std::vector<std::vector<double>>& cauchy_cart,
@@ -317,4 +319,15 @@ void ccm_functions11(
       db::get<::Tags::dt<Cce::Tags::CauchyCartesianCoords>>(spectre_box);
   auto& dt_inertial_cart =
       db::get<::Tags::dt<Cce::Tags::PartiallyFlatCartesianCoords>>(spectre_box);
+
+  for (unsigned int i = 0; i < dt_cauchy_cart.get(0).size(); i++) {
+    dt_cauchy_x.push_back(dt_cauchy_cart.get(0)[i]);
+    dt_cauchy_y.push_back(dt_cauchy_cart.get(1)[i]);
+    dt_cauchy_z.push_back(dt_cauchy_cart.get(2)[i]);
+  }
+    auto& du_t = get<::Tags::dt<Cce::Tags::InertialRetardedTime>>(spectre_box);
+
+  for (unsigned int i = 0; i < du_t.get().size(); i++) {
+    dt_u_scri.push_back(du_t.get()[i]);
+  }
 }
