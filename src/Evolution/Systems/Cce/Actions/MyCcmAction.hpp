@@ -116,12 +116,14 @@ struct MyCCMAction {
     // db::get<::Tags::Variables<typename
     // Metavariables::cce_boundary_communication_tags>>(box);
 
-    ccm_functions11(re_h, im_h, l_max, number_of_radial_points, radius, re_j,
-                    im_j, cauchy_cart_std, inertial_cart_std, bondi_beta_bdry,
-                    dr_j_bdry, du_r_bdry, bondi_h_bdry, bondi_j_bdry,
-                    bondi_q_bdry, bondi_r_bdry, bondi_u_bdry, bondi_w_bdry,
-                    bondi_dr_u_bdry, bondi_du_j_bdry,
-                    bondi_du_r_bdry_DuRDividedByR);
+    std::vector<double> dt_cauchy_x, dt_cauchy_y, dt_cauchy_z, dt_u_scri;
+
+    ccm_functions11(
+        re_h, im_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z, dt_u_scri, l_max,
+        number_of_radial_points, radius, re_j, im_j, cauchy_cart_std,
+        inertial_cart_std, bondi_beta_bdry, dr_j_bdry, du_r_bdry, bondi_h_bdry,
+        bondi_j_bdry, bondi_q_bdry, bondi_r_bdry, bondi_u_bdry, bondi_w_bdry,
+        bondi_dr_u_bdry, bondi_du_j_bdry, bondi_du_r_bdry_DuRDividedByR);
 
     auto bondi_h = db::get<Tags::BondiH>(box);
 
@@ -132,7 +134,32 @@ struct MyCCMAction {
     }
 
     resres /= re_h.size();
-    std::cout << std::setprecision(30) << sqrt(resres) << std::endl;
+    std::cout << std::setprecision(30) << sqrt(resres) << " ";
+
+    auto& dt_cauchy_cart =
+        db::get<::Tags::dt<Cce::Tags::CauchyCartesianCoords>>(box);
+
+    double resres_cauchy = 0;
+    for (size_t iii = 0; iii < get<0>(dt_cauchy_cart).size(); iii++) {
+      resres_cauchy +=
+          pow(dt_cauchy_x.at(iii) - get<0>(dt_cauchy_cart)[iii], 2);
+      resres_cauchy +=
+          pow(dt_cauchy_y.at(iii) - get<1>(dt_cauchy_cart)[iii], 2);
+      resres_cauchy +=
+          pow(dt_cauchy_z.at(iii) - get<2>(dt_cauchy_cart)[iii], 2);
+    }
+    resres_cauchy /= get<0>(dt_cauchy_cart).size();
+    std::cout << std::setprecision(30) << sqrt(resres_cauchy) << " ";
+
+    auto& du_t = get<::Tags::dt<Cce::Tags::InertialRetardedTime>>(box);
+    double resres_du_t = 0;
+    for (size_t iii = 0; iii < dt_u_scri.size(); iii++) {
+      resres_du_t += pow(dt_u_scri.at(iii) - du_t.get()[iii], 2);
+    }
+
+    resres_du_t /= dt_u_scri.size();
+    std::cout << std::setprecision(30) << sqrt(resres_du_t) << std::endl;
+    std::cout << std::endl;
     // BondiBeta
     // std::cout << std::setprecision(30) << im_h.at(41) << " true "
     //           << imag(get(bondi_h).data())[41] << std::endl;
