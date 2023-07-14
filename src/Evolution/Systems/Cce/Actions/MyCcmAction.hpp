@@ -124,13 +124,21 @@ struct MyCCMAction {
                     bondi_du_r_bdry_DuRDividedByR);
 
     auto bondi_h = db::get<Tags::BondiH>(box);
+
+    double resres = 0;
+    for (size_t iii = 0; iii < re_h.size(); iii++) {
+      resres += pow(im_h.at(iii) - imag(get(bondi_h).data())[iii], 2);
+      resres += pow(re_h.at(iii) - real(get(bondi_h).data())[iii], 2);
+    }
+
+    resres /= re_h.size();
+    std::cout << std::setprecision(30) << sqrt(resres) << std::endl;
     // BondiBeta
-    // std::cout << re_h.at(0) << " true "
-    //           << real(get(bondi_h).data())[0] - re_h.at(0) << std::endl;
-    auto& dt_cauchy_cart = db::get<Cce::Tags::DuRDividedByR>(box);
-    std::cout << "my beta " << std::setprecision(30)
-              << get(dt_cauchy_cart).data()[0] << std::endl;
-    std::cout << std::endl;
+    // std::cout << std::setprecision(30) << im_h.at(41) << " true "
+    //           << imag(get(bondi_h).data())[41] << std::endl;
+    // auto& dt_cauchy_cart = db::get<Cce::Tags::DuRDividedByR>(box);
+    // std::cout << "my beta " << std::setprecision(30)
+    //           << get(dt_cauchy_cart).data()[0] << std::endl;
     return {Parallel ::AlgorithmExecution::Continue, std::nullopt};
   }
 };
