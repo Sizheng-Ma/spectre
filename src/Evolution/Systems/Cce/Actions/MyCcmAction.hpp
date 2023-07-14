@@ -127,7 +127,7 @@ struct MyCCMAction {
     // BondiBeta
     // std::cout << re_h.at(0) << " true "
     //           << real(get(bondi_h).data())[0] - re_h.at(0) << std::endl;
-    auto& dt_cauchy_cart = db::get<Cce::Tags::EthRDividedByR>(box);
+    auto& dt_cauchy_cart = db::get<Cce::Tags::DuRDividedByR>(box);
     std::cout << "my beta " << std::setprecision(30)
               << get(dt_cauchy_cart).data()[0] << std::endl;
     std::cout << std::endl;
