@@ -230,17 +230,6 @@ void ccm_functions11(
         using mutator = typename decltype(mutator_v)::type;
         db::mutate_apply<mutator>(make_not_null(&spectre_box));
       });
-  auto GaugeOmega = db::get<Cce::Tags::PartiallyFlatGaugeOmega>(spectre_box);
-  auto GaugeOmegadot = db::get<Spectral::Swsh::Tags::Derivative<
-      Cce::Tags::PartiallyFlatGaugeOmega, Spectral::Swsh::Tags::Eth>>(
-      spectre_box);
-  std::cout << std::setprecision(30) << get(GaugeOmega).data()[0] << " "
-            << get(GaugeOmegadot).data()[0] << " ";
-
-  auto& dt_cauchy_cart =
-      db::get<::Tags::dt<Cce::Tags::CauchyCartesianCoords>>(spectre_box);
-  auto& dt_inertial_cart =
-      db::get<::Tags::dt<Cce::Tags::PartiallyFlatCartesianCoords>>(spectre_box);
 
   /****************************PrecomputeGlobalCceDependencies*************************************/
   tmpl::for_each<Cce::gauge_adjustments_setup_tags>([&spectre_box](auto tag_v) {
@@ -251,6 +240,11 @@ void ccm_functions11(
 
   Cce::mutate_all_precompute_cce_dependencies<
       Cce::Tags::EvolutionGaugeBoundaryValue>(make_not_null(&spectre_box));
+
+  // Sizheng stops here.
+    auto& result = db::get<Cce::Tags::EthRDividedByR>(
+        spectre_box);
+    std::cout << std::setprecision(30) << get(result).data()[0] << " ";
 
   /****************************CalculatePsi0AndDerivAtInnerBoundary*************************************/
   tmpl::for_each<Cce::Actions::CalculatePsi0AndDerivAtInnerBoundary::mutators>(
@@ -320,4 +314,8 @@ void ccm_functions11(
     re_h.push_back(real(final_h.data())[i]);
     im_h.push_back(real(final_h.data())[i]);
   }
+  auto& dt_cauchy_cart =
+      db::get<::Tags::dt<Cce::Tags::CauchyCartesianCoords>>(spectre_box);
+  auto& dt_inertial_cart =
+      db::get<::Tags::dt<Cce::Tags::PartiallyFlatCartesianCoords>>(spectre_box);
 }
