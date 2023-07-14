@@ -138,7 +138,7 @@ void ccm_functions11(
              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>,
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
-             Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
+             Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
       [&l_max, &radius, &cce_bondi_beta, &cce_bondi_dr_j, &cce_du_R,
        &cce_bondi_h, &cce_bondi_j, &cce_bondi_q, &cce_bondi_R, &cce_bondi_u,
        &cce_bondi_w, &cce_dr_u, &cce_du_j, &bondi_du_r_bdry_DuRDividedByR](
@@ -241,11 +241,6 @@ void ccm_functions11(
   Cce::mutate_all_precompute_cce_dependencies<
       Cce::Tags::EvolutionGaugeBoundaryValue>(make_not_null(&spectre_box));
 
-  // Sizheng stops here.
-    auto& result = db::get<Cce::Tags::EthRDividedByR>(
-        spectre_box);
-    std::cout << std::setprecision(30) << get(result).data()[0] << " ";
-
   /****************************CalculatePsi0AndDerivAtInnerBoundary*************************************/
   tmpl::for_each<Cce::Actions::CalculatePsi0AndDerivAtInnerBoundary::mutators>(
       [&spectre_box](auto mutator_v) {
@@ -288,6 +283,10 @@ void ccm_functions11(
           make_not_null(&spectre_box));
     };
   });
+
+  // Sizheng stops here.
+  auto& result = db::get<Cce::Tags::DuRDividedByR>(spectre_box);
+  std::cout << std::setprecision(30) << get(result).data()[0] << " ";
 
   /****************************FilterSwshVolumeQuantity*************************************/
   Cce::Actions::FilterSwshVolumeQuantity<Cce::Tags::BondiH>::apply(spectre_box);
