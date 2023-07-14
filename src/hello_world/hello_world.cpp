@@ -591,7 +591,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
   auto& final_h = get(get<Cce::Tags::BondiH>(spectre_box));
   for (unsigned int i = 0; i < final_h.size(); i++) {
     re_h.push_back(real(final_h.data())[i]);
-    im_h.push_back(real(final_h.data())[i]);
+    im_h.push_back(imag(final_h.data())[i]);
   }
   
   auto& dt_cauchy_cart =
