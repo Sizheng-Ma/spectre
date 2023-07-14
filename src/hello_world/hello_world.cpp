@@ -206,7 +206,7 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>,
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
-             Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
+             Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
       [&spacetime_metric, &phi, &pi, &l_max, &radius](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
@@ -382,7 +382,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
              Cce::Tags::BoundaryValue<Cce::Tags::BondiW>,
              Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
-             Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
+             Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(
       [&spacetime_metric, &phi, &pi, &l_max, &radius](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
