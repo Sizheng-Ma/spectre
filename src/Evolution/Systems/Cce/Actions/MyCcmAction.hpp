@@ -9,22 +9,30 @@
 namespace Cce {
 namespace Actions {
 
+template <typename Boundary>
 struct MyCCMAction {
   using const_global_cache_tags =
-      tmpl::list<Tags::LMax, Tags::NumberOfRadialPoints,
-                 InitializationTags::ExtractionRadius>;
+      tmpl::list<Tags::LMax, Tags::NumberOfRadialPoints>;
   template <typename DbTags, typename... InboxTags, typename Metavariables,
             typename ArrayIndex, typename ActionList,
             typename ParallelComponent>
   static Parallel::iterable_action_return_t apply(
       db::DataBox<DbTags>& box,
       const tuples::TaggedTuple<InboxTags...>& /*inboxes*/,
-      const Parallel::GlobalCache<Metavariables>& cache,
+      const Parallel::GlobalCache<Metavariables>& /*cache*/,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) {
     auto l_max = db::get<Tags::LMax>(box);
     auto number_of_radial_points = db::get<Tags::NumberOfRadialPoints>(box);
-    auto radius = db::get<InitializationTags::ExtractionRadius>(box);
+
+    double radius;
+    if constexpr (tt::is_a_v<AnalyticWorldtubeBoundary, Boundary>) {
+      radius = db::get<Tags::AnalyticBoundaryDataManager>(box)
+                   .get_extraction_radius();
+    } else if (tt::is_a_v<H5WorldtubeBoundary, Boundary>) {
+      // TODO This is hardcoded.
+      radius = 267.;
+    }
 
     auto bondi_j = db::get<Tags::BondiJ>(box);
     auto cauchy_cart = db::get<Tags::CauchyCartesianCoords>(box);

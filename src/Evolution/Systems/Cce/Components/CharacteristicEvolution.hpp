@@ -225,28 +225,8 @@ struct CharacteristicEvolution {
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
-      compute_scri_quantities_and_observe, Actions::MyCCMAction,
-      ::Actions::RecordTimeStepperData<cce_system>,
-      ::Actions::UpdateU<cce_system>,
-      ::Actions::ChangeStepSize<typename Metavariables::cce_step_choosers>,
-      // We cannot know our next step for certain until after we've performed
-      // step size selection, as we may need to reject a step.
-      Actions::RequestNextBoundaryData<
-          typename Metavariables::cce_boundary_component,
-          CharacteristicEvolution<Metavariables>>,
-      ::Actions::AdvanceTime, Actions::ExitIfEndTimeReached,
-      ::Actions::Goto<CceEvolutionLabelTag>>;
-
-  using extract_action_list_new = tmpl::list<
-      Actions::RequestBoundaryData<
-          typename Metavariables::cce_boundary_component,
-          CharacteristicEvolution<Metavariables>>,
-      ::Actions::Label<CceEvolutionLabelTag>,
-      Actions::ReceiveWorldtubeData<Metavariables>,
-      Actions::InitializeFirstHypersurface<
-          Metavariables::evolve_ccm,
-          typename Metavariables::cce_boundary_component>,
-      Actions::MyCCMAction, compute_scri_quantities_and_observe_new,
+      compute_scri_quantities_and_observe,
+      Actions::MyCCMAction<typename Metavariables::cce_boundary_component>,
       ::Actions::RecordTimeStepperData<cce_system>,
       ::Actions::UpdateU<cce_system>,
       ::Actions::ChangeStepSize<typename Metavariables::cce_step_choosers>,
