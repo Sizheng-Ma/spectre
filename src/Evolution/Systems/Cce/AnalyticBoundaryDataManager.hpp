@@ -70,6 +70,8 @@ class AnalyticBoundaryDataManager {
 
   size_t get_l_max() const { return l_max_; }
 
+  double get_extraction_radius() const { return extraction_radius_;}
+
   const Solutions::WorldtubeData& get_generator() const { return *generator_; }
 
   /// Serialization for Charm++.
