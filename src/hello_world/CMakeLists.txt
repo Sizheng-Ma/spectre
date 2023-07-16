@@ -8,16 +8,16 @@ add_spectre_library(${LIBRARY})
 spectre_target_sources(
   ${LIBRARY}
   PRIVATE
-  # hello_world.cpp
-  hello_world_test.cpp
+  hello_world.cpp
+  #hello_world_test.cpp
   )
 
 spectre_target_headers(
   ${LIBRARY}
   INCLUDE_DIRECTORY ${CMAKE_SOURCE_DIR}/src
   HEADERS
-  # hello_world.hpp
-  hello_world_test.hpp
+  hello_world.hpp
+  #hello_world_test.hpp
   )
 
 target_link_libraries(
