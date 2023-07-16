@@ -329,6 +329,8 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    const std::vector<std::vector<double>>& inertial_cart) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
+  // TODO this is hardcoded
+  double this_time = 0;
   const size_t filter_l_max = l_max - 2;
   const size_t scri_interpolation_order = 5;
   const double radial_filter_alpha = 35.0;
@@ -583,8 +585,25 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
         make_not_null(&spectre_box));
   });
 
+  tmpl::for_each<Metavariables::scri_values_to_observe>([&spectre_box,
+                                                         &this_time](
+                                                            auto tag_v) {
+    using tag_to_observe = typename decltype(tag_v)::type;
+    db::mutate_apply<Cce::Actions::detail::InsertIntoInterpolationManagerImpl<
+        tag_to_observe>>(make_not_null(&spectre_box));
+
+    db::mutate<
+        Cce::Tags::InterpolationManager<ComplexDataVector, tag_to_observe>>(
+        [&this_time](const gsl::not_null<Cce::ScriPlusInterpolationManager<
+                         ComplexDataVector, tag_to_observe>*>
+                         interpolation_manager) {
+          interpolation_manager->insert_target_time(this_time);
+        },
+        make_not_null(&spectre_box));
+  });
+
   /*************************after_cce*****************************/
-  // I don't have InsertInterpolationScriData and ScriObserveInterpolated
+  // I don't have ScriObserveInterpolated
   //   std::cout << "final: BondiH size: "
   //             << get(get<Cce::Tags::BondiH>(spectre_box)).size() <<
   //             std::endl;
@@ -593,12 +612,11 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
     re_h.push_back(real(final_h.data())[i]);
     im_h.push_back(imag(final_h.data())[i]);
   }
-  
+
   auto& dt_cauchy_cart =
       db::get<::Tags::dt<Cce::Tags::CauchyCartesianCoords>>(spectre_box);
   auto& dt_inertial_cart =
       db::get<::Tags::dt<Cce::Tags::PartiallyFlatCartesianCoords>>(spectre_box);
-
 
   for (unsigned int i = 0; i < dt_cauchy_cart.get(0).size(); i++) {
     dt_cauchy_x.push_back(dt_cauchy_cart.get(0)[i]);
