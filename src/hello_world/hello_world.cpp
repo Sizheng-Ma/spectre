@@ -627,6 +627,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
 
   /*********************ScriObserveInterpolated************************/
 
+  std::vector<std::vector<double>> data_to_write_final;
   std::vector<double> data_to_write(2 * square(observation_l_max + 1) + 1);
   ComplexModalVector goldberg_modes{square(l_max + 1)};
   std::vector<std::string> file_legend;
@@ -674,8 +675,8 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
     // then output each of them
     tmpl::for_each<Cce::Actions::detail::weyl_correction_list>(
         [&data_to_write, &corrected_scri_plus_weyl, &interpolation_time,
-         &file_legend, &observation_l_max, &l_max,
-         &goldberg_modes](auto tag_v) {
+         &file_legend, &observation_l_max, &l_max, &goldberg_modes,
+         &data_to_write_final](auto tag_v) {
           using tag = typename decltype(tag_v)::type;
           if constexpr (tmpl::list_contains_v<
                             typename Metavariables::scri_values_to_observe,
@@ -685,6 +686,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                 interpolation_time, make_not_null(&goldberg_modes),
                 make_not_null(&data_to_write), file_legend, l_max,
                 observation_l_max);
+            data_to_write_final.push_back(data_to_write);
           }
         });
 
@@ -693,7 +695,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
         tmpl::list_difference<typename Metavariables::scri_values_to_observe,
                               Cce::Actions::detail::weyl_correction_list>>(
         [&spectre_box, &data_to_write, &file_legend, &observation_l_max, &l_max,
-         &goldberg_modes](auto tag_v) {
+         &goldberg_modes, &data_to_write_final](auto tag_v) {
           using tag = typename decltype(tag_v)::type;
           std::pair<double, ComplexDataVector> interpolation;
           db::mutate<Cce::Tags::InterpolationManager<ComplexDataVector, tag>>(
@@ -709,6 +711,7 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
               interpolation.second, interpolation.first,
               make_not_null(&goldberg_modes), make_not_null(&data_to_write),
               file_legend, l_max, observation_l_max);
+          data_to_write_final.push_back(data_to_write);
         });
   }
 
