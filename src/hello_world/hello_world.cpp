@@ -111,6 +111,28 @@ void print_data_vector() {
   Parallel::printf("%s\n", a);
 }
 
+template <typename Tag, int Spin>
+static void transform_and_write_new(
+    const ComplexDataVector& data, const double time,
+    const gsl::not_null<ComplexModalVector*> goldberg_mode_buffer,
+    const gsl::not_null<std::vector<double>*> data_to_write_buffer,
+    const std::vector<std::string>& legend, const size_t l_max,
+    const size_t observation_l_max) {
+  const SpinWeighted<ComplexDataVector, Spin> to_transform;
+  make_const_view(make_not_null(&to_transform.data()), data, 0, data.size());
+  SpinWeighted<ComplexModalVector, Spin> goldberg_modes;
+  goldberg_modes.set_data_ref(goldberg_mode_buffer);
+  Spectral::Swsh::libsharp_to_goldberg_modes(
+      make_not_null(&goldberg_modes),
+      Spectral::Swsh::swsh_transform(l_max, 1, to_transform), l_max);
+
+  (*data_to_write_buffer)[0] = time;
+  for (size_t i = 0; i < square(observation_l_max + 1); ++i) {
+    (*data_to_write_buffer)[2 * i + 1] = real(goldberg_modes.data()[i]);
+    (*data_to_write_buffer)[2 * i + 2] = imag(goldberg_modes.data()[i]);
+  }
+}
+
 struct MyEvolutionMetavars : CharacteristicExtractDefaults<true> {
   using cce_boundary_component = tmpl::list<>;
   static constexpr bool local_time_stepping = false;
@@ -658,13 +680,11 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
           if constexpr (tmpl::list_contains_v<
                             typename Metavariables::scri_values_to_observe,
                             tag>) {
-            // ScriObserveInterpolated::transform_and_write<tag,
-            // tag::type::type::spin,
-            //                                              ParallelComponent>(
-            //     get(get<tag>(corrected_scri_plus_weyl)).data(),
-            //     interpolation_time, make_not_null(&goldberg_modes),
-            //     make_not_null(&data_to_write), file_legend, l_max,
-            //     observation_l_max, cache);
+            transform_and_write_new<tag, tag::type::type::spin>(
+                get(get<tag>(corrected_scri_plus_weyl)).data(),
+                interpolation_time, make_not_null(&goldberg_modes),
+                make_not_null(&data_to_write), file_legend, l_max,
+                observation_l_max);
           }
         });
 
@@ -678,24 +698,21 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
           std::pair<double, ComplexDataVector> interpolation;
           db::mutate<Cce::Tags::InterpolationManager<ComplexDataVector, tag>>(
               [&interpolation](
-                  const gsl::not_null<
-                      ScriPlusInterpolationManager<ComplexDataVector, tag>*>
+                  const gsl::not_null<Cce::ScriPlusInterpolationManager<
+                      ComplexDataVector, tag>*>
                       interpolation_manager) {
                 interpolation =
                     interpolation_manager->interpolate_and_pop_first_time();
               },
-              make_not_null(&box));
-          //   ScriObserveInterpolated::transform_and_write<
-          //       tag, tag::type::type::spin, ParallelComponent>(
-          //       interpolation.second, interpolation.first,
-          //       make_not_null(&goldberg_modes),
-          //       make_not_null(&data_to_write), file_legend, l_max,
-          //       observation_l_max, cache);
+              make_not_null(&spectre_box));
+          transform_and_write_new<tag, tag::type::type::spin>(
+              interpolation.second, interpolation.first,
+              make_not_null(&goldberg_modes), make_not_null(&data_to_write),
+              file_legend, l_max, observation_l_max);
         });
   }
 
   /*************************after_cce*****************************/
-  // I don't have ScriObserveInterpolated
   //   std::cout << "final: BondiH size: "
   //             << get(get<Cce::Tags::BondiH>(spectre_box)).size() <<
   //             std::endl;
