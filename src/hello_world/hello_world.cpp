@@ -25,6 +25,7 @@
 #include "Evolution/Systems/Cce/OptionTags.hpp"
 #include "Evolution/Systems/Cce/PreSwshDerivatives.hpp"
 #include "Evolution/Systems/Cce/PrecomputeCceDependencies.hpp"
+#include "Evolution/Systems/Cce/ScriPlusInterpolationManager.hpp"
 #include "Evolution/Systems/Cce/SwshDerivatives.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "Evolution/Systems/Cce/WorldtubeBufferUpdater.hpp"
@@ -888,3 +889,30 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
   //   bondiu = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(spectre_box);
   //   bondiw = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(spectre_box);
 }
+
+namespace spectre {
+struct MyScriPlusInterpolationManager {
+ public:
+  Cce::ScriPlusInterpolationManager<ComplexDataVector,
+                                    Cce::Tags::ScriPlus<Cce::Tags::Psi1>>
+      manager_;
+};
+
+InterpolationInterface::InterpolationInterface()
+    : my_scri_plus_interpolation_manager_(nullptr) {
+    my_scri_plus_interpolation_manager_ = new MyScriPlusInterpolationManager();
+}
+
+InterpolationInterface::~InterpolationInterface() {
+  delete my_scri_plus_interpolation_manager_;
+}
+void InterpolationInterface::clear() {
+  delete my_scri_plus_interpolation_manager_;
+  my_scri_plus_interpolation_manager_ = nullptr;
+}
+
+void InterpolationInterface::insert_data(std::vector<double> data) {}
+
+// DataVector(data.data(),data.size());
+
+}  // namespace spectre
