@@ -42,6 +42,24 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
                    const std::vector<std::vector<double>>& cauchy_cart,
                    const std::vector<std::vector<double>>& inertial_cart);
 
+namespace spectre {
+
+struct MyScriPlusInterpolationManager;
+
+struct InterpolationInterface {
+ public:
+  InterpolationInterface();
+  ~InterpolationInterface();
+
+  void clear();
+
+  void insert_data(std::vector<double> data);
+
+ private:
+  MyScriPlusInterpolationManager* my_scri_plus_interpolation_manager_;
+};
+}  // namespace spectre
+
 // struct test {
 //   using a = tmpl::list<>;
 // };
