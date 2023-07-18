@@ -1217,6 +1217,21 @@ void InterpolationInterface::ScriObserveInterpolated() {
 
     Cce::Actions::detail::correct_weyl_scalars_for_inertial_time(
         make_not_null(&corrected_scri_plus_weyl));
+
+    tmpl::for_each<Cce::Actions::detail::weyl_correction_list>(
+        [&data_to_write, &corrected_scri_plus_weyl, &interpolation_time,
+         &file_legend, &goldberg_modes, this](auto tag_v) {
+          using tag = typename decltype(tag_v)::type;
+          if constexpr (tmpl::list_contains_v<typename MyEvolutionMetavars::
+                                                  scri_values_to_observe,
+                                              tag>) {
+            transform_and_write_new<tag, tag::type::type::spin>(
+                get(get<tag>(corrected_scri_plus_weyl)).data(),
+                interpolation_time, make_not_null(&goldberg_modes),
+                make_not_null(&data_to_write), file_legend, l_max_,
+                observation_l_max_);
+          }
+        });
   }
 }
 
