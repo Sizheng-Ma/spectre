@@ -65,7 +65,7 @@ struct InterpolationInterface {
       std::vector<std::complex<double>>& news,
       std::vector<std::complex<double>>& eth_inertial_retarded_time);
 
-  void ScriObserveInterpolated();
+  void ScriObserveInterpolated(std::vector<double>& strain_to_write);
 
  private:
   MyScriPlusInterpolationManager* my_scri_plus_interpolation_manager_;
