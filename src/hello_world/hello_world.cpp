@@ -970,7 +970,8 @@ void InterpolationInterface::clear() {
 }
 
 void InterpolationInterface::InsertInterpolationScriData(
-    std::vector<double>& inertial_time, std::vector<std::complex<double>>& psi0,
+    const double delta_time_spec, std::vector<double>& inertial_time,
+    std::vector<std::complex<double>>& psi0,
     std::vector<std::complex<double>>& psi1,
     std::vector<std::complex<double>>& psi2,
     std::vector<std::complex<double>>& psi3,
@@ -1016,18 +1017,128 @@ void InterpolationInterface::InsertInterpolationScriData(
   my_scri_plus_interpolation_manager_->manager_eth_inertial_retarded_time_
       .insert_data(spectre_inertial_time, spectre_eth_inertial_retarded_time);
 
-  const auto& time_span_deque =
-      my_scri_plus_interpolation_manager_->manager_psi0_.get_u_bondi_ranges();
-  const double this_time = time_span_deque.back().first;
-  double time_delta_estimate;
-  if (time_span_deque.size() > 1) {
-    time_delta_estimate =
-        this_time - time_span_deque[time_span_deque.size() - 2].first;
+  double time_delta_estimate = delta_time_spec;
+
+  {
+    const auto& time_span_deque =
+        my_scri_plus_interpolation_manager_->manager_psi0_.get_u_bondi_ranges();
+    const double this_time = time_span_deque.back().first;
+    if (time_span_deque.size() > 1) {
+      time_delta_estimate =
+          this_time - time_span_deque[time_span_deque.size() - 2].first;
+    }
+    for (size_t i = 0; i < scri_output_density_; ++i) {
+      my_scri_plus_interpolation_manager_->manager_psi0_.insert_target_time(
+          this_time + time_delta_estimate * static_cast<double>(i) /
+                          static_cast<double>(scri_output_density_));
+    }
   }
-  for (size_t i = 0; i < scri_output_density_; ++i) {
-    my_scri_plus_interpolation_manager_->manager_psi0_.insert_target_time(
-        this_time + time_delta_estimate * static_cast<double>(i) /
-                        static_cast<double>(scri_output_density_));
+
+  {
+    const auto& time_span_deque =
+        my_scri_plus_interpolation_manager_->manager_psi1_.get_u_bondi_ranges();
+    const double this_time = time_span_deque.back().first;
+    if (time_span_deque.size() > 1) {
+      time_delta_estimate =
+          this_time - time_span_deque[time_span_deque.size() - 2].first;
+    }
+    for (size_t i = 0; i < scri_output_density_; ++i) {
+      my_scri_plus_interpolation_manager_->manager_psi1_.insert_target_time(
+          this_time + time_delta_estimate * static_cast<double>(i) /
+                          static_cast<double>(scri_output_density_));
+    }
+  }
+
+  {
+    const auto& time_span_deque =
+        my_scri_plus_interpolation_manager_->manager_psi2_.get_u_bondi_ranges();
+    const double this_time = time_span_deque.back().first;
+    if (time_span_deque.size() > 1) {
+      time_delta_estimate =
+          this_time - time_span_deque[time_span_deque.size() - 2].first;
+    }
+    for (size_t i = 0; i < scri_output_density_; ++i) {
+      my_scri_plus_interpolation_manager_->manager_psi2_.insert_target_time(
+          this_time + time_delta_estimate * static_cast<double>(i) /
+                          static_cast<double>(scri_output_density_));
+    }
+  }
+
+  {
+    const auto& time_span_deque =
+        my_scri_plus_interpolation_manager_->manager_psi3_.get_u_bondi_ranges();
+    const double this_time = time_span_deque.back().first;
+    if (time_span_deque.size() > 1) {
+      time_delta_estimate =
+          this_time - time_span_deque[time_span_deque.size() - 2].first;
+    }
+    for (size_t i = 0; i < scri_output_density_; ++i) {
+      my_scri_plus_interpolation_manager_->manager_psi3_.insert_target_time(
+          this_time + time_delta_estimate * static_cast<double>(i) /
+                          static_cast<double>(scri_output_density_));
+    }
+  }
+
+  {
+    const auto& time_span_deque =
+        my_scri_plus_interpolation_manager_->manager_psi4_.get_u_bondi_ranges();
+    const double this_time = time_span_deque.back().first;
+    if (time_span_deque.size() > 1) {
+      time_delta_estimate =
+          this_time - time_span_deque[time_span_deque.size() - 2].first;
+    }
+    for (size_t i = 0; i < scri_output_density_; ++i) {
+      my_scri_plus_interpolation_manager_->manager_psi4_.insert_target_time(
+          this_time + time_delta_estimate * static_cast<double>(i) /
+                          static_cast<double>(scri_output_density_));
+    }
+  }
+
+  {
+    const auto& time_span_deque = my_scri_plus_interpolation_manager_
+                                      ->manager_strain_.get_u_bondi_ranges();
+    const double this_time = time_span_deque.back().first;
+    if (time_span_deque.size() > 1) {
+      time_delta_estimate =
+          this_time - time_span_deque[time_span_deque.size() - 2].first;
+    }
+    for (size_t i = 0; i < scri_output_density_; ++i) {
+      my_scri_plus_interpolation_manager_->manager_strain_.insert_target_time(
+          this_time + time_delta_estimate * static_cast<double>(i) /
+                          static_cast<double>(scri_output_density_));
+    }
+  }
+
+  {
+    const auto& time_span_deque =
+        my_scri_plus_interpolation_manager_->manager_news_.get_u_bondi_ranges();
+    const double this_time = time_span_deque.back().first;
+    if (time_span_deque.size() > 1) {
+      time_delta_estimate =
+          this_time - time_span_deque[time_span_deque.size() - 2].first;
+    }
+    for (size_t i = 0; i < scri_output_density_; ++i) {
+      my_scri_plus_interpolation_manager_->manager_news_.insert_target_time(
+          this_time + time_delta_estimate * static_cast<double>(i) /
+                          static_cast<double>(scri_output_density_));
+    }
+  }
+
+  {
+    const auto& time_span_deque =
+        my_scri_plus_interpolation_manager_->manager_eth_inertial_retarded_time_
+            .get_u_bondi_ranges();
+    const double this_time = time_span_deque.back().first;
+    if (time_span_deque.size() > 1) {
+      time_delta_estimate =
+          this_time - time_span_deque[time_span_deque.size() - 2].first;
+    }
+    for (size_t i = 0; i < scri_output_density_; ++i) {
+      my_scri_plus_interpolation_manager_->manager_eth_inertial_retarded_time_
+          .insert_target_time(this_time +
+                              time_delta_estimate * static_cast<double>(i) /
+                                  static_cast<double>(scri_output_density_));
+    }
   }
 }
 

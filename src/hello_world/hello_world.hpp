@@ -54,7 +54,7 @@ struct InterpolationInterface {
 
   void clear();
 
-  void InsertInterpolationScriData(
+  void InsertInterpolationScriData(const double delta_time_spec,
       std::vector<double>& inertial_time,
       std::vector<std::complex<double>>& psi0,
       std::vector<std::complex<double>>& psi1,
