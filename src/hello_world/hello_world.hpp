@@ -49,7 +49,7 @@ struct MyScriPlusInterpolationManager;
 struct InterpolationInterface {
  public:
   InterpolationInterface(size_t target_number_of_points, size_t l_max,
-                         size_t scri_output_density);
+                         size_t scri_output_density, size_t observation_l_max);
   ~InterpolationInterface();
 
   void clear();
@@ -57,9 +57,11 @@ struct InterpolationInterface {
   void InsertInterpolationScriData(std::vector<double>& inertial_time,
                                    std::vector<std::complex<double>>& psi0);
 
+  void ScriObserveInterpolated();
+
  private:
   MyScriPlusInterpolationManager* my_scri_plus_interpolation_manager_;
-  size_t scri_output_density_;
+  size_t scri_output_density_, l_max_, observation_l_max_;
 };
 }  // namespace spectre
 
