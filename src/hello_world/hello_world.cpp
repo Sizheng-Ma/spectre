@@ -914,8 +914,11 @@ struct MyScriPlusInterpolationManager {
   std::unique_ptr<intrp::SpanInterpolator> interpolator_;
 };
 
-InterpolationInterface::InterpolationInterface(size_t target_number_of_points, size_t l_max)
-    : my_scri_plus_interpolation_manager_(nullptr) {
+InterpolationInterface::InterpolationInterface(size_t target_number_of_points,
+                                               size_t l_max,
+                                               size_t scri_output_density)
+    : my_scri_plus_interpolation_manager_(nullptr),
+      scri_output_density_(scri_output_density) {
   my_scri_plus_interpolation_manager_ =
       new MyScriPlusInterpolationManager(target_number_of_points, l_max);
 }
@@ -928,7 +931,7 @@ void InterpolationInterface::clear() {
   my_scri_plus_interpolation_manager_ = nullptr;
 }
 
-void InterpolationInterface::insert_psi0(
+void InterpolationInterface::InsertInterpolationScriData(
     std::vector<double>& inertial_time,
     std::vector<std::complex<double>>& psi0) {
   const ComplexDataVector spectre_psi0 =
@@ -938,6 +941,21 @@ void InterpolationInterface::insert_psi0(
 
   my_scri_plus_interpolation_manager_->manager_psi0_.insert_data(
       spectre_inertial_time, spectre_psi0);
+
+
+  const auto& time_span_deque =
+      my_scri_plus_interpolation_manager_->manager_psi0_.get_u_bondi_ranges();
+  const double this_time = time_span_deque.back().first;
+  double time_delta_estimate;
+  if (time_span_deque.size() > 1) {
+    time_delta_estimate =
+        this_time - time_span_deque[time_span_deque.size() - 2].first;
+  }
+  for (size_t i = 0; i < scri_output_density_; ++i) {
+    my_scri_plus_interpolation_manager_->manager_psi0_.insert_target_time(
+        this_time + time_delta_estimate * static_cast<double>(i) /
+                        static_cast<double>(scri_output_density_));
+  }
 }
 
 }  // namespace spectre
