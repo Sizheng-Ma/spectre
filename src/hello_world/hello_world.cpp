@@ -1178,8 +1178,9 @@ void InterpolationInterface::InsertInterpolationScriData(
 }
 
 void InterpolationInterface::ScriObserveInterpolated(
-    std::vector<double>& strain_to_write) {
+    std::vector<double>& strain_to_write, std::vector<double>& news_to_write) {
   strain_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
+  news_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
 
   std::vector<double> data_to_write(2 * square(observation_l_max_ + 1) + 1);
   ComplexModalVector goldberg_modes{square(l_max_ + 1)};
@@ -1286,7 +1287,7 @@ void InterpolationInterface::ScriObserveInterpolated(
                           .interpolate_and_pop_first_time();
       transform_and_write_new<tag, tag::type::type::spin>(
           interpolation.second, interpolation.first,
-          make_not_null(&goldberg_modes), make_not_null(&data_to_write),
+          make_not_null(&goldberg_modes), make_not_null(&news_to_write),
           file_legend, l_max_, observation_l_max_);
     }
   }
