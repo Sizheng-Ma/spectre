@@ -899,24 +899,27 @@ struct MyScriPlusInterpolationManager {
             std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
                 2 * target_number_of_points - 1,
                 2 * target_number_of_points + 2)),
-        manager_news_(target_number_of_points_, vector_size_,
+        manager_news_(target_number_of_points, vector_size_,
                       std::move(interpolator_)),
-        manager_strain_(target_number_of_points_, vector_size_,
+        manager_strain_(target_number_of_points, vector_size_,
                         std::move(interpolator_)),
-        manager_psi3_(target_number_of_points_, vector_size_,
+        manager_psi3_(target_number_of_points, vector_size_,
                       std::move(interpolator_)),
-        manager_psi2_(target_number_of_points_, vector_size_,
+        manager_psi2_(target_number_of_points, vector_size_,
                       std::move(interpolator_)),
-        manager_psi1_(target_number_of_points_, vector_size_,
+        manager_psi1_(target_number_of_points, vector_size_,
                       std::move(interpolator_)),
-        manager_psi0_(target_number_of_points_, vector_size_,
+        manager_psi0_(target_number_of_points, vector_size_,
                       std::move(interpolator_)),
         manager_eth_inertial_retarded_time_(
-            target_number_of_points_, vector_size_, std::move(interpolator_)),
-        manager_psi4_(target_number_of_points_, vector_size_,
+            target_number_of_points, vector_size_, std::move(interpolator_)),
+        manager_psi4_(target_number_of_points, vector_size_,
                       std::move(interpolator_)){
 
         };
+ private:
+  size_t target_number_of_points_, vector_size_;
+  std::unique_ptr<intrp::SpanInterpolator> interpolator_;
 
  public:
   Cce::ScriPlusInterpolationManager<ComplexDataVector, Cce::Tags::News>
@@ -944,9 +947,6 @@ struct MyScriPlusInterpolationManager {
                                         Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>>
       manager_psi4_;
 
- private:
-  size_t target_number_of_points_, vector_size_;
-  std::unique_ptr<intrp::SpanInterpolator> interpolator_;
 };
 
 InterpolationInterface::InterpolationInterface(size_t target_number_of_points,
@@ -1214,6 +1214,9 @@ void InterpolationInterface::ScriObserveInterpolated() {
       get(get<Cce::Tags::EthInertialRetardedTime>(corrected_scri_plus_weyl))
           .data() = interpolation.second;
     }
+
+    Cce::Actions::detail::correct_weyl_scalars_for_inertial_time(
+        make_not_null(&corrected_scri_plus_weyl));
   }
 }
 
