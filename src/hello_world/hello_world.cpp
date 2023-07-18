@@ -1159,9 +1159,61 @@ void InterpolationInterface::ScriObserveInterpolated() {
       corrected_scri_plus_weyl{
           Spectral::Swsh::number_of_swsh_collocation_points(l_max_)};
 
-  while (my_scri_plus_interpolation_manager_->manager_psi0_
+  while (my_scri_plus_interpolation_manager_->manager_news_
              .first_time_is_ready_to_interpolate()) {
     double interpolation_time = 0.0;
+    std::pair<double, ComplexDataVector> interpolation;
+
+    {
+      interpolation = my_scri_plus_interpolation_manager_->manager_psi4_
+                          .interpolate_and_pop_first_time();
+      interpolation_time = interpolation.first;
+      get(get<Cce::Tags::Du<
+              Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>>(
+              corrected_scri_plus_weyl))
+          .data() = interpolation.second;
+    }
+
+    {
+      interpolation = my_scri_plus_interpolation_manager_->manager_psi3_
+                          .interpolate_and_pop_first_time();
+      interpolation_time = interpolation.first;
+      get(get<Cce::Tags::ScriPlus<Cce::Tags::Psi3>>(corrected_scri_plus_weyl))
+          .data() = interpolation.second;
+    }
+
+    {
+      interpolation = my_scri_plus_interpolation_manager_->manager_psi2_
+                          .interpolate_and_pop_first_time();
+      interpolation_time = interpolation.first;
+      get(get<Cce::Tags::ScriPlus<Cce::Tags::Psi2>>(corrected_scri_plus_weyl))
+          .data() = interpolation.second;
+    }
+
+    {
+      interpolation = my_scri_plus_interpolation_manager_->manager_psi1_
+                          .interpolate_and_pop_first_time();
+      interpolation_time = interpolation.first;
+      get(get<Cce::Tags::ScriPlus<Cce::Tags::Psi1>>(corrected_scri_plus_weyl))
+          .data() = interpolation.second;
+    }
+
+    {
+      interpolation = my_scri_plus_interpolation_manager_->manager_psi0_
+                          .interpolate_and_pop_first_time();
+      interpolation_time = interpolation.first;
+      get(get<Cce::Tags::ScriPlus<Cce::Tags::Psi0>>(corrected_scri_plus_weyl))
+          .data() = interpolation.second;
+    }
+
+    {
+      interpolation = my_scri_plus_interpolation_manager_
+                          ->manager_eth_inertial_retarded_time_
+                          .interpolate_and_pop_first_time();
+      interpolation_time = interpolation.first;
+      get(get<Cce::Tags::EthInertialRetardedTime>(corrected_scri_plus_weyl))
+          .data() = interpolation.second;
+    }
   }
 }
 
