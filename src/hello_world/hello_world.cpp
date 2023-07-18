@@ -1232,6 +1232,25 @@ void InterpolationInterface::ScriObserveInterpolated() {
                 observation_l_max_);
           }
         });
+
+    {
+      using tag = Cce::Tags::ScriPlus<Cce::Tags::Strain>;
+      interpolation = my_scri_plus_interpolation_manager_->manager_strain_
+                          .interpolate_and_pop_first_time();
+      transform_and_write_new<tag, tag::type::type::spin>(
+          interpolation.second, interpolation.first,
+          make_not_null(&goldberg_modes), make_not_null(&data_to_write),
+          file_legend, l_max_, observation_l_max_);
+    }
+    {
+      using tag = Cce::Tags::News;
+      interpolation = my_scri_plus_interpolation_manager_->manager_news_
+                          .interpolate_and_pop_first_time();
+      transform_and_write_new<tag, tag::type::type::spin>(
+          interpolation.second, interpolation.first,
+          make_not_null(&goldberg_modes), make_not_null(&data_to_write),
+          file_legend, l_max_, observation_l_max_);
+    }
   }
 }
 
