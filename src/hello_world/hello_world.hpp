@@ -54,8 +54,16 @@ struct InterpolationInterface {
 
   void clear();
 
-  void InsertInterpolationScriData(std::vector<double>& inertial_time,
-                                   std::vector<std::complex<double>>& psi0);
+  void InsertInterpolationScriData(
+      std::vector<double>& inertial_time,
+      std::vector<std::complex<double>>& psi0,
+      std::vector<std::complex<double>>& psi1,
+      std::vector<std::complex<double>>& psi2,
+      std::vector<std::complex<double>>& psi3,
+      std::vector<std::complex<double>>& psi4,
+      std::vector<std::complex<double>>& strain,
+      std::vector<std::complex<double>>& news,
+      std::vector<std::complex<double>>& eth_inertial_retarded_time);
 
   void ScriObserveInterpolated();
 
