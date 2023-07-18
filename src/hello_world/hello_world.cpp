@@ -895,31 +895,66 @@ struct MyScriPlusInterpolationManager {
   MyScriPlusInterpolationManager(size_t target_number_of_points, size_t l_max)
       : target_number_of_points_(target_number_of_points),
         vector_size_(Spectral::Swsh::number_of_swsh_collocation_points(l_max)),
-        interpolator_(
+        interpolator1_(
+            std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
+                2 * target_number_of_points - 1,
+                2 * target_number_of_points + 2)),
+        interpolator2_(
+            std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
+                2 * target_number_of_points - 1,
+                2 * target_number_of_points + 2)),
+        interpolator3_(
+            std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
+                2 * target_number_of_points - 1,
+                2 * target_number_of_points + 2)),
+        interpolator4_(
+            std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
+                2 * target_number_of_points - 1,
+                2 * target_number_of_points + 2)),
+        interpolator5_(
+            std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
+                2 * target_number_of_points - 1,
+                2 * target_number_of_points + 2)),
+        interpolator6_(
+            std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
+                2 * target_number_of_points - 1,
+                2 * target_number_of_points + 2)),
+        interpolator7_(
+            std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
+                2 * target_number_of_points - 1,
+                2 * target_number_of_points + 2)),
+        interpolator8_(
             std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
                 2 * target_number_of_points - 1,
                 2 * target_number_of_points + 2)),
         manager_news_(target_number_of_points, vector_size_,
-                      std::move(interpolator_)),
+                      std::move(interpolator1_)),
         manager_strain_(target_number_of_points, vector_size_,
-                        std::move(interpolator_)),
+                        std::move(interpolator2_)),
         manager_psi3_(target_number_of_points, vector_size_,
-                      std::move(interpolator_)),
+                      std::move(interpolator3_)),
         manager_psi2_(target_number_of_points, vector_size_,
-                      std::move(interpolator_)),
+                      std::move(interpolator4_)),
         manager_psi1_(target_number_of_points, vector_size_,
-                      std::move(interpolator_)),
+                      std::move(interpolator5_)),
         manager_psi0_(target_number_of_points, vector_size_,
-                      std::move(interpolator_)),
+                      std::move(interpolator6_)),
         manager_eth_inertial_retarded_time_(
-            target_number_of_points, vector_size_, std::move(interpolator_)),
+            target_number_of_points, vector_size_, std::move(interpolator7_)),
         manager_psi4_(target_number_of_points, vector_size_,
-                      std::move(interpolator_)){
+                      std::move(interpolator8_)){
 
         };
  private:
   size_t target_number_of_points_, vector_size_;
-  std::unique_ptr<intrp::SpanInterpolator> interpolator_;
+  std::unique_ptr<intrp::BarycentricRationalSpanInterpolator> interpolator1_;
+  std::unique_ptr<intrp::BarycentricRationalSpanInterpolator> interpolator2_;
+  std::unique_ptr<intrp::BarycentricRationalSpanInterpolator> interpolator3_;
+  std::unique_ptr<intrp::BarycentricRationalSpanInterpolator> interpolator4_;
+  std::unique_ptr<intrp::BarycentricRationalSpanInterpolator> interpolator5_;
+  std::unique_ptr<intrp::BarycentricRationalSpanInterpolator> interpolator6_;
+  std::unique_ptr<intrp::BarycentricRationalSpanInterpolator> interpolator7_;
+  std::unique_ptr<intrp::BarycentricRationalSpanInterpolator> interpolator8_;
 
  public:
   Cce::ScriPlusInterpolationManager<ComplexDataVector, Cce::Tags::News>
