@@ -899,15 +899,50 @@ struct MyScriPlusInterpolationManager {
             std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
                 2 * target_number_of_points - 1,
                 2 * target_number_of_points + 2)),
+        manager_news_(target_number_of_points_, vector_size_,
+                      std::move(interpolator_)),
+        manager_strain_(target_number_of_points_, vector_size_,
+                        std::move(interpolator_)),
+        manager_psi3_(target_number_of_points_, vector_size_,
+                      std::move(interpolator_)),
+        manager_psi2_(target_number_of_points_, vector_size_,
+                      std::move(interpolator_)),
+        manager_psi1_(target_number_of_points_, vector_size_,
+                      std::move(interpolator_)),
         manager_psi0_(target_number_of_points_, vector_size_,
+                      std::move(interpolator_)),
+        manager_eth_inertial_retarded_time_(
+            target_number_of_points_, vector_size_, std::move(interpolator_)),
+        manager_psi4_(target_number_of_points_, vector_size_,
                       std::move(interpolator_)){
 
         };
 
  public:
+  Cce::ScriPlusInterpolationManager<ComplexDataVector, Cce::Tags::News>
+      manager_news_;
+  Cce::ScriPlusInterpolationManager<ComplexDataVector,
+                                    Cce::Tags::ScriPlus<Cce::Tags::Strain>>
+      manager_strain_;
+  Cce::ScriPlusInterpolationManager<ComplexDataVector,
+                                    Cce::Tags::ScriPlus<Cce::Tags::Psi3>>
+      manager_psi3_;
+  Cce::ScriPlusInterpolationManager<ComplexDataVector,
+                                    Cce::Tags::ScriPlus<Cce::Tags::Psi2>>
+      manager_psi2_;
+  Cce::ScriPlusInterpolationManager<ComplexDataVector,
+                                    Cce::Tags::ScriPlus<Cce::Tags::Psi1>>
+      manager_psi1_;
   Cce::ScriPlusInterpolationManager<ComplexDataVector,
                                     Cce::Tags::ScriPlus<Cce::Tags::Psi0>>
       manager_psi0_;
+  Cce::ScriPlusInterpolationManager<ComplexDataVector,
+                                    Cce::Tags::EthInertialRetardedTime>
+      manager_eth_inertial_retarded_time_;
+  Cce::ScriPlusInterpolationManager<ComplexDataVector,
+                                    Cce::Tags::Du<Cce::Tags::TimeIntegral<
+                                        Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>>
+      manager_psi4_;
 
  private:
   size_t target_number_of_points_, vector_size_;
@@ -935,16 +970,51 @@ void InterpolationInterface::clear() {
 }
 
 void InterpolationInterface::InsertInterpolationScriData(
-    std::vector<double>& inertial_time,
-    std::vector<std::complex<double>>& psi0) {
+    std::vector<double>& inertial_time, std::vector<std::complex<double>>& psi0,
+    std::vector<std::complex<double>>& psi1,
+    std::vector<std::complex<double>>& psi2,
+    std::vector<std::complex<double>>& psi3,
+    std::vector<std::complex<double>>& psi4,
+    std::vector<std::complex<double>>& strain,
+    std::vector<std::complex<double>>& news,
+    std::vector<std::complex<double>>& eth_inertial_retarded_time) {
   const ComplexDataVector spectre_psi0 =
       ComplexDataVector(psi0.data(), psi0.size());
+  const ComplexDataVector spectre_psi1 =
+      ComplexDataVector(psi1.data(), psi1.size());
+  const ComplexDataVector spectre_psi2 =
+      ComplexDataVector(psi2.data(), psi2.size());
+  const ComplexDataVector spectre_psi3 =
+      ComplexDataVector(psi3.data(), psi3.size());
+  const ComplexDataVector spectre_psi4 =
+      ComplexDataVector(psi4.data(), psi4.size());
+  const ComplexDataVector spectre_strain =
+      ComplexDataVector(strain.data(), strain.size());
+  const ComplexDataVector spectre_news =
+      ComplexDataVector(news.data(), news.size());
+  const ComplexDataVector spectre_eth_inertial_retarded_time =
+      ComplexDataVector(eth_inertial_retarded_time.data(),
+                        eth_inertial_retarded_time.size());
+
   const DataVector spectre_inertial_time =
       DataVector(inertial_time.data(), inertial_time.size());
 
   my_scri_plus_interpolation_manager_->manager_psi0_.insert_data(
       spectre_inertial_time, spectre_psi0);
-
+  my_scri_plus_interpolation_manager_->manager_psi1_.insert_data(
+      spectre_inertial_time, spectre_psi1);
+  my_scri_plus_interpolation_manager_->manager_psi2_.insert_data(
+      spectre_inertial_time, spectre_psi2);
+  my_scri_plus_interpolation_manager_->manager_psi3_.insert_data(
+      spectre_inertial_time, spectre_psi3);
+  my_scri_plus_interpolation_manager_->manager_psi4_.insert_data(
+      spectre_inertial_time, spectre_psi4);
+  my_scri_plus_interpolation_manager_->manager_strain_.insert_data(
+      spectre_inertial_time, spectre_strain);
+  my_scri_plus_interpolation_manager_->manager_news_.insert_data(
+      spectre_inertial_time, spectre_news);
+  my_scri_plus_interpolation_manager_->manager_eth_inertial_retarded_time_
+      .insert_data(spectre_inertial_time, spectre_eth_inertial_retarded_time);
 
   const auto& time_span_deque =
       my_scri_plus_interpolation_manager_->manager_psi0_.get_u_bondi_ranges();
