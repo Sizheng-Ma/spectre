@@ -892,15 +892,32 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
 
 namespace spectre {
 struct MyScriPlusInterpolationManager {
+  MyScriPlusInterpolationManager(size_t target_number_of_points, size_t l_max)
+      : target_number_of_points_(target_number_of_points),
+        vector_size_(Spectral::Swsh::number_of_swsh_collocation_points(l_max)),
+        interpolator_(
+            std::make_unique<intrp::BarycentricRationalSpanInterpolator>(
+                2 * target_number_of_points - 1,
+                2 * target_number_of_points + 2)),
+        manager_psi0_(target_number_of_points_, vector_size_,
+                      std::move(interpolator_)){
+
+        };
+
  public:
   Cce::ScriPlusInterpolationManager<ComplexDataVector,
-                                    Cce::Tags::ScriPlus<Cce::Tags::Psi1>>
-      manager_;
+                                    Cce::Tags::ScriPlus<Cce::Tags::Psi0>>
+      manager_psi0_;
+
+ private:
+  size_t target_number_of_points_, vector_size_;
+  std::unique_ptr<intrp::SpanInterpolator> interpolator_;
 };
 
-InterpolationInterface::InterpolationInterface()
+InterpolationInterface::InterpolationInterface(size_t target_number_of_points, size_t l_max)
     : my_scri_plus_interpolation_manager_(nullptr) {
-    my_scri_plus_interpolation_manager_ = new MyScriPlusInterpolationManager();
+  my_scri_plus_interpolation_manager_ =
+      new MyScriPlusInterpolationManager(target_number_of_points, l_max);
 }
 
 InterpolationInterface::~InterpolationInterface() {
@@ -911,8 +928,16 @@ void InterpolationInterface::clear() {
   my_scri_plus_interpolation_manager_ = nullptr;
 }
 
-void InterpolationInterface::insert_data(std::vector<double> data) {}
+void InterpolationInterface::insert_psi0(
+    std::vector<double>& inertial_time,
+    std::vector<std::complex<double>>& psi0) {
+  const ComplexDataVector spectre_psi0 =
+      ComplexDataVector(psi0.data(), psi0.size());
+  const DataVector spectre_inertial_time =
+      DataVector(inertial_time.data(), inertial_time.size());
 
-// DataVector(data.data(),data.size());
+  my_scri_plus_interpolation_manager_->manager_psi0_.insert_data(
+      spectre_inertial_time, spectre_psi0);
+}
 
 }  // namespace spectre

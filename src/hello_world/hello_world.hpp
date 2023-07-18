@@ -48,15 +48,16 @@ struct MyScriPlusInterpolationManager;
 
 struct InterpolationInterface {
  public:
-  InterpolationInterface();
+  InterpolationInterface(size_t target_number_of_points, size_t l_max);
   ~InterpolationInterface();
 
   void clear();
 
-  void insert_data(std::vector<double> data);
+  void insert_psi0(std::vector<double>& inertial_time,std::vector<std::complex<double>>& psi0);
 
  private:
   MyScriPlusInterpolationManager* my_scri_plus_interpolation_manager_;
+  size_t target_number_of_points_, vector_size_;
 };
 }  // namespace spectre
 
