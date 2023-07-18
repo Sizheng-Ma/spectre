@@ -1177,10 +1177,18 @@ void InterpolationInterface::InsertInterpolationScriData(
   }
 }
 
-void InterpolationInterface::ScriObserveInterpolated(
-    std::vector<double>& strain_to_write, std::vector<double>& news_to_write) {
+void InterpolationInterface::ScriObserveInterpolated(std::vector<double>& eth_inertial_retarded_time_to_write,
+   std::vector<double>& psi0_to_write,std::vector<double>& psi1_to_write, std::vector<double>& psi2_to_write,std::vector<double>& psi3_to_write,
+    std::vector<double>& psi4_to_write, std::vector<double>& strain_to_write,
+    std::vector<double>& news_to_write) {
   strain_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
   news_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
+  psi4_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
+  psi3_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
+  psi2_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
+  psi1_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
+  psi0_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
+  eth_inertial_retarded_time_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
 
   std::vector<double> data_to_write(2 * square(observation_l_max_ + 1) + 1);
   ComplexModalVector goldberg_modes{square(l_max_ + 1)};
@@ -1257,20 +1265,66 @@ void InterpolationInterface::ScriObserveInterpolated(
     Cce::Actions::detail::correct_weyl_scalars_for_inertial_time(
         make_not_null(&corrected_scri_plus_weyl));
 
-    tmpl::for_each<Cce::Actions::detail::weyl_correction_list>(
-        [&data_to_write, &corrected_scri_plus_weyl, &interpolation_time,
-         &file_legend, &goldberg_modes, this](auto tag_v) {
-          using tag = typename decltype(tag_v)::type;
-          if constexpr (tmpl::list_contains_v<typename MyEvolutionMetavars::
-                                                  scri_values_to_observe,
-                                              tag>) {
-            transform_and_write_new<tag, tag::type::type::spin>(
-                get(get<tag>(corrected_scri_plus_weyl)).data(),
-                interpolation_time, make_not_null(&goldberg_modes),
-                make_not_null(&data_to_write), file_legend, l_max_,
-                observation_l_max_);
-          }
-        });
+    // tmpl::for_each<Cce::Actions::detail::weyl_correction_list>(
+    //     [&data_to_write, &corrected_scri_plus_weyl, &interpolation_time,
+    //      &file_legend, &goldberg_modes, this](auto tag_v) {
+    //       using tag = typename decltype(tag_v)::type;
+    //       if constexpr (tmpl::list_contains_v<typename MyEvolutionMetavars::
+    //                                               scri_values_to_observe,
+    //                                           tag>) {
+    //         transform_and_write_new<tag, tag::type::type::spin>(
+    //             get(get<tag>(corrected_scri_plus_weyl)).data(),
+    //             interpolation_time, make_not_null(&goldberg_modes),
+    //             make_not_null(&data_to_write), file_legend, l_max_,
+    //             observation_l_max_);
+    //       }
+    //     });
+    {
+      using tag = Cce::Tags::EthInertialRetardedTime;
+      transform_and_write_new<tag, tag::type::type::spin>(
+          get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
+          make_not_null(&goldberg_modes),
+          make_not_null(&eth_inertial_retarded_time_to_write), file_legend,
+          l_max_, observation_l_max_);
+    }
+    {
+      using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi0>;
+      transform_and_write_new<tag, tag::type::type::spin>(
+          get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
+          make_not_null(&goldberg_modes), make_not_null(&psi0_to_write),
+          file_legend, l_max_, observation_l_max_);
+    }
+    {
+      using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi1>;
+      transform_and_write_new<tag, tag::type::type::spin>(
+          get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
+          make_not_null(&goldberg_modes), make_not_null(&psi1_to_write),
+          file_legend, l_max_, observation_l_max_);
+    }
+    {
+      using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi2>;
+      transform_and_write_new<tag, tag::type::type::spin>(
+          get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
+          make_not_null(&goldberg_modes), make_not_null(&psi2_to_write),
+          file_legend, l_max_, observation_l_max_);
+    }
+
+            {
+      using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi3>;
+      transform_and_write_new<tag, tag::type::type::spin>(
+          get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
+          make_not_null(&goldberg_modes), make_not_null(&psi3_to_write),
+          file_legend, l_max_, observation_l_max_);
+    }
+
+    {
+      using tag = Cce::Tags::Du<
+          Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>;
+      transform_and_write_new<tag, tag::type::type::spin>(
+          get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
+          make_not_null(&goldberg_modes), make_not_null(&psi4_to_write),
+          file_legend, l_max_, observation_l_max_);
+    }
 
     {
       using tag = Cce::Tags::ScriPlus<Cce::Tags::Strain>;
