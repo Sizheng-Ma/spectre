@@ -916,9 +916,12 @@ struct MyScriPlusInterpolationManager {
 
 InterpolationInterface::InterpolationInterface(size_t target_number_of_points,
                                                size_t l_max,
-                                               size_t scri_output_density)
+                                               size_t scri_output_density,
+                                               size_t observation_l_max)
     : my_scri_plus_interpolation_manager_(nullptr),
-      scri_output_density_(scri_output_density) {
+      scri_output_density_(scri_output_density),
+      l_max_(l_max),
+      observation_l_max_(observation_l_max) {
   my_scri_plus_interpolation_manager_ =
       new MyScriPlusInterpolationManager(target_number_of_points, l_max);
 }
@@ -955,6 +958,29 @@ void InterpolationInterface::InsertInterpolationScriData(
     my_scri_plus_interpolation_manager_->manager_psi0_.insert_target_time(
         this_time + time_delta_estimate * static_cast<double>(i) /
                         static_cast<double>(scri_output_density_));
+  }
+}
+
+void InterpolationInterface::ScriObserveInterpolated() {
+  std::vector<double> data_to_write(2 * square(observation_l_max_ + 1) + 1);
+  ComplexModalVector goldberg_modes{square(l_max_ + 1)};
+  std::vector<std::string> file_legend;
+  file_legend.reserve(2 * square(observation_l_max_ + 1) + 1);
+  file_legend.emplace_back("time");
+  for (int i = 0; i <= static_cast<int>(observation_l_max_); ++i) {
+    for (int j = -i; j <= i; ++j) {
+      file_legend.push_back(MakeString{} << "Real Y_" << i << "," << j);
+      file_legend.push_back(MakeString{} << "Imag Y_" << i << "," << j);
+    }
+  }
+
+  Variables<Cce::Actions::detail::weyl_correction_list>
+      corrected_scri_plus_weyl{
+          Spectral::Swsh::number_of_swsh_collocation_points(l_max_)};
+
+  while (my_scri_plus_interpolation_manager_->manager_psi0_
+             .first_time_is_ready_to_interpolate()) {
+    double interpolation_time = 0.0;
   }
 }
 
