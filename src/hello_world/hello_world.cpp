@@ -338,7 +338,12 @@ void ccm_functions(
     std::vector<double>& dt_cauchy_x, std::vector<double>& dt_cauchy_y,
     std::vector<double>& dt_cauchy_z, std::vector<double>& dt_inertial_x,
     std::vector<double>& dt_inertial_y, std::vector<double>& dt_inertial_z,
-    std::vector<double>& re_psi3, std::vector<double>& im_psi3,
+    std::vector<std::complex<double>>& eth_inertial_retarded_time,
+    std::vector<std::complex<double>>& news,
+    std::vector<std::complex<double>>& strain,
+    std::vector<std::complex<double>>& psi0,
+    std::vector<std::complex<double>>& psi1,std::vector<std::complex<double>>& psi2,
+    std::vector<std::complex<double>>& psi3, 
     std::vector<std::complex<double>>& psi4, std::vector<double>& dt_u_scri,
     const size_t l_max, const size_t number_of_radial_points,
     const std::vector<std::vector<double>>& spacetime_metric,
@@ -744,14 +749,37 @@ void ccm_functions(
     dt_u_scri.push_back(du_t.get()[i]);
   }
 
+  auto& eth_inertial_retarded_time_from_cce = get<Cce::Tags::EthInertialRetardedTime>(spectre_box);
+  auto& news_from_cce = get<Cce::Tags::News>(spectre_box);
+  auto& strain_from_cce = get<Cce::Tags::ScriPlus<Cce::Tags::Strain>>(spectre_box);
+  auto& psi0_from_cce = get<Cce::Tags::ScriPlus<Cce::Tags::Psi0>>(spectre_box);
+  auto& psi1_from_cce = get<Cce::Tags::ScriPlus<Cce::Tags::Psi1>>(spectre_box);
+  auto& psi2_from_cce = get<Cce::Tags::ScriPlus<Cce::Tags::Psi2>>(spectre_box);
   auto& psi3_from_cce = get<Cce::Tags::ScriPlus<Cce::Tags::Psi3>>(spectre_box);
   auto& psi4_from_cce =
       get<Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>(
           spectre_box);
 
+  for (unsigned int i = 0; i < get(eth_inertial_retarded_time_from_cce).size(); i++) {
+    eth_inertial_retarded_time.push_back(get(eth_inertial_retarded_time_from_cce).data()[i]);
+  }
+  for (unsigned int i = 0; i < get(news_from_cce).size(); i++) {
+    news.push_back(get(news_from_cce).data()[i]);
+  }
+  for (unsigned int i = 0; i < get(strain_from_cce).size(); i++) {
+    strain.push_back(get(strain_from_cce).data()[i]);
+  }
+  for (unsigned int i = 0; i < get(psi0_from_cce).size(); i++) {
+    psi0.push_back(get(psi0_from_cce).data()[i]);
+  }
+  for (unsigned int i = 0; i < get(psi1_from_cce).size(); i++) {
+    psi1.push_back(get(psi1_from_cce).data()[i]);
+  }
+  for (unsigned int i = 0; i < get(psi2_from_cce).size(); i++) {
+    psi2.push_back(get(psi2_from_cce).data()[i]);
+  }
   for (unsigned int i = 0; i < get(psi3_from_cce).size(); i++) {
-    re_psi3.push_back(real(get(psi3_from_cce).data())[i]);
-    im_psi3.push_back(imag(get(psi3_from_cce).data())[i]);
+    psi3.push_back(get(psi3_from_cce).data()[i]);
   }
   for (unsigned int i = 0; i < get(psi4_from_cce).size(); i++) {
     psi4.push_back(get(psi4_from_cce).data()[i]);
