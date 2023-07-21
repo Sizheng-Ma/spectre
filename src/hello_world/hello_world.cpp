@@ -748,13 +748,13 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
 
   auto& psi3 = get<Cce::Tags::ScriPlus<Cce::Tags::Psi3>>(spectre_box);
 
-  for (unsigned int i = 0; i < psi3.size(); i++) {
+  for (unsigned int i = 0; i < get(psi3).size(); i++) {
     re_psi3.push_back(real(get(psi3).data())[i]);
     im_psi3.push_back(imag(get(psi3).data())[i]);
   }
-
-  std::cout << real(get(psi3).data())[0] << " " << imag(get(psi3).data())[0]
-            << std::endl;
+  //   std::cout << real(get(psi3).data())[0] << " " <<
+  //   imag(get(psi3).data())[0]
+  //             << std::endl;
 
   // DataVector dv_psi0 = gh_read * 2.;
 
