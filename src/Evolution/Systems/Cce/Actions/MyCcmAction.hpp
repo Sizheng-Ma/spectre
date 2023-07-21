@@ -4,7 +4,7 @@
 #include "Parallel/GlobalCache.hpp"
 #include "Utilities/Gsl.hpp"
 #include "Utilities/TMPL.hpp"
-#include "hello_world/hello_world_test.hpp"
+#include "hello_world/hello_world.hpp"
 
 namespace Cce {
 namespace Actions {
@@ -126,12 +126,13 @@ struct MyCCMAction {
 
     std::vector<double> dt_cauchy_x, dt_cauchy_y, dt_cauchy_z, dt_u_scri;
 
-    ccm_functions11(
-        re_h, im_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z, dt_u_scri, l_max,
-        number_of_radial_points, radius, re_j, im_j, cauchy_cart_std,
-        inertial_cart_std, bondi_beta_bdry, dr_j_bdry, du_r_bdry, bondi_h_bdry,
-        bondi_j_bdry, bondi_q_bdry, bondi_r_bdry, bondi_u_bdry, bondi_w_bdry,
-        bondi_dr_u_bdry, bondi_du_j_bdry, bondi_du_r_bdry_DuRDividedByR);
+    // ccm_functions11(
+    //     re_h, im_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z, dt_u_scri, l_max,
+    //     number_of_radial_points, radius, re_j, im_j, cauchy_cart_std,
+    //     inertial_cart_std, bondi_beta_bdry, dr_j_bdry, du_r_bdry,
+    //     bondi_h_bdry, bondi_j_bdry, bondi_q_bdry, bondi_r_bdry, bondi_u_bdry,
+    //     bondi_w_bdry, bondi_dr_u_bdry, bondi_du_j_bdry,
+    //     bondi_du_r_bdry_DuRDividedByR);
 
     auto bondi_h = db::get<Tags::BondiH>(box);
 
