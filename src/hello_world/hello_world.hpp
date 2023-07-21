@@ -4,6 +4,7 @@
 #pragma once
 
 #include <complex>
+#include <deque>
 #include <vector>
 
 void myprint();
@@ -54,8 +55,10 @@ struct InterpolationInterface {
 
   void clear();
 
-  void InsertInterpolationScriData(const double delta_time_spec,
-      std::vector<double>& inertial_time,
+  std::deque<std::pair<double, double>> get_u_bondi_ranges();
+
+  void InsertInterpolationScriData(
+      const double delta_time_spec, std::vector<double>& inertial_time,
       std::vector<std::complex<double>>& psi0,
       std::vector<std::complex<double>>& psi1,
       std::vector<std::complex<double>>& psi2,
