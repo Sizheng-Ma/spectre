@@ -945,6 +945,7 @@ struct MyScriPlusInterpolationManager {
                       std::move(interpolator8_)){
 
         };
+
  private:
   size_t target_number_of_points_, vector_size_;
   std::unique_ptr<intrp::BarycentricRationalSpanInterpolator> interpolator1_;
@@ -981,7 +982,6 @@ struct MyScriPlusInterpolationManager {
                                     Cce::Tags::Du<Cce::Tags::TimeIntegral<
                                         Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>>
       manager_psi4_;
-
 };
 
 InterpolationInterface::InterpolationInterface(size_t target_number_of_points,
@@ -1004,6 +1004,12 @@ void InterpolationInterface::clear() {
   my_scri_plus_interpolation_manager_ = nullptr;
 }
 
+std::deque<std::pair<double, double>>
+InterpolationInterface::get_u_bondi_ranges() {
+  return my_scri_plus_interpolation_manager_->manager_psi0_
+      .get_u_bondi_ranges();
+}
+
 void InterpolationInterface::InsertInterpolationScriData(
     const double delta_time_spec, std::vector<double>& inertial_time,
     std::vector<std::complex<double>>& psi0,
@@ -1014,6 +1020,7 @@ void InterpolationInterface::InsertInterpolationScriData(
     std::vector<std::complex<double>>& strain,
     std::vector<std::complex<double>>& news,
     std::vector<std::complex<double>>& eth_inertial_retarded_time) {
+  std::cout << "hihihi" << std::endl;
   const ComplexDataVector spectre_psi0 =
       ComplexDataVector(psi0.data(), psi0.size());
   const ComplexDataVector spectre_psi1 =
@@ -1177,8 +1184,10 @@ void InterpolationInterface::InsertInterpolationScriData(
   }
 }
 
-void InterpolationInterface::ScriObserveInterpolated(std::vector<double>& eth_inertial_retarded_time_to_write,
-   std::vector<double>& psi0_to_write,std::vector<double>& psi1_to_write, std::vector<double>& psi2_to_write,std::vector<double>& psi3_to_write,
+void InterpolationInterface::ScriObserveInterpolated(
+    std::vector<double>& eth_inertial_retarded_time_to_write,
+    std::vector<double>& psi0_to_write, std::vector<double>& psi1_to_write,
+    std::vector<double>& psi2_to_write, std::vector<double>& psi3_to_write,
     std::vector<double>& psi4_to_write, std::vector<double>& strain_to_write,
     std::vector<double>& news_to_write) {
   strain_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
@@ -1188,7 +1197,8 @@ void InterpolationInterface::ScriObserveInterpolated(std::vector<double>& eth_in
   psi2_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
   psi1_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
   psi0_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
-  eth_inertial_retarded_time_to_write.resize(2 * square(observation_l_max_ + 1) + 1);
+  eth_inertial_retarded_time_to_write.resize(
+      2 * square(observation_l_max_ + 1) + 1);
 
   std::vector<double> data_to_write(2 * square(observation_l_max_ + 1) + 1);
   ComplexModalVector goldberg_modes{square(l_max_ + 1)};
@@ -1309,7 +1319,7 @@ void InterpolationInterface::ScriObserveInterpolated(std::vector<double>& eth_in
           file_legend, l_max_, observation_l_max_);
     }
 
-            {
+    {
       using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi3>;
       transform_and_write_new<tag, tag::type::type::spin>(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
