@@ -333,23 +333,21 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
   }
 }
 
-void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
-                   std::vector<double>& dt_cauchy_x,
-                   std::vector<double>& dt_cauchy_y,
-                   std::vector<double>& dt_cauchy_z,
-                   std::vector<double>& dt_inertial_x,
-                   std::vector<double>& dt_inertial_y,
-                   std::vector<double>& dt_inertial_z,
-                   std::vector<double>& re_psi3, std::vector<double>& im_psi3,
-                   std::vector<double>& dt_u_scri, const size_t l_max,
-                   const size_t number_of_radial_points,
-                   const std::vector<std::vector<double>>& spacetime_metric,
-                   const std::vector<std::vector<double>>& pi,
-                   const std::vector<std::vector<std::vector<double>>>& phi,
-                   const double radius, const std::vector<double>& re_j,
-                   const std::vector<double>& im_j,
-                   const std::vector<std::vector<double>>& cauchy_cart,
-                   const std::vector<std::vector<double>>& inertial_cart) {
+void ccm_functions(
+    std::vector<double>& re_h, std::vector<double>& im_h,
+    std::vector<double>& dt_cauchy_x, std::vector<double>& dt_cauchy_y,
+    std::vector<double>& dt_cauchy_z, std::vector<double>& dt_inertial_x,
+    std::vector<double>& dt_inertial_y, std::vector<double>& dt_inertial_z,
+    std::vector<double>& re_psi3, std::vector<double>& im_psi3,
+    std::vector<std::complex<double>>& psi4, std::vector<double>& dt_u_scri,
+    const size_t l_max, const size_t number_of_radial_points,
+    const std::vector<std::vector<double>>& spacetime_metric,
+    const std::vector<std::vector<double>>& pi,
+    const std::vector<std::vector<std::vector<double>>>& phi,
+    const double radius, const std::vector<double>& re_j,
+    const std::vector<double>& im_j,
+    const std::vector<std::vector<double>>& cauchy_cart,
+    const std::vector<std::vector<double>>& inertial_cart) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   // TODO this is hardcoded
@@ -746,11 +744,17 @@ void ccm_functions(std::vector<double>& re_h, std::vector<double>& im_h,
     dt_u_scri.push_back(du_t.get()[i]);
   }
 
-  auto& psi3 = get<Cce::Tags::ScriPlus<Cce::Tags::Psi3>>(spectre_box);
+  auto& psi3_from_cce = get<Cce::Tags::ScriPlus<Cce::Tags::Psi3>>(spectre_box);
+  auto& psi4_from_cce =
+      get<Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>(
+          spectre_box);
 
-  for (unsigned int i = 0; i < get(psi3).size(); i++) {
-    re_psi3.push_back(real(get(psi3).data())[i]);
-    im_psi3.push_back(imag(get(psi3).data())[i]);
+  for (unsigned int i = 0; i < get(psi3_from_cce).size(); i++) {
+    re_psi3.push_back(real(get(psi3_from_cce).data())[i]);
+    im_psi3.push_back(imag(get(psi3_from_cce).data())[i]);
+  }
+  for (unsigned int i = 0; i < get(psi4_from_cce).size(); i++) {
+    psi4.push_back(get(psi4_from_cce).data()[i]);
   }
   //   std::cout << real(get(psi3).data())[0] << " " <<
   //   imag(get(psi3).data())[0]
