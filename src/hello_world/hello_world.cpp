@@ -1020,7 +1020,6 @@ void InterpolationInterface::InsertInterpolationScriData(
     std::vector<std::complex<double>>& strain,
     std::vector<std::complex<double>>& news,
     std::vector<std::complex<double>>& eth_inertial_retarded_time) {
-  std::cout << "hihihi" << std::endl;
   const ComplexDataVector spectre_psi0 =
       ComplexDataVector(psi0.data(), psi0.size());
   const ComplexDataVector spectre_psi1 =
