@@ -26,6 +26,7 @@ set(LIBS_TO_LINK
   PhaseControl
   Serialization
   Time
+  SizhengHelloWorld
   Utilities
   )
 
