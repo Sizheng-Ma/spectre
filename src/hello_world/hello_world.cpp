@@ -353,7 +353,8 @@ void ccm_functions(
     const double radius, const std::vector<double>& re_j,
     const std::vector<double>& im_j,
     const std::vector<std::vector<double>>& cauchy_cart,
-    const std::vector<std::vector<double>>& inertial_cart) {
+    const std::vector<std::vector<double>>& inertial_cart,
+    const std::vector<double>& intertial_time) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   // TODO this is hardcoded
@@ -509,13 +510,16 @@ void ccm_functions(
   //                    Cce::InitializeJ::InitializeJ<true>::argument_tags>(
   //       Cce::InitializeJ::InverseCubic<true>(), make_not_null(&spectre_box));
   db::mutate<Cce::Tags::BondiJ, Cce::Tags::CauchyCartesianCoords,
-             Cce::Tags::PartiallyFlatCartesianCoords>(
-      [&cauchy_cart, &inertial_cart, &re_j, &im_j](
+             Cce::Tags::PartiallyFlatCartesianCoords,
+             Cce::Tags::InertialRetardedTime>(
+      [&cauchy_cart, &inertial_cart, &re_j, &im_j, &intertial_time](
           const gsl::not_null<Cce::Tags::BondiJ::type*> bondi_j,
           const gsl::not_null<Cce::Tags::CauchyCartesianCoords::type*>
               spectre_cauchy_cart,
           const gsl::not_null<Cce::Tags::PartiallyFlatCartesianCoords::type*>
-              spectre_inertial_cart) {
+              spectre_inertial_cart,
+          const gsl::not_null<Cce::Tags::InertialRetardedTime::type*>
+              inertial_retarded_time_assign) {
         for (int jij = 0; jij < cauchy_cart[0].size(); jij++) {
           get<0>(*spectre_cauchy_cart)[jij] = cauchy_cart[0][jij];
           get<0>(*spectre_inertial_cart)[jij] = inertial_cart[0][jij];
@@ -528,6 +532,9 @@ void ccm_functions(
           get(*bondi_j).data()[jij] =
               re_j[jij] * std::complex<double>(1.0, 0.0) +
               im_j[jij] * std::complex<double>(0.0, 1.0);
+        }
+        for (int jij = 0; jij < intertial_time.size(); jij++) {
+          get(*inertial_retarded_time_assign)[jij] = intertial_time[jij];
         }
       },
       make_not_null(&spectre_box));
