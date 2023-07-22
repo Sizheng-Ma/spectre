@@ -26,7 +26,7 @@ struct MyCCMAction {
     auto l_max = db::get<Tags::LMax>(box);
     auto number_of_radial_points = db::get<Tags::NumberOfRadialPoints>(box);
 
-    double radius = 41.;
+    double radius = 20.;
     if constexpr (tt::is_a_v<AnalyticWorldtubeBoundary, Boundary>) {
       radius = db::get<Tags::AnalyticBoundaryDataManager>(box)
                    .get_extraction_radius();
