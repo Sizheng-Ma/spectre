@@ -45,7 +45,8 @@ void ccm_functions(
     const double radius, const std::vector<double>& re_j,
     const std::vector<double>& im_j,
     const std::vector<std::vector<double>>& cauchy_cart,
-    const std::vector<std::vector<double>>& inertial_cart);
+    const std::vector<std::vector<double>>& inertial_cart,
+    const std::vector<double>& intertial_time);
 
 namespace spectre {
 
