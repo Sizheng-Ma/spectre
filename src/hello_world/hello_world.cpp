@@ -316,7 +316,7 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
   auto& j_initial_data = get(get<Cce::Tags::BondiJ>(spectre_box));
   for (unsigned int i = 0; i < j_initial_data.size(); i++) {
     re_j.push_back(real(j_initial_data.data())[i]);
-    im_j.push_back(real(j_initial_data.data())[i]);
+    im_j.push_back(imag(j_initial_data.data())[i]);
   }
 
   /****************************Construct_coordinates*************************************/
