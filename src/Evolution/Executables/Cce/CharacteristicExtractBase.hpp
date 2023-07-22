@@ -93,6 +93,9 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::Psi0, Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>,
       Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>>>;
 
+  using test_tag_tag = tmpl::list<Cce::Tags::TestSpaceTimeMetric,
+                                  Cce::Tags::TestPhi, Cce::Tags::TestPi>;
+
   using cce_integration_independent_tags = tmpl::conditional_t<
       evolve_ccm,
       tmpl::append<Cce::pre_computation_tags, ccm_matching_tags,

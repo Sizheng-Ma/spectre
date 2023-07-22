@@ -98,6 +98,18 @@ struct BondiUAtScri : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 1>>;
 };
 
+struct TestSpaceTimeMetric : db::SimpleTag {
+  using type = tnsr::aa<DataVector, 3, ::Frame::Inertial>;
+};
+
+struct TestPhi : db::SimpleTag {
+  using type = tnsr::iaa<DataVector, 3, ::Frame::Inertial>;
+};
+
+struct TestPi : db::SimpleTag {
+  using type = tnsr::aa<DataVector, 3, ::Frame::Inertial>;
+};
+
 /// Bondi parameter \f$\bar{U}\f$
 struct BondiUbar : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, -1>>;

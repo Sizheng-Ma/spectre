@@ -178,6 +178,7 @@ struct CharacteristicEvolution {
           typename Metavariables::cce_boundary_component,
           CharacteristicEvolution<Metavariables>>,
       Actions::ReceiveWorldtubeData<Metavariables>,
+      Actions::ReceiveTestData<Metavariables>,
       // note that the initialization will only actually happen on the
       // iterations immediately following restarts
       Actions::InitializeFirstHypersurface<
@@ -210,6 +211,7 @@ struct CharacteristicEvolution {
           CharacteristicEvolution<Metavariables>>,
       ::Actions::Label<CceEvolutionLabelTag>,
       Actions::ReceiveWorldtubeData<Metavariables>,
+      Actions::ReceiveTestData<Metavariables>,
       Actions::InitializeFirstHypersurface<
           Metavariables::evolve_ccm,
           typename Metavariables::cce_boundary_component>,
