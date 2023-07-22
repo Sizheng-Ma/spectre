@@ -272,11 +272,27 @@ struct SendToEvolution<GhWorldtubeBoundary<Metavariables>, EvolutionComponent> {
         },
         make_not_null(&box), db::get<InitializationTags::ExtractionRadius>(box),
         db::get<Tags::LMax>(box));
+    db::mutate<::Tags::Variables<typename Metavariables::test_tag_tag>>(
+        [&spacetime_metric, &phi,
+         &pi](const gsl::not_null<
+              Variables<typename Metavariables::test_tag_tag>*>
+                  boundary_variables) {
+          get<Cce::Tags::TestSpaceTimeMetric>(*boundary_variables) =
+              spacetime_metric;
+          get<Cce::Tags::TestPhi>(*boundary_variables) = phi;
+          get<Cce::Tags::TestPi>(*boundary_variables) = pi;
+        },
+        make_not_null(&box));
     Parallel::receive_data<Cce::ReceiveTags::BoundaryData<
         typename Metavariables::cce_boundary_communication_tags>>(
         Parallel::get_parallel_component<EvolutionComponent>(cache), time,
         db::get<::Tags::Variables<
             typename Metavariables::cce_boundary_communication_tags>>(box),
+        true);
+    Parallel::receive_data<
+        Cce::ReceiveTags::BoundaryData<typename Metavariables::test_tag_tag>>(
+        Parallel::get_parallel_component<EvolutionComponent>(cache), time,
+        db::get<::Tags::Variables<typename Metavariables::test_tag_tag>>(box),
         true);
   }
 };
