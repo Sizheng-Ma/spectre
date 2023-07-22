@@ -50,8 +50,12 @@ struct InitializeWorldtubeBoundaryBase {
   using simple_tags_from_options = ManagerTags;
   using const_global_cache_tags = tmpl::list<Tags::LMax>;
 
+  using testtestlist = tmpl::list<Cce::Tags::TestSpaceTimeMetric,
+                                  Cce::Tags::TestPhi, Cce::Tags::TestPi>;
+
   using simple_tags =
-      tmpl::list<::Tags::Variables<BoundaryCommunicationTagsList>>;
+      tmpl::list<::Tags::Variables<BoundaryCommunicationTagsList>,
+                 ::Tags::Variables<testtestlist>>;
 
   template <typename DataBoxTagsList, typename... InboxTags,
             typename ArrayIndex, typename Metavariables, typename ActionList,
@@ -79,9 +83,12 @@ struct InitializeWorldtubeBoundaryBase {
     const size_t l_max = db::get<Tags::LMax>(box);
     Variables<BoundaryCommunicationTagsList> boundary_variables{
         Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
+    Variables<testtestlist> boundary_variables1{
+        Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
 
     Initialization::mutate_assign<simple_tags>(make_not_null(&box),
-                                               std::move(boundary_variables));
+                                               std::move(boundary_variables),
+                                               std::move(boundary_variables1));
     return {Parallel::AlgorithmExecution::Continue, std::nullopt};
   }
 };
