@@ -342,8 +342,9 @@ void ccm_functions(
     std::vector<std::complex<double>>& news,
     std::vector<std::complex<double>>& strain,
     std::vector<std::complex<double>>& psi0,
-    std::vector<std::complex<double>>& psi1,std::vector<std::complex<double>>& psi2,
-    std::vector<std::complex<double>>& psi3, 
+    std::vector<std::complex<double>>& psi1,
+    std::vector<std::complex<double>>& psi2,
+    std::vector<std::complex<double>>& psi3,
     std::vector<std::complex<double>>& psi4, std::vector<double>& dt_u_scri,
     const size_t l_max, const size_t number_of_radial_points,
     const std::vector<std::vector<double>>& spacetime_metric,
@@ -612,112 +613,116 @@ void ccm_functions(
         make_not_null(&spectre_box));
   });
 
-  tmpl::for_each<Metavariables::scri_values_to_observe>([&spectre_box,
-                                                         &this_time](
-                                                            auto tag_v) {
-    using tag_to_observe = typename decltype(tag_v)::type;
-    db::mutate_apply<Cce::Actions::detail::InsertIntoInterpolationManagerImpl<
-        tag_to_observe>>(make_not_null(&spectre_box));
+  // tmpl::for_each<Metavariables::scri_values_to_observe>([&spectre_box,
+  //                                                        &this_time](
+  //                                                           auto tag_v) {
+  //   using tag_to_observe = typename decltype(tag_v)::type;
+  //   db::mutate_apply<Cce::Actions::detail::InsertIntoInterpolationManagerImpl<
+  //       tag_to_observe>>(make_not_null(&spectre_box));
 
-    db::mutate<
-        Cce::Tags::InterpolationManager<ComplexDataVector, tag_to_observe>>(
-        [&this_time](const gsl::not_null<Cce::ScriPlusInterpolationManager<
-                         ComplexDataVector, tag_to_observe>*>
-                         interpolation_manager) {
-          interpolation_manager->insert_target_time(this_time);
-        },
-        make_not_null(&spectre_box));
-  });
+  //   db::mutate<
+  //       Cce::Tags::InterpolationManager<ComplexDataVector, tag_to_observe>>(
+  //       [&this_time](const gsl::not_null<Cce::ScriPlusInterpolationManager<
+  //                        ComplexDataVector, tag_to_observe>*>
+  //                        interpolation_manager) {
+  //         interpolation_manager->insert_target_time(this_time);
+  //       },
+  //       make_not_null(&spectre_box));
+  // });
 
   /*********************ScriObserveInterpolated************************/
 
-  std::vector<std::vector<double>> data_to_write_final;
-  std::vector<double> data_to_write(2 * square(observation_l_max + 1) + 1);
-  ComplexModalVector goldberg_modes{square(l_max + 1)};
-  std::vector<std::string> file_legend;
-  file_legend.reserve(2 * square(observation_l_max + 1) + 1);
-  file_legend.emplace_back("time");
-  for (int i = 0; i <= static_cast<int>(observation_l_max); ++i) {
-    for (int j = -i; j <= i; ++j) {
-      file_legend.push_back(MakeString{} << "Real Y_" << i << "," << j);
-      file_legend.push_back(MakeString{} << "Imag Y_" << i << "," << j);
-    }
-  }
+  // std::vector<std::vector<double>> data_to_write_final;
+  // std::vector<double> data_to_write(2 * square(observation_l_max + 1) + 1);
+  // ComplexModalVector goldberg_modes{square(l_max + 1)};
+  // std::vector<std::string> file_legend;
+  // file_legend.reserve(2 * square(observation_l_max + 1) + 1);
+  // file_legend.emplace_back("time");
+  // for (int i = 0; i <= static_cast<int>(observation_l_max); ++i) {
+  //   for (int j = -i; j <= i; ++j) {
+  //     file_legend.push_back(MakeString{} << "Real Y_" << i << "," << j);
+  //     file_legend.push_back(MakeString{} << "Imag Y_" << i << "," << j);
+  //   }
+  // }
 
-  Variables<Cce::Actions::detail::weyl_correction_list>
-      corrected_scri_plus_weyl{
-          Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
+  // Variables<Cce::Actions::detail::weyl_correction_list>
+  //     corrected_scri_plus_weyl{
+  //         Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
 
-  while (db::get<Cce::Tags::InterpolationManager<
-             ComplexDataVector,
-             tmpl::front<typename Metavariables::scri_values_to_observe>>>(
-             spectre_box)
-             .first_time_is_ready_to_interpolate()) {
-    // first get the weyl scalars and correct them
-    double interpolation_time = 0.0;
-    tmpl::for_each<Cce::Actions::detail::weyl_correction_list>(
-        [&interpolation_time, &corrected_scri_plus_weyl,
-         &spectre_box](auto tag_v) {
-          using tag = typename decltype(tag_v)::type;
-          std::pair<double, ComplexDataVector> interpolation;
-          db::mutate<Cce::Tags::InterpolationManager<ComplexDataVector, tag>>(
-              [&interpolation](
-                  const gsl::not_null<Cce::ScriPlusInterpolationManager<
-                      ComplexDataVector, tag>*>
-                      interpolation_manager) {
-                interpolation =
-                    interpolation_manager->interpolate_and_pop_first_time();
-              },
-              make_not_null(&spectre_box));
-          interpolation_time = interpolation.first;
-          get(get<tag>(corrected_scri_plus_weyl)).data() = interpolation.second;
-        });
+  // while (db::get<Cce::Tags::InterpolationManager<
+  //            ComplexDataVector,
+  //            tmpl::front<typename Metavariables::scri_values_to_observe>>>(
+  //            spectre_box)
+  //            .first_time_is_ready_to_interpolate()) {
+  //   // first get the weyl scalars and correct them
+  //   double interpolation_time = 0.0;
+  //   tmpl::for_each<Cce::Actions::detail::weyl_correction_list>(
+  //       [&interpolation_time, &corrected_scri_plus_weyl,
+  //        &spectre_box](auto tag_v) {
+  //         using tag = typename decltype(tag_v)::type;
+  //         std::pair<double, ComplexDataVector> interpolation;
+  //         db::mutate<Cce::Tags::InterpolationManager<ComplexDataVector,
+  //         tag>>(
+  //             [&interpolation](
+  //                 const gsl::not_null<Cce::ScriPlusInterpolationManager<
+  //                     ComplexDataVector, tag>*>
+  //                     interpolation_manager) {
+  //               interpolation =
+  //                   interpolation_manager->interpolate_and_pop_first_time();
+  //             },
+  //             make_not_null(&spectre_box));
+  //         interpolation_time = interpolation.first;
+  //         get(get<tag>(corrected_scri_plus_weyl)).data() =
+  //         interpolation.second;
+  //       });
 
-    Cce::Actions::detail::correct_weyl_scalars_for_inertial_time(
-        make_not_null(&corrected_scri_plus_weyl));
+  //   Cce::Actions::detail::correct_weyl_scalars_for_inertial_time(
+  //       make_not_null(&corrected_scri_plus_weyl));
 
-    // then output each of them
-    tmpl::for_each<Cce::Actions::detail::weyl_correction_list>(
-        [&data_to_write, &corrected_scri_plus_weyl, &interpolation_time,
-         &file_legend, &observation_l_max, &l_max, &goldberg_modes,
-         &data_to_write_final](auto tag_v) {
-          using tag = typename decltype(tag_v)::type;
-          if constexpr (tmpl::list_contains_v<
-                            typename Metavariables::scri_values_to_observe,
-                            tag>) {
-            transform_and_write_new<tag, tag::type::type::spin>(
-                get(get<tag>(corrected_scri_plus_weyl)).data(),
-                interpolation_time, make_not_null(&goldberg_modes),
-                make_not_null(&data_to_write), file_legend, l_max,
-                observation_l_max);
-            data_to_write_final.push_back(data_to_write);
-          }
-        });
+  //   // then output each of them
+  //   tmpl::for_each<Cce::Actions::detail::weyl_correction_list>(
+  //       [&data_to_write, &corrected_scri_plus_weyl, &interpolation_time,
+  //        &file_legend, &observation_l_max, &l_max, &goldberg_modes,
+  //        &data_to_write_final](auto tag_v) {
+  //         using tag = typename decltype(tag_v)::type;
+  //         if constexpr (tmpl::list_contains_v<
+  //                           typename Metavariables::scri_values_to_observe,
+  //                           tag>) {
+  //           transform_and_write_new<tag, tag::type::type::spin>(
+  //               get(get<tag>(corrected_scri_plus_weyl)).data(),
+  //               interpolation_time, make_not_null(&goldberg_modes),
+  //               make_not_null(&data_to_write), file_legend, l_max,
+  //               observation_l_max);
+  //           data_to_write_final.push_back(data_to_write);
+  //         }
+  //       });
 
-    // then do the interpolation and output of each of the rest of the tags.
-    tmpl::for_each<
-        tmpl::list_difference<typename Metavariables::scri_values_to_observe,
-                              Cce::Actions::detail::weyl_correction_list>>(
-        [&spectre_box, &data_to_write, &file_legend, &observation_l_max, &l_max,
-         &goldberg_modes, &data_to_write_final](auto tag_v) {
-          using tag = typename decltype(tag_v)::type;
-          std::pair<double, ComplexDataVector> interpolation;
-          db::mutate<Cce::Tags::InterpolationManager<ComplexDataVector, tag>>(
-              [&interpolation](
-                  const gsl::not_null<Cce::ScriPlusInterpolationManager<
-                      ComplexDataVector, tag>*>
-                      interpolation_manager) {
-                interpolation =
-                    interpolation_manager->interpolate_and_pop_first_time();
-              },
-              make_not_null(&spectre_box));
-          transform_and_write_new<tag, tag::type::type::spin>(
-              interpolation.second, interpolation.first,
-              make_not_null(&goldberg_modes), make_not_null(&data_to_write),
-              file_legend, l_max, observation_l_max);
-          data_to_write_final.push_back(data_to_write);
-        });
-  }
+  //   // then do the interpolation and output of each of the rest of the tags.
+  //   tmpl::for_each<
+  //       tmpl::list_difference<typename Metavariables::scri_values_to_observe,
+  //                             Cce::Actions::detail::weyl_correction_list>>(
+  //       [&spectre_box, &data_to_write, &file_legend, &observation_l_max,
+  //       &l_max,
+  //        &goldberg_modes, &data_to_write_final](auto tag_v) {
+  //         using tag = typename decltype(tag_v)::type;
+  //         std::pair<double, ComplexDataVector> interpolation;
+  //         db::mutate<Cce::Tags::InterpolationManager<ComplexDataVector,
+  //         tag>>(
+  //             [&interpolation](
+  //                 const gsl::not_null<Cce::ScriPlusInterpolationManager<
+  //                     ComplexDataVector, tag>*>
+  //                     interpolation_manager) {
+  //               interpolation =
+  //                   interpolation_manager->interpolate_and_pop_first_time();
+  //             },
+  //             make_not_null(&spectre_box));
+  //         transform_and_write_new<tag, tag::type::type::spin>(
+  //             interpolation.second, interpolation.first,
+  //             make_not_null(&goldberg_modes), make_not_null(&data_to_write),
+  //             file_legend, l_max, observation_l_max);
+  //         data_to_write_final.push_back(data_to_write);
+  //       });
+  // }
 
   /*************************after_cce*****************************/
   //   std::cout << "final: BondiH size: "
@@ -749,9 +754,11 @@ void ccm_functions(
     dt_u_scri.push_back(du_t.get()[i]);
   }
 
-  auto& eth_inertial_retarded_time_from_cce = get<Cce::Tags::EthInertialRetardedTime>(spectre_box);
+  auto& eth_inertial_retarded_time_from_cce =
+      get<Cce::Tags::EthInertialRetardedTime>(spectre_box);
   auto& news_from_cce = get<Cce::Tags::News>(spectre_box);
-  auto& strain_from_cce = get<Cce::Tags::ScriPlus<Cce::Tags::Strain>>(spectre_box);
+  auto& strain_from_cce =
+      get<Cce::Tags::ScriPlus<Cce::Tags::Strain>>(spectre_box);
   auto& psi0_from_cce = get<Cce::Tags::ScriPlus<Cce::Tags::Psi0>>(spectre_box);
   auto& psi1_from_cce = get<Cce::Tags::ScriPlus<Cce::Tags::Psi1>>(spectre_box);
   auto& psi2_from_cce = get<Cce::Tags::ScriPlus<Cce::Tags::Psi2>>(spectre_box);
@@ -760,8 +767,10 @@ void ccm_functions(
       get<Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>(
           spectre_box);
 
-  for (unsigned int i = 0; i < get(eth_inertial_retarded_time_from_cce).size(); i++) {
-    eth_inertial_retarded_time.push_back(get(eth_inertial_retarded_time_from_cce).data()[i]);
+  for (unsigned int i = 0; i < get(eth_inertial_retarded_time_from_cce).size();
+       i++) {
+    eth_inertial_retarded_time.push_back(
+        get(eth_inertial_retarded_time_from_cce).data()[i]);
   }
   for (unsigned int i = 0; i < get(news_from_cce).size(); i++) {
     news.push_back(get(news_from_cce).data()[i]);
