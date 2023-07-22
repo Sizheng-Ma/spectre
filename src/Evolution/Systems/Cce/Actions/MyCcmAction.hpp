@@ -13,6 +13,67 @@ template <typename Boundary>
 struct MyCCMAction {
   using const_global_cache_tags =
       tmpl::list<Tags::LMax, Tags::NumberOfRadialPoints>;
+
+  void DataVector_to_std_vector(const tnsr::aa<DataVector, 3>& pi,
+                                std::vector<std::vector<double>>& data) {
+    const auto size = get<0, 0>(pi).size();
+    std::vector<double> datattt(size);
+    std::vector<double> datattx(size);
+    std::vector<double> datatty(size);
+    std::vector<double> datattz(size);
+    std::vector<double> datatxx(size);
+    std::vector<double> datatxy(size);
+    std::vector<double> datatxz(size);
+    std::vector<double> datatyy(size);
+    std::vector<double> datatyz(size);
+    std::vector<double> datatzz(size);
+    for (unsigned int i = 0; i < size; i++) {
+      datattt[i] = get<0, 0>(pi)[i];
+      datattx[i] = get<0, 1>(pi)[i];
+      datatty[i] = get<0, 2>(pi)[i];
+      datattz[i] = get<0, 3>(pi)[i];
+      datatxx[i] = get<1, 1>(pi)[i];
+      datatxy[i] = get<1, 2>(pi)[i];
+      datatxz[i] = get<1, 3>(pi)[i];
+      datatyy[i] = get<2, 2>(pi)[i];
+      datatyz[i] = get<2, 3>(pi)[i];
+      datatzz[i] = get<3, 3>(pi)[i];
+    }
+  }
+
+  void DataVector_to_tri_std_vector(
+      const tnsr::iaa<DataVector, 3>& pi,
+      std::vector<std::vector<std::vector<double>>>& data) {
+    const auto size = pi.get(0, 0, 0).size();
+    std::vector<double> datattt(size);
+    std::vector<double> datattx(size);
+    std::vector<double> datatty(size);
+    std::vector<double> datattz(size);
+    std::vector<double> datatxx(size);
+    std::vector<double> datatxy(size);
+    std::vector<double> datatxz(size);
+    std::vector<double> datatyy(size);
+    std::vector<double> datatyz(size);
+    std::vector<double> datatzz(size);
+    for (size_t ijj = 0; ijj < 3; ++ijj) {
+      for (size_t i = 0; i < size; i++) {
+        datattt[i] = pi.get(ijj, 0, 0)[i];
+        datattx[i] = pi.get(ijj, 0, 1)[i];
+        datatty[i] = pi.get(ijj, 0, 2)[i];
+        datattz[i] = pi.get(ijj, 0, 3)[i];
+        datatxx[i] = pi.get(ijj, 1, 1)[i];
+        datatxy[i] = pi.get(ijj, 1, 2)[i];
+        datatxz[i] = pi.get(ijj, 1, 3)[i];
+        datatyy[i] = pi.get(ijj, 2, 2)[i];
+        datatyz[i] = pi.get(ijj, 2, 3)[i];
+        datatzz[i] = pi.get(ijj, 3, 3)[i];
+      }
+      std::vector<std::vector<double>> datafinal{
+          datattt, datattx, datatty, datattz, datatxx,
+          datatxy, datatxz, datatyy, datatyz, datatzz};
+      data.push_back(datafinal);
+    }
+  }
   template <typename DbTags, typename... InboxTags, typename Metavariables,
             typename ArrayIndex, typename ActionList,
             typename ParallelComponent>
@@ -81,45 +142,58 @@ struct MyCCMAction {
     std::vector<double> re_h;
     std::vector<double> im_h;
 
-    auto& bondi_beta_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(box);
+    std::vector<std::complex<double>> eth_inertial_retarded_time;
+    std::vector<std::complex<double>> news;
+    std::vector<std::complex<double>> strain;
+    std::vector<std::complex<double>> psi0;
+    std::vector<std::complex<double>> psi1;
+    std::vector<std::complex<double>> psi2;
+    std::vector<std::complex<double>> psi3;
+    std::vector<std::complex<double>> psi4;
 
-    auto& dr_j_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(
-            box);
+    auto& my_space_time = db::get<Cce::Tags::TestSpaceTimeMetric>(box);
+    auto& my_phi = db::get<Cce::Tags::TestPhi>(box);
+    auto& my_pi = db::get<Cce::Tags::TestPi>(box);
 
-    auto& du_r_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
-            box);
+    // auto& bondi_beta_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(box);
 
-    auto& bondi_h_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiH>>(box);
+    // auto& dr_j_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(
+    //         box);
 
-    auto& bondi_j_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>>(box);
+    // auto& du_r_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
+    //         box);
 
-    auto& bondi_q_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>>(box);
+    // auto& bondi_h_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiH>>(box);
 
-    auto& bondi_r_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>>(box);
+    // auto& bondi_j_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>>(box);
 
-    auto& bondi_u_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(box);
+    // auto& bondi_q_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>>(box);
 
-    auto& bondi_w_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(box);
+    // auto& bondi_r_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>>(box);
 
-    auto& bondi_dr_u_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>>(
-            box);
+    // auto& bondi_u_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(box);
 
-    auto& bondi_du_j_bdry =
-        db::get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>>(
-            box);
+    // auto& bondi_w_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(box);
 
-    auto& bondi_du_r_bdry_DuRDividedByR =
-        db::get<Tags::BoundaryValue<Tags::DuRDividedByR>>(box);
+    // auto& bondi_dr_u_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>>(
+    //         box);
+
+    // auto& bondi_du_j_bdry =
+    //     db::get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>>(
+    //         box);
+
+    // auto& bondi_du_r_bdry_DuRDividedByR =
+    //     db::get<Tags::BoundaryValue<Tags::DuRDividedByR>>(box);
 
     // db::get<::Tags::Variables<typename
     // Metavariables::cce_boundary_communication_tags>>(box);
