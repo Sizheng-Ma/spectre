@@ -38,6 +38,9 @@ struct MyCCMAction {
     auto bondi_j = db::get<Tags::BondiJ>(box);
     auto cauchy_cart = db::get<Tags::CauchyCartesianCoords>(box);
 
+    auto spectre_inertial_retarded_time =
+        db::get<Tags::InertialRetardedTime>(box);
+
     const size_t boundary_size =
         Spectral::Swsh::number_of_swsh_collocation_points(l_max);
     // std::vector<double> test(boundary_size, 1.);
@@ -49,6 +52,8 @@ struct MyCCMAction {
     std::vector<std::vector<std::vector<double>>> phi;
 
     std::vector<double> re_j;
+    std::vector<double> spectre_inertial_retarded_time_std;
+
     std::vector<double> im_j;
 
     for (size_t iii = 0; iii < get(bondi_j).data().size(); iii++) {
@@ -70,6 +75,10 @@ struct MyCCMAction {
     }
     for (size_t iii = 0; iii < boundary_size; iii++) {
       cauchy_cartz.push_back(get<2>(cauchy_cart).data()[iii]);
+    }
+    for (size_t iii = 0; iii < boundary_size; iii++) {
+      spectre_inertial_retarded_time_std.push_back(
+          get(spectre_inertial_retarded_time)[iii]);
     }
 
     std::vector<std::vector<double>> cauchy_cart_std{cauchy_cartx, cauchy_carty,
@@ -151,12 +160,12 @@ struct MyCCMAction {
     //     bondi_u_bdry, bondi_w_bdry, bondi_dr_u_bdry, bondi_du_j_bdry,
     //     bondi_du_r_bdry_DuRDividedByR);
 
-    ccm_functions(re_h, im_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z,
-                  dt_inertial_x, dt_inertial_y, dt_inertial_z,
-                  eth_inertial_retarded_time, news, strain, psi0, psi1, psi2,
-                  psi3, psi4, dt_u_scri, l_max, number_of_radial_points,
-                  spacetime_metric, pi, phi, radius, re_j, im_j,
-                  cauchy_cart_std, inertial_cart_std);
+    ccm_functions(
+        re_h, im_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z, dt_inertial_x,
+        dt_inertial_y, dt_inertial_z, eth_inertial_retarded_time, news, strain,
+        psi0, psi1, psi2, psi3, psi4, dt_u_scri, l_max, number_of_radial_points,
+        spacetime_metric, pi, phi, radius, re_j, im_j, cauchy_cart_std,
+        inertial_cart_std, spectre_inertial_retarded_time_std);
 
     auto bondi_h = db::get<Tags::BondiH>(box);
 
