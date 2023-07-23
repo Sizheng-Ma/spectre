@@ -6,6 +6,7 @@
 #include <boost/preprocessor.hpp>
 #include <complex>
 #include <iostream>
+#include <queue>
 #include <string>
 #include <type_traits>
 
@@ -1236,14 +1237,14 @@ void InterpolationInterface::InsertInterpolationScriData(
 }
 
 void InterpolationInterface::ScriObserveInterpolated(
-    std::vector<std::vector<double>>& eth_inertial_retarded_time_to_write_final,
-    std::vector<std::vector<double>>& psi0_to_write_final,
-    std::vector<std::vector<double>>& psi1_to_write_final,
-    std::vector<std::vector<double>>& psi2_to_write_final,
-    std::vector<std::vector<double>>& psi3_to_write_final,
-    std::vector<std::vector<double>>& psi4_to_write_final,
-    std::vector<std::vector<double>>& strain_to_write_final,
-    std::vector<std::vector<double>>& news_to_write_final) {
+    std::queue<std::vector<double>>& eth_inertial_retarded_time_to_write_final,
+    std::queue<std::vector<double>>& psi0_to_write_final,
+    std::queue<std::vector<double>>& psi1_to_write_final,
+    std::queue<std::vector<double>>& psi2_to_write_final,
+    std::queue<std::vector<double>>& psi3_to_write_final,
+    std::queue<std::vector<double>>& psi4_to_write_final,
+    std::queue<std::vector<double>>& strain_to_write_final,
+    std::queue<std::vector<double>>& news_to_write_final) {
   std::vector<double> eth_inertial_retarded_time_to_write(
       2 * square(observation_l_max_ + 1) + 1);
   std::vector<double> psi0_to_write(2 * square(observation_l_max_ + 1) + 1);
@@ -1350,7 +1351,7 @@ void InterpolationInterface::ScriObserveInterpolated(
           make_not_null(&goldberg_modes),
           make_not_null(&eth_inertial_retarded_time_to_write), file_legend,
           l_max_, observation_l_max_);
-      eth_inertial_retarded_time_to_write_final.push_back(
+      eth_inertial_retarded_time_to_write_final.push(
           eth_inertial_retarded_time_to_write);
     }
     {
@@ -1359,7 +1360,7 @@ void InterpolationInterface::ScriObserveInterpolated(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
           make_not_null(&goldberg_modes), make_not_null(&psi0_to_write),
           file_legend, l_max_, observation_l_max_);
-      psi0_to_write_final.push_back(psi0_to_write);
+      psi0_to_write_final.push(psi0_to_write);
     }
     {
       using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi1>;
@@ -1367,7 +1368,7 @@ void InterpolationInterface::ScriObserveInterpolated(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
           make_not_null(&goldberg_modes), make_not_null(&psi1_to_write),
           file_legend, l_max_, observation_l_max_);
-      psi1_to_write_final.push_back(psi1_to_write);
+      psi1_to_write_final.push(psi1_to_write);
     }
     {
       using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi2>;
@@ -1375,7 +1376,7 @@ void InterpolationInterface::ScriObserveInterpolated(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
           make_not_null(&goldberg_modes), make_not_null(&psi2_to_write),
           file_legend, l_max_, observation_l_max_);
-      psi2_to_write_final.push_back(psi2_to_write);
+      psi2_to_write_final.push(psi2_to_write);
     }
 
     {
@@ -1384,7 +1385,7 @@ void InterpolationInterface::ScriObserveInterpolated(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
           make_not_null(&goldberg_modes), make_not_null(&psi3_to_write),
           file_legend, l_max_, observation_l_max_);
-      psi3_to_write_final.push_back(psi3_to_write);
+      psi3_to_write_final.push(psi3_to_write);
     }
 
     {
@@ -1394,7 +1395,7 @@ void InterpolationInterface::ScriObserveInterpolated(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
           make_not_null(&goldberg_modes), make_not_null(&psi4_to_write),
           file_legend, l_max_, observation_l_max_);
-      psi4_to_write_final.push_back(psi4_to_write);
+      psi4_to_write_final.push(psi4_to_write);
     }
 
     {
@@ -1405,7 +1406,7 @@ void InterpolationInterface::ScriObserveInterpolated(
           interpolation.second, interpolation.first,
           make_not_null(&goldberg_modes), make_not_null(&strain_to_write),
           file_legend, l_max_, observation_l_max_);
-      strain_to_write_final.push_back(strain_to_write);
+      strain_to_write_final.push(strain_to_write);
     }
     {
       using tag = Cce::Tags::News;
@@ -1415,7 +1416,7 @@ void InterpolationInterface::ScriObserveInterpolated(
           interpolation.second, interpolation.first,
           make_not_null(&goldberg_modes), make_not_null(&news_to_write),
           file_legend, l_max_, observation_l_max_);
-      news_to_write_final.push_back(news_to_write);
+      news_to_write_final.push(news_to_write);
     }
   }
 }
