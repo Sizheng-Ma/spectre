@@ -138,6 +138,7 @@ struct ScriPlusInterpolationManager {
 
   /// \brief return the number of times in the target times queue
   size_t number_of_target_times() const { return target_times_.size(); }
+  std::deque<double> get_target_times() const { return target_times_; }
 
   /// \brief return the number of data points that have been provided to the
   /// interpolation manager

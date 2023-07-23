@@ -1058,6 +1058,10 @@ InterpolationInterface::get_u_bondi_ranges() {
       .get_u_bondi_ranges();
 }
 
+std::deque<double> InterpolationInterface::get_target_times() {
+  return my_scri_plus_interpolation_manager_->manager_psi0_.get_target_times();
+}
+
 void InterpolationInterface::InsertInterpolationScriData(
     const double delta_time_spec, std::vector<double>& inertial_time,
     std::vector<std::complex<double>>& psi0,
