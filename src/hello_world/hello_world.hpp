@@ -5,6 +5,7 @@
 
 #include <complex>
 #include <deque>
+#include <queue>
 #include <vector>
 
 void myprint();
@@ -75,15 +76,15 @@ struct InterpolationInterface {
       std::vector<std::complex<double>>& eth_inertial_retarded_time);
 
   void ScriObserveInterpolated(
-      std::vector<std::vector<double>>&
+      std::queue<std::vector<double>>&
           eth_inertial_retarded_time_to_write_final,
-      std::vector<std::vector<double>>& psi0_to_write_final,
-      std::vector<std::vector<double>>& psi1_to_write_final,
-      std::vector<std::vector<double>>& psi2_to_write_final,
-      std::vector<std::vector<double>>& psi3_to_write_final,
-      std::vector<std::vector<double>>& psi4_to_write_final,
-      std::vector<std::vector<double>>& strain_to_write_final,
-      std::vector<std::vector<double>>& news_to_write_final);
+      std::queue<std::vector<double>>& psi0_to_write_final,
+      std::queue<std::vector<double>>& psi1_to_write_final,
+      std::queue<std::vector<double>>& psi2_to_write_final,
+      std::queue<std::vector<double>>& psi3_to_write_final,
+      std::queue<std::vector<double>>& psi4_to_write_final,
+      std::queue<std::vector<double>>& strain_to_write_final,
+      std::queue<std::vector<double>>& news_to_write_final);
 
  private:
   MyScriPlusInterpolationManager* my_scri_plus_interpolation_manager_;
