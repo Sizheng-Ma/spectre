@@ -1123,7 +1123,7 @@ void InterpolationInterface::InsertInterpolationScriData(
     }
     for (size_t i = 0; i < scri_output_density_; ++i) {
       my_scri_plus_interpolation_manager_->manager_psi0_.insert_target_time(
-          this_time + time_delta_estimate * static_cast<double>(i) /
+          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
                           static_cast<double>(scri_output_density_));
     }
   }
@@ -1138,7 +1138,7 @@ void InterpolationInterface::InsertInterpolationScriData(
     }
     for (size_t i = 0; i < scri_output_density_; ++i) {
       my_scri_plus_interpolation_manager_->manager_psi1_.insert_target_time(
-          this_time + time_delta_estimate * static_cast<double>(i) /
+          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
                           static_cast<double>(scri_output_density_));
     }
   }
@@ -1153,7 +1153,7 @@ void InterpolationInterface::InsertInterpolationScriData(
     }
     for (size_t i = 0; i < scri_output_density_; ++i) {
       my_scri_plus_interpolation_manager_->manager_psi2_.insert_target_time(
-          this_time + time_delta_estimate * static_cast<double>(i) /
+          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
                           static_cast<double>(scri_output_density_));
     }
   }
@@ -1168,7 +1168,7 @@ void InterpolationInterface::InsertInterpolationScriData(
     }
     for (size_t i = 0; i < scri_output_density_; ++i) {
       my_scri_plus_interpolation_manager_->manager_psi3_.insert_target_time(
-          this_time + time_delta_estimate * static_cast<double>(i) /
+          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
                           static_cast<double>(scri_output_density_));
     }
   }
@@ -1183,7 +1183,7 @@ void InterpolationInterface::InsertInterpolationScriData(
     }
     for (size_t i = 0; i < scri_output_density_; ++i) {
       my_scri_plus_interpolation_manager_->manager_psi4_.insert_target_time(
-          this_time + time_delta_estimate * static_cast<double>(i) /
+          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
                           static_cast<double>(scri_output_density_));
     }
   }
@@ -1198,7 +1198,7 @@ void InterpolationInterface::InsertInterpolationScriData(
     }
     for (size_t i = 0; i < scri_output_density_; ++i) {
       my_scri_plus_interpolation_manager_->manager_strain_.insert_target_time(
-          this_time + time_delta_estimate * static_cast<double>(i) /
+          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
                           static_cast<double>(scri_output_density_));
     }
   }
@@ -1213,7 +1213,7 @@ void InterpolationInterface::InsertInterpolationScriData(
     }
     for (size_t i = 0; i < scri_output_density_; ++i) {
       my_scri_plus_interpolation_manager_->manager_news_.insert_target_time(
-          this_time + time_delta_estimate * static_cast<double>(i) /
+          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
                           static_cast<double>(scri_output_density_));
     }
   }
@@ -1230,7 +1230,7 @@ void InterpolationInterface::InsertInterpolationScriData(
     for (size_t i = 0; i < scri_output_density_; ++i) {
       my_scri_plus_interpolation_manager_->manager_eth_inertial_retarded_time_
           .insert_target_time(this_time +
-                              time_delta_estimate * static_cast<double>(i) /
+                              0 * time_delta_estimate * static_cast<double>(i) /
                                   static_cast<double>(scri_output_density_));
     }
   }
