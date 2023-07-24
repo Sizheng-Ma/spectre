@@ -83,7 +83,8 @@ std::string git_description() {
   return std::string(BOOST_PP_STRINGIZE(GIT_DESCRIPTION));
 }
 
-std::string git_branch() { return std::string(BOOST_PP_STRINGIZE(GIT_BRANCH)); }
+std::string git_branch() { return
+std::string(BOOST_PP_STRINGIZE(GIT_BRANCH)); }
 
 namespace formaline {
 std::vector<char> get_archive() {
@@ -164,7 +165,7 @@ std::vector<double> transpose_wt_data(const std::vector<double>& data,
   return data_transposed;
 }
 
-void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
+void initialize_j(std::vector<std::complex<double>>& finalbondij,
                   std::vector<double>& cauchy_x, std::vector<double>& cauchy_y,
                   std::vector<double>& cauchy_z,
                   std::vector<double>& inertial_x,
@@ -316,8 +317,7 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
   //             std::endl;
   auto& j_initial_data = get(get<Cce::Tags::BondiJ>(spectre_box));
   for (unsigned int i = 0; i < j_initial_data.size(); i++) {
-    re_j.push_back(real(j_initial_data.data())[i]);
-    im_j.push_back(imag(j_initial_data.data())[i]);
+    finalbondij.push_back(j_initial_data.data()[i]);
   }
 
   /****************************Construct_coordinates*************************************/
@@ -335,7 +335,7 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
 }
 
 void ccm_functions(
-    std::vector<double>& re_h, std::vector<double>& im_h,
+    std::vector<std::complex<double>>& finalbondih,
     std::vector<double>& dt_cauchy_x, std::vector<double>& dt_cauchy_y,
     std::vector<double>& dt_cauchy_z, std::vector<double>& dt_inertial_x,
     std::vector<double>& dt_inertial_y, std::vector<double>& dt_inertial_z,
@@ -351,8 +351,7 @@ void ccm_functions(
     const std::vector<std::vector<double>>& spacetime_metric,
     const std::vector<std::vector<double>>& pi,
     const std::vector<std::vector<std::vector<double>>>& phi,
-    const double radius, const std::vector<double>& re_j,
-    const std::vector<double>& im_j,
+    const double radius, const std::vector<std::complex<double>>& bondij,
     const std::vector<std::vector<double>>& cauchy_cart,
     const std::vector<std::vector<double>>& inertial_cart,
     const std::vector<double>& intertial_time) {
@@ -513,7 +512,7 @@ void ccm_functions(
   db::mutate<Cce::Tags::BondiJ, Cce::Tags::CauchyCartesianCoords,
              Cce::Tags::PartiallyFlatCartesianCoords,
              Cce::Tags::InertialRetardedTime>(
-      [&cauchy_cart, &inertial_cart, &re_j, &im_j, &intertial_time](
+      [&cauchy_cart, &inertial_cart, &bondij, &intertial_time](
           const gsl::not_null<Cce::Tags::BondiJ::type*> bondi_j,
           const gsl::not_null<Cce::Tags::CauchyCartesianCoords::type*>
               spectre_cauchy_cart,
@@ -529,10 +528,8 @@ void ccm_functions(
           get<2>(*spectre_cauchy_cart)[jij] = cauchy_cart[2][jij];
           get<2>(*spectre_inertial_cart)[jij] = inertial_cart[2][jij];
         }
-        for (int jij = 0; jij < re_j.size(); jij++) {
-          get(*bondi_j).data()[jij] =
-              re_j[jij] * std::complex<double>(1.0, 0.0) +
-              im_j[jij] * std::complex<double>(0.0, 1.0);
+        for (int jij = 0; jij < bondij.size(); jij++) {
+          get(*bondi_j).data()[jij] = bondij[jij];
         }
         for (int jij = 0; jij < intertial_time.size(); jij++) {
           get(*inertial_retarded_time_assign)[jij] = intertial_time[jij];
@@ -738,8 +735,7 @@ void ccm_functions(
   //             std::endl;
   auto& final_h = get(get<Cce::Tags::BondiH>(spectre_box));
   for (unsigned int i = 0; i < final_h.size(); i++) {
-    re_h.push_back(real(final_h.data())[i]);
-    im_h.push_back(imag(final_h.data())[i]);
+    finalbondih.push_back(final_h.data()[i]);
   }
 
   auto& dt_cauchy_cart =
