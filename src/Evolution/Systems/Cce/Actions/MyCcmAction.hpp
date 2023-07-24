@@ -51,16 +51,11 @@ struct MyCCMAction {
     std::vector<std::vector<double>> spacetime_metric;
     std::vector<std::vector<std::vector<double>>> phi;
 
-    std::vector<double> re_j;
+    std::vector<std::complex<double>> volume_j;
     std::vector<double> spectre_inertial_retarded_time_std;
 
-    std::vector<double> im_j;
-
     for (size_t iii = 0; iii < get(bondi_j).data().size(); iii++) {
-      re_j.push_back(real(get(bondi_j).data())[iii]);
-    }
-    for (size_t iii = 0; iii < get(bondi_j).data().size(); iii++) {
-      im_j.push_back(imag(get(bondi_j).data())[iii]);
+      volume_j.push_back(get(bondi_j).data()[iii]);
     }
 
     std::vector<double> cauchy_cartx;
@@ -86,8 +81,7 @@ struct MyCCMAction {
     std::vector<std::vector<double>> inertial_cart_std{
         cauchy_cartx, cauchy_carty, cauchy_cartz};
 
-    std::vector<double> re_h;
-    std::vector<double> im_h;
+    std::vector<std::complex<double>> final_h;
 
     std::vector<std::complex<double>> eth_inertial_retarded_time;
     std::vector<std::complex<double>> news;
@@ -160,22 +154,22 @@ struct MyCCMAction {
     //     bondi_u_bdry, bondi_w_bdry, bondi_dr_u_bdry, bondi_du_j_bdry,
     //     bondi_du_r_bdry_DuRDividedByR);
 
-    ccm_functions(
-        re_h, im_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z, dt_inertial_x,
-        dt_inertial_y, dt_inertial_z, eth_inertial_retarded_time, news, strain,
-        psi0, psi1, psi2, psi3, psi4, dt_u_scri, l_max, number_of_radial_points,
-        spacetime_metric, pi, phi, radius, re_j, im_j, cauchy_cart_std,
-        inertial_cart_std, spectre_inertial_retarded_time_std);
+    ccm_functions(final_h, dt_cauchy_x, dt_cauchy_y, dt_cauchy_z, dt_inertial_x,
+                  dt_inertial_y, dt_inertial_z, eth_inertial_retarded_time,
+                  news, strain, psi0, psi1, psi2, psi3, psi4, dt_u_scri, l_max,
+                  number_of_radial_points, spacetime_metric, pi, phi, radius,
+                  volume_j, cauchy_cart_std, inertial_cart_std,
+                  spectre_inertial_retarded_time_std);
 
     auto bondi_h = db::get<Tags::BondiH>(box);
 
     double resres = 0;
-    for (size_t iii = 0; iii < re_h.size(); iii++) {
-      resres += pow(im_h.at(iii) - imag(get(bondi_h).data())[iii], 2);
-      resres += pow(re_h.at(iii) - real(get(bondi_h).data())[iii], 2);
+    std::cout << "hihi";
+    for (size_t iii = 0; iii < final_h.size(); iii++) {
+      resres += pow(abs(final_h.at(iii) - get(bondi_h).data()[iii]), 2);
     }
 
-    resres /= re_h.size();
+    resres /= final_h.size();
     std::cout << std::setprecision(30) << sqrt(resres) << " ";
 
     auto& dt_cauchy_cart =

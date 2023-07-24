@@ -15,7 +15,7 @@ size_t get_vector_size(const size_t l_max);
 std::vector<double> transpose_wt_data(const std::vector<double>& data,
                                       const size_t l_max);
 
-void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
+void initialize_j(std::vector<std::complex<double>>& finalbondij,
                   std::vector<double>& cauchy_x, std::vector<double>& cauchy_y,
                   std::vector<double>& cauchy_z,
                   std::vector<double>& inertial_x,
@@ -27,7 +27,7 @@ void initialize_j(std::vector<double>& re_j, std::vector<double>& im_j,
                   const std::vector<std::vector<std::vector<double>>>& phi,
                   const double radius);
 void ccm_functions(
-    std::vector<double>& re_h, std::vector<double>& im_h,
+    std::vector<std::complex<double>>& finalbondih,
     std::vector<double>& dt_cauchy_x, std::vector<double>& dt_cauchy_y,
     std::vector<double>& dt_cauchy_z, std::vector<double>& dt_inertial_x,
     std::vector<double>& dt_inertial_y, std::vector<double>& dt_inertial_z,
@@ -43,8 +43,7 @@ void ccm_functions(
     const std::vector<std::vector<double>>& spacetime_metric,
     const std::vector<std::vector<double>>& pi,
     const std::vector<std::vector<std::vector<double>>>& phi,
-    const double radius, const std::vector<double>& re_j,
-    const std::vector<double>& im_j,
+    const double radius, const std::vector<std::complex<double>>& bondij,
     const std::vector<std::vector<double>>& cauchy_cart,
     const std::vector<std::vector<double>>& inertial_cart,
     const std::vector<double>& intertial_time);

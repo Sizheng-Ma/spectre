@@ -107,8 +107,7 @@ struct InitializeFirstHypersurface {
     ThisThisDataVector_to_std_vector(my_pi, pi);
     ThisThisDataVector_to_tri_std_vector(my_phi, phi);
 
-    std::vector<double> re_j;
-    std::vector<double> im_j;
+    std::vector<std::complex<double>> volume_j;
 
     std::vector<double> cauchy_x;
     std::vector<double> cauchy_y;
@@ -122,19 +121,17 @@ struct InitializeFirstHypersurface {
 
     double radius = 20.;
 
-    initialize_j(re_j, im_j, cauchy_x, cauchy_y, cauchy_z, inertial_x,
-                 inertial_y, inertial_z, l_max, number_of_radial_points,
-                 spacetime_metric, pi, phi, radius);
+    initialize_j(volume_j, cauchy_x, cauchy_y, cauchy_z, inertial_x, inertial_y,
+                 inertial_z, l_max, number_of_radial_points, spacetime_metric,
+                 pi, phi, radius);
 
     auto bondi_j = db::get<Tags::BondiJ>(box);
 
     double resres = 0;
-    for (size_t iii = 0; iii < re_j.size(); iii++) {
-      resres += pow(im_j.at(iii) - imag(get(bondi_j).data())[iii], 2);
-      resres += pow(re_j.at(iii) - real(get(bondi_j).data())[iii], 2);
+    for (size_t iii = 0; iii < volume_j.size(); iii++) {
+      resres += pow(abs(volume_j.at(iii) - get(bondi_j).data()[iii]), 2);
     }
-
-    resres /= re_j.size();
+    resres /= volume_j.size();
     std::cout << "first time " << std::setprecision(30) << sqrt(resres) << " ";
 
     auto& dt_cauchy_cart = db::get<Cce::Tags::CauchyCartesianCoords>(box);
