@@ -6,6 +6,7 @@
 #include <algorithm>
 #include <array>
 #include <cstddef>
+#include <iostream>
 #include <limits>
 #include <set>
 #include <variant>
@@ -190,6 +191,14 @@ struct Sphere : tt::ConformsTo<intrp::protocols::ComputeTargetPoints> {
           transpose(make_not_null(&transposed_coords.get(i)), coords.get(i),
                     physical_extents[0], physical_extents[1]);
         }
+        // std::cout << "size " << transposed_coords.get(0).size() << std::endl;
+        // for (int sss = 0; sss < transposed_coords.get(0).size(); sss++) {
+        //   std::cout << transposed_coords.get(0)[sss] << " ";
+        //   std::cout << transposed_coords.get(1)[sss] << " ";
+        //   std::cout << transposed_coords.get(2)[sss] << std::endl;
+        // }
+
+        // std::cout << std::endl;
         coords = std::move(transposed_coords);
       }
 
