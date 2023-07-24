@@ -160,7 +160,7 @@ std::vector<double> transpose_wt_data(const std::vector<double>& data,
   const size_t phi_extent = 2 * l_max + 1;
   auto data_transposed = data;
   // TODO: check this
-  transpose(make_not_null(&data_transposed), data, phi_extent, theta_extent);
+  transpose(make_not_null(&data_transposed), data, theta_extent, phi_extent);
   return data_transposed;
 }
 
