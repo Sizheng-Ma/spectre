@@ -63,6 +63,7 @@ struct InterpolationInterface {
   std::deque<std::pair<double, double>> get_u_bondi_ranges();
   std::deque<double> get_target_times() const;
   std::deque<std::vector<double>> get_u_bondi_values() const;
+  std::deque<std::vector<std::complex<double>>> get_psi0() const;
 
   void InsertInterpolationScriData(
       const double delta_time_spec, std::vector<double>& inertial_time,
