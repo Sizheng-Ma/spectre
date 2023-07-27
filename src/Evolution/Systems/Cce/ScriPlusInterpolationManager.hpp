@@ -517,6 +517,16 @@ struct ScriPlusInterpolationManager<VectorTypeToInterpolate, Tags::Du<Tag>> {
     return argument_interpolation_manager_.get_u_bondi_ranges();
   }
 
+  std::deque<double> get_target_times() const {
+    return argument_interpolation_manager_.target_times_;
+  }
+  std::deque<VectorTypeToInterpolate> get_data() const {
+    return argument_interpolation_manager_.to_interpolate_values_;
+  }
+  std::deque<DataVector> get_u_bondi_values() const {
+    return argument_interpolation_manager_.u_bondi_values_;
+  }
+
   /// \brief Interpolate to the first target time in the queue, returning both
   /// the time and the interpolated data at that time.
   ///
