@@ -1072,6 +1072,105 @@ std::deque<std::vector<std::complex<double>>> InterpolationInterface::get_psi0()
   return test;
 }
 
+std::deque<std::vector<std::complex<double>>> InterpolationInterface::get_psi1()
+    const {
+  auto psi0 = my_scri_plus_interpolation_manager_->manager_psi1_.get_data();
+  std::deque<std::vector<std::complex<double>>> test;
+  for (const auto& element : psi0) {
+    std::vector<std::complex<double>> temp(element.size());
+    for (size_t i = 0; i < element.size(); i++) {
+      temp[i] = element[i];
+    }
+    test.push_back(temp);
+  }
+  return test;
+}
+
+std::deque<std::vector<std::complex<double>>> InterpolationInterface::get_psi2()
+    const {
+  auto psi0 = my_scri_plus_interpolation_manager_->manager_psi2_.get_data();
+  std::deque<std::vector<std::complex<double>>> test;
+  for (const auto& element : psi0) {
+    std::vector<std::complex<double>> temp(element.size());
+    for (size_t i = 0; i < element.size(); i++) {
+      temp[i] = element[i];
+    }
+    test.push_back(temp);
+  }
+  return test;
+}
+
+std::deque<std::vector<std::complex<double>>> InterpolationInterface::get_psi3()
+    const {
+  auto psi0 = my_scri_plus_interpolation_manager_->manager_psi1_.get_data();
+  std::deque<std::vector<std::complex<double>>> test;
+  for (const auto& element : psi0) {
+    std::vector<std::complex<double>> temp(element.size());
+    for (size_t i = 0; i < element.size(); i++) {
+      temp[i] = element[i];
+    }
+    test.push_back(temp);
+  }
+  return test;
+}
+
+std::deque<std::vector<std::complex<double>>> InterpolationInterface::get_psi4()
+    const {
+  auto psi0 = my_scri_plus_interpolation_manager_->manager_psi4_.get_data();
+  std::deque<std::vector<std::complex<double>>> test;
+  for (const auto& element : psi0) {
+    std::vector<std::complex<double>> temp(element.size());
+    for (size_t i = 0; i < element.size(); i++) {
+      temp[i] = element[i];
+    }
+    test.push_back(temp);
+  }
+  return test;
+}
+
+std::deque<std::vector<std::complex<double>>> InterpolationInterface::get_news()
+    const {
+  auto psi0 = my_scri_plus_interpolation_manager_->manager_news_.get_data();
+  std::deque<std::vector<std::complex<double>>> test;
+  for (const auto& element : psi0) {
+    std::vector<std::complex<double>> temp(element.size());
+    for (size_t i = 0; i < element.size(); i++) {
+      temp[i] = element[i];
+    }
+    test.push_back(temp);
+  }
+  return test;
+}
+
+std::deque<std::vector<std::complex<double>>>
+InterpolationInterface::get_strain() const {
+  auto psi0 = my_scri_plus_interpolation_manager_->manager_strain_.get_data();
+  std::deque<std::vector<std::complex<double>>> test;
+  for (const auto& element : psi0) {
+    std::vector<std::complex<double>> temp(element.size());
+    for (size_t i = 0; i < element.size(); i++) {
+      temp[i] = element[i];
+    }
+    test.push_back(temp);
+  }
+  return test;
+}
+
+std::deque<std::vector<std::complex<double>>>
+InterpolationInterface::get_eth_inertial_retarded_time() const {
+  auto psi0 = my_scri_plus_interpolation_manager_
+                  ->manager_eth_inertial_retarded_time_.get_data();
+  std::deque<std::vector<std::complex<double>>> test;
+  for (const auto& element : psi0) {
+    std::vector<std::complex<double>> temp(element.size());
+    for (size_t i = 0; i < element.size(); i++) {
+      temp[i] = element[i];
+    }
+    test.push_back(temp);
+  }
+  return test;
+}
+
 std::deque<std::vector<double>> InterpolationInterface::get_u_bondi_values()
     const {
   auto u_bondi_values =
