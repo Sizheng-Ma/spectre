@@ -1055,8 +1055,25 @@ InterpolationInterface::get_u_bondi_ranges() {
       .get_u_bondi_ranges();
 }
 
-std::deque<double> InterpolationInterface::get_target_times() {
+std::deque<double> InterpolationInterface::get_target_times() const {
   return my_scri_plus_interpolation_manager_->manager_psi0_.get_target_times();
+}
+
+std::deque<std::vector<double>> InterpolationInterface::get_u_bondi_values()
+    const {
+  auto u_bondi_values =
+      my_scri_plus_interpolation_manager_->manager_psi0_.get_u_bondi_values();
+
+  std::deque<std::vector<double>> test;
+
+  for (const auto& element : u_bondi_values) {
+    std::vector<double> temp(element.size());
+    for (size_t i = 0; i < element.size(); i++) {
+      temp[i] = element[i];
+    }
+    test.push_back(temp);
+  }
+  return test;
 }
 
 void InterpolationInterface::InsertInterpolationScriData(
