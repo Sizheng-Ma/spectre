@@ -42,7 +42,6 @@
 #include "Parallel/Printf.hpp"
 #include "ParallelAlgorithms/Initialization/MutateAssign.hpp"
 #include "Time/StepChoosers/Factory.hpp"
-#include "Time/Tags.hpp"
 #include "Time/TimeSteppers/Factory.hpp"
 #include "Time/TimeSteppers/LtsTimeStepper.hpp"
 #include "Utilities/MakeString.hpp"
