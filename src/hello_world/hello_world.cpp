@@ -1101,7 +1101,7 @@ std::deque<std::vector<std::complex<double>>> InterpolationInterface::get_psi2()
 
 std::deque<std::vector<std::complex<double>>> InterpolationInterface::get_psi3()
     const {
-  auto psi0 = my_scri_plus_interpolation_manager_->manager_psi1_.get_data();
+  auto psi0 = my_scri_plus_interpolation_manager_->manager_psi3_.get_data();
   std::deque<std::vector<std::complex<double>>> test;
   for (const auto& element : psi0) {
     std::vector<std::complex<double>> temp(element.size());
