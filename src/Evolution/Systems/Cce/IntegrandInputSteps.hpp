@@ -43,7 +43,8 @@ struct TagsToComputeForImpl;
 template <>
 struct TagsToComputeForImpl<Tags::BondiBeta> {
   using pre_swsh_derivative_tags =
-      tmpl::list<Tags::Dy<Tags::BondiJ>, Tags::Dy<Tags::Dy<Tags::BondiJ>>>;
+      tmpl::list<Tags::Dy<Tags::BondiJ>, Tags::Dy<Tags::Dy<Tags::BondiJ>>,
+                 Tags::Dy<Tags::BondiSTPsi>>;
   using second_swsh_derivative_tags = tmpl::list<>;
   using swsh_derivative_tags = tmpl::list<>;
 };
