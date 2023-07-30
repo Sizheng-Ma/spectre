@@ -124,5 +124,6 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,
       Cce::Tags::BoundaryValue<Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>>;
 
-  using st_tags = tmpl::list<Cce::Tags::BondiSTPsi>;
+  using st_tags =
+      tmpl::list<Cce::Tags::BondiSTPsi, Cce::Tags::Dy<Cce::Tags::BondiSTPsi>>;
 };
