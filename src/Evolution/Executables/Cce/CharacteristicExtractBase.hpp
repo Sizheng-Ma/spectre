@@ -123,4 +123,6 @@ struct CharacteristicExtractDefaults {
   using ccm_psi0 = tmpl::list<
       Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,
       Cce::Tags::BoundaryValue<Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>>;
+
+  using st_tags = tmpl::list<Cce::Tags::BondiSTPsi>;
 };
