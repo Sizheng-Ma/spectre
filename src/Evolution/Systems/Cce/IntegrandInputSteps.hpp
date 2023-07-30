@@ -75,7 +75,9 @@ struct TagsToComputeForImpl<Tags::BondiQ> {
       Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiJ>,
                                        Spectral::Swsh::Tags::Ethbar>,
       Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
-                                       Spectral::Swsh::Tags::Ethbar>>;
+                                       Spectral::Swsh::Tags::Ethbar>,
+      Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                       Spectral::Swsh::Tags::Eth>>;
   using second_swsh_derivative_tags = tmpl::list<>;
 };
 

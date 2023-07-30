@@ -278,7 +278,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiQ>> {
  public:
   using pre_swsh_derivative_tags =
       tmpl::list<Tags::Dy<Tags::BondiBeta>, Tags::Dy<Tags::BondiJ>,
-                 Tags::BondiJ>;
+                 Tags::BondiJ, Tags::Dy<Tags::BondiSTPsi>>;
   using swsh_derivative_tags = tmpl::list<
       Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiBeta>,
                                        Spectral::Swsh::Tags::Eth>,
@@ -291,9 +291,11 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiQ>> {
       Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiJ>,
                                        Spectral::Swsh::Tags::Ethbar>,
       Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
-                                       Spectral::Swsh::Tags::Ethbar>>;
+                                       Spectral::Swsh::Tags::Ethbar>,
+      Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                       Spectral::Swsh::Tags::Eth>>;
   using integration_independent_tags =
-      tmpl::list<Tags::EthRDividedByR, Tags::BondiK>;
+      tmpl::list<Tags::EthRDividedByR, Tags::BondiK, Tags::OneMinusY>;
   using temporary_tags =
       tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
                                       std::integral_constant<int, 1>>>;
@@ -324,13 +326,16 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiQ>> {
       const SpinWeighted<ComplexDataVector, 0>& dy_beta,
       const SpinWeighted<ComplexDataVector, 2>& dy_j,
       const SpinWeighted<ComplexDataVector, 2>& j,
+      const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
       const SpinWeighted<ComplexDataVector, 1>& eth_dy_beta,
       const SpinWeighted<ComplexDataVector, 1>& eth_j_jbar,
       const SpinWeighted<ComplexDataVector, 1>& eth_jbar_dy_j,
       const SpinWeighted<ComplexDataVector, 1>& ethbar_dy_j,
       const SpinWeighted<ComplexDataVector, 1>& ethbar_j,
+      const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
       const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
-      const SpinWeighted<ComplexDataVector, 0>& k);
+      const SpinWeighted<ComplexDataVector, 0>& k,
+      const SpinWeighted<ComplexDataVector, 0>& one_minus_y);
 };
 
 /*!
