@@ -11,6 +11,7 @@
 #include "DataStructures/DataBox/DataBox.hpp"
 #include "Evolution/Systems/Cce/Components/WorldtubeBoundary.hpp"
 #include "Evolution/Systems/Cce/Initialize/InitializeJ.hpp"
+#include "Evolution/Systems/Cce/Initialize/InitializeSTPsi.hpp"
 #include "Evolution/Systems/Cce/OptionTags.hpp"
 #include "Evolution/Systems/Cce/ScriPlusValues.hpp"
 #include "IO/Observer/Actions/GetLockPointer.hpp"
@@ -92,6 +93,7 @@ struct InitializeFirstHypersurface {
           typename InitializeJ::InitializeJ<EvolveCcm>::argument_tags>(
           db::get<Tags::InitializeJBase>(box), make_not_null(&box),
           make_not_null(hdf5_lock));
+      db::mutate_apply<ScalarTensor::InitializeSTPsi>(make_not_null(&box));
     }
     db::mutate_apply<InitializeScriPlusValue<Tags::InertialRetardedTime>>(
         make_not_null(&box), db::get<::Tags::TimeStepId>(box).substep_time());
