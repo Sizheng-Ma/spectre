@@ -150,7 +150,8 @@ template <>
 struct ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>> {
  public:
   using pre_swsh_derivative_tags =
-      tmpl::list<Tags::Dy<Tags::BondiJ>, Tags::BondiJ>;
+      tmpl::list<Tags::Dy<Tags::BondiJ>, Tags::BondiJ,
+                 Tags::Dy<Tags::BondiSTPsi>>;
   using swsh_derivative_tags = tmpl::list<>;
   using integration_independent_tags = tmpl::list<Tags::OneMinusY>;
   using temporary_tags = tmpl::list<>;
@@ -174,6 +175,7 @@ struct ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>> {
       gsl::not_null<SpinWeighted<ComplexDataVector, 0>*> integrand_for_beta,
       const SpinWeighted<ComplexDataVector, 2>& dy_j,
       const SpinWeighted<ComplexDataVector, 2>& j,
+      const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
       const SpinWeighted<ComplexDataVector, 0>& one_minus_y);
 };
 
