@@ -181,6 +181,7 @@ struct CharacteristicEvolution {
       tmpl::conditional_t<evolve_ccm,
                           Actions::CalculatePsi0AndDerivAtInnerBoundary,
                           tmpl::list<>>,
+      ::Actions::MutateApply<PreSwshDerivatives<Tags::Dy<Tags::BondiSTPsi>>>,
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
