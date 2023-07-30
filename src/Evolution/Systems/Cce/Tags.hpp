@@ -37,6 +37,11 @@ struct BondiJ : db::SimpleTag {
   static std::string name() { return "J"; }
 };
 
+struct BondiSTPsi : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+  static std::string name() { return "STPsi"; }
+};
+
 }  // namespace Tags
 }  // namespace Cce
 
