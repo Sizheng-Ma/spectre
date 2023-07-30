@@ -14,6 +14,7 @@
 #include "Evolution/Systems/Cce/InterfaceManagers/GhInterfaceManager.hpp"
 #include "Evolution/Systems/Cce/InterfaceManagers/GhLocalTimeStepping.hpp"
 #include "Evolution/Systems/Cce/InterfaceManagers/GhLockstep.hpp"
+#include "Evolution/Systems/Cce/STWorldtubeDataManager.hpp"
 #include "Evolution/Systems/Cce/WorldtubeDataManager.hpp"
 #include "NumericalAlgorithms/Interpolation/SpanInterpolator.hpp"
 #include "Options/Auto.hpp"
@@ -138,6 +139,13 @@ struct BoundaryDataFilename {
   using type = std::string;
   static constexpr Options::String help{
       "H5 file to read the wordltube data from."};
+  using group = Cce;
+};
+
+struct STBoundaryDataFilename {
+  using type = std::string;
+  static constexpr Options::String help{
+      "H5 file to read the ST wordltube data from."};
   using group = Cce;
 };
 
@@ -316,6 +324,37 @@ struct H5WorldtubeBoundaryDataManager : db::SimpleTag {
           l_max, number_of_lookahead_times, interpolator->get_clone(),
           fix_spec_normalization);
     }
+  }
+};
+
+struct H5STWorldtubeBoundaryDataManager : db::SimpleTag {
+  using type = std::unique_ptr<STWorldtubeDataManager>;
+  using option_tags =
+      tmpl::list<OptionTags::LMax, OptionTags::STBoundaryDataFilename,
+                 OptionTags::H5LookaheadTimes, OptionTags::H5Interpolator,
+                 OptionTags::H5IsBondiData, OptionTags::FixSpecNormalization,
+                 OptionTags::StandaloneExtractionRadius>;
+
+  static constexpr bool pass_metavariables = false;
+  static type create_from_options(
+      const size_t l_max, const std::string& filename,
+      const size_t number_of_lookahead_times,
+      const std::unique_ptr<intrp::SpanInterpolator>& interpolator,
+      const bool h5_is_bondi_data, const bool fix_spec_normalization,
+      const std::optional<double> extraction_radius) {
+    if (static_cast<bool>(extraction_radius)) {
+      Parallel::printf(
+          "Warning: Option ExtractionRadius is set to a specific value and "
+          "H5IsBondiData is set to `true` -- the ExtractionRadius will not "
+          "be used, because all radius information is specified in the input "
+          "file for the Bondi worldtube data format. It is recommended to "
+          "set `ExtractionRadius` to `\"Auto\"` to make the input file "
+          "clearer.\n");
+    }
+    return std::make_unique<RealSTWorldtubeDataManager>(
+        std::make_unique<RealSTWorldtubeH5BufferUpdater>(filename,
+                                                         extraction_radius),
+        l_max, number_of_lookahead_times, interpolator->get_clone());
   }
 };
 

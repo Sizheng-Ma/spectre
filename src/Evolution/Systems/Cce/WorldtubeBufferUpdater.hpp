@@ -104,6 +104,10 @@ using cce_bondi_input_tags =
                Spectral::Swsh::Tags::SwshTransform<Tags::BondiR>,
                Spectral::Swsh::Tags::SwshTransform<Tags::Du<Tags::BondiR>>>;
 
+using cce_st_input_tags =
+    tmpl::list<Spectral::Swsh::Tags::SwshTransform<Tags::BondiSTPsi>,
+               Spectral::Swsh::Tags::SwshTransform<Tags::BondiSTTheta>>;
+
 /// \cond
 class MetricWorldtubeH5BufferUpdater;
 class BondiWorldtubeH5BufferUpdater;

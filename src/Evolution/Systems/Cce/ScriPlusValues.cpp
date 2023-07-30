@@ -326,6 +326,22 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi0>>::apply(
                  2.0 * dy_dy_dy_j_at_scri);
 }
 
+void CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>::apply(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi_scri,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_st_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& boundary_r, size_t l_max,
+    size_t number_of_radial_points) {
+  const size_t number_of_angular_points =
+      Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+
+  const SpinWeighted<ComplexDataVector, 0> dy_st_psi_scri;
+  make_const_view(make_not_null(&dy_st_psi_scri), get(dy_st_psi),
+                  (number_of_radial_points - 1) * number_of_angular_points,
+                  number_of_angular_points);
+
+  get(*st_psi_scri) = -2. * get(boundary_r) * dy_st_psi_scri;
+}
+
 void CalculateScriPlusValue<Tags::ScriPlus<Tags::Strain>>::apply(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, -2>>*> strain,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_bondi_j,
@@ -353,6 +369,16 @@ void CalculateScriPlusValue<Tags::EthInertialRetardedTime>::apply(
     const size_t l_max) {
   Spectral::Swsh::angular_derivatives<tmpl::list<Spectral::Swsh::Tags::Eth>>(
       l_max, 1, make_not_null(&get(*eth_inertial_time)), get(inertial_time));
+}
+
+void CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiBeta>>::apply(
+    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> scri_beta,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& beta) {
+  const SpinWeighted<ComplexDataVector, 0> exp_2_beta_at_scri;
+  make_const_view(make_not_null(&exp_2_beta_at_scri), get(beta),
+                  get(beta).size() - get(*scri_beta).size(),
+                  get(*scri_beta).size());
+  get(*scri_beta) = exp_2_beta_at_scri;
 }
 
 void CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>>::apply(

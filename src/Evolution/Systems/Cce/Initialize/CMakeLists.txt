@@ -9,6 +9,7 @@ spectre_target_sources(
   InverseCubic.cpp
   NoIncomingRadiation.cpp
   ZeroNonSmooth.cpp
+  InitializeSTPsi.cpp
   )
 
 spectre_target_headers(
@@ -18,6 +19,7 @@ spectre_target_headers(
   ConformalFactor.hpp
   InitializeJ.hpp
   InverseCubic.hpp
+  InitializeSTPsi.hpp
   NoIncomingRadiation.hpp
   RegisterInitializeJWithCharm.hpp
   ZeroNonSmooth.hpp

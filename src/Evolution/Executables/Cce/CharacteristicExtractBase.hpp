@@ -20,8 +20,9 @@
 template <bool EvolveCcm>
 struct CharacteristicExtractDefaults {
   static constexpr bool evolve_ccm = EvolveCcm;
-  using evolved_swsh_tag = Cce::Tags::BondiJ;
-  using evolved_swsh_dt_tag = Cce::Tags::BondiH;
+  using evolved_swsh_tag = tmpl::list<Cce::Tags::BondiSTPsi, Cce::Tags::BondiJ>;
+  using evolved_swsh_dt_tag =
+      tmpl::list<Cce::Tags::BondiSTTheta, Cce::Tags::BondiH>;
   using evolved_coordinates_variables_tag = Tags::Variables<
       tmpl::conditional_t<evolve_ccm,
                           tmpl::list<Cce::Tags::CauchyCartesianCoords,
@@ -41,6 +42,14 @@ struct CharacteristicExtractDefaults {
   using cce_boundary_communication_tags =
       Cce::Tags::characteristic_worldtube_boundary_tags<
           Cce::Tags::BoundaryValue>;
+
+  using st_cce_boundary_communication_tags =
+      tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::BondiSTPsi>,
+                 Cce::Tags::BoundaryValue<Cce::Tags::BondiSTTheta>>;
+
+  using st_gauge_boundary_tag = tmpl::list<
+      Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::BondiSTTheta>,
+      Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::BondiSTPsi>>;
 
   using cce_gauge_boundary_tags = tmpl::flatten<tmpl::list<
       tmpl::transform<
@@ -63,6 +72,7 @@ struct CharacteristicExtractDefaults {
       Spectral::Swsh::Tags::Derivative<Cce::Tags::PartiallyFlatGaugeOmega,
                                        Spectral::Swsh::Tags::Eth>,
       Cce::all_boundary_pre_swsh_derivative_tags_for_scri,
+      Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::STMonitor>,
       Cce::all_boundary_swsh_derivative_tags_for_scri>>;
 
   using scri_values_to_observe =
@@ -70,6 +80,7 @@ struct CharacteristicExtractDefaults {
                  Cce::Tags::ScriPlus<Cce::Tags::Psi3>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi2>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi1>,
+                 Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::STMonitor>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi0>,
                  Cce::Tags::Du<Cce::Tags::TimeIntegral<
                      Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>,
@@ -83,10 +94,17 @@ struct CharacteristicExtractDefaults {
                  Cce::Tags::ScriPlus<Cce::Tags::Psi0>,
                  Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>,
                  Cce::Tags::EthInertialRetardedTime>;
+  using cce_st_scri_tags =
+      tmpl::list<Cce::Tags::ScriPlus<Cce::Tags::BondiSTPsi>,
+                 Cce::Tags::ScriPlus<Cce::Tags::BondiBeta>>;
   using cce_integrand_tags = tmpl::flatten<tmpl::transform<
       Cce::bondi_hypersurface_step_tags,
       tmpl::bind<Cce::integrand_terms_to_compute_for_bondi_variable,
                  tmpl::_1>>>;
+
+  using cce_st_integrand_tags = tmpl::flatten<
+      tmpl::list<Cce::integrand_terms_to_compute_for_bondi_variable<
+                     Cce::Tags::BondiSTTheta>>>;
   using ccm_matching_tags = tmpl::list<
       Cce::Tags::BondiJCauchyView, Cce::Tags::Psi0Match,
       Cce::Tags::Dy<Cce::Tags::Psi0Match>,
@@ -103,22 +121,56 @@ struct CharacteristicExtractDefaults {
       tmpl::transform<cce_integrand_tags,
                       tmpl::bind<Cce::integrand_temporary_tags, tmpl::_1>>>>;
   using cce_pre_swsh_derivatives_tags = Cce::all_pre_swsh_derivative_tags;
+  using cce_st_pre_swsh_derivatives_tags =
+      tmpl::list<Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiSTPsi>>,
+                 Cce::Tags::Dy<Cce::Tags::BondiK>>;
   using cce_transform_buffer_tags = Cce::all_transform_buffer_tags;
   using cce_swsh_derivative_tags = Cce::all_swsh_derivative_tags;
+  using cce_st_swsh_derivative_tags = tmpl::list<
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::Dy<Cce::Tags::BondiSTPsi>,
+                                       Spectral::Swsh::Tags::Ethbar>,
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiSTPsi,
+                                       Spectral::Swsh::Tags::EthEthbar>,
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiSTPsi,
+                                       Spectral::Swsh::Tags::Ethbar>,
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiK,
+                                       Spectral::Swsh::Tags::Eth>,
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiJbar,
+                                       Spectral::Swsh::Tags::Eth>,
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::Dy<Cce::Tags::BondiSTPsi>,
+                                       Spectral::Swsh::Tags::Eth>,
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiSTPsi,
+                                       Spectral::Swsh::Tags::EthEth>>;
+  using cce_st_transform_buffer_tags = tmpl::list<
+      Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
+          Cce::Tags::BondiSTPsi, Spectral::Swsh::Tags::EthEthbar>>,
+      Spectral::Swsh::Tags::SwshTransform<Cce::Tags::BondiK>,
+      Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
+          Cce::Tags::BondiK, Spectral::Swsh::Tags::Eth>>,
+      Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
+          Cce::Tags::BondiSTPsi, Spectral::Swsh::Tags::EthEth>>,
+      Spectral::Swsh::Tags::SwshTransform<Cce::Tags::Dy<Cce::Tags::BondiSTPsi>>,
+      Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
+          Cce::Tags::Dy<Cce::Tags::BondiSTPsi>, Spectral::Swsh::Tags::Eth>>,
+      Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
+          Cce::Tags::BondiSTPsi, Spectral::Swsh::Tags::Ethbar>>,
+      Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
+          Cce::Tags::Dy<Cce::Tags::BondiSTPsi>, Spectral::Swsh::Tags::Ethbar>>>;
+
   using cce_angular_coordinate_tags =
       tmpl::conditional_t<evolve_ccm,
                           tmpl::list<Cce::Tags::CauchyAngularCoords,
                                      Cce::Tags::PartiallyFlatAngularCoords>,
                           tmpl::list<Cce::Tags::CauchyAngularCoords>>;
-  using cce_step_choosers = tmpl::list<
-      StepChoosers::Constant<StepChooserUse::LtsStep>,
-      StepChoosers::Increase<StepChooserUse::LtsStep>,
-      StepChoosers::ErrorControl<StepChooserUse::LtsStep,
-                                 Tags::Variables<tmpl::list<evolved_swsh_tag>>,
-                                 swsh_vars_selector>,
-      StepChoosers::ErrorControl<StepChooserUse::LtsStep,
-                                 evolved_coordinates_variables_tag,
-                                 coord_vars_selector>>;
+  using cce_step_choosers =
+      tmpl::list<StepChoosers::Constant<StepChooserUse::LtsStep>,
+                 StepChoosers::Increase<StepChooserUse::LtsStep>,
+                 StepChoosers::ErrorControl<StepChooserUse::LtsStep,
+                                            Tags::Variables<evolved_swsh_tag>,
+                                            swsh_vars_selector>,
+                 StepChoosers::ErrorControl<StepChooserUse::LtsStep,
+                                            evolved_coordinates_variables_tag,
+                                            coord_vars_selector>>;
 
   using ccm_psi0 = tmpl::list<
       Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,

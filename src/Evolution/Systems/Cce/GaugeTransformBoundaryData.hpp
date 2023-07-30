@@ -78,6 +78,72 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiR> {
       const Spectral::Swsh::SwshInterpolator& interpolator);
 };
 
+struct print_constraint {
+  using return_tags = tmpl::list<>;
+  using argument_tags =
+      tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                                  Spectral::Swsh::Tags::Eth>,
+                 Tags::EthRDividedByR, Tags::Dy<Tags::BondiSTPsi>,
+                 Tags::BondiSTPsi, Tags::LMax>;
+  static void apply(
+      const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_psi,
+      const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_over_r,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& psi, const size_t lmax);
+};
+
+template <>
+struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
+  using return_tags =
+      tmpl::list<Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTTheta>,
+                 Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTPsi>>;
+  using argument_tags = tmpl::list<
+      Tags::BoundaryValue<Tags::BondiSTTheta>, Tags::BondiUAtScri,
+      Tags::BoundaryValue<Tags::BondiSTPsi>,
+      Tags::EvolutionGaugeBoundaryValue<Tags::BondiR>,
+      Tags::PartiallyFlatGaugeOmega, Tags::Du<Tags::PartiallyFlatGaugeOmega>,
+      Tags::EvolutionGaugeBoundaryValue<Tags::DuRDividedByR>,
+      Tags::EthRDividedByR,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Tags::LMax, Tags::EvolutionGaugeBoundaryValue<Tags::BondiBeta>,
+      Tags::BondiSTPsi, Tags::Dy<Tags::BondiSTPsi>, Tags::OneMinusY>;
+
+  static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          evolution_st_theta,
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          evolution_st_psi,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_theta,
+      const Scalar<SpinWeighted<ComplexDataVector, 1>>&
+          evolution_gauge_u_at_scri,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& evolution_gauge_r,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_omega,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r_divided_by_r,
+      const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_divided_by_r,
+      const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y);
+};
+
+struct STWTMonitor {
+  using return_tags =
+      tmpl::list<Tags::EvolutionGaugeBoundaryValue<Tags::STMonitor>>;
+  using argument_tags = tmpl::list<
+      Tags::BoundaryValue<Tags::BondiSTPsi>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Tags::LMax, Tags::BondiSTPsi>;
+
+  static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          evolution_st_monitor,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
+      const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi);
+};
 /*!
  * \brief Computes the evolution gauge \f$\partial_{\hat u} \hat R / \hat R\f$
  * on the worldtube.

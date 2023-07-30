@@ -70,8 +70,7 @@ struct InitializeCharacteristicEvolutionScri {
       const Parallel::GlobalCache<Metavariables>& /*cache*/,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) {
-    initialize_impl(make_not_null(&box),
-                    typename Metavariables::scri_values_to_observe{});
+    initialize_impl(make_not_null(&box), ScriValuesToObserve{});
     return {Parallel::AlgorithmExecution::Continue, std::nullopt};
   }
 

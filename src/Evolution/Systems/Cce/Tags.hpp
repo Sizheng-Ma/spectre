@@ -37,6 +37,11 @@ struct BondiJ : db::SimpleTag {
   static std::string name() { return "J"; }
 };
 
+struct BondiSTPsi : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+  static std::string name() { return "STPsi"; }
+};
+
 }  // namespace Tags
 }  // namespace Cce
 
@@ -61,6 +66,7 @@ namespace Tags {
 /// with the physical Bondi radius, which is not directly used for numerical
 /// grids).
 using BondiH = ::Tags::dt<BondiJ>;
+using BondiSTTheta = ::Tags::dt<BondiSTPsi>;
 
 /// Bondi parameter \f$\bar{J}\f$
 struct BondiJbar : db::SimpleTag {
@@ -175,6 +181,10 @@ struct CauchyGaugeD : db::SimpleTag {
 /// associated with an angular transformation, see Eq. (32) of
 /// \cite Moxon2020gha
 struct PartiallyFlatGaugeOmega : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
+
+struct STMonitor : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 

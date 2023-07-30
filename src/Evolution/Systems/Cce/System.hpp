@@ -122,7 +122,7 @@ template <bool EvolveCcm>
 struct System {
   static constexpr size_t volume_dim = 3;
   using variables_tag =
-      tmpl::list<::Tags::Variables<tmpl::list<Tags::BondiJ>>,
+      tmpl::list<::Tags::Variables<tmpl::list<Tags::BondiSTPsi, Tags::BondiJ>>,
                  ::Tags::Variables<std::conditional_t<
                      EvolveCcm,
                      tmpl::list<Cce::Tags::CauchyCartesianCoords,

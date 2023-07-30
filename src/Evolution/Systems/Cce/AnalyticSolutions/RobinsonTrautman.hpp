@@ -123,7 +123,8 @@ struct RobinsonTrautman : public SphericalMetricData {
  private:
   void du_rt_scalar(
       gsl::not_null<SpinWeighted<ComplexDataVector, 0>*> local_du_rt_scalar,
-      const SpinWeighted<ComplexDataVector, 0>& rt_scalar) const;
+      const SpinWeighted<ComplexDataVector, 0>& rt_scalar,
+      const double time) const;
 
   void du_bondi_w(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_bondi_w,
@@ -305,6 +306,16 @@ struct RobinsonTrautman : public SphericalMetricData {
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, -2>>*> News,
       size_t l_max, double time,
       tmpl::type_<Tags::News> /*meta*/) const override;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::BondiSTPsi> /*meta*/) const override;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::BondiSTTheta> /*meta*/) const override;
 
   using WorldtubeData::variables_impl;
 

@@ -3,6 +3,8 @@
 
 #include "Evolution/Systems/Cce/GaugeTransformBoundaryData.hpp"
 
+#include <iostream>
+
 #include "DataStructures/DataBox/Prefixes.hpp"
 #include "DataStructures/SpinWeighted.hpp"
 #include "DataStructures/Tags.hpp"
@@ -13,8 +15,29 @@
 #include "NumericalAlgorithms/Spectral/SwshDerivatives.hpp"
 #include "NumericalAlgorithms/Spectral/SwshInterpolation.hpp"
 
-
 namespace Cce {
+
+namespace hihihi {
+template <int N>
+void compute_norm(
+    const SpinWeighted<ComplexDataVector, N> to_compare,
+    const SpinWeighted<ComplexDataVector, N> regular_integrand_for_st_theta) {
+  SpinWeighted<ComplexDataVector, N> final_diff =
+      to_compare - (regular_integrand_for_st_theta);
+
+  double norm = 0;
+
+  for (size_t iiiii = 0; iiiii < final_diff.size(); iiiii++) {
+    norm += square(abs(final_diff.data()[iiiii]));
+  }
+
+  norm /= final_diff.size();
+
+  norm = sqrt(norm);
+
+  std::cout << norm << std::endl;
+}
+}  // namespace hihihi
 
 void GaugeAdjustedBoundaryValue<Tags::BondiR>::apply(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
@@ -114,6 +137,93 @@ void GaugeAdjustedBoundaryValue<Tags::BondiBeta>::apply(
   get(*evolution_gauge_beta).data() -= 0.5 * log(get(omega).data());
 }
 
+void print_constraint::apply(
+    const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_over_r,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& psi, const size_t l_max) {
+  const SpinWeighted<ComplexDataVector, 0> surfacepsi;
+  make_const_view(make_not_null(&surfacepsi), get(psi), 0,
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+
+  const auto grid_eth_psi =
+      Spectral::Swsh::angular_derivative<Spectral::Swsh::Tags::Eth>(l_max, 1,
+                                                                    surfacepsi);
+
+  SpinWeighted<ComplexDataVector, 1> res =
+      get(eth_psi) + 2. * get(eth_r_over_r) * get(dy_psi);
+
+  const SpinWeighted<ComplexDataVector, 1> consttraintsurf;
+
+  make_const_view(make_not_null(&consttraintsurf), res, 0,
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+
+  //   hihihi::compute_norm<1>(consttraintsurf, grid_eth_psi);
+  //   hihihi::compute_norm<1>(consttraintsurf, grid_eth_psi * 0);
+}
+
+void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+        evolution_st_theta,
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> evolution_st_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_theta,
+    const Scalar<SpinWeighted<ComplexDataVector, 1>>& evolution_gauge_u_at_scri,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& evolution_gauge_r,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_omega,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r_divided_by_r,
+    const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_divided_by_r,
+    const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y) {
+  interpolator.interpolate(make_not_null(&get(*evolution_st_theta)),
+                           get(cauchy_st_theta));
+
+  interpolator.interpolate(make_not_null(&get(*evolution_st_psi)),
+                           get(cauchy_st_psi));
+
+  SpinWeighted<ComplexDataVector, 1> eth_psi;
+  SpinWeighted<ComplexDataVector, 1> eth_omega;
+  const SpinWeighted<ComplexDataVector, 0> surface_psi;
+  make_const_view(make_not_null(&surface_psi), get(volume_psi), 0,
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+  Spectral::Swsh::angular_derivatives<
+      tmpl::list<Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Eth>>(
+      l_max, 1, make_not_null(&eth_psi), make_not_null(&eth_omega), surface_psi,
+      get(omega));
+
+  get(*evolution_st_theta).data() +=
+      real(get(evolution_gauge_u_at_scri).data() * conj(eth_psi).data());
+
+  const SpinWeighted<ComplexDataVector, 0> consttraint =
+      get(dy_psi) * get(one_minus_y) + get(volume_psi);
+  const SpinWeighted<ComplexDataVector, 0> consttraintsurf;
+
+  make_const_view(make_not_null(&consttraintsurf), consttraint,
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max) * 0,
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+
+  hihihi::compute_norm<0>(get(*evolution_st_psi), surface_psi);
+}
+
+void STWTMonitor::apply(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+        evolution_st_monitor,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
+    const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi) {
+  SpinWeighted<ComplexDataVector, 0> evolution_st_psi;
+  interpolator.interpolate(make_not_null(&evolution_st_psi),
+                           get(cauchy_st_psi));
+
+  const SpinWeighted<ComplexDataVector, 0> surface_psi;
+  make_const_view(make_not_null(&surface_psi), get(volume_psi), 0,
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+  get(*evolution_st_monitor) = evolution_st_psi - surface_psi;
+}
 void GaugeAdjustedBoundaryValue<Tags::BondiQ>::apply_impl(
     const gsl::not_null<SpinWeighted<ComplexDataVector, 1>*> evolution_gauge_q,
     const SpinWeighted<ComplexDataVector, 1>& cauchy_gauge_dr_u,

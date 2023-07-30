@@ -43,7 +43,8 @@ struct TagsToComputeForImpl;
 template <>
 struct TagsToComputeForImpl<Tags::BondiBeta> {
   using pre_swsh_derivative_tags =
-      tmpl::list<Tags::Dy<Tags::BondiJ>, Tags::Dy<Tags::Dy<Tags::BondiJ>>>;
+      tmpl::list<Tags::Dy<Tags::BondiJ>, Tags::Dy<Tags::Dy<Tags::BondiJ>>,
+                 Tags::Dy<Tags::BondiSTPsi>>;
   using second_swsh_derivative_tags = tmpl::list<>;
   using swsh_derivative_tags = tmpl::list<>;
 };
@@ -74,7 +75,9 @@ struct TagsToComputeForImpl<Tags::BondiQ> {
       Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiJ>,
                                        Spectral::Swsh::Tags::Ethbar>,
       Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
-                                       Spectral::Swsh::Tags::Ethbar>>;
+                                       Spectral::Swsh::Tags::Ethbar>,
+      Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                       Spectral::Swsh::Tags::Eth>>;
   using second_swsh_derivative_tags = tmpl::list<>;
 };
 
@@ -85,6 +88,37 @@ struct TagsToComputeForImpl<Tags::BondiU> {
                  Tags::Dy<Tags::Dy<Tags::BondiQ>>>;
   using second_swsh_derivative_tags = tmpl::list<>;
   using swsh_derivative_tags = tmpl::list<>;
+};
+
+template <>
+struct TagsToComputeForImpl<Tags::BondiSTTheta> {
+  using pre_swsh_derivative_tags =
+      tmpl::list<Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>,
+                 Tags::Dy<Tags::BondiSTPsi>, Tags::Dy<Tags::BondiW>,
+                 Tags::Dy<Tags::BondiU>, Tags::Dy<Tags::BondiJ>,
+                 Tags::Dy<Tags::BondiBeta>, Tags::Dy<Tags::BondiK>>;
+  using second_swsh_derivative_tags =
+      tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                                  Spectral::Swsh::Tags::EthEth>,
+                 Spectral::Swsh::Tags::Derivative<
+                     Tags::BondiSTPsi, Spectral::Swsh::Tags::EthEthbar>>;
+  using swsh_derivative_tags =
+      tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiSTPsi>,
+                                                  Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiSTPsi>,
+                                                  Spectral::Swsh::Tags::Ethbar>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                                  Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                                  Spectral::Swsh::Tags::Ethbar>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
+                                                  Spectral::Swsh::Tags::Ethbar>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiU,
+                                                  Spectral::Swsh::Tags::Ethbar>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
+                                                  Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiK,
+                                                  Spectral::Swsh::Tags::Eth>>;
 };
 
 template <>

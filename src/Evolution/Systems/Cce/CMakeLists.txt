@@ -21,6 +21,8 @@ spectre_target_sources(
   SpecBoundaryData.cpp
   WorldtubeBufferUpdater.cpp
   WorldtubeDataManager.cpp
+  STWorldtubeBufferUpdater.cpp
+  STWorldtubeDataManager.cpp
   )
 
 spectre_target_headers(
@@ -49,6 +51,8 @@ spectre_target_headers(
   Tags.hpp
   WorldtubeBufferUpdater.hpp
   WorldtubeDataManager.hpp
+  STWorldtubeBufferUpdater.hpp
+  STWorldtubeDataManager.hpp
   )
 
 target_link_libraries(

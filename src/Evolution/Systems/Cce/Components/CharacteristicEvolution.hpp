@@ -110,7 +110,8 @@ struct CharacteristicEvolution {
           typename Metavariables::evolved_swsh_tag,
           Metavariables::local_time_stepping>,
       Actions::InitializeCharacteristicEvolutionScri<
-          typename Metavariables::scri_values_to_observe,
+          tmpl::append<typename Metavariables::scri_values_to_observe,
+                       typename Metavariables::cce_st_scri_tags>,
           typename Metavariables::cce_boundary_component>,
       Parallel::Actions::TerminatePhase>;
 
@@ -148,9 +149,23 @@ struct CharacteristicEvolution {
                   Tags::EvolutionGaugeBoundaryValue, Tags::DuRDividedByR>>>,
           tmpl::list<>>>;
 
+  using scalar_tensor_computation = tmpl::list<
+      ::Actions::MutateApply<PreSwshDerivatives<Tags::Dy<Tags::BondiSTPsi>>>,
+      ::Actions::MutateApply<GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>>,
+      ::Actions::MutateApply<STWTMonitor>,
+      Actions::CalculateIntegrandInputsForTag<Tags::BondiSTTheta>,
+      tmpl::transform<
+          integrand_terms_to_compute_for_bondi_variable<Tags::BondiSTTheta>,
+          tmpl::bind<::Actions::MutateApply,
+                     tmpl::bind<ComputeBondiIntegrand, tmpl::_1>>>,
+      ::Actions::MutateApply<RadialIntegrateBondi<
+          Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTTheta>>>;
+
   using compute_scri_quantities_and_observe = tmpl::list<
       ::Actions::MutateApply<
           CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>>>,
+      ::Actions::MutateApply<
+          CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiBeta>>>,
       Actions::CalculateScriInputs,
       tmpl::transform<typename metavariables::cce_scri_tags,
                       tmpl::bind<::Actions::MutateApply,
@@ -164,11 +179,21 @@ struct CharacteristicEvolution {
           observers::ObserverWriter<Metavariables>,
           typename Metavariables::cce_boundary_component>>;
 
+  using compute_st_scri_quantities_and_observe =
+      tmpl::list<::Actions::MutateApply<
+                     CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>>,
+                 Actions::InsertInterpolationScriData<
+                     Tags::ScriPlus<Tags::BondiSTPsi>,
+                     typename Metavariables::cce_boundary_component>,
+                 Actions::STScriObserveInterpolated<
+                     observers::ObserverWriter<Metavariables>>>;
+
   using self_start_extract_action_list = tmpl::list<
       Actions::RequestBoundaryData<
           typename Metavariables::cce_boundary_component,
           CharacteristicEvolution<Metavariables>>,
       Actions::ReceiveWorldtubeData<Metavariables>,
+      Actions::ReceiveSTWorldtubeData<Metavariables>,
       // note that the initialization will only actually happen on the
       // iterations immediately following restarts
       Actions::InitializeFirstHypersurface<
@@ -183,7 +208,9 @@ struct CharacteristicEvolution {
                           tmpl::list<>>,
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
+      scalar_tensor_computation,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
+      Actions::FilterSwshVolumeQuantity<Tags::BondiSTTheta>,
       ::Actions::MutateApply<
           CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>>>,
       Actions::CalculateScriInputs,
@@ -201,6 +228,7 @@ struct CharacteristicEvolution {
       tmpl::conditional_t<evolve_ccm, tmpl::list<>,
                           evolution::Actions::RunEventsAndTriggers>,
       Actions::ReceiveWorldtubeData<Metavariables>,
+      Actions::ReceiveSTWorldtubeData<Metavariables>,
       Actions::InitializeFirstHypersurface<
           evolve_ccm, typename Metavariables::cce_boundary_component>,
       tmpl::conditional_t<
@@ -213,8 +241,12 @@ struct CharacteristicEvolution {
                           tmpl::list<>>,
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
+      scalar_tensor_computation,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
+      Actions::FilterSwshVolumeQuantity<Tags::BondiSTTheta>,
       compute_scri_quantities_and_observe,
+      compute_st_scri_quantities_and_observe,
+      ::Actions::MutateApply<print_constraint>,
       ::Actions::RecordTimeStepperData<cce_system>,
       ::Actions::UpdateU<cce_system>,
       ::Actions::ChangeStepSize<typename Metavariables::cce_step_choosers>,
