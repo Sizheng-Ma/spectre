@@ -28,7 +28,11 @@ namespace Cce {
 
 void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
     apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
-                   pole_of_integrand_for_st_theta) {}
+                   pole_of_integrand_for_st_theta,
+               const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
+               const SpinWeighted<ComplexDataVector, 1>& bondi_u) {
+  *pole_of_integrand_for_st_theta = -eth_st_psi * conj(bondi_u);
+}
 
 void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
     apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
@@ -52,7 +56,8 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
                const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
                const SpinWeighted<ComplexDataVector, 2>& eth_eth_r_divided_by_r,
                const SpinWeighted<ComplexDataVector, 0>& bondi_r,
-               const SpinWeighted<ComplexDataVector, 0>& bondi_k) {
+               const SpinWeighted<ComplexDataVector, 0>& bondi_k,
+               const SpinWeighted<ComplexDataVector, 1>& bondi_u) {
   SpinWeighted<ComplexDataVector, 0> from_lhs =
       du_r_divided_by_r * one_minus_y * dy_dy_st_psi;
 }
