@@ -148,6 +148,16 @@ struct CharacteristicEvolution {
                   Tags::EvolutionGaugeBoundaryValue, Tags::DuRDividedByR>>>,
           tmpl::list<>>>;
 
+  using scalar_tensor_computation = tmpl::list<
+    //   ::Actions::MutateApply<GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>>,
+    //   Actions::CalculateIntegrandInputsForTag<Tags::BondiSTTheta>,
+    //   tmpl::transform<integrand_terms_to_compute_for_bondi_variable<Tags::BondiSTTheta>,
+    //                   tmpl::bind<::Actions::MutateApply,
+    //                              tmpl::bind<ComputeBondiIntegrand, tmpl::_1>>>,
+    //   ::Actions::MutateApply<
+    //       RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTTheta>>
+          >;
+
   using compute_scri_quantities_and_observe = tmpl::list<
       ::Actions::MutateApply<
           CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>>>,
@@ -183,6 +193,7 @@ struct CharacteristicEvolution {
                           tmpl::list<>>,
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
+                      scalar_tensor_computation,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
       ::Actions::MutateApply<
           CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>>>,
@@ -213,6 +224,7 @@ struct CharacteristicEvolution {
                           tmpl::list<>>,
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
+                      scalar_tensor_computation,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
       compute_scri_quantities_and_observe,
       ::Actions::RecordTimeStepperData<cce_system>,
