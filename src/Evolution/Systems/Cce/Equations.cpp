@@ -101,6 +101,7 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
   SpinWeighted<ComplexDataVector, 0> complex3;
   SpinWeighted<ComplexDataVector, 0> complex2;
   SpinWeighted<ComplexDataVector, 0> complex1;
+  SpinWeighted<ComplexDataVector, 0> complex_final;
 
   SpinWeighted<ComplexDataVector, 0> dy_k;
 
@@ -156,6 +157,12 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
   complex2 -= 0.5 * exp2beta * conj(j) * eth_beta * eth_st_psi / bondi_r;
   complex2 += 0.25 * exp2beta * eth_st_psi * conj(eth_k) / bondi_r;
   complex2 += 0.5 * exp2beta * bondi_k * eth_st_psi * conj(eth_beta) / bondi_r;
+
+  complex_final =
+      complex1 + complex2 + complex3 + complex4 + complex5 + complex6;
+
+  *regular_integrand_for_st_theta =
+      0.5 * (complex_final + conj(complex_final)) + real;
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
