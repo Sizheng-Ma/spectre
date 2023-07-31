@@ -727,7 +727,8 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiH>> {
   using pre_swsh_derivative_tags =
       tmpl::list<Tags::Dy<Tags::Dy<Tags::BondiJ>>, Tags::Dy<Tags::BondiJ>,
                  Tags::Dy<Tags::BondiW>, Tags::Exp2Beta, Tags::BondiJ,
-                 Tags::BondiQ, Tags::BondiU, Tags::BondiW>;
+                 Tags::BondiQ, Tags::BondiU, Tags::BondiW,
+                 Tags::Dy<Tags::BondiSTPsi>>;
   using swsh_derivative_tags = tmpl::list<
       Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
                                        Spectral::Swsh::Tags::Eth>,
@@ -764,7 +765,9 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiH>> {
       Spectral::Swsh::Tags::Derivative<Tags::BondiQ,
                                        Spectral::Swsh::Tags::Ethbar>,
       Spectral::Swsh::Tags::Derivative<Tags::BondiU,
-                                       Spectral::Swsh::Tags::Ethbar>>;
+                                       Spectral::Swsh::Tags::Ethbar>,
+      Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                       Spectral::Swsh::Tags::Eth>>;
   using integration_independent_tags =
       tmpl::list<Tags::DuRDividedByR, Tags::EthRDividedByR, Tags::BondiK,
                  Tags::OneMinusY, Tags::BondiR>;
@@ -814,6 +817,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiH>> {
       const SpinWeighted<ComplexDataVector, 1>& q,
       const SpinWeighted<ComplexDataVector, 1>& u,
       const SpinWeighted<ComplexDataVector, 0>& w,
+      const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
       const SpinWeighted<ComplexDataVector, 1>& eth_beta,
       const SpinWeighted<ComplexDataVector, 2>& eth_eth_beta,
       const SpinWeighted<ComplexDataVector, 0>& eth_ethbar_beta,
@@ -830,6 +834,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiH>> {
       const SpinWeighted<ComplexDataVector, -2>& ethbar_jbar_q_minus_2_eth_beta,
       const SpinWeighted<ComplexDataVector, 0>& ethbar_q,
       const SpinWeighted<ComplexDataVector, 0>& ethbar_u,
+      const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
       const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r,
       const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
       const SpinWeighted<ComplexDataVector, 0>& k,
