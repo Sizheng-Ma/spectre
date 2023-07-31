@@ -154,11 +154,9 @@ struct CharacteristicEvolution {
       tmpl::transform<
           integrand_terms_to_compute_for_bondi_variable<Tags::BondiSTTheta>,
           tmpl::bind<::Actions::MutateApply,
-                     tmpl::bind<ComputeBondiIntegrand, tmpl::_1>>>
-      //   ::Actions::MutateApply<
-      //       RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
-      //       Tags::BondiSTTheta>>
-      >;
+                     tmpl::bind<ComputeBondiIntegrand, tmpl::_1>>>,
+      ::Actions::MutateApply<RadialIntegrateBondi<
+          Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTTheta>>>;
 
   using compute_scri_quantities_and_observe = tmpl::list<
       ::Actions::MutateApply<
