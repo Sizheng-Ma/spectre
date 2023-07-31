@@ -31,7 +31,8 @@ void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
                    pole_of_integrand_for_st_theta,
                const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
                const SpinWeighted<ComplexDataVector, 1>& bondi_u) {
-  *pole_of_integrand_for_st_theta = -eth_st_psi * conj(bondi_u);
+  *pole_of_integrand_for_st_theta =
+      0.5 * (-eth_st_psi * conj(bondi_u) - conj(eth_st_psi) * bondi_u);
 }
 
 void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
@@ -67,6 +68,28 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
         const SpinWeighted<ComplexDataVector, 0>& bondi_w) {
   SpinWeighted<ComplexDataVector, 0> from_lhs =
       du_r_divided_by_r * one_minus_y * dy_dy_st_psi;
+
+  SpinWeighted<ComplexDataVector, 0> real6;
+  SpinWeighted<ComplexDataVector, 0> real5;
+  SpinWeighted<ComplexDataVector, 0> real4;
+  SpinWeighted<ComplexDataVector, 0> real3;
+  SpinWeighted<ComplexDataVector, 0> real2;
+  SpinWeighted<ComplexDataVector, 0> real1;
+  SpinWeighted<ComplexDataVector, 0> tmptt;
+
+  real6 = 0.5 * one_minus_y * dy_dy_st_psi * bondi_w - dy_st_psi * bondi_w;
+  real5 = 0.25 * square(one_minus_y) * dy_dy_st_psi / bondi_r -
+          0.5 * one_minus_y * dy_st_psi / bondi_r;
+  real4 = 0.5 * one_minus_y * dy_w * dy_st_psi;
+  real3 = 1.5 * dy_st_psi * bondi_w;
+  real2 = 0.5 * one_minus_y * dy_st_psi / bondi_r;
+  tmptt = -0.25 * exp2beta * bondi_k * eth_r_divided_by_r / bondi_r *
+          conj(eth_dy_st_psi) * one_minus_y;
+  real1 = tmptt + conj(tmptt);
+  real1 += 0.25 * exp2beta * bondi_k * eth_r_divided_by_r *
+           conj(eth_r_divided_by_r) / bondi_r * square(one_minus_y) *
+           dy_dy_st_psi;
+  // real1-=0.25*exp2beta*bondi_k*
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
