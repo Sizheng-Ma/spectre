@@ -299,7 +299,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
   using integration_independent_tags =
       tmpl::list<Tags::DuRDividedByR, Tags::OneMinusY, Tags::EthRDividedByR,
                  Tags::EthEthRDividedByR, Tags::BondiR, Tags::BondiK,
-                 Tags::BondiU>;
+                 Tags::BondiU, Tags::EthEthbarRDividedByR>;
 
   using return_tags = tmpl::list<Tags::RegularIntegrand<Tags::BondiSTTheta>>;
   using argument_tags =
@@ -341,7 +341,8 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
       const SpinWeighted<ComplexDataVector, 2>& eth_eth_r_divided_by_r,
       const SpinWeighted<ComplexDataVector, 0>& bondi_r,
       const SpinWeighted<ComplexDataVector, 0>& bondi_k,
-      const SpinWeighted<ComplexDataVector, 1>& bondi_u);
+      const SpinWeighted<ComplexDataVector, 1>& bondi_u,
+      const SpinWeighted<ComplexDataVector, 0>& ethbar_eth_r_divided_by_r);
 };
 
 /*!
