@@ -83,6 +83,11 @@ struct integrand_terms_to_compute_for_bondi_variable_impl<Tags::BondiH> {
                           Tags::LinearFactor<Tags::BondiH>,
                           Tags::LinearFactorForConjugate<Tags::BondiH>>;
 };
+template <>
+struct integrand_terms_to_compute_for_bondi_variable_impl<Tags::BondiSTTheta> {
+  using type = tmpl::list<Tags::PoleOfIntegrand<Tags::BondiSTTheta>,
+                          Tags::RegularIntegrand<Tags::BondiSTTheta>>;
+};
 }  // namespace detail
 
 /// \brief A struct for providing a `tmpl::list` of integrand tags that need to
