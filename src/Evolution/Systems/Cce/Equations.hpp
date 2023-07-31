@@ -247,9 +247,10 @@ template <>
 struct ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>> {
  public:
   using pre_swsh_derivative_tags = tmpl::list<>;
-  using swsh_derivative_tags = tmpl::list<>;
-  using integration_independent_tags = tmpl::list<>;
-  using temporary_tags = tmpl::list<>;
+  using swsh_derivative_tags =
+      tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                                  Spectral::Swsh::Tags::Eth>>;
+  using integration_independent_tags = tmpl::list<Tags::BondiU>;
 
   using return_tags = tmpl::list<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>;
   using argument_tags =
@@ -267,7 +268,9 @@ struct ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>> {
 
  private:
   static void apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
-                             pole_of_integrand_for_st_theta);
+                             pole_of_integrand_for_st_theta,
+                         const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
+                         const SpinWeighted<ComplexDataVector, 1>& bondi_u);
 };
 
 template <>
@@ -292,7 +295,8 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
                                                   Spectral::Swsh::Tags::Eth>>;
   using integration_independent_tags =
       tmpl::list<Tags::DuRDividedByR, Tags::OneMinusY, Tags::EthRDividedByR,
-                 Tags::EthEthRDividedByR, Tags::BondiR, Tags::BondiK>;
+                 Tags::EthEthRDividedByR, Tags::BondiR, Tags::BondiK,
+                 Tags::BondiU>;
 
   using return_tags = tmpl::list<Tags::RegularIntegrand<Tags::BondiSTTheta>>;
   using argument_tags =
@@ -331,7 +335,8 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
       const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
       const SpinWeighted<ComplexDataVector, 2>& eth_eth_r_divided_by_r,
       const SpinWeighted<ComplexDataVector, 0>& bondi_r,
-      const SpinWeighted<ComplexDataVector, 0>& bondi_k);
+      const SpinWeighted<ComplexDataVector, 0>& bondi_k,
+      const SpinWeighted<ComplexDataVector, 1>& bondi_u);
 };
 
 /*!
