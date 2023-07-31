@@ -495,32 +495,35 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiW>> {
  public:
   using pre_swsh_derivative_tags =
       tmpl::list<Tags::Dy<Tags::BondiU>, Tags::Exp2Beta, Tags::BondiJ,
-                 Tags::BondiQ>;
-  using swsh_derivative_tags = tmpl::list<
-      Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
-                                       Spectral::Swsh::Tags::Eth>,
-      Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
-                                       Spectral::Swsh::Tags::EthEth>,
-      Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
-                                       Spectral::Swsh::Tags::EthEthbar>,
-      Spectral::Swsh::Tags::Derivative<
-          Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
-                                           Spectral::Swsh::Tags::Ethbar>,
-          Spectral::Swsh::Tags::Eth>,
-      Spectral::Swsh::Tags::Derivative<
-          ::Tags::Multiplies<Tags::BondiJ, Tags::BondiJbar>,
-          Spectral::Swsh::Tags::EthEthbar>,
-      Spectral::Swsh::Tags::Derivative<
-          ::Tags::Multiplies<Tags::BondiJ, Tags::BondiJbar>,
-          Spectral::Swsh::Tags::Eth>,
-      Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiU>,
-                                       Spectral::Swsh::Tags::Ethbar>,
-      Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
-                                       Spectral::Swsh::Tags::EthbarEthbar>,
-      Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
-                                       Spectral::Swsh::Tags::Ethbar>>;
+                 Tags::BondiQ, Tags::Dy<Tags::BondiSTPsi>>;
+  using swsh_derivative_tags =
+      tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
+                                                  Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
+                                                  Spectral::Swsh::Tags::EthEth>,
+                 Spectral::Swsh::Tags::Derivative<
+                     Tags::BondiBeta, Spectral::Swsh::Tags::EthEthbar>,
+                 Spectral::Swsh::Tags::Derivative<
+                     Spectral::Swsh::Tags::Derivative<
+                         Tags::BondiJ, Spectral::Swsh::Tags::Ethbar>,
+                     Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<
+                     ::Tags::Multiplies<Tags::BondiJ, Tags::BondiJbar>,
+                     Spectral::Swsh::Tags::EthEthbar>,
+                 Spectral::Swsh::Tags::Derivative<
+                     ::Tags::Multiplies<Tags::BondiJ, Tags::BondiJbar>,
+                     Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiU>,
+                                                  Spectral::Swsh::Tags::Ethbar>,
+                 Spectral::Swsh::Tags::Derivative<
+                     Tags::BondiJ, Spectral::Swsh::Tags::EthbarEthbar>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
+                                                  Spectral::Swsh::Tags::Ethbar>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                                  Spectral::Swsh::Tags::Eth>>;
   using integration_independent_tags =
-      tmpl::list<Tags::EthRDividedByR, Tags::BondiK, Tags::BondiR>;
+      tmpl::list<Tags::EthRDividedByR, Tags::BondiK, Tags::BondiR,
+                 Tags::OneMinusY>;
   using temporary_tags =
       tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
                                       std::integral_constant<int, 0>>>;
@@ -552,6 +555,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiW>> {
       const SpinWeighted<ComplexDataVector, 0>& exp_2_beta,
       const SpinWeighted<ComplexDataVector, 2>& j,
       const SpinWeighted<ComplexDataVector, 1>& q,
+      const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
       const SpinWeighted<ComplexDataVector, 1>& eth_beta,
       const SpinWeighted<ComplexDataVector, 2>& eth_eth_beta,
       const SpinWeighted<ComplexDataVector, 0>& eth_ethbar_beta,
@@ -561,9 +565,11 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiW>> {
       const SpinWeighted<ComplexDataVector, 0>& ethbar_dy_u,
       const SpinWeighted<ComplexDataVector, 0>& ethbar_ethbar_j,
       const SpinWeighted<ComplexDataVector, 1>& ethbar_j,
+      const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
       const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
       const SpinWeighted<ComplexDataVector, 0>& k,
-      const SpinWeighted<ComplexDataVector, 0>& r);
+      const SpinWeighted<ComplexDataVector, 0>& r,
+      const SpinWeighted<ComplexDataVector, 0>& one_minus_y);
 };
 
 /*!
