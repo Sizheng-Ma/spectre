@@ -79,6 +79,7 @@ struct InitializeCharacteristicEvolutionVariables {
       ::Tags::Variables<typename Metavariables::cce_scri_tags>;
   using volume_variables_tag = ::Tags::Variables<
       tmpl::append<typename Metavariables::cce_integrand_tags,
+                   typename Metavariables::cce_st_integrand_tags,
                    typename Metavariables::cce_integration_independent_tags,
                    typename Metavariables::cce_temporary_equations_tags>>;
   using pre_swsh_derivatives_variables_tag =

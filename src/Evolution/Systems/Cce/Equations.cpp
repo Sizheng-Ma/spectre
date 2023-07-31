@@ -26,6 +26,14 @@
 namespace Cce {
 // suppresses doxygen problems with these functions
 
+void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
+    apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
+                   pole_of_integrand_for_st_theta) {}
+
+void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
+    apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
+                   regular_integrand_for_st_theta) {}
+
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
     const gsl::not_null<SpinWeighted<ComplexDataVector, 0>*> integrand_for_beta,
     const SpinWeighted<ComplexDataVector, 2>& dy_j,
