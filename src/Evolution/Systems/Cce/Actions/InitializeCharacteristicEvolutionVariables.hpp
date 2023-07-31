@@ -101,6 +101,8 @@ struct InitializeCharacteristicEvolutionVariables {
 
   using evolved_st_variables_tags =
       ::Tags::Variables<typename Metavariables::st_tags>;
+  using evolved_dt_st_variables_tags =
+      ::Tags::Variables<typename Metavariables::dt_st_tags>;
 
   using simple_tags_for_evolution = tmpl::list<
       boundary_value_variables_tag, coordinate_variables_tag,
@@ -111,7 +113,7 @@ struct InitializeCharacteristicEvolutionVariables {
       swsh_derivative_variables_tag,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>,
-      ccm_tag, evolved_st_variables_tags>;
+      ccm_tag, evolved_st_variables_tags, evolved_dt_st_variables_tags>;
   using simple_tags =
       tmpl::append<StepChoosers::step_chooser_simple_tags<Metavariables, true>,
                    simple_tags_for_evolution>;
@@ -159,7 +161,8 @@ struct InitializeCharacteristicEvolutionVariables {
         typename swsh_derivative_variables_tag::type{volume_size, 0.0},
         Spectral::Swsh::SwshInterpolator{}, Spectral::Swsh::SwshInterpolator{},
         typename ccm_tag::type{boundary_size},
-        typename evolved_st_variables_tags::type{volume_size});
+        typename evolved_st_variables_tags::type{volume_size},
+        typename evolved_dt_st_variables_tags::type{volume_size});
   }
 };
 

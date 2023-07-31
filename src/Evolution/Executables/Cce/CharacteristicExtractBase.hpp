@@ -125,4 +125,5 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::BoundaryValue<Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>>;
 
   using st_tags = tmpl::list<Cce::Tags::BondiSTPsi>;
+  using dt_st_tags = tmpl::list<Cce::Tags::BondiSTTheta>;
 };

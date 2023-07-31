@@ -66,6 +66,7 @@ namespace Tags {
 /// with the physical Bondi radius, which is not directly used for numerical
 /// grids).
 using BondiH = ::Tags::dt<BondiJ>;
+using BondiSTTheta = ::Tags::dt<BondiSTPsi>;
 
 /// Bondi parameter \f$\bar{J}\f$
 struct BondiJbar : db::SimpleTag {
