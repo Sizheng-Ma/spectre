@@ -274,10 +274,10 @@ template <>
 struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
  public:
   using pre_swsh_derivative_tags =
-      tmpl::list<Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>>;
+      tmpl::list<Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>, Tags::BondiJ>;
   using swsh_derivative_tags = tmpl::list<>;
   using integration_independent_tags =
-      tmpl::list<Tags::DuRDividedByR, Tags::OneMinusY>;
+      tmpl::list<Tags::DuRDividedByR, Tags::OneMinusY, Tags::EthRDividedByR>;
 
   using return_tags = tmpl::list<Tags::RegularIntegrand<Tags::BondiSTTheta>>;
   using argument_tags =
@@ -298,8 +298,10 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
       gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
           regular_integrand_for_st_theta,
       const SpinWeighted<ComplexDataVector, 0>& dy_dy_st_psi,
+      const SpinWeighted<ComplexDataVector, 2>& j,
       const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r,
-      const SpinWeighted<ComplexDataVector, 0>& one_minus_y);
+      const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
+      const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r);
 };
 
 /*!
