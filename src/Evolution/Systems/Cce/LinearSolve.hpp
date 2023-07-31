@@ -167,6 +167,27 @@ struct RadialIntegrateBondi<BoundaryPrefix, Tags::BondiW> {
 };
 
 template <template <typename> class BoundaryPrefix>
+struct RadialIntegrateBondi<BoundaryPrefix, Tags::BondiSTTheta> {
+  //   using boundary_tags = tmpl::list<BoundaryPrefix<Tags::BondiSTTheta>>;
+  using boundary_tags = tmpl::list<>;
+  using integrand_tags = tmpl::list<Tags::PoleOfIntegrand<Tags::BondiSTTheta>,
+                                    Tags::RegularIntegrand<Tags::BondiSTTheta>>;
+  using integration_independent_tags = tmpl::list<Tags::OneMinusY>;
+
+  using return_tags = tmpl::list<Tags::BondiSTTheta>;
+  using argument_tags =
+      tmpl::append<integrand_tags, boundary_tags, integration_independent_tags,
+                   tmpl::list<Tags::LMax, Tags::NumberOfRadialPoints>>;
+  static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          integral_result,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& pole_of_integrand,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& regular_integrand,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
+      size_t l_max, size_t number_of_radial_points);
+};
+
+template <template <typename> class BoundaryPrefix>
 struct RadialIntegrateBondi<BoundaryPrefix, Tags::BondiH> {
   using boundary_tags = tmpl::list<BoundaryPrefix<Tags::BondiH>>;
   using integrand_tags =
