@@ -277,9 +277,10 @@ template <>
 struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
  public:
   using pre_swsh_derivative_tags =
-      tmpl::list<Tags::Exp2Beta, Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>,Tags::Dy<Tags::BondiSTPsi>,
-                 Tags::BondiJ, Tags::Dy<Tags::BondiBeta>,
-                 Tags::Dy<Tags::BondiJ>>;
+      tmpl::list<Tags::Exp2Beta, Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>,
+                 Tags::Dy<Tags::BondiSTPsi>, Tags::BondiJ,
+                 Tags::Dy<Tags::BondiBeta>, Tags::Dy<Tags::BondiJ>,
+                 Tags::Dy<Tags::BondiU>>;
   using swsh_derivative_tags =
       tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiSTPsi>,
                                                   Spectral::Swsh::Tags::Eth>,
@@ -322,6 +323,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
       const SpinWeighted<ComplexDataVector, 2>& j,
       const SpinWeighted<ComplexDataVector, 0>& dy_beta,
       const SpinWeighted<ComplexDataVector, 2>& dy_j,
+      const SpinWeighted<ComplexDataVector, 1>& dy_bondi_u,
       // swsh_derivative_tags
       const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
       const SpinWeighted<ComplexDataVector, 2>& eth_eth_st_psi,
