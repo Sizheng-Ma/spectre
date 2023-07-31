@@ -114,12 +114,13 @@ Matrix q_integration_matrix_for_st(const size_t number_of_points) {
 
   Matrix lhs_mat = inverse_one_minus_y * dy_identity_lhs;
 
+  double my_change = 1.0;
   for (size_t i = 1; i < number_of_points - 1; ++i) {
-    lhs_mat(i, i - 1) += 2.0;
-    lhs_mat(i, i + 1) += -2.0;
+    lhs_mat(i, i - 1) += my_change;
+    lhs_mat(i, i + 1) += -my_change;
   }
-  lhs_mat(0, 1) += -2.0;
-  lhs_mat(number_of_points - 1, number_of_points - 2) += 2.0;
+  lhs_mat(0, 1) += -my_change;
+  lhs_mat(number_of_points - 1, number_of_points - 2) += my_change;
 
   return Spectral::modal_to_nodal_matrix<Spectral::Basis::Legendre,
                                          Spectral::Quadrature::GaussLobatto>(
