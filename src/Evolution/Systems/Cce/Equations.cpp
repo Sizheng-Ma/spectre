@@ -102,6 +102,10 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
   SpinWeighted<ComplexDataVector, 0> complex2;
   SpinWeighted<ComplexDataVector, 0> complex1;
 
+  SpinWeighted<ComplexDataVector, 0> dy_k;
+
+  dy_k = 0.5 * (conj(j) * dy_j + j * conj(dy_j)) / bondi_k;
+
   complex6 = -0.5 * ethbar_u * dy_st_psi + 0.5 * conj(eth_r_divided_by_r) *
                                                one_minus_y * dy_bondi_u *
                                                dy_st_psi;
@@ -120,6 +124,38 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
   complex1 += 0.25 * exp2beta * conj(j) * eth_eth_r_divided_by_r / bondi_r *
               one_minus_y * dy_st_psi;
   complex1 -= 0.25 * exp2beta * conj(j) * eth_eth_st_psi / bondi_r;
+
+  complex2 = -0.25 * exp2beta * square(eth_r_divided_by_r) / bondi_r *
+             square(one_minus_y) * conj(dy_j) * dy_st_psi;
+  complex2 += 0.25 * exp2beta * eth_r_divided_by_r * conj(eth_r_divided_by_r) /
+              bondi_r * square(one_minus_y) * dy_k * dy_st_psi;
+  complex2 -= 0.5 * exp2beta * conj(j) * square(eth_r_divided_by_r) / bondi_r *
+              square(one_minus_y) * dy_beta * dy_st_psi;
+  complex2 += 0.5 * exp2beta * bondi_k * eth_r_divided_by_r *
+              conj(eth_r_divided_by_r) / bondi_r * square(one_minus_y) *
+              dy_beta * dy_st_psi;
+  complex2 += 0.25 * exp2beta * eth_r_divided_by_r / bondi_r * eth_st_psi *
+              one_minus_y * conj(dy_j);
+  complex2 -= 0.25 * exp2beta * conj(eth_r_divided_by_r) / bondi_r *
+              eth_st_psi * one_minus_y * dy_k;
+  complex2 += 0.5 * exp2beta * conj(j) * eth_r_divided_by_r / bondi_r *
+              eth_st_psi * one_minus_y * dy_beta;
+  complex2 -= 0.5 * exp2beta * bondi_k * eth_st_psi * conj(eth_r_divided_by_r) /
+              bondi_r * one_minus_y * dy_beta;
+  complex2 += 0.25 * exp2beta * conj(ethbar_j) * eth_r_divided_by_r / bondi_r *
+              one_minus_y * dy_st_psi;
+
+  complex2 += 0.5 * exp2beta * conj(j) * eth_r_divided_by_r / bondi_r *
+              eth_beta * one_minus_y * dy_st_psi;
+  complex2 -= 0.25 * exp2beta * eth_r_divided_by_r / bondi_r * conj(eth_k) *
+              one_minus_y * dy_st_psi;
+  complex2 -= 0.5 * exp2beta * bondi_k * eth_r_divided_by_r / bondi_r *
+              conj(eth_beta) * one_minus_y * dy_st_psi;
+
+  complex2 -= 0.25 * exp2beta * conj(ethbar_j) * eth_st_psi / bondi_r;
+  complex2 -= 0.5 * exp2beta * conj(j) * eth_beta * eth_st_psi / bondi_r;
+  complex2 += 0.25 * exp2beta * eth_st_psi * conj(eth_k) / bondi_r;
+  complex2 += 0.5 * exp2beta * bondi_k * eth_st_psi * conj(eth_beta) / bondi_r;
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
