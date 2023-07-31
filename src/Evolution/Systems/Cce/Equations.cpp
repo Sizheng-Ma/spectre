@@ -62,7 +62,8 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
         const SpinWeighted<ComplexDataVector, 0>& bondi_r,
         const SpinWeighted<ComplexDataVector, 0>& bondi_k,
         const SpinWeighted<ComplexDataVector, 1>& bondi_u,
-        const SpinWeighted<ComplexDataVector, 0>& ethbar_eth_r_divided_by_r) {
+        const SpinWeighted<ComplexDataVector, 0>& ethbar_eth_r_divided_by_r,
+        const SpinWeighted<ComplexDataVector, 0>& bondi_w) {
   SpinWeighted<ComplexDataVector, 0> from_lhs =
       du_r_divided_by_r * one_minus_y * dy_dy_st_psi;
 }
