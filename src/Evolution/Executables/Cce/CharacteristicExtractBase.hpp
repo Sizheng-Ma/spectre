@@ -113,6 +113,10 @@ struct CharacteristicExtractDefaults {
   using cce_transform_buffer_tags = Cce::all_transform_buffer_tags;
   using cce_swsh_derivative_tags = Cce::all_swsh_derivative_tags;
   using cce_st_swsh_derivative_tags = tmpl::list<
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::Dy<Cce::Tags::BondiSTPsi>,
+                                       Spectral::Swsh::Tags::Ethbar>,
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiSTPsi,
+                                       Spectral::Swsh::Tags::EthEthbar>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiK,
                                        Spectral::Swsh::Tags::Eth>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiJbar,
@@ -122,6 +126,8 @@ struct CharacteristicExtractDefaults {
       Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiSTPsi,
                                        Spectral::Swsh::Tags::EthEth>>;
   using cce_st_transform_buffer_tags = tmpl::list<
+      Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
+          Cce::Tags::BondiSTPsi, Spectral::Swsh::Tags::EthEthbar>>,
       Spectral::Swsh::Tags::SwshTransform<Cce::Tags::BondiK>,
       Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
           Cce::Tags::BondiK, Spectral::Swsh::Tags::Eth>>,

@@ -53,6 +53,7 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
         const SpinWeighted<ComplexDataVector, 0>& ethbar_u,
         const SpinWeighted<ComplexDataVector, 1>& eth_beta,
         const SpinWeighted<ComplexDataVector, 1>& eth_k,
+        const SpinWeighted<ComplexDataVector, 0>& eth_ethbar_st_psi,
         // swsh_derivative_tags
         const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r,
         const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
