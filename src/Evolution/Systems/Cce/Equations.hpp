@@ -273,9 +273,11 @@ struct ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>> {
 template <>
 struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
  public:
-  using pre_swsh_derivative_tags = tmpl::list<>;
+  using pre_swsh_derivative_tags =
+      tmpl::list<Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>>;
   using swsh_derivative_tags = tmpl::list<>;
-  using integration_independent_tags = tmpl::list<>;
+  using integration_independent_tags =
+      tmpl::list<Tags::DuRDividedByR, Tags::OneMinusY>;
 
   using return_tags = tmpl::list<Tags::RegularIntegrand<Tags::BondiSTTheta>>;
   using argument_tags =
@@ -292,8 +294,12 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
   }
 
  private:
-  static void apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
-                             regular_integrand_for_st_theta);
+  static void apply_impl(
+      gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
+          regular_integrand_for_st_theta,
+      const SpinWeighted<ComplexDataVector, 0>& dy_dy_st_psi,
+      const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r,
+      const SpinWeighted<ComplexDataVector, 0>& one_minus_y);
 };
 
 /*!

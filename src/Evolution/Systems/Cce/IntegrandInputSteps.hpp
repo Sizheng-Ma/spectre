@@ -92,7 +92,8 @@ struct TagsToComputeForImpl<Tags::BondiU> {
 
 template <>
 struct TagsToComputeForImpl<Tags::BondiSTTheta> {
-  using pre_swsh_derivative_tags = tmpl::list<>;
+  using pre_swsh_derivative_tags =
+      tmpl::list<Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>>;
   using second_swsh_derivative_tags = tmpl::list<>;
   using swsh_derivative_tags = tmpl::list<>;
 };

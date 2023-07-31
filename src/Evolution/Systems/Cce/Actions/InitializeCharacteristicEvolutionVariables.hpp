@@ -82,12 +82,14 @@ struct InitializeCharacteristicEvolutionVariables {
                    typename Metavariables::cce_st_integrand_tags,
                    typename Metavariables::cce_integration_independent_tags,
                    typename Metavariables::cce_temporary_equations_tags>>;
-  using pre_swsh_derivatives_variables_tag =
-      ::Tags::Variables<typename Metavariables::cce_pre_swsh_derivatives_tags>;
+  using pre_swsh_derivatives_variables_tag = ::Tags::Variables<
+      tmpl::append<typename Metavariables::cce_pre_swsh_derivatives_tags,
+                   typename Metavariables::cce_st_pre_swsh_derivatives_tags>>;
   using transform_buffer_variables_tag =
       ::Tags::Variables<typename Metavariables::cce_transform_buffer_tags>;
-  using swsh_derivative_variables_tag =
-      ::Tags::Variables<typename Metavariables::cce_swsh_derivative_tags>;
+  using swsh_derivative_variables_tag = ::Tags::Variables<
+      tmpl::append<typename Metavariables::cce_swsh_derivative_tags,
+                   typename Metavariables::cce_st_swsh_derivative_tags>>;
   using angular_coordinates_variables_tag =
       ::Tags::Variables<typename Metavariables::cce_angular_coordinate_tags>;
   using coordinate_variables_tag =
