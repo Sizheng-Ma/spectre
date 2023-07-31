@@ -278,10 +278,12 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
                  Tags::BondiJ>;
   using swsh_derivative_tags =
       tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiSTPsi>,
-                                                  Spectral::Swsh::Tags::Eth>>;
+                                                  Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<
+                     Tags::BondiSTPsi, Spectral::Swsh::Tags::EthEth>>;
   using integration_independent_tags =
       tmpl::list<Tags::DuRDividedByR, Tags::OneMinusY, Tags::EthRDividedByR,
-                 Tags::EthEthRDividedByR>;
+                 Tags::EthEthRDividedByR, Tags::BondiR>;
 
   using return_tags = tmpl::list<Tags::RegularIntegrand<Tags::BondiSTTheta>>;
   using argument_tags =
@@ -305,10 +307,12 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
       const SpinWeighted<ComplexDataVector, 0>& dy_dy_st_psi,
       const SpinWeighted<ComplexDataVector, 2>& j,
       const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
+      const SpinWeighted<ComplexDataVector, 2>& eth_eth_st_psi,
       const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r,
       const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
       const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
-      const SpinWeighted<ComplexDataVector, 2>& eth_eth_r_divided_by_r);
+      const SpinWeighted<ComplexDataVector, 2>& eth_eth_r_divided_by_r,
+      const SpinWeighted<ComplexDataVector, 0>& bondi_r);
 };
 
 /*!
