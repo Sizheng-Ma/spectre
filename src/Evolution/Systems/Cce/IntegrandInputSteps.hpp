@@ -102,6 +102,8 @@ struct TagsToComputeForImpl<Tags::BondiSTTheta> {
                                                   Spectral::Swsh::Tags::Eth>,
                  Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
                                                   Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
+                                                  Spectral::Swsh::Tags::Eth>,
 Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
                                                   Spectral::Swsh::Tags::Ethbar>>;
 };
