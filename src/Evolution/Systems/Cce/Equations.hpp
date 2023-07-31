@@ -274,14 +274,16 @@ template <>
 struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
  public:
   using pre_swsh_derivative_tags =
-      tmpl::list<Tags::Exp2Beta, Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>,
+      tmpl::list<Tags::Exp2Beta, Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>,Tags::Dy<Tags::BondiSTPsi>,
                  Tags::BondiJ, Tags::Dy<Tags::BondiBeta>,
                  Tags::Dy<Tags::BondiJ>>;
   using swsh_derivative_tags =
       tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiSTPsi>,
                                                   Spectral::Swsh::Tags::Eth>,
-                 Spectral::Swsh::Tags::Derivative<
-                     Tags::BondiSTPsi, Spectral::Swsh::Tags::EthEth>>;
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                                  Spectral::Swsh::Tags::EthEth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                                  Spectral::Swsh::Tags::Eth>>;
   using integration_independent_tags =
       tmpl::list<Tags::DuRDividedByR, Tags::OneMinusY, Tags::EthRDividedByR,
                  Tags::EthEthRDividedByR, Tags::BondiR, Tags::BondiK>;
@@ -306,12 +308,14 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
           regular_integrand_for_st_theta,
       const SpinWeighted<ComplexDataVector, 0>& exp2beta,
       const SpinWeighted<ComplexDataVector, 0>& dy_dy_st_psi,
+      const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
       const SpinWeighted<ComplexDataVector, 2>& j,
       const SpinWeighted<ComplexDataVector, 0>& dy_beta,
       const SpinWeighted<ComplexDataVector, 2>& dy_j,
       // swsh_derivative_tags
       const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
       const SpinWeighted<ComplexDataVector, 2>& eth_eth_st_psi,
+      const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
       // swsh_derivative_tags
       const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r,
       const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
