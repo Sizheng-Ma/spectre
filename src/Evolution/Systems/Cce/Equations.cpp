@@ -117,7 +117,9 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
              square(one_minus_y) * dy_dy_st_psi;
   complex1 += 0.5 * exp2beta * conj(j) * eth_dy_st_psi * eth_r_divided_by_r /
               bondi_r * one_minus_y;
-  complex1 += ;
+  complex1 += 0.25 * exp2beta * conj(j) * eth_eth_r_divided_by_r / bondi_r *
+              one_minus_y * dy_st_psi;
+  complex1 -= 0.25 * exp2beta * conj(j) * eth_eth_st_psi / bondi_r;
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
