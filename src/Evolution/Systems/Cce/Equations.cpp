@@ -37,6 +37,7 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
                const SpinWeighted<ComplexDataVector, 0>& dy_dy_st_psi,
                const SpinWeighted<ComplexDataVector, 2>& j,
                const SpinWeighted<ComplexDataVector, 0>& dy_beta,
+               const SpinWeighted<ComplexDataVector, 2>& dy_j,
                // swsh_derivative_tags
                const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
                const SpinWeighted<ComplexDataVector, 2>& eth_eth_st_psi,
@@ -45,7 +46,8 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
                const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
                const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
                const SpinWeighted<ComplexDataVector, 2>& eth_eth_r_divided_by_r,
-               const SpinWeighted<ComplexDataVector, 0>& bondi_r) {
+               const SpinWeighted<ComplexDataVector, 0>& bondi_r,
+               const SpinWeighted<ComplexDataVector, 0>& bondi_k) {
   SpinWeighted<ComplexDataVector, 0> from_lhs =
       du_r_divided_by_r * one_minus_y * dy_dy_st_psi;
 }
