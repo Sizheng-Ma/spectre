@@ -243,6 +243,59 @@ struct ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiQ>> {
                          const SpinWeighted<ComplexDataVector, 1>& eth_beta);
 };
 
+template <>
+struct ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>> {
+ public:
+  using pre_swsh_derivative_tags = tmpl::list<>;
+  using swsh_derivative_tags = tmpl::list<>;
+  using integration_independent_tags = tmpl::list<>;
+  using temporary_tags = tmpl::list<>;
+
+  using return_tags = tmpl::list<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>;
+  using argument_tags =
+      tmpl::append<pre_swsh_derivative_tags, swsh_derivative_tags,
+                   integration_independent_tags>;
+
+  template <typename... Args>
+  static void apply(
+      const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          pole_of_integrand_for_st_theta,
+      const Args&... args) {
+    apply_impl(make_not_null(&get(*pole_of_integrand_for_st_theta)),
+               get(args)...);
+  }
+
+ private:
+  static void apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
+                             pole_of_integrand_for_st_theta);
+};
+
+template <>
+struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
+ public:
+  using pre_swsh_derivative_tags = tmpl::list<>;
+  using swsh_derivative_tags = tmpl::list<>;
+  using integration_independent_tags = tmpl::list<>;
+
+  using return_tags = tmpl::list<Tags::RegularIntegrand<Tags::BondiSTTheta>>;
+  using argument_tags =
+      tmpl::append<pre_swsh_derivative_tags, swsh_derivative_tags,
+                   integration_independent_tags>;
+
+  template <typename... Args>
+  static void apply(
+      const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          regular_integrand_for_st_theta,
+      const Args&... args) {
+    apply_impl(make_not_null(&get(*regular_integrand_for_st_theta)),
+               get(args)...);
+  }
+
+ private:
+  static void apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
+                             regular_integrand_for_st_theta);
+};
+
 /*!
  * \brief Computes the regular part of the integrand (right-hand side) of the
  * equation which determines the radial (y) dependence of the Bondi quantity
