@@ -94,7 +94,7 @@ template <>
 struct TagsToComputeForImpl<Tags::BondiSTTheta> {
   using pre_swsh_derivative_tags =
       tmpl::list<Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>,
-                 Tags::Dy<Tags::BondiBeta>>;
+                 Tags::Dy<Tags::BondiBeta>, Tags::Dy<Tags::BondiK>>;
   using second_swsh_derivative_tags = tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
                                                   Spectral::Swsh::Tags::EthEth>>;
   using swsh_derivative_tags =
@@ -104,8 +104,10 @@ struct TagsToComputeForImpl<Tags::BondiSTTheta> {
                                                   Spectral::Swsh::Tags::Eth>,
                  Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
                                                   Spectral::Swsh::Tags::Eth>,
-Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
-                                                  Spectral::Swsh::Tags::Ethbar>>;
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
+                                                  Spectral::Swsh::Tags::Ethbar>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiK,
+                                                  Spectral::Swsh::Tags::Eth>>;
 };
 
 template <>
