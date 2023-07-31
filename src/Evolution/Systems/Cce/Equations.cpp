@@ -35,31 +35,33 @@ void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
 }
 
 void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
-    apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
-                   regular_integrand_for_st_theta,
-               const SpinWeighted<ComplexDataVector, 0>& exp2beta,
-               const SpinWeighted<ComplexDataVector, 0>& dy_dy_st_psi,
-               const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
-               const SpinWeighted<ComplexDataVector, 2>& j,
-               const SpinWeighted<ComplexDataVector, 0>& dy_beta,
-               const SpinWeighted<ComplexDataVector, 2>& dy_j,
-               const SpinWeighted<ComplexDataVector, 1>& dy_bondi_u,
-               // swsh_derivative_tags
-               const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
-               const SpinWeighted<ComplexDataVector, 2>& eth_eth_st_psi,
-               const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
-               const SpinWeighted<ComplexDataVector, 1>& ethbar_j,
-               const SpinWeighted<ComplexDataVector, 0>& ethbar_u,
-               const SpinWeighted<ComplexDataVector, 1>& eth_beta,
-               const SpinWeighted<ComplexDataVector, 1>& eth_k,
-               // swsh_derivative_tags
-               const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r,
-               const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
-               const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
-               const SpinWeighted<ComplexDataVector, 2>& eth_eth_r_divided_by_r,
-               const SpinWeighted<ComplexDataVector, 0>& bondi_r,
-               const SpinWeighted<ComplexDataVector, 0>& bondi_k,
-               const SpinWeighted<ComplexDataVector, 1>& bondi_u) {
+    apply_impl(
+        gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
+            regular_integrand_for_st_theta,
+        const SpinWeighted<ComplexDataVector, 0>& exp2beta,
+        const SpinWeighted<ComplexDataVector, 0>& dy_dy_st_psi,
+        const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
+        const SpinWeighted<ComplexDataVector, 2>& j,
+        const SpinWeighted<ComplexDataVector, 0>& dy_beta,
+        const SpinWeighted<ComplexDataVector, 2>& dy_j,
+        const SpinWeighted<ComplexDataVector, 1>& dy_bondi_u,
+        // swsh_derivative_tags
+        const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
+        const SpinWeighted<ComplexDataVector, 2>& eth_eth_st_psi,
+        const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
+        const SpinWeighted<ComplexDataVector, 1>& ethbar_j,
+        const SpinWeighted<ComplexDataVector, 0>& ethbar_u,
+        const SpinWeighted<ComplexDataVector, 1>& eth_beta,
+        const SpinWeighted<ComplexDataVector, 1>& eth_k,
+        // swsh_derivative_tags
+        const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r,
+        const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
+        const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
+        const SpinWeighted<ComplexDataVector, 2>& eth_eth_r_divided_by_r,
+        const SpinWeighted<ComplexDataVector, 0>& bondi_r,
+        const SpinWeighted<ComplexDataVector, 0>& bondi_k,
+        const SpinWeighted<ComplexDataVector, 1>& bondi_u,
+        const SpinWeighted<ComplexDataVector, 0>& ethbar_eth_r_divided_by_r) {
   SpinWeighted<ComplexDataVector, 0> from_lhs =
       du_r_divided_by_r * one_minus_y * dy_dy_st_psi;
 }
