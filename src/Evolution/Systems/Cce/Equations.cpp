@@ -76,6 +76,7 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
   SpinWeighted<ComplexDataVector, 0> real2;
   SpinWeighted<ComplexDataVector, 0> real1;
   SpinWeighted<ComplexDataVector, 0> tmptt;
+  SpinWeighted<ComplexDataVector, 0> real;
 
   real6 = 0.5 * one_minus_y * dy_dy_st_psi * bondi_w - dy_st_psi * bondi_w;
   real5 = 0.25 * square(one_minus_y) * dy_dy_st_psi / bondi_r -
@@ -89,7 +90,10 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
   real1 += 0.25 * exp2beta * bondi_k * eth_r_divided_by_r *
            conj(eth_r_divided_by_r) / bondi_r * square(one_minus_y) *
            dy_dy_st_psi;
-  // real1-=0.25*exp2beta*bondi_k*
+  real1 -= 0.25 * exp2beta * bondi_k * ethbar_eth_r_divided_by_r / bondi_r *
+           one_minus_y * dy_st_psi;
+  real1 += 0.25 * exp2beta * bondi_k / bondi_r * eth_ethbar_st_psi;
+  real = real1 + real2 + real3 + real4 + real5 + real6;
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
