@@ -279,7 +279,8 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>> {
   using pre_swsh_derivative_tags =
       tmpl::list<Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>,
                  Tags::Dy<Tags::BondiSTPsi>, Tags::Dy<Tags::BondiBeta>,
-                 Tags::Dy<Tags::BondiJ>, Tags::Dy<Tags::BondiU>>;
+                 Tags::Dy<Tags::BondiJ>, Tags::Dy<Tags::BondiU>,
+                 Tags::Dy<Tags::BondiW>>;
   using swsh_derivative_tags =
       tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiSTPsi>,
                                                   Spectral::Swsh::Tags::Eth>,
@@ -326,6 +327,7 @@ Spectral::Swsh::Tags::Derivative<
       const SpinWeighted<ComplexDataVector, 0>& dy_beta,
       const SpinWeighted<ComplexDataVector, 2>& dy_j,
       const SpinWeighted<ComplexDataVector, 1>& dy_bondi_u,
+      const SpinWeighted<ComplexDataVector, 0>& dy_w,
       // swsh_derivative_tags
       const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
       const SpinWeighted<ComplexDataVector, 2>& eth_eth_st_psi,
