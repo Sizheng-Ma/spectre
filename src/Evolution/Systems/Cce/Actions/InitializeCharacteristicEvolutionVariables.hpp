@@ -86,7 +86,8 @@ struct InitializeCharacteristicEvolutionVariables {
       tmpl::append<typename Metavariables::cce_pre_swsh_derivatives_tags,
                    typename Metavariables::cce_st_pre_swsh_derivatives_tags>>;
   using transform_buffer_variables_tag =
-      ::Tags::Variables<typename Metavariables::cce_transform_buffer_tags>;
+      ::Tags::Variables<tmpl::append<typename Metavariables::cce_transform_buffer_tags,
+            typename Metavariables::cce_st_transform_buffer_tags>>;
   using swsh_derivative_variables_tag = ::Tags::Variables<
       tmpl::append<typename Metavariables::cce_swsh_derivative_tags,
                    typename Metavariables::cce_st_swsh_derivative_tags>>;
