@@ -111,7 +111,15 @@ struct CharacteristicExtractDefaults {
       tmpl::list<Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiSTPsi>>>;
   using cce_transform_buffer_tags = Cce::all_transform_buffer_tags;
   using cce_swsh_derivative_tags = Cce::all_swsh_derivative_tags;
-  using cce_st_swsh_derivative_tags = tmpl::list<>;
+  using cce_st_swsh_derivative_tags = tmpl::list<
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::Dy<Cce::Tags::BondiSTPsi>,
+                                       Spectral::Swsh::Tags::Eth>
+                                       >;
+using cce_st_transform_buffer_tags =
+    tmpl::remove_duplicates<tmpl::flatten<tmpl::transform<
+        cce_st_swsh_derivative_tags,
+        tmpl::bind<Spectral::Swsh::coefficient_buffer_tags_for_derivative_tag,
+                   tmpl::_1>>>>;
   using cce_angular_coordinate_tags =
       tmpl::conditional_t<evolve_ccm,
                           tmpl::list<Cce::Tags::CauchyAngularCoords,
