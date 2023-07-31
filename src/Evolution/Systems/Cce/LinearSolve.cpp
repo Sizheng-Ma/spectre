@@ -87,6 +87,50 @@ Matrix q_integration_matrix(const size_t number_of_points) {
                                          Spectral::Quadrature::GaussLobatto>(
              number_of_points);
 }
+
+Matrix q_integration_matrix_for_st(const size_t number_of_points) {
+  Matrix inverse_one_minus_y = Matrix(number_of_points, number_of_points, 0.0);
+  for (size_t i = 1; i < number_of_points - 1; ++i) {
+    inverse_one_minus_y(i, i - 1) = i / -(2.0 * i - 1.0);
+    inverse_one_minus_y(i, i) = 1.0;
+    inverse_one_minus_y(i, i + 1) = (i + 1.0) / -(2.0 * i + 3.0);
+  }
+  inverse_one_minus_y(0, 0) = 1.0;
+  inverse_one_minus_y(0, 1) = -1.0 / 3.0;
+  inverse_one_minus_y(number_of_points - 1, number_of_points - 2) =
+      -(number_of_points - 1.0) / (2.0 * (number_of_points - 1.0) - 1.0);
+  inverse_one_minus_y(number_of_points - 1, number_of_points - 1) = 1.0;
+
+  Matrix indefinite_integral(number_of_points, number_of_points, 0.0);
+  for (size_t i = 1; i < number_of_points - 1; ++i) {
+    indefinite_integral(i, i - 1) = 1.0;
+    indefinite_integral(i, i + 1) = -1.0;
+  }
+  indefinite_integral(0, 1) = -1.0;
+  indefinite_integral(number_of_points - 1, number_of_points - 2) = 1.0;
+
+  Matrix dy_identity_lhs(number_of_points, number_of_points, 0.0);
+  for (size_t i = 0; i < number_of_points - 1; ++i) {
+    dy_identity_lhs(i, i) = 2.0 * i + 1.0;
+  }
+
+  Matrix lhs_mat = inverse_one_minus_y * dy_identity_lhs;
+
+  for (size_t i = 1; i < number_of_points - 1; ++i) {
+    lhs_mat(i, i - 1) += 2.0;
+    lhs_mat(i, i + 1) += -2.0;
+  }
+  lhs_mat(0, 1) += -2.0;
+  lhs_mat(number_of_points - 1, number_of_points - 2) += 2.0;
+
+  return Spectral::modal_to_nodal_matrix<Spectral::Basis::Legendre,
+                                         Spectral::Quadrature::GaussLobatto>(
+             number_of_points) *
+         indefinite_integral * inv(lhs_mat) *
+         Spectral::nodal_to_modal_matrix<Spectral::Basis::Legendre,
+                                         Spectral::Quadrature::GaussLobatto>(
+             number_of_points);
+}
 }  // namespace
 
 const Matrix& precomputed_cce_q_integrator(
@@ -95,6 +139,17 @@ const Matrix& precomputed_cce_q_integrator(
       1_st, Spectral::maximum_number_of_points<Spectral::Basis::Legendre> + 1>>(
       [](const size_t local_number_of_radial_points) {
         return q_integration_matrix(local_number_of_radial_points);
+      });
+  return lazy_matrix_cache(number_of_radial_grid_points);
+}
+
+const Matrix& precomputed_st_cce_q_integrator(
+    const size_t number_of_radial_grid_points) {
+  // TODO: check
+  static const auto lazy_matrix_cache = make_static_cache<CacheRange<
+      1_st, Spectral::maximum_number_of_points<Spectral::Basis::Legendre> + 1>>(
+      [](const size_t local_number_of_radial_points) {
+        return q_integration_matrix_for_st(local_number_of_radial_points);
       });
   return lazy_matrix_cache(number_of_radial_grid_points);
 }
@@ -112,6 +167,39 @@ void radial_integrate_cce_pole_equations(
                  std::array<Matrix, 3>{
                      {Matrix{}, Matrix{},
                       precomputed_cce_q_integrator(number_of_radial_points)}},
+                 integrand,
+                 Spectral::Swsh::swsh_volume_mesh_for_radial_operations(
+                     l_max, number_of_radial_points)
+                     .extents());
+
+  // apply boundary condition
+  const ComplexDataVector boundary_correction =
+      0.25 * (boundary -
+              ComplexDataVector{
+                  integral_result->data(),
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max)});
+  const ComplexDataVector one_minus_y_squared = square(
+      1.0 -
+      std::complex<double>(1.0, 0.0) *
+          Spectral::collocation_points<Spectral::Basis::Legendre,
+                                       Spectral::Quadrature::GaussLobatto>(
+              number_of_radial_points));
+  *integral_result += outer_product(boundary_correction, one_minus_y_squared);
+}
+
+void radial_integrate_st_cce_pole_equations(
+    const gsl::not_null<ComplexDataVector*> integral_result,
+    const ComplexDataVector& pole_of_integrand,
+    const ComplexDataVector& regular_integrand,
+    const ComplexDataVector& boundary, const ComplexDataVector& one_minus_y,
+    const size_t l_max, const size_t number_of_radial_points) {
+  const ComplexDataVector integrand =
+      pole_of_integrand + one_minus_y * regular_integrand;
+
+  apply_matrices(integral_result,
+                 std::array<Matrix, 3>{{Matrix{}, Matrix{},
+                                        precomputed_st_cce_q_integrator(
+                                            number_of_radial_points)}},
                  integrand,
                  Spectral::Swsh::swsh_volume_mesh_for_radial_operations(
                      l_max, number_of_radial_points)
@@ -215,11 +303,15 @@ void RadialIntegrateBondi<BoundaryPrefix, Tags::BondiSTTheta>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& regular_integrand,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
     const size_t l_max, const size_t number_of_radial_points) {
-  // radial_integrate_cce_pole_equations(
-  //     make_not_null(&get(*integral_result).data()),
-  //     get(pole_of_integrand).data(), get(regular_integrand).data(),
-  //     get(boundary).data(), get(one_minus_y).data(), l_max,
-  //     number_of_radial_points);
+  const size_t number_of_angular_points =
+      Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+
+  Scalar<SpinWeighted<ComplexDataVector, 2>> boundary{number_of_angular_points};
+  radial_integrate_st_cce_pole_equations(
+      make_not_null(&get(*integral_result).data()),
+      get(pole_of_integrand).data(), get(regular_integrand).data(),
+      get(boundary).data(), get(one_minus_y).data(), l_max,
+      number_of_radial_points);
 }
 
 template <template <typename> class BoundaryPrefix>
