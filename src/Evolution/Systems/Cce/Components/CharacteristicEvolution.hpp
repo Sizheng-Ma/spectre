@@ -181,16 +181,9 @@ struct CharacteristicEvolution {
           CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>>,
       Actions::InsertInterpolationScriData<
           Tags::ScriPlus<Tags::BondiSTPsi>,
-          typename Metavariables::cce_boundary_component>
-      //   tmpl::transform<
-      //       typename metavariables::scri_values_to_observe,
-      //       tmpl::bind<
-      //           Actions::InsertInterpolationScriData, tmpl::_1,
-      //           tmpl::pin<typename Metavariables::cce_boundary_component>>>,
-      //   Actions::ScriObserveInterpolated<
-      //       observers::ObserverWriter<Metavariables>,
-      //       typename Metavariables::cce_boundary_component>
-      >;
+          typename Metavariables::cce_boundary_component>,
+      Actions::STScriObserveInterpolated<
+          observers::ObserverWriter<Metavariables>>>;
 
   using self_start_extract_action_list = tmpl::list<
       Actions::RequestBoundaryData<
