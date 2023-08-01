@@ -3,6 +3,7 @@
 
 #pragma once
 
+#include <iostream>
 #include <optional>
 #include <tuple>
 
@@ -48,6 +49,8 @@ struct ExitIfEndTimeReached {
       const Parallel::GlobalCache<Metavariables>& /*cache*/,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) {
+    std::cout << "time: " << db::get<::Tags::TimeStepId>(box).substep_time()
+              << std::endl;
     return {db::get<::Tags::TimeStepId>(box).substep_time() >=
                     db::get<Tags::EndTime>(box)
                 ? Parallel::AlgorithmExecution::Pause
