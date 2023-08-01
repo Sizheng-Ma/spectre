@@ -176,7 +176,7 @@ void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
       (dy_j * conj(dy_j) -
        0.25 * square(j * conj(dy_j) + conj(j) * dy_j) / (1.0 + j * conj(j)));
 
-  *integrand_for_beta += 2 * M_PI * one_minus_y * dy_st_psi * dy_st_psi;
+  *integrand_for_beta += 2 * M_PI * one_minus_y * square(dy_st_psi);
 }
 
 void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiQ>>::apply_impl(
@@ -215,7 +215,7 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiQ>>::apply_impl(
 
   *regular_integrand_for_q +=
       16. * M_PI * eth_st_psi * dy_st_psi -
-      16. * M_PI * eth_r_divided_by_r * one_minus_y * dy_st_psi * dy_st_psi;
+      16. * M_PI * eth_r_divided_by_r * one_minus_y * square(dy_st_psi);
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiU>>::apply_impl(
