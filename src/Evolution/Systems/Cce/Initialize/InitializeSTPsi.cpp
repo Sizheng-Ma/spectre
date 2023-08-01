@@ -37,7 +37,8 @@ void InitializeSTPsi::apply(
     double ymin = -0.8;
     double ymax = 0.8;
     double width = 0.15;
-    angular_view_scalar_tensor_psi = perturbed_j.data() * 0.0;
+    angular_view_scalar_tensor_psi =
+        perturbed_j.data() * one_minus_y_collocation[i] * 0.01;
     if (one_minus_y_collocation[i] >= (1. - ymax) &&
         one_minus_y_collocation[i] <= (1. - ymin)) {
       angular_view_scalar_tensor_psi +=
