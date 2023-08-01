@@ -76,8 +76,7 @@ struct InitializeCharacteristicEvolutionTime {
 
   using const_global_cache_tags = tmpl::list<>;
 
-  using evolved_swsh_variables_tag =
-      ::Tags::Variables<tmpl::list<EvolvedSwshTag>>;
+  using evolved_swsh_variables_tag = ::Tags::Variables<EvolvedSwshTag>;
   using simple_tags = tmpl::list<
       ::Tags::TimeStepId, ::Tags::Next<::Tags::TimeStepId>, ::Tags::TimeStep,
       ::Tags::Next<::Tags::TimeStep>, ::Tags::Time,
