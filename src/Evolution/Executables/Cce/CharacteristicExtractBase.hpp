@@ -84,6 +84,8 @@ struct CharacteristicExtractDefaults {
                  Cce::Tags::ScriPlus<Cce::Tags::Psi0>,
                  Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>,
                  Cce::Tags::EthInertialRetardedTime>;
+  using cce_st_scri_tags =
+      tmpl::list<Cce::Tags::ScriPlus<Cce::Tags::BondiSTPsi>>;
   using cce_integrand_tags = tmpl::flatten<tmpl::transform<
       Cce::bondi_hypersurface_step_tags,
       tmpl::bind<Cce::integrand_terms_to_compute_for_bondi_variable,
