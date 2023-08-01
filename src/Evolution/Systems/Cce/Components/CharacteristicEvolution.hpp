@@ -110,7 +110,8 @@ struct CharacteristicEvolution {
           typename Metavariables::evolved_swsh_tag,
           Metavariables::local_time_stepping>,
       Actions::InitializeCharacteristicEvolutionScri<
-          typename Metavariables::scri_values_to_observe,
+          tmpl::append<typename Metavariables::scri_values_to_observe,
+                       typename Metavariables::cce_st_scri_tags>,
           typename Metavariables::cce_boundary_component>,
       Parallel::Actions::TerminatePhase>;
 
@@ -177,7 +178,10 @@ struct CharacteristicEvolution {
   using compute_st_scri_quantities_and_observe = tmpl::list<
       ::Actions::MutateApply<PreSwshDerivatives<Tags::Dy<Tags::BondiSTPsi>>>,
       ::Actions::MutateApply<
-          CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>>
+          CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>>,
+      Actions::InsertInterpolationScriData<
+          Tags::ScriPlus<Tags::BondiSTPsi>,
+          typename Metavariables::cce_boundary_component>
       //   tmpl::transform<
       //       typename metavariables::scri_values_to_observe,
       //       tmpl::bind<
