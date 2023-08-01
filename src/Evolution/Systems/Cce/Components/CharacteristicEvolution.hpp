@@ -174,6 +174,20 @@ struct CharacteristicEvolution {
           observers::ObserverWriter<Metavariables>,
           typename Metavariables::cce_boundary_component>>;
 
+  using compute_st_scri_quantities_and_observe = tmpl::list<
+      ::Actions::MutateApply<PreSwshDerivatives<Tags::Dy<Tags::BondiSTPsi>>>,
+      ::Actions::MutateApply<
+          CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>>
+      //   tmpl::transform<
+      //       typename metavariables::scri_values_to_observe,
+      //       tmpl::bind<
+      //           Actions::InsertInterpolationScriData, tmpl::_1,
+      //           tmpl::pin<typename Metavariables::cce_boundary_component>>>,
+      //   Actions::ScriObserveInterpolated<
+      //       observers::ObserverWriter<Metavariables>,
+      //       typename Metavariables::cce_boundary_component>
+      >;
+
   using self_start_extract_action_list = tmpl::list<
       Actions::RequestBoundaryData<
           typename Metavariables::cce_boundary_component,
@@ -229,6 +243,7 @@ struct CharacteristicEvolution {
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiSTTheta>,
       compute_scri_quantities_and_observe,
+      compute_st_scri_quantities_and_observe,
       ::Actions::RecordTimeStepperData<cce_system>,
       ::Actions::UpdateU<cce_system>,
       ::Actions::ChangeStepSize<typename Metavariables::cce_step_choosers>,
