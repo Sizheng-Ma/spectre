@@ -46,7 +46,10 @@ void flat_spacetime(
     const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
     const SpinWeighted<ComplexDataVector, 0>& ethbar_eth_r_divided_by_r,
     const SpinWeighted<ComplexDataVector, 0>& eth_ethbar_st_psi,
-    const SpinWeighted<ComplexDataVector, 0>& dy_st_psi) {
+    const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
+    const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r) {
+  SpinWeighted<ComplexDataVector, 0> from_lhs =
+      du_r_divided_by_r * one_minus_y * dy_dy_st_psi;
   result =
       -0.25 * eth_r_divided_by_r / bondi_r * conj(eth_dy_st_psi) * one_minus_y;
   result -= conj(result);
@@ -55,7 +58,7 @@ void flat_spacetime(
   result -=
       0.25 * ethbar_eth_r_divided_by_r / bondi_r * one_minus_y * dy_st_psi;
   result += eth_ethbar_st_psi / bondi_r * 0.25;
-  result += 0.25 * square(one_minus_y) * dy_dy_st_psi / bondi_r;
+  result += 0.25 * square(one_minus_y) * dy_dy_st_psi / bondi_r + from_lhs;
 }
 }  // namespace detail
 
@@ -94,7 +97,7 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
 
   detail::flat_spacetime(to_compare, bondi_r, eth_r_divided_by_r, one_minus_y,
                          dy_dy_st_psi, eth_dy_st_psi, ethbar_eth_r_divided_by_r,
-                         eth_ethbar_st_psi, dy_st_psi);
+                         eth_ethbar_st_psi, dy_st_psi, du_r_divided_by_r);
   SpinWeighted<ComplexDataVector, 0> from_lhs =
       du_r_divided_by_r * one_minus_y * dy_dy_st_psi;
 
@@ -191,7 +194,7 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
       complex1 + complex2 + complex3 + complex4 + complex5 + complex6;
 
   *regular_integrand_for_st_theta =
-      0.5 * (complex_final + conj(complex_final)) + real;
+      0.5 * (complex_final + conj(complex_final)) + real + from_lhs;
 
   SpinWeighted<ComplexDataVector, 0> final_diff =
       to_compare - (*regular_integrand_for_st_theta);
