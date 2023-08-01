@@ -20,7 +20,7 @@ void InitializeSTPsi::apply(
     ComplexDataVector angular_view_scalar_tensor_psi{
         get(*bondi_st_psi).data().data() + boundary_size * i, boundary_size};
 
-    angular_view_scalar_tensor_psi = one_minus_y_collocation[i];
+    angular_view_scalar_tensor_psi = 0.01 * one_minus_y_collocation[i];
   }
 }
 }  // namespace Cce::ScalarTensor
