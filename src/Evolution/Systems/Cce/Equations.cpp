@@ -4,6 +4,7 @@
 #include "Evolution/Systems/Cce/Equations.hpp"
 
 #include <complex>
+#include <iostream>
 
 #include "DataStructures/ComplexDataVector.hpp"
 #include "DataStructures/DataVector.hpp"
@@ -34,6 +35,29 @@ void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
   *pole_of_integrand_for_st_theta =
       0.5 * (-eth_st_psi * conj(bondi_u) - conj(eth_st_psi) * bondi_u);
 }
+
+namespace detail {
+void flat_spacetime(
+    SpinWeighted<ComplexDataVector, 0>& result,
+    const SpinWeighted<ComplexDataVector, 0>& bondi_r,
+    const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
+    const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
+    const SpinWeighted<ComplexDataVector, 0>& dy_dy_st_psi,
+    const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
+    const SpinWeighted<ComplexDataVector, 0>& ethbar_eth_r_divided_by_r,
+    const SpinWeighted<ComplexDataVector, 0>& eth_ethbar_st_psi,
+    const SpinWeighted<ComplexDataVector, 0>& dy_st_psi) {
+  result =
+      -0.25 * eth_r_divided_by_r / bondi_r * conj(eth_dy_st_psi) * one_minus_y;
+  result -= conj(result);
+  result += 0.25 * eth_r_divided_by_r * conj(eth_r_divided_by_r) / bondi_r *
+            square(one_minus_y) * dy_dy_st_psi;
+  result -=
+      0.25 * ethbar_eth_r_divided_by_r / bondi_r * one_minus_y * dy_st_psi;
+  result += eth_ethbar_st_psi / bondi_r * 0.25;
+  result += 0.25 * square(one_minus_y) * dy_dy_st_psi / bondi_r;
+}
+}  // namespace detail
 
 void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
     apply_impl(
@@ -66,6 +90,11 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
         const SpinWeighted<ComplexDataVector, 1>& bondi_u,
         const SpinWeighted<ComplexDataVector, 0>& ethbar_eth_r_divided_by_r,
         const SpinWeighted<ComplexDataVector, 0>& bondi_w) {
+  SpinWeighted<ComplexDataVector, 0> to_compare;
+
+  detail::flat_spacetime(to_compare, bondi_r, eth_r_divided_by_r, one_minus_y,
+                         dy_dy_st_psi, eth_dy_st_psi, ethbar_eth_r_divided_by_r,
+                         eth_ethbar_st_psi, dy_st_psi);
   SpinWeighted<ComplexDataVector, 0> from_lhs =
       du_r_divided_by_r * one_minus_y * dy_dy_st_psi;
 
@@ -163,6 +192,21 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
 
   *regular_integrand_for_st_theta =
       0.5 * (complex_final + conj(complex_final)) + real;
+
+  SpinWeighted<ComplexDataVector, 0> final_diff =
+      to_compare - (*regular_integrand_for_st_theta);
+
+  double norm = 0;
+
+  for (size_t iiiii = 0; iiiii < final_diff.size(); iiiii++) {
+    norm += square(abs(final_diff.data()[iiiii]));
+  }
+
+  norm /= final_diff.size();
+
+  norm = sqrt(norm);
+
+  std::cout << norm << std::endl;
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
