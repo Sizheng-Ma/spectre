@@ -18,7 +18,7 @@ namespace ScalarTensor {
 
 struct InitializeSTPsi {
   using return_tags = tmpl::list<Tags::BondiSTPsi>;
-  using argument_tags = tmpl::list<Tags::NumberOfRadialPoints, Tags::LMax>;
+  using argument_tags = tmpl::list<Tags::LMax, Tags::NumberOfRadialPoints>;
 
   static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> bondi_st_psi,
