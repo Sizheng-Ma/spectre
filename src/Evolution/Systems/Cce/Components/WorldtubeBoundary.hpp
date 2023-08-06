@@ -23,6 +23,7 @@ struct WorldtubeComponentBase {
   using metavariables = Metavariables;
   using initialize_action_list =
       tmpl::list<Actions::InitializeWorldtubeBoundary<WorldtubeComponent>,
+      Actions::InitializeSTWorldtubeBoundary<Metavariables>,
                  Parallel::Actions::TerminatePhase>;
 
   using simple_tags_from_options =

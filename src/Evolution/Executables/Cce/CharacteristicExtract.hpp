@@ -27,6 +27,7 @@
 #include "Evolution/Systems/Cce/System.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "Evolution/Systems/Cce/WorldtubeDataManager.hpp"
+#include "Evolution/Systems/Cce/STWorldtubeDataManager.hpp"
 #include "IO/Observer/ObserverComponent.hpp"
 #include "Options/Protocols/FactoryCreation.hpp"
 #include "Options/String.hpp"
