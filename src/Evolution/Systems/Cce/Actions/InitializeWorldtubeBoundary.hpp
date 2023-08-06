@@ -131,6 +131,23 @@ struct InitializeWorldtubeBoundary<H5WorldtubeBoundary<Metavariables>>
   using typename base_type::simple_tags_from_options;
 };
 
+template <typename Metavariables>
+struct InitializeSTWorldtubeBoundary
+    : public detail::InitializeWorldtubeBoundaryBase<
+          InitializeSTWorldtubeBoundary<Metavariables>,
+          tmpl::list<Tags::H5STWorldtubeBoundaryDataManager>,
+          typename Metavariables::cce_boundary_communication_tags> {
+  using base_type = detail::InitializeWorldtubeBoundaryBase<
+      InitializeSTWorldtubeBoundary<Metavariables>,
+      tmpl::list<Tags::H5STWorldtubeBoundaryDataManager>,
+      typename Metavariables::cce_boundary_communication_tags>;
+  using base_type::apply;
+  using typename base_type::simple_tags;
+  using const_global_cache_tags =
+      tmpl::list<Tags::LMax, Tags::EndTimeFromFile, Tags::StartTimeFromFile>;
+  using typename base_type::simple_tags_from_options;
+};
+
 /*!
  * \ingroup ActionsGroup
  * \brief Initializes a GhWorldtubeBoundary
