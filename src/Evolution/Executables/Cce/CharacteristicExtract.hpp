@@ -28,6 +28,7 @@
 #include "Evolution/Systems/Cce/System.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "Evolution/Systems/Cce/WorldtubeDataManager.hpp"
+#include "Evolution/Systems/Cce/STWorldtubeDataManager.hpp"
 #include "IO/Observer/ObserverComponent.hpp"
 #include "NumericalAlgorithms/Interpolation/BarycentricRationalSpanInterpolator.hpp"
 #include "NumericalAlgorithms/Interpolation/CubicSpanInterpolator.hpp"
@@ -114,7 +115,10 @@ static const std::vector<void (*)()> charm_init_node_funcs{
         Cce::WorldtubeBufferUpdater<Cce::cce_metric_input_tags>>,
     &register_derived_classes_with_charm<
         Cce::WorldtubeBufferUpdater<Cce::cce_bondi_input_tags>>,
+    &register_derived_classes_with_charm<
+        Cce::STWorldtubeBufferUpdater<Cce::cce_bondi_input_tags>>,
     &register_derived_classes_with_charm<Cce::WorldtubeDataManager>,
+    &register_derived_classes_with_charm<Cce::STWorldtubeDataManager>,
     &register_derived_classes_with_charm<intrp::SpanInterpolator>,
     &register_derived_classes_with_charm<Cce::Solutions::WorldtubeData>,
     &register_factory_classes_with_charm<metavariables>};
