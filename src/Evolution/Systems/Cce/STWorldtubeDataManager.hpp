@@ -31,8 +31,8 @@ class STWorldtubeDataManager : public PUP::able {
   WRAPPED_PUPable_abstract(STWorldtubeDataManager);  // NOLINT
 
   virtual bool populate_hypersurface_boundary_data(
-      gsl::not_null<Variables<
-          Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>*>
+      gsl::not_null<
+          Variables<Tags::st_worldtube_boundary_tags<Tags::BoundaryValue>>*>
           boundary_data_variables,
       double time, gsl::not_null<Parallel::NodeLock*> hdf5_lock) const = 0;
 
@@ -49,7 +49,7 @@ class RealSTWorldtubeDataManager : public STWorldtubeDataManager {
   RealSTWorldtubeDataManager() = default;
 
   RealSTWorldtubeDataManager(
-      std::unique_ptr<STWorldtubeBufferUpdater<cce_bondi_input_tags>>
+      std::unique_ptr<STWorldtubeBufferUpdater<cce_st_input_tags>>
           buffer_updater,
       size_t l_max, size_t buffer_depth,
       std::unique_ptr<intrp::SpanInterpolator> interpolator);
@@ -59,8 +59,8 @@ class RealSTWorldtubeDataManager : public STWorldtubeDataManager {
   explicit RealSTWorldtubeDataManager(CkMigrateMessage* /*unused*/) {}
 
   bool populate_hypersurface_boundary_data(
-      gsl::not_null<Variables<
-          Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>*>
+      gsl::not_null<
+          Variables<Tags::st_worldtube_boundary_tags<Tags::BoundaryValue>>*>
           boundary_data_variables,
       double time, gsl::not_null<Parallel::NodeLock*> hdf5_lock) const override;
 
@@ -74,15 +74,14 @@ class RealSTWorldtubeDataManager : public STWorldtubeDataManager {
   void pup(PUP::er& p) override;  // NOLINT
 
  private:
-  std::unique_ptr<STWorldtubeBufferUpdater<cce_bondi_input_tags>>
-      buffer_updater_;
+  std::unique_ptr<STWorldtubeBufferUpdater<cce_st_input_tags>> buffer_updater_;
   mutable size_t time_span_start_ = 0;
   mutable size_t time_span_end_ = 0;
   size_t l_max_ = 0;
 
-  mutable Variables<cce_bondi_input_tags> interpolated_coefficients_;
+  mutable Variables<cce_st_input_tags> interpolated_coefficients_;
 
-  mutable Variables<cce_bondi_input_tags> coefficients_buffers_;
+  mutable Variables<cce_st_input_tags> coefficients_buffers_;
 
   size_t buffer_depth_ = 0;
 
