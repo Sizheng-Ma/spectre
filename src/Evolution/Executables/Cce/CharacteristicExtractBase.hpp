@@ -43,6 +43,9 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::characteristic_worldtube_boundary_tags<
           Cce::Tags::BoundaryValue>;
 
+  using st_cce_boundary_communication_tags =
+      tmpl::list<Cce::Tags::BondiSTPsi, Cce::Tags::BondiSTTheta>;
+
   using cce_gauge_boundary_tags = tmpl::flatten<tmpl::list<
       tmpl::transform<
           tmpl::list<Cce::Tags::BondiR, Cce::Tags::DuRDividedByR,
