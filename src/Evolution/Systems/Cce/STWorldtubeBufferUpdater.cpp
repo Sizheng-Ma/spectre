@@ -36,27 +36,8 @@ RealSTWorldtubeH5BufferUpdater::RealSTWorldtubeH5BufferUpdater(
     const std::optional<double> extraction_radius)
     : cce_data_file_{cce_data_filename}, filename_{cce_data_filename} {
   get<Tags::detail::InputDataSet<
-      Spectral::Swsh::Tags::SwshTransform<Tags::BondiBeta>>>(dataset_names_) =
-      "Beta";
-  get<Tags::detail::InputDataSet<
-      Spectral::Swsh::Tags::SwshTransform<Tags::BondiU>>>(dataset_names_) = "U";
-  get<Tags::detail::InputDataSet<
-      Spectral::Swsh::Tags::SwshTransform<Tags::BondiQ>>>(dataset_names_) = "Q";
-  get<Tags::detail::InputDataSet<
-      Spectral::Swsh::Tags::SwshTransform<Tags::BondiW>>>(dataset_names_) = "W";
-  get<Tags::detail::InputDataSet<
-      Spectral::Swsh::Tags::SwshTransform<Tags::BondiJ>>>(dataset_names_) = "J";
-  get<Tags::detail::InputDataSet<
-      Spectral::Swsh::Tags::SwshTransform<Tags::Dr<Tags::BondiJ>>>>(
-      dataset_names_) = "DrJ";
-  get<Tags::detail::InputDataSet<
-      Spectral::Swsh::Tags::SwshTransform<Tags::Du<Tags::BondiJ>>>>(
-      dataset_names_) = "H";
-  get<Tags::detail::InputDataSet<
-      Spectral::Swsh::Tags::SwshTransform<Tags::BondiR>>>(dataset_names_) = "R";
-  get<Tags::detail::InputDataSet<
-      Spectral::Swsh::Tags::SwshTransform<Tags::Du<Tags::BondiR>>>>(
-      dataset_names_) = "DuR";
+      Spectral::Swsh::Tags::SwshTransform<Tags::BondiSTPsi>>>(dataset_names_) =
+      "KGPsi";
 
   // We assume that the filename has the extraction radius encoded as an
   // integer between the last occurrence of 'R' and the last occurrence of
@@ -76,7 +57,7 @@ RealSTWorldtubeH5BufferUpdater::RealSTWorldtubeH5BufferUpdater(
     // `get_extraction_radius`.
   }
 
-  const auto& u_data = cce_data_file_.get<h5::Dat>("/U");
+  const auto& u_data = cce_data_file_.get<h5::Dat>("/KGPsi");
   const auto data_table_dimensions = u_data.get_dimensions();
   const Matrix time_matrix = u_data.get_data_subset(std::vector<size_t>{0}, 0,
                                                     data_table_dimensions[0]);
@@ -89,7 +70,7 @@ RealSTWorldtubeH5BufferUpdater::RealSTWorldtubeH5BufferUpdater(
 }
 
 double RealSTWorldtubeH5BufferUpdater::update_buffers_for_time(
-    const gsl::not_null<Variables<cce_bondi_input_tags>*> buffers,
+    const gsl::not_null<Variables<cce_st_input_tags>*> buffers,
     const gsl::not_null<size_t*> time_span_start,
     const gsl::not_null<size_t*> time_span_end, const double time,
     const size_t computation_l_max, const size_t interpolator_length,
@@ -109,9 +90,9 @@ double RealSTWorldtubeH5BufferUpdater::update_buffers_for_time(
   *time_span_start = new_span_pair.first;
   *time_span_end = new_span_pair.second;
   // load the desired time spans into the buffers
-  tmpl::for_each<cce_bondi_input_tags>([this, &buffers, &time_span_start,
-                                        &time_span_end,
-                                        &computation_l_max](auto tag_v) {
+  tmpl::for_each<cce_st_input_tags>([this, &buffers, &time_span_start,
+                                     &time_span_end,
+                                     &computation_l_max](auto tag_v) {
     using tag = typename decltype(tag_v)::type;
     this->update_buffer(
         make_not_null(&get(get<tag>(*buffers)).data()),

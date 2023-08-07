@@ -31,30 +31,6 @@
 #include "Utilities/TaggedTuple.hpp"
 
 namespace Cce {
-// namespace Tags {
-// namespace detail {
-// // tags for use in the buffers for the modal input worldtube data management
-// // classes
-// using SpatialMetric = gr::Tags::SpatialMetric<ComplexModalVector, 3>;
-// using Shift = gr::Tags::Shift<ComplexModalVector, 3>;
-// using Lapse = gr::Tags::Lapse<ComplexModalVector>;
-
-// // radial derivative prefix tag to be used with the modal input worldtube
-// data template <typename Tag> struct Dr : db::SimpleTag, db::PrefixTag {
-//   using type = typename Tag::type;
-//   using tag = Tag;
-// };
-
-// // tag for the string for accessing the quantity associated with `Tag` in
-// // worldtube h5 file
-// template <typename Tag>
-// struct InputDataSet : db::SimpleTag, db::PrefixTag {
-//   using type = std::string;
-//   using tag = Tag;
-// };
-// }  // namespace detail
-// }  // namespace Tags
-
 /// the full set of tensors to be extracted from the worldtube h5 file
 /// \cond
 class RealSTWorldtubeH5BufferUpdater;
@@ -90,7 +66,7 @@ class STWorldtubeBufferUpdater : public PUP::able {
 /// A `WorldtubeBufferUpdater` specialized to the CCE input worldtube H5 file
 /// produced by the reduced SpEC format.
 class RealSTWorldtubeH5BufferUpdater
-    : public STWorldtubeBufferUpdater<cce_bondi_input_tags> {
+    : public STWorldtubeBufferUpdater<cce_st_input_tags> {
  public:
   // charm needs the empty constructor
   RealSTWorldtubeH5BufferUpdater() = default;
@@ -111,13 +87,13 @@ class RealSTWorldtubeH5BufferUpdater
   /// time-varies-fastest, Goldberg modal data and the start and end index in
   /// the member `time_buffer_` covered by the newly updated `buffers`.
   double update_buffers_for_time(
-      gsl::not_null<Variables<cce_bondi_input_tags>*> buffers,
+      gsl::not_null<Variables<cce_st_input_tags>*> buffers,
       gsl::not_null<size_t*> time_span_start,
       gsl::not_null<size_t*> time_span_end, double time,
       size_t computation_l_max, size_t interpolator_length,
       size_t buffer_depth) const override;
 
-  std::unique_ptr<STWorldtubeBufferUpdater<cce_bondi_input_tags>> get_clone()
+  std::unique_ptr<STWorldtubeBufferUpdater<cce_st_input_tags>> get_clone()
       const override {
     return std::make_unique<RealSTWorldtubeH5BufferUpdater>(filename_);
   }
@@ -171,7 +147,7 @@ class RealSTWorldtubeH5BufferUpdater
   std::string filename_;
 
   tuples::tagged_tuple_from_typelist<
-      db::wrap_tags_in<Tags::detail::InputDataSet, cce_bondi_input_tags>>
+      db::wrap_tags_in<Tags::detail::InputDataSet, cce_st_input_tags>>
       dataset_names_;
 
   // stores all the times in the input file

@@ -27,8 +27,7 @@
 
 namespace Cce {
 RealSTWorldtubeDataManager::RealSTWorldtubeDataManager(
-    std::unique_ptr<STWorldtubeBufferUpdater<cce_bondi_input_tags>>
-        buffer_updater,
+    std::unique_ptr<STWorldtubeBufferUpdater<cce_st_input_tags>> buffer_updater,
     const size_t l_max, const size_t buffer_depth,
     std::unique_ptr<intrp::SpanInterpolator> interpolator)
     : buffer_updater_{std::move(buffer_updater)},
@@ -59,15 +58,15 @@ RealSTWorldtubeDataManager::RealSTWorldtubeDataManager(
         buffer_updater_->get_time_buffer().size() -
         2 * interpolator_->required_number_of_points_before_and_after();
   }
-  coefficients_buffers_ = Variables<cce_bondi_input_tags>{
+  coefficients_buffers_ = Variables<cce_st_input_tags>{
       square(l_max + 1) *
       (buffer_depth_ +
        2 * interpolator_->required_number_of_points_before_and_after())};
 }
 
 bool RealSTWorldtubeDataManager::populate_hypersurface_boundary_data(
-    const gsl::not_null<Variables<
-        Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>*>
+    const gsl::not_null<
+        Variables<Tags::st_worldtube_boundary_tags<Tags::BoundaryValue>>*>
         boundary_data_variables,
     const double time,
     const gsl::not_null<Parallel::NodeLock*> hdf5_lock) const {
@@ -86,11 +85,6 @@ bool RealSTWorldtubeDataManager::populate_hypersurface_boundary_data(
       time, 0, interpolator_->required_number_of_points_before_and_after(),
       time_span_start_, time_span_end_, buffer_updater_->get_time_buffer());
 
-  // search through and find the two interpolation points the time point is
-  // between. If we can, put the range for the interpolation centered on the
-  // desired point. If that can't be done (near the start or the end of the
-  // simulation), make the range terminated at the start or end of the cached
-  // data and extending for the desired range in the other direction.
   const size_t buffer_span_size = time_span_end_ - time_span_start_;
   const size_t interpolation_span_size =
       interpolation_time_span.second - interpolation_time_span.first;
@@ -117,7 +111,7 @@ bool RealSTWorldtubeDataManager::populate_hypersurface_boundary_data(
   // format.
   for (const auto libsharp_mode :
        Spectral::Swsh::cached_coefficients_metadata(l_max_)) {
-    tmpl::for_each<cce_bondi_input_tags>(
+    tmpl::for_each<cce_st_input_tags>(
         [this, &libsharp_mode, &interpolate_from_column](auto tag_v) {
           using tag = typename decltype(tag_v)::type;
           Spectral::Swsh::goldberg_modes_to_libsharp_modes_single_pair(
@@ -136,7 +130,7 @@ bool RealSTWorldtubeDataManager::populate_hypersurface_boundary_data(
         });
   }
   // just inverse transform the 'direct' tags
-  tmpl::for_each<tmpl::transform<cce_bondi_input_tags,
+  tmpl::for_each<tmpl::transform<cce_st_input_tags,
                                  tmpl::bind<db::remove_tag_prefix, tmpl::_1>>>(
       [this, &boundary_data_variables](auto tag_v) {
         using tag = typename decltype(tag_v)::type;
@@ -147,35 +141,6 @@ bool RealSTWorldtubeDataManager::populate_hypersurface_boundary_data(
             get(get<Spectral::Swsh::Tags::SwshTransform<tag>>(
                 interpolated_coefficients_)));
       });
-  const auto& du_r = get(get<Tags::BoundaryValue<Tags::Du<Tags::BondiR>>>(
-      *boundary_data_variables));
-  const auto& bondi_r =
-      get(get<Tags::BoundaryValue<Tags::BondiR>>(*boundary_data_variables));
-
-  get(get<Tags::BoundaryValue<Tags::DuRDividedByR>>(*boundary_data_variables)) =
-      du_r / bondi_r;
-
-  // there's only a couple of tags desired by the core computation that aren't
-  // stored in the 'reduced' format, so we perform the remaining computation
-  // in-line here.
-  const auto& du_bondi_j = get(get<Tags::BoundaryValue<Tags::Du<Tags::BondiJ>>>(
-      *boundary_data_variables));
-  const auto& dr_bondi_j = get(get<Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>>(
-      *boundary_data_variables));
-  get(get<Tags::BoundaryValue<Tags::BondiH>>(*boundary_data_variables)) =
-      du_bondi_j + du_r * dr_bondi_j;
-
-  const auto& bondi_j =
-      get(get<Tags::BoundaryValue<Tags::BondiJ>>(*boundary_data_variables));
-  const auto& bondi_beta =
-      get(get<Tags::BoundaryValue<Tags::BondiBeta>>(*boundary_data_variables));
-  const auto& bondi_q =
-      get(get<Tags::BoundaryValue<Tags::BondiQ>>(*boundary_data_variables));
-  const auto& bondi_k = sqrt(1.0 + bondi_j * conj(bondi_j));
-  get(get<Tags::BoundaryValue<Tags::Dr<Tags::BondiU>>>(
-      *boundary_data_variables)) =
-      exp(2.0 * bondi_beta.data()) / square(bondi_r.data()) *
-      (bondi_k.data() * bondi_q.data() - bondi_j.data() * conj(bondi_q.data()));
   return true;
 }
 
@@ -204,8 +169,8 @@ void RealSTWorldtubeDataManager::pup(PUP::er& p) {
         square(l_max_ + 1) *
         (buffer_depth_ +
          2 * interpolator_->required_number_of_points_before_and_after());
-    coefficients_buffers_ = Variables<cce_bondi_input_tags>{size_of_buffer};
-    interpolated_coefficients_ = Variables<cce_bondi_input_tags>{
+    coefficients_buffers_ = Variables<cce_st_input_tags>{size_of_buffer};
+    interpolated_coefficients_ = Variables<cce_st_input_tags>{
         Spectral::Swsh::size_of_libsharp_coefficient_vector(l_max_)};
   }
 }
