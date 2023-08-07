@@ -136,11 +136,11 @@ struct InitializeSTWorldtubeBoundary
     : public detail::InitializeWorldtubeBoundaryBase<
           InitializeSTWorldtubeBoundary<Metavariables>,
           tmpl::list<Tags::H5STWorldtubeBoundaryDataManager>,
-          typename Metavariables::cce_boundary_communication_tags> {
+          typename Metavariables::st_cce_boundary_communication_tags> {
   using base_type = detail::InitializeWorldtubeBoundaryBase<
       InitializeSTWorldtubeBoundary<Metavariables>,
       tmpl::list<Tags::H5STWorldtubeBoundaryDataManager>,
-      typename Metavariables::cce_boundary_communication_tags>;
+      typename Metavariables::st_cce_boundary_communication_tags>;
   using base_type::apply;
   using typename base_type::simple_tags;
   using const_global_cache_tags =
