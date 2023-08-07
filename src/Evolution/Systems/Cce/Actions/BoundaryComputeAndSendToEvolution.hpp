@@ -143,6 +143,13 @@ struct BoundaryComputeAndSendToEvolution<H5WorldtubeBoundary<Metavariables>,
         db::get<::Tags::Variables<
             typename Metavariables::cce_boundary_communication_tags>>(box),
         true);
+
+    Parallel::receive_data<Cce::ReceiveTags::BoundaryData<
+        typename Metavariables::st_cce_boundary_communication_tags>>(
+        Parallel::get_parallel_component<EvolutionComponent>(cache), time,
+        db::get<::Tags::Variables<
+            typename Metavariables::st_cce_boundary_communication_tags>>(box),
+        true);
   }
 };
 

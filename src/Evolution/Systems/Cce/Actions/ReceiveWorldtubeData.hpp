@@ -77,5 +77,40 @@ struct ReceiveWorldtubeData {
             tmpl::index_of<ActionList, ReceiveWorldtubeData>::value + 1};
   }
 };
+
+template <typename Metavariables>
+struct ReceiveSTWorldtubeData {
+  using inbox_tags = tmpl::list<Cce::ReceiveTags::BoundaryData<
+      typename Metavariables::st_cce_boundary_communication_tags>>;
+
+  template <typename DbTags, typename... InboxTags, typename ArrayIndex,
+            typename ActionList, typename ParallelComponent>
+  static Parallel::iterable_action_return_t apply(
+      db::DataBox<DbTags>& box, tuples::TaggedTuple<InboxTags...>& inboxes,
+      const Parallel::GlobalCache<Metavariables>& /*cache*/,
+      const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
+      const ParallelComponent* const /*meta*/) {
+    auto& inbox = tuples::get<Cce::ReceiveTags::BoundaryData<
+        typename Metavariables::st_cce_boundary_communication_tags>>(inboxes);
+    if (inbox.count(db::get<::Tags::TimeStepId>(box)) != 1) {
+      return {Parallel::AlgorithmExecution::Pause,
+              tmpl::index_of<ActionList, ReceiveSTWorldtubeData>::value};
+    }
+
+    tmpl::for_each<typename Metavariables::st_cce_boundary_communication_tags>(
+        [&inbox, &box](auto tag_v) {
+          using tag = typename decltype(tag_v)::type;
+          db::mutate<tag>(
+              [&inbox](const gsl::not_null<typename tag::type*> destination,
+                       const TimeStepId& time) {
+                *destination = get<tag>(inbox[time]);
+              },
+              make_not_null(&box), db::get<::Tags::TimeStepId>(box));
+        });
+    inbox.erase(db::get<::Tags::TimeStepId>(box));
+    return {Parallel::AlgorithmExecution::Continue,
+            tmpl::index_of<ActionList, ReceiveSTWorldtubeData>::value + 1};
+  }
+};
 }  // namespace Actions
 }  // namespace Cce
