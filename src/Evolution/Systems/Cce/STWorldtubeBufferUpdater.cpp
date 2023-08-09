@@ -38,6 +38,9 @@ RealSTWorldtubeH5BufferUpdater::RealSTWorldtubeH5BufferUpdater(
   get<Tags::detail::InputDataSet<
       Spectral::Swsh::Tags::SwshTransform<Tags::BondiSTPsi>>>(dataset_names_) =
       "KGPsi";
+  get<Tags::detail::InputDataSet<
+      Spectral::Swsh::Tags::SwshTransform<Tags::BondiSTTheta>>>(
+      dataset_names_) = "dtKGPsi";
 
   // We assume that the filename has the extraction radius encoded as an
   // integer between the last occurrence of 'R' and the last occurrence of
