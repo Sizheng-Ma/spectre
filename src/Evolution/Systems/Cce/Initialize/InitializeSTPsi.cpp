@@ -9,7 +9,8 @@
 namespace Cce::ScalarTensor {
 void InitializeSTPsi::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> bondi_st_psi,
-    const size_t l_max, const size_t number_of_radial_points) {
+    const size_t l_max, const size_t number_of_radial_points,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>> st_psi_boundary) {
   const DataVector one_minus_y_collocation =
       1.0 - Spectral::collocation_points<Spectral::Basis::Legendre,
                                          Spectral::Quadrature::GaussLobatto>(
@@ -38,17 +39,17 @@ void InitializeSTPsi::apply(
     double ymax = 0.8;
     double width = 0.15;
     angular_view_scalar_tensor_psi =
-        perturbed_j.data() * one_minus_y_collocation[i] * 0.01;
-    if (one_minus_y_collocation[i] >= (1. - ymax) &&
-        one_minus_y_collocation[i] <= (1. - ymin)) {
-      angular_view_scalar_tensor_psi +=
-          perturbed_j.data() * 0.001 *
-          exp(-pow(1.0 - one_minus_y_collocation[i] - ycenter, 2.0) / width /
-              width) *
-          (one_minus_y_collocation[i] - 1.0 + ymax) *
-          (1. - one_minus_y_collocation[i] - ymin) * 4.0 /
-          pow((ymax - ymin), 2.0);
-    }
+        0.5 * get(st_psi_boundary).data() * one_minus_y_collocation[i];
+    // if (one_minus_y_collocation[i] >= (1. - ymax) &&
+    //     one_minus_y_collocation[i] <= (1. - ymin)) {
+    //   angular_view_scalar_tensor_psi +=
+    //       perturbed_j.data() * 0.001 *
+    //       exp(-pow(1.0 - one_minus_y_collocation[i] - ycenter, 2.0) / width /
+    //           width) *
+    //       (one_minus_y_collocation[i] - 1.0 + ymax) *
+    //       (1. - one_minus_y_collocation[i] - ymin) * 4.0 /
+    //       pow((ymax - ymin), 2.0);
+    // }
   }
 }
 }  // namespace Cce::ScalarTensor

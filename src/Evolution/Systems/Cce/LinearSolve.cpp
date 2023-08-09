@@ -300,12 +300,12 @@ void RadialIntegrateBondi<BoundaryPrefix, Tags::BondiSTTheta>::apply(
         integral_result,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& pole_of_integrand,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& regular_integrand,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& boundary,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
     const size_t l_max, const size_t number_of_radial_points) {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
 
-  Scalar<SpinWeighted<ComplexDataVector, 2>> boundary{number_of_angular_points};
   radial_integrate_st_cce_pole_equations(
       make_not_null(&get(*integral_result).data()),
       get(pole_of_integrand).data(), get(regular_integrand).data(),
