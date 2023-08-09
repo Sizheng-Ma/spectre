@@ -44,7 +44,8 @@ struct CharacteristicExtractDefaults {
           Cce::Tags::BoundaryValue>;
 
   using st_cce_boundary_communication_tags =
-      tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::BondiSTPsi>>;
+      tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::BondiSTPsi>,
+      Cce::Tags::BoundaryValue<Cce::Tags::BondiSTTheta>>;
 
   using cce_gauge_boundary_tags = tmpl::flatten<tmpl::list<
       tmpl::transform<
@@ -75,6 +76,7 @@ struct CharacteristicExtractDefaults {
                  Cce::Tags::ScriPlus<Cce::Tags::Psi2>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi1>,
                  Cce::Tags::BoundaryValue<Cce::Tags::BondiSTPsi>,
+                 Cce::Tags::BoundaryValue<Cce::Tags::BondiSTTheta>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi0>,
                  Cce::Tags::Du<Cce::Tags::TimeIntegral<
                      Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>,

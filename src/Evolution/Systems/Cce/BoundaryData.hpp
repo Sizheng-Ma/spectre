@@ -551,7 +551,7 @@ using characteristic_worldtube_boundary_tags = db::wrap_tags_in<
 
 template <template <typename> class BoundaryPrefix>
 using st_worldtube_boundary_tags =
-    db::wrap_tags_in<BoundaryPrefix, tmpl::list<Tags::BondiSTPsi>>;
+    db::wrap_tags_in<BoundaryPrefix, tmpl::list<Tags::BondiSTPsi,Tags::BondiSTTheta>>;
 }  // namespace Tags
 
 namespace detail {
