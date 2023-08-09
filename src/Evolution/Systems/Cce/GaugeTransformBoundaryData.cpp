@@ -114,6 +114,24 @@ void GaugeAdjustedBoundaryValue<Tags::BondiBeta>::apply(
   get(*evolution_gauge_beta).data() -= 0.5 * log(get(omega).data());
 }
 
+void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+        evolution_st_theta,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_theta,
+    const Scalar<SpinWeighted<ComplexDataVector, 1>>& evolution_gauge_u_at_scri,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
+    const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max) {
+  interpolator.interpolate(make_not_null(&get(*evolution_st_theta)),
+                           get(cauchy_st_theta));
+
+  const auto eth_psi =
+      Spectral::Swsh::angular_derivative<Spectral::Swsh::Tags::Eth>(
+          l_max, 1, get(cauchy_st_psi));
+
+  get(*evolution_st_theta).data() +=
+      real(get(evolution_gauge_u_at_scri).data() * conj(eth_psi).data());
+}
+
 void GaugeAdjustedBoundaryValue<Tags::BondiQ>::apply_impl(
     const gsl::not_null<SpinWeighted<ComplexDataVector, 1>*> evolution_gauge_q,
     const SpinWeighted<ComplexDataVector, 1>& cauchy_gauge_dr_u,
