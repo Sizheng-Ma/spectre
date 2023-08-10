@@ -9,6 +9,7 @@ spectre_target_sources(
   ${LIBRARY}
   PRIVATE
   AnalyticBoundaryDataManager.cpp
+  STAnalyticBoundaryDataManager.cpp
   BoundaryData.cpp
   Equations.cpp
   GaugeTransformBoundaryData.cpp
@@ -30,6 +31,7 @@ spectre_target_headers(
   INCLUDE_DIRECTORY ${CMAKE_SOURCE_DIR}/src
   HEADERS
   AnalyticBoundaryDataManager.hpp
+  STAnalyticBoundaryDataManager.hpp
   BoundaryData.hpp
   BoundaryDataTags.hpp
   Equations.hpp
