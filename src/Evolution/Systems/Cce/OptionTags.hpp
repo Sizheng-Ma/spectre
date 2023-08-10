@@ -14,6 +14,7 @@
 #include "Evolution/Systems/Cce/InterfaceManagers/GhInterfaceManager.hpp"
 #include "Evolution/Systems/Cce/InterfaceManagers/GhLocalTimeStepping.hpp"
 #include "Evolution/Systems/Cce/InterfaceManagers/GhLockstep.hpp"
+#include "Evolution/Systems/Cce/STAnalyticBoundaryDataManager.hpp"
 #include "Evolution/Systems/Cce/STWorldtubeDataManager.hpp"
 #include "Evolution/Systems/Cce/WorldtubeDataManager.hpp"
 #include "NumericalAlgorithms/Interpolation/SpanInterpolator.hpp"
@@ -584,6 +585,18 @@ struct AnalyticBoundaryDataManager : db::SimpleTag {
       const std::unique_ptr<Cce::Solutions::WorldtubeData>& worldtube_data) {
     return ::Cce::AnalyticBoundaryDataManager(l_max, extraction_radius,
                                               worldtube_data->get_clone());
+  }
+};
+
+struct STAnalyticBoundaryDataManager : db::SimpleTag {
+  using type = ::Cce::STAnalyticBoundaryDataManager;
+  using option_tags =
+      tmpl::list<OptionTags::ExtractionRadius, OptionTags::LMax>;
+
+  static constexpr bool pass_metavariables = false;
+  static Cce::STAnalyticBoundaryDataManager create_from_options(
+      const double extraction_radius, const size_t l_max) {
+    return ::Cce::STAnalyticBoundaryDataManager(l_max, extraction_radius);
   }
 };
 
