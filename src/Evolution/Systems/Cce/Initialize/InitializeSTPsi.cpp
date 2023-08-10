@@ -23,7 +23,7 @@ void InitializeSTPsi::apply(
   const auto& collocation_metadata =
       Spectral::Swsh::cached_collocation_metadata<
           Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max);
-  SpinWeighted<ComplexDataVector, 2> perturbed_j{boundary_size};
+  SpinWeighted<ComplexDataVector, 0> perturbed_j{boundary_size};
   for (const auto collocation_point : collocation_metadata) {
     const std::complex<double> y_22_factor =
         y_22.evaluate(collocation_point.theta, collocation_point.phi);
@@ -34,12 +34,14 @@ void InitializeSTPsi::apply(
     ComplexDataVector angular_view_scalar_tensor_psi{
         get(*bondi_st_psi).data().data() + boundary_size * i, boundary_size};
 
-    double ycenter = -0.0;
-    double ymin = -0.8;
-    double ymax = 0.8;
-    double width = 0.15;
-    angular_view_scalar_tensor_psi =
-        0.5 * get(st_psi_boundary).data() * one_minus_y_collocation[i];
+    // double ycenter = -0.0;
+    // double ymin = -0.8;
+    // double ymax = 0.8;
+    // double width = 0.15;
+    const double u0 = 20;
+    const double sigma0 = 1;
+    double psi_boundary = exp(-0.5 * square(u0) / square(sigma0));
+    angular_view_scalar_tensor_psi = psi_boundary;
     // if (one_minus_y_collocation[i] >= (1. - ymax) &&
     //     one_minus_y_collocation[i] <= (1. - ymin)) {
     //   angular_view_scalar_tensor_psi +=
