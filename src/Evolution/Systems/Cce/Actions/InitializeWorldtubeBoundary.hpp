@@ -17,6 +17,7 @@
 #include "Evolution/Systems/Cce/InterfaceManagers/GhLocalTimeStepping.hpp"
 #include "Evolution/Systems/Cce/InterfaceManagers/GhLockstep.hpp"
 #include "Evolution/Systems/Cce/OptionTags.hpp"
+#include "Evolution/Systems/Cce/STAnalyticBoundaryDataManager.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "NumericalAlgorithms/Interpolation/SpanInterpolator.hpp"
 #include "NumericalAlgorithms/Spectral/SwshCollocation.hpp"
@@ -97,6 +98,9 @@ struct InitializeWorldtubeBoundaryBase {
 template <typename WorldtubeComponent>
 struct InitializeWorldtubeBoundary;
 
+template <typename WorldtubeComponent>
+struct InitializeSTWorldtubeBoundary;
+
 /*!
  * \ingroup ActionsGroup
  * \brief Initializes a H5WorldtubeBoundary
@@ -132,13 +136,13 @@ struct InitializeWorldtubeBoundary<H5WorldtubeBoundary<Metavariables>>
 };
 
 template <typename Metavariables>
-struct InitializeSTWorldtubeBoundary
+struct InitializeSTWorldtubeBoundary<H5WorldtubeBoundary<Metavariables>>
     : public detail::InitializeWorldtubeBoundaryBase<
-          InitializeSTWorldtubeBoundary<Metavariables>,
+          InitializeSTWorldtubeBoundary<H5WorldtubeBoundary<Metavariables>>,
           tmpl::list<Tags::H5STWorldtubeBoundaryDataManager>,
           typename Metavariables::st_cce_boundary_communication_tags> {
   using base_type = detail::InitializeWorldtubeBoundaryBase<
-      InitializeSTWorldtubeBoundary<Metavariables>,
+      InitializeSTWorldtubeBoundary<H5WorldtubeBoundary<Metavariables>>,
       tmpl::list<Tags::H5STWorldtubeBoundaryDataManager>,
       typename Metavariables::st_cce_boundary_communication_tags>;
   using base_type::apply;
@@ -217,6 +221,29 @@ struct InitializeWorldtubeBoundary<AnalyticWorldtubeBoundary<Metavariables>>
                      tmpl::conditional_t<Metavariables::local_time_stepping,
                                          LtsTimeStepper, TimeStepper>>>>,
       typename Metavariables::cce_boundary_communication_tags>;
+  using base_type::apply;
+  using typename base_type::simple_tags;
+  using const_global_cache_tags =
+      tmpl::list<Tags::LMax, Tags::SpecifiedEndTime, Tags::SpecifiedStartTime>;
+  using typename base_type::simple_tags_from_options;
+};
+
+template <typename Metavariables>
+struct InitializeSTWorldtubeBoundary<AnalyticWorldtubeBoundary<Metavariables>>
+    : public detail::InitializeWorldtubeBoundaryBase<
+          InitializeSTWorldtubeBoundary<AnalyticWorldtubeBoundary<Metavariables>>,
+          tmpl::list<Tags::STAnalyticBoundaryDataManager,
+                     Tags::CceEvolutionPrefix<::Tags::TimeStepper<
+                         tmpl::conditional_t<Metavariables::local_time_stepping,
+                                             LtsTimeStepper, TimeStepper>>>>,
+          typename Metavariables::st_cce_boundary_communication_tags> {
+  using base_type = detail::InitializeWorldtubeBoundaryBase<
+      InitializeSTWorldtubeBoundary<AnalyticWorldtubeBoundary<Metavariables>>,
+      tmpl::list<Tags::STAnalyticBoundaryDataManager,
+                 Tags::CceEvolutionPrefix<::Tags::TimeStepper<
+                     tmpl::conditional_t<Metavariables::local_time_stepping,
+                                         LtsTimeStepper, TimeStepper>>>>,
+      typename Metavariables::st_cce_boundary_communication_tags>;
   using base_type::apply;
   using typename base_type::simple_tags;
   using const_global_cache_tags =
