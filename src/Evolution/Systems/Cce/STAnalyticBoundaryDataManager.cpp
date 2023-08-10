@@ -18,6 +18,30 @@ bool STAnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
         Variables<Tags::st_worldtube_boundary_tags<Tags::BoundaryValue>>*>
         boundary_data_variables,
     const double time) const {
+  auto& psi =
+      get<Tags::BoundaryValue<Tags::BondiSTPsi>>(*boundary_data_variables);
+  auto& theta =
+      get<Tags::BoundaryValue<Tags::BondiSTTheta>>(*boundary_data_variables);
+
+  const size_t boundary_size =
+      Spectral::Swsh::number_of_swsh_collocation_points(l_max_);
+
+  Spectral::Swsh::SpinWeightedSphericalHarmonic y_22{0, 2_st, 0};
+  const auto& collocation_metadata =
+      Spectral::Swsh::cached_collocation_metadata<
+          Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max_);
+  SpinWeighted<ComplexDataVector, 0> perturbed_j{boundary_size};
+  for (const auto collocation_point : collocation_metadata) {
+    const std::complex<double> y_22_factor =
+        y_22.evaluate(collocation_point.theta, collocation_point.phi);
+    perturbed_j.data()[collocation_point.offset] = y_22_factor;
+  }
+  const double u0 = 20;
+  const double sigma0 = 1;
+  double psi_boundary = exp(-0.5 * square(time - u0) / square(sigma0));
+  get(psi).data() = psi_boundary * perturbed_j.data();
+  get(theta).data() =
+      -(time - u0) / square(sigma0) * psi_boundary * perturbed_j.data();
   return true;
 }
 
