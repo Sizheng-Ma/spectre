@@ -206,17 +206,17 @@ void radial_integrate_st_cce_pole_equations(
 
   // apply boundary condition
   const ComplexDataVector boundary_correction =
-      0.25 * (boundary -
-              ComplexDataVector{
-                  integral_result->data(),
-                  Spectral::Swsh::number_of_swsh_collocation_points(l_max)});
-  const ComplexDataVector one_minus_y_squared = square(
+      0.5 * (boundary -
+             ComplexDataVector{
+                 integral_result->data(),
+                 Spectral::Swsh::number_of_swsh_collocation_points(l_max)});
+  const ComplexDataVector one_minus_y_bc =
       1.0 -
       std::complex<double>(1.0, 0.0) *
           Spectral::collocation_points<Spectral::Basis::Legendre,
                                        Spectral::Quadrature::GaussLobatto>(
-              number_of_radial_points));
-  *integral_result += outer_product(boundary_correction, one_minus_y_squared);
+              number_of_radial_points);
+  *integral_result += outer_product(boundary_correction, one_minus_y_bc);
 }
 
 namespace detail {
