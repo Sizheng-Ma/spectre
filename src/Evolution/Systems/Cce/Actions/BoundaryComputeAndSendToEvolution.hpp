@@ -193,10 +193,11 @@ struct BoundaryComputeAndSendToEvolution<
                                                        time.substep_time());
         },
         make_not_null(&box));
+    const auto& bondi_r = db::get<Tags::BoundaryValue<Tags::BondiR>>(box);
     db::mutate<Tags::STAnalyticBoundaryDataManager,
                ::Tags::Variables<
                    typename Metavariables::st_cce_boundary_communication_tags>>(
-        [&successfully_populated_st, &time](
+        [&successfully_populated_st, &time, &bondi_r](
             const gsl::not_null<Cce::STAnalyticBoundaryDataManager*>
                 worldtube_data_manager,
             const gsl::not_null<Variables<
@@ -204,8 +205,8 @@ struct BoundaryComputeAndSendToEvolution<
                 boundary_variables) {
           successfully_populated_st =
               (*worldtube_data_manager)
-                  .populate_hypersurface_boundary_data(boundary_variables,
-                                                       time.substep_time());
+                  .populate_hypersurface_boundary_data(
+                      boundary_variables, time.substep_time(), bondi_r);
         },
         make_not_null(&box));
 

@@ -10,7 +10,8 @@ namespace Cce::ScalarTensor {
 void InitializeSTPsi::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> bondi_st_psi,
     const size_t l_max, const size_t number_of_radial_points,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> st_psi_boundary) {
+    const Scalar<SpinWeighted<ComplexDataVector, 0>> st_psi_boundary,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>> bondi_r) {
   const DataVector one_minus_y_collocation =
       1.0 - Spectral::collocation_points<Spectral::Basis::Legendre,
                                          Spectral::Quadrature::GaussLobatto>(
@@ -19,7 +20,7 @@ void InitializeSTPsi::apply(
   const size_t boundary_size =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
 
-  Spectral::Swsh::SpinWeightedSphericalHarmonic y_22{0, 2_st, 0};
+  Spectral::Swsh::SpinWeightedSphericalHarmonic y_22{0, 2, 0};
   const auto& collocation_metadata =
       Spectral::Swsh::cached_collocation_metadata<
           Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max);
@@ -41,7 +42,9 @@ void InitializeSTPsi::apply(
     const double u0 = 20;
     const double sigma0 = 1;
     double psi_boundary = exp(-0.5 * square(u0) / square(sigma0));
-    angular_view_scalar_tensor_psi = psi_boundary;
+    angular_view_scalar_tensor_psi = psi_boundary * perturbed_j.data() *
+                                     one_minus_y_collocation[i] / 2. /
+                                     get(bondi_r).data();
     // if (one_minus_y_collocation[i] >= (1. - ymax) &&
     //     one_minus_y_collocation[i] <= (1. - ymin)) {
     //   angular_view_scalar_tensor_psi +=
