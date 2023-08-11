@@ -55,10 +55,11 @@ class STAnalyticBoundaryDataManager {
    * construct the Bondi values into the provided `Variables`
    */
   bool populate_hypersurface_boundary_data(
-      gsl::not_null<Variables<
-          Tags::st_worldtube_boundary_tags<Tags::BoundaryValue>>*>
+      gsl::not_null<
+          Variables<Tags::st_worldtube_boundary_tags<Tags::BoundaryValue>>*>
           boundary_data_variables,
-      double time) const;
+      double time,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>> bondi_r) const;
 
   size_t get_l_max() const { return l_max_; }
 
