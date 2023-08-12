@@ -37,6 +37,29 @@ void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
 }
 
 namespace detail {
+
+void BH(SpinWeighted<ComplexDataVector, 0>& result,
+        const SpinWeighted<ComplexDataVector, 0>& eth_ethbar_st_psi,
+        const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
+        const SpinWeighted<ComplexDataVector, 0>& bondi_r,
+        const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
+        const SpinWeighted<ComplexDataVector, 0>& dy_dy_st_psi) {
+  result = 0.25 * eth_ethbar_st_psi / bondi_r;
+
+  const auto radius_inverse = 0.5 * one_minus_y / bondi_r;
+  const auto dpsidroone_minus_y = 0.5 * (one_minus_y) / bondi_r * dy_st_psi;
+  SpinWeighted<ComplexDataVector, 0> ddpsidrdr =
+      0.5 * square(one_minus_y) / bondi_r * dy_dy_st_psi -
+      one_minus_y / bondi_r * dy_st_psi;
+
+  auto rtimesddpsidrdroone_minus_y = ddpsidrdr;
+
+  auto ddpsidrdroone_minus_y = ddpsidrdr * (0.5 * (one_minus_y) / bondi_r);
+
+  result += 0.5 * (rtimesddpsidrdroone_minus_y - 2. * ddpsidrdroone_minus_y +
+                   2 * (1. - radius_inverse) * dpsidroone_minus_y);
+}
+
 void flat_spacetime(
     SpinWeighted<ComplexDataVector, 0>& result,
     const SpinWeighted<ComplexDataVector, 0>& bondi_r,
@@ -95,9 +118,13 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
         const SpinWeighted<ComplexDataVector, 0>& bondi_w) {
   SpinWeighted<ComplexDataVector, 0> to_compare;
 
-  detail::flat_spacetime(to_compare, bondi_r, eth_r_divided_by_r, one_minus_y,
-                         dy_dy_st_psi, eth_dy_st_psi, ethbar_eth_r_divided_by_r,
-                         eth_ethbar_st_psi, dy_st_psi, du_r_divided_by_r);
+  //   detail::flat_spacetime(to_compare, bondi_r, eth_r_divided_by_r,
+  //   one_minus_y,
+  //                          dy_dy_st_psi, eth_dy_st_psi,
+  //                          ethbar_eth_r_divided_by_r, eth_ethbar_st_psi,
+  //                          dy_st_psi, du_r_divided_by_r);
+  detail::BH(to_compare, eth_ethbar_st_psi, one_minus_y, bondi_r, dy_st_psi,
+             dy_dy_st_psi);
   SpinWeighted<ComplexDataVector, 0> from_lhs =
       du_r_divided_by_r * one_minus_y * dy_dy_st_psi;
 
