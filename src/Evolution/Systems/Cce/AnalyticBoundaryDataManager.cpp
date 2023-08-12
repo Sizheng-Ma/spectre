@@ -31,6 +31,86 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
   const auto& phi = get<gh::Tags::Phi<DataVector, 3>>(boundary_tuple);
   create_bondi_boundary_data(boundary_data_variables, phi, pi, spacetime_metric,
                              extraction_radius_, l_max_);
+
+  // auto& beta =
+  //     get<Tags::BoundaryValue<Tags::BondiBeta>>(*boundary_data_variables);
+
+  // get(beta) = get(beta) * 0.;
+  // {
+  //   auto& bondi_u =
+  //       get<Tags::BoundaryValue<Tags::BondiU>>(*boundary_data_variables);
+
+  //   get(bondi_u) = get(bondi_u) * 0.;
+  // }
+
+  // auto& bondi_dr_u = get<Tags::BoundaryValue<Tags::Dr<Tags::BondiU>>>(
+  //     *boundary_data_variables);
+
+  // get(bondi_dr_u) = get(bondi_dr_u) * 0.;
+
+  // {
+  //   auto& bondi_u =
+  //       get<Tags::BoundaryValue<Tags::BondiQ>>(*boundary_data_variables);
+
+  //   get(bondi_u) = get(bondi_u) * 0.;
+  // }
+
+  // {
+  //   auto& bondi_u =
+  //       get<Tags::BoundaryValue<Tags::BondiJ>>(*boundary_data_variables);
+
+  //   get(bondi_u) = get(bondi_u) * 0.;
+  // }
+
+  // {
+  //   auto& bondi_u = get<Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>>(
+  //       *boundary_data_variables);
+
+  //   get(bondi_u) = get(bondi_u) * 0.;
+  // }
+
+  // {
+  //   auto& bondi_u =
+  //       get<Tags::BoundaryValue<Tags::BondiH>>(*boundary_data_variables);
+
+  //   get(bondi_u) = get(bondi_u) * 0.;
+  // }
+
+  // {
+  //   auto& bondi_u = get<Tags::BoundaryValue<Tags::Du<Tags::BondiJ>>>(
+  //       *boundary_data_variables);
+
+  //   get(bondi_u) = get(bondi_u) * 0.;
+  // }
+
+  // {
+  //   auto& bondi_u =
+  //       get<Tags::BoundaryValue<Tags::BondiW>>(*boundary_data_variables);
+
+  //   get(bondi_u) = get(bondi_u) * 0. - 2. / square(extraction_radius_);
+  // }
+
+  // {
+  //   auto& bondi_u =
+  //       get<Tags::BoundaryValue<Tags::DuRDividedByR>>(*boundary_data_variables);
+
+  //   get(bondi_u) = get(bondi_u) * 0.;
+  // }
+
+  // {
+  //   auto& bondi_u = get<Tags::BoundaryValue<Tags::Du<Tags::BondiR>>>(
+  //       *boundary_data_variables);
+
+  //   get(bondi_u) = get(bondi_u) * 0.;
+  // }
+
+  // {
+  //   auto& bondi_u =
+  //       get<Tags::BoundaryValue<Tags::BondiR>>(*boundary_data_variables);
+
+  //   get(bondi_u) = get(bondi_u) * 0. + extraction_radius_;
+  // }
+
   return true;
 }
 
