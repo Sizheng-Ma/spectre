@@ -123,7 +123,8 @@ struct RobinsonTrautman : public SphericalMetricData {
  private:
   void du_rt_scalar(
       gsl::not_null<SpinWeighted<ComplexDataVector, 0>*> local_du_rt_scalar,
-      const SpinWeighted<ComplexDataVector, 0>& rt_scalar) const;
+      const SpinWeighted<ComplexDataVector, 0>& rt_scalar,
+      const double time) const;
 
   void du_bondi_w(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_bondi_w,

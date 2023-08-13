@@ -89,7 +89,7 @@ void RobinsonTrautman::initialize_stepper_from_start() const {
     // of 1.0 for the Robinson-Trautman scalar.
     initial_rt_scalar.data() =
         1.0 + std::complex<double>(1.0, 0.0) * real(initial_rt_scalar.data());
-    du_rt_scalar(make_not_null(&initial_du_rt_scalar), initial_rt_scalar);
+    du_rt_scalar(make_not_null(&initial_du_rt_scalar), initial_rt_scalar, 0.0);
     stepper_ = boost::numeric::odeint::make_dense_output(
         tolerance_ * 0.01, tolerance_,
         boost::numeric::odeint::runge_kutta_dopri5<ComplexDataVector>{});
@@ -114,7 +114,7 @@ void RobinsonTrautman::initialize_stepper_from_start() const {
   }
   const auto rt_system = [this](const ComplexDataVector& local_rt_scalar,
                                 ComplexDataVector& local_du_rt_scalar,
-                                const double /*t*/) {
+                                const double t) {
     local_du_rt_scalar.destructive_resize(local_rt_scalar.size());
     const SpinWeighted<ComplexDataVector, 0> rt_scalar_reference;
     make_const_view(make_not_null(&rt_scalar_reference.data()), local_rt_scalar,
@@ -122,7 +122,8 @@ void RobinsonTrautman::initialize_stepper_from_start() const {
     SpinWeighted<ComplexDataVector, 0> du_rt_scalar_reference;
     du_rt_scalar_reference.set_data_ref(local_du_rt_scalar.data(),
                                         local_du_rt_scalar.size());
-    du_rt_scalar(make_not_null(&du_rt_scalar_reference), rt_scalar_reference);
+    du_rt_scalar(make_not_null(&du_rt_scalar_reference), rt_scalar_reference,
+                 t);
     Spectral::Swsh::filter_swsh_boundary_quantity(
         make_not_null(&du_rt_scalar_reference), l_max_, l_max_ - 3);
   };
@@ -143,9 +144,9 @@ void RobinsonTrautman::prepare_solution(const size_t l_max,
     initialize_stepper_from_start();
   }
   // step until the target time is within the current timestep
-  const auto rt_system = [this](const ComplexDataVector& local_rt_scalar,
-                                ComplexDataVector& local_du_rt_scalar,
-                                const double /*t*/) {
+  const auto rt_system = [this, time](const ComplexDataVector& local_rt_scalar,
+                                      ComplexDataVector& local_du_rt_scalar,
+                                      const double /*t*/) {
     local_du_rt_scalar.destructive_resize(local_rt_scalar.size());
     const SpinWeighted<ComplexDataVector, 0> rt_scalar_reference;
     make_const_view(make_not_null(&rt_scalar_reference.data()), local_rt_scalar,
@@ -153,7 +154,8 @@ void RobinsonTrautman::prepare_solution(const size_t l_max,
     SpinWeighted<ComplexDataVector, 0> du_rt_scalar_reference;
     du_rt_scalar_reference.set_data_ref(local_du_rt_scalar.data(),
                                         local_du_rt_scalar.size());
-    du_rt_scalar(make_not_null(&du_rt_scalar_reference), rt_scalar_reference);
+    du_rt_scalar(make_not_null(&du_rt_scalar_reference), rt_scalar_reference,
+                 time);
     Spectral::Swsh::filter_swsh_boundary_quantity(
         make_not_null(&du_rt_scalar_reference), l_max_, l_max_ - 3);
   };
@@ -162,7 +164,7 @@ void RobinsonTrautman::prepare_solution(const size_t l_max,
   }
   stepper_.calc_state(time, get(dense_output_rt_scalar_).data());
   du_rt_scalar(make_not_null(&get(dense_output_du_rt_scalar_)),
-               get(dense_output_rt_scalar_));
+               get(dense_output_rt_scalar_), time);
   Spectral::Swsh::filter_swsh_boundary_quantity(
       make_not_null(&get(dense_output_du_rt_scalar_)), l_max_, l_max_ - 3);
   prepared_time_ = time;
@@ -190,7 +192,27 @@ void RobinsonTrautman::variables_impl(
 
 void RobinsonTrautman::du_rt_scalar(
     const gsl::not_null<SpinWeighted<ComplexDataVector, 0>*> local_du_rt_scalar,
-    const SpinWeighted<ComplexDataVector, 0>& rt_scalar) const {
+    const SpinWeighted<ComplexDataVector, 0>& rt_scalar,
+    const double time) const {
+  const size_t boundary_size =
+      Spectral::Swsh::number_of_swsh_collocation_points(l_max_);
+
+  Spectral::Swsh::SpinWeightedSphericalHarmonic y_22{0, 2, 0};
+  const auto& collocation_metadata =
+      Spectral::Swsh::cached_collocation_metadata<
+          Spectral::Swsh::ComplexRepresentation::Interleaved>(l_max_);
+  SpinWeighted<ComplexDataVector, 0> perturbed_j{boundary_size};
+  for (const auto collocation_point : collocation_metadata) {
+    const std::complex<double> y_22_factor =
+        y_22.evaluate(collocation_point.theta, collocation_point.phi);
+    perturbed_j.data()[collocation_point.offset] = y_22_factor;
+  }
+  const double u0 = 10;
+  const double sigma0 = 1;
+  double psi_boundary = exp(-0.5 * square(time - u0) / square(sigma0));
+  auto psi = psi_boundary * perturbed_j;
+  auto theta = -(time - u0) / square(sigma0) * psi;
+
   using rt_tag = ::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
                                       std::integral_constant<int, 0>>;
   using ethbar_ethbar_rt_tag =
@@ -217,6 +239,7 @@ void RobinsonTrautman::du_rt_scalar(
        pow<3>(rt_scalar) * get(ethbar_ethbar_rt_scalar) *
            conj(get(ethbar_ethbar_rt_scalar))) /
       12.0;
+  *local_du_rt_scalar += 4. * M_PI / 3. * rt_scalar * square(theta);
 }
 
 void RobinsonTrautman::bondi_u(
