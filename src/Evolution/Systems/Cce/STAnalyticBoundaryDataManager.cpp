@@ -37,7 +37,7 @@ bool STAnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
         y_22.evaluate(collocation_point.theta, collocation_point.phi);
     perturbed_j.data()[collocation_point.offset] = y_22_factor;
   }
-  const double u0 = 20;
+  const double u0 = 10;
   const double sigma0 = 1;
   double psi_boundary = exp(-0.5 * square(time - u0) / square(sigma0));
   get(psi).data() = psi_boundary * perturbed_j.data() / get(bondi_r).data();
