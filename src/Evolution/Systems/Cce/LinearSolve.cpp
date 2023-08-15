@@ -433,7 +433,48 @@ void RadialIntegrateBondi<BoundaryPrefix, Tags::BondiH>::apply(
 
 void ConstructAnaSolution::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_x_final,
-    Scalar<SpinWeighted<ComplexDataVector, 0>> du_x_int) {}
+    const Scalar<SpinWeighted<ComplexDataVector, 0>> du_x_int,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>> beta,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>> st_x,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>> one_minus_y,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>> bondi_r,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>> dy_st_x,
+    const size_t l_max) {
+  SpinWeighted<ComplexDataVector, 0> omega = exp(2. * get(beta));
+
+  SpinWeighted<ComplexDataVector, 0> omegaX = omega * get(st_x);
+
+  Variables<
+      tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<1, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<2, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>>>
+      computation_buffers{
+          Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
+
+  auto& eth_ethbar_omega =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
+
+  auto& eth_ethbar_X =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<1, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
+
+  auto& eth_ethbar_omega_X =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<2, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          computation_buffers));
+
+  Spectral::Swsh::angular_derivatives<tmpl::list<
+      Spectral::Swsh::Tags::EthEthbar, Spectral::Swsh::Tags::EthEthbar,
+      Spectral::Swsh::Tags::EthEthbar>>(
+      l_max, 1, make_not_null(&eth_ethbar_omega), make_not_null(&eth_ethbar_X),
+      make_not_null(&eth_ethbar_omega_X), omega, get(st_x), omegaX);
+}
 
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiBeta>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiQ>;
