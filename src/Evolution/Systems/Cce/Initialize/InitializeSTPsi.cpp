@@ -39,7 +39,7 @@ void InitializeSTPsi::apply(
     // double ymin = -0.8;
     // double ymax = 0.8;
     // double width = 0.15;
-    const double u0 = 20;
+    const double u0 = 10;
     const double sigma0 = 1;
     double psi_boundary = exp(-0.5 * square(u0) / square(sigma0));
     angular_view_scalar_tensor_psi = psi_boundary * perturbed_j.data() *
