@@ -82,7 +82,7 @@ template <>
 struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
   using return_tags =
       tmpl::list<Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTTheta>,
-                 Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTduX>>;
+                 Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTduXInt>>;
   using argument_tags = tmpl::list<
       Tags::BoundaryValue<Tags::BondiSTTheta>, Tags::BondiUAtScri,
       Tags::BoundaryValue<Tags::BondiSTPsi>,

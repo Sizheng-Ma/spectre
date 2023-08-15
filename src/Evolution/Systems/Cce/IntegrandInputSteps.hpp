@@ -116,7 +116,7 @@ struct TagsToComputeForImpl<Tags::BondiSTTheta> {
 };
 
 template <>
-struct TagsToComputeForImpl<Tags::BondiSTduX> {
+struct TagsToComputeForImpl<Tags::BondiSTduXInt> {
   using pre_swsh_derivative_tags = tmpl::list<>;
   using second_swsh_derivative_tags =
       tmpl::list<Spectral::Swsh::Tags::Derivative<
