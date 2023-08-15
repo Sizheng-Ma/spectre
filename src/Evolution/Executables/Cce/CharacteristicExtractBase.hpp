@@ -20,9 +20,11 @@
 template <bool EvolveCcm>
 struct CharacteristicExtractDefaults {
   static constexpr bool evolve_ccm = EvolveCcm;
-  using evolved_swsh_tag = tmpl::list<Cce::Tags::BondiSTPsi, Cce::Tags::BondiJ>;
+  using evolved_swsh_tag =
+      tmpl::list<Cce::Tags::BondiSTX, Cce::Tags::BondiSTPsi, Cce::Tags::BondiJ>;
   using evolved_swsh_dt_tag =
-      tmpl::list<Cce::Tags::BondiSTTheta, Cce::Tags::BondiH>;
+      tmpl::list<Cce::Tags::BondiSTTheta, Cce::Tags::BondiH,
+                 Cce::Tags::BondiSTduX>;
   using evolved_coordinates_variables_tag = Tags::Variables<
       tmpl::conditional_t<evolve_ccm,
                           tmpl::list<Cce::Tags::CauchyCartesianCoords,
