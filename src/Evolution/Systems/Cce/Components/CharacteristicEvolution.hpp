@@ -152,19 +152,19 @@ struct CharacteristicEvolution {
   using scalar_tensor_computation = tmpl::list<
       ::Actions::MutateApply<GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>>,
       Actions::CalculateIntegrandInputsForTag<Tags::BondiSTTheta>,
-      Actions::CalculateIntegrandInputsForTag<Tags::BondiSTduX>,
+      Actions::CalculateIntegrandInputsForTag<Tags::BondiSTduXInt>,
       tmpl::transform<
           integrand_terms_to_compute_for_bondi_variable<Tags::BondiSTTheta>,
           tmpl::bind<::Actions::MutateApply,
                      tmpl::bind<ComputeBondiIntegrand, tmpl::_1>>>,
       tmpl::transform<
-          integrand_terms_to_compute_for_bondi_variable<Tags::BondiSTduX>,
+          integrand_terms_to_compute_for_bondi_variable<Tags::BondiSTduXInt>,
           tmpl::bind<::Actions::MutateApply,
                      tmpl::bind<ComputeBondiIntegrand, tmpl::_1>>>,
       ::Actions::MutateApply<RadialIntegrateBondi<
           Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTTheta>>,
       ::Actions::MutateApply<RadialIntegrateBondi<
-          Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTduX>>>;
+          Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTduXInt>>>;
 
   using compute_scri_quantities_and_observe = tmpl::list<
       ::Actions::MutateApply<

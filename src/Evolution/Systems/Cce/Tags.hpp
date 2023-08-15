@@ -48,6 +48,11 @@ struct BondiSTX : db::SimpleTag {
   static std::string name() { return "STX"; }
 };
 
+struct BondiSTduXInt : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+  static std::string name() { return "STduXInt"; }
+};
+
 }  // namespace Tags
 }  // namespace Cce
 

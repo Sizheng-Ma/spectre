@@ -436,7 +436,7 @@ template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiQ>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiU>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiW>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiSTTheta>;
-template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiSTduX>;
+template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiSTduXInt>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiH>;
 template struct RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
                                      Tags::BondiBeta>;
@@ -449,7 +449,7 @@ template struct RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
 template struct RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
                                      Tags::BondiSTTheta>;
 template struct RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
-                                     Tags::BondiSTduX>;
+                                     Tags::BondiSTduXInt>;
 template struct RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
                                      Tags::BondiH>;
 
