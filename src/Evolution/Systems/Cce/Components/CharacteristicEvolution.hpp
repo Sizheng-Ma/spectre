@@ -164,7 +164,8 @@ struct CharacteristicEvolution {
       ::Actions::MutateApply<RadialIntegrateBondi<
           Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTTheta>>,
       ::Actions::MutateApply<RadialIntegrateBondi<
-          Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTduXInt>>>;
+          Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTduXInt>>,
+      ::Actions::MutateApply<ConstructAnaSolution>>;
 
   using compute_scri_quantities_and_observe = tmpl::list<
       ::Actions::MutateApply<
