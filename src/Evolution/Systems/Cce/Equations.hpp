@@ -62,6 +62,12 @@ template <>
 struct integrand_terms_to_compute_for_bondi_variable_impl<Tags::BondiBeta> {
   using type = tmpl::list<Tags::Integrand<Tags::BondiBeta>>;
 };
+
+template <>
+struct integrand_terms_to_compute_for_bondi_variable_impl<Tags::BondiSTduX> {
+  using type = tmpl::list<Tags::Integrand<Tags::BondiSTduX>>;
+};
+
 template <>
 struct integrand_terms_to_compute_for_bondi_variable_impl<Tags::BondiQ> {
   using type = tmpl::list<Tags::PoleOfIntegrand<Tags::BondiQ>,
@@ -241,6 +247,42 @@ struct ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiQ>> {
   static void apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 1>*>
                              pole_of_integrand_for_q,
                          const SpinWeighted<ComplexDataVector, 1>& eth_beta);
+};
+
+template <>
+struct ComputeBondiIntegrand<Tags::Integrand<Tags::BondiSTduX>> {
+ public:
+  using pre_swsh_derivative_tags = tmpl::list<>;
+  using swsh_derivative_tags = tmpl::list<Spectral::Swsh::Tags::Derivative<
+      Tags::BondiSTX, Spectral::Swsh::Tags::EthEthbar>>;
+  using integration_independent_tags =
+      tmpl::list<Tags::OneMinusY, Tags::BondiBeta, Tags::BondiR,
+                 Tags::BondiSTX>;
+  using temporary_tags = tmpl::list<>;
+
+  using return_tags =
+      tmpl::append<tmpl::list<Tags::Integrand<Tags::BondiSTduX>>,
+                   temporary_tags>;
+  using argument_tags =
+      tmpl::append<pre_swsh_derivative_tags, swsh_derivative_tags,
+                   integration_independent_tags>;
+
+  template <typename... Args>
+  static void apply(
+      const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          integrand_for_beta,
+      const Args&... args) {
+    apply_impl(make_not_null(&get(*integrand_for_beta)), get(args)...);
+  }
+
+ private:
+  static void apply_impl(
+      gsl::not_null<SpinWeighted<ComplexDataVector, 0>*> integrand_for_duX,
+      const SpinWeighted<ComplexDataVector, 0>& ethethbar_st_X,
+      const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
+      const SpinWeighted<ComplexDataVector, 0>& beta,
+      const SpinWeighted<ComplexDataVector, 0>& bondi_r,
+      const SpinWeighted<ComplexDataVector, 0>& bondi_st_X);
 };
 
 template <>
