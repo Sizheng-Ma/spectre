@@ -250,7 +250,7 @@ void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
       (dy_j * conj(dy_j) -
        0.25 * square(j * conj(dy_j) + conj(j) * dy_j) / (1.0 + j * conj(j)));
 
-  *integrand_for_beta += 2 * M_PI * one_minus_y * square(dy_st_psi);
+  //   *integrand_for_beta += 2 * M_PI * one_minus_y * square(dy_st_psi);
 }
 
 void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiQ>>::apply_impl(
@@ -287,9 +287,9 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiQ>>::apply_impl(
               0.5 * ethbar_dy_j / k - dy_beta * eth_r_divided_by_r +
               0.5 * dy_j * conj(eth_r_divided_by_r) / k);
 
-  *regular_integrand_for_q +=
-      16. * M_PI * eth_st_psi * dy_st_psi -
-      16. * M_PI * eth_r_divided_by_r * one_minus_y * square(dy_st_psi);
+  //   *regular_integrand_for_q +=
+  //       16. * M_PI * eth_st_psi * dy_st_psi -
+  //       16. * M_PI * eth_r_divided_by_r * one_minus_y * square(dy_st_psi);
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiU>>::apply_impl(
@@ -382,8 +382,8 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiW>>::apply_impl(
 
   real_final = real1 + real2 + real3 + conj(real3);
 
-  *regular_integrand_for_w +=
-      2 * M_PI * exp_2_beta * (complex_final + real_final);
+  //   *regular_integrand_for_w +=
+  //       2 * M_PI * exp_2_beta * (complex_final + real_final);
 }
 
 void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiH>>::apply_impl(
@@ -501,10 +501,10 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiH>>::apply_impl(
            0.5 * dy_j * (dy_w + 1.0 / r)) +
       square(one_minus_y) * 0.25 * dy_dy_j / r;
 
-  SpinWeighted<ComplexDataVector, 1> from_st;
+  //   SpinWeighted<ComplexDataVector, 1> from_st;
 
-  from_st = eth_st_psi - eth_r_divided_by_r * one_minus_y * dy_st_psi;
-  *regular_integrand_for_h += 2 * M_PI * exp_2_beta / r * square(from_st);
+  //   from_st = eth_st_psi - eth_r_divided_by_r * one_minus_y * dy_st_psi;
+  //   *regular_integrand_for_h += 2 * M_PI * exp_2_beta / r * square(from_st);
 }
 
 void ComputeBondiIntegrand<Tags::LinearFactor<Tags::BondiH>>::apply_impl(
