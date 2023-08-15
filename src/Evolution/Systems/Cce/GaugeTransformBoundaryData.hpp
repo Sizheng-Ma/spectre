@@ -81,21 +81,25 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiR> {
 template <>
 struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
   using return_tags =
-      tmpl::list<Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTTheta>>;
+      tmpl::list<Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTTheta>,
+                 Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTduX>>;
   using argument_tags = tmpl::list<
       Tags::BoundaryValue<Tags::BondiSTTheta>, Tags::BondiUAtScri,
       Tags::BoundaryValue<Tags::BondiSTPsi>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
-      Tags::LMax>;
+      Tags::LMax, Tags::EvolutionGaugeBoundaryValue<Tags::BondiBeta>>;
 
   static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
           evolution_st_theta,
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          evolution_st_du_x,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_theta,
       const Scalar<SpinWeighted<ComplexDataVector, 1>>&
           evolution_gauge_u_at_scri,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
-      const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max);
+      const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta);
 };
 
 /*!
