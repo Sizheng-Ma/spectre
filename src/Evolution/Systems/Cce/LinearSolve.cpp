@@ -431,6 +431,10 @@ void RadialIntegrateBondi<BoundaryPrefix, Tags::BondiH>::apply(
                 2 * number_of_angular_points);
 }
 
+void ConstructAnaSolution::apply(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_x_final,
+    Scalar<SpinWeighted<ComplexDataVector, 0>> du_x_int) {}
+
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiBeta>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiQ>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiU>;
