@@ -102,9 +102,10 @@ struct CharacteristicExtractDefaults {
       tmpl::bind<Cce::integrand_terms_to_compute_for_bondi_variable,
                  tmpl::_1>>>;
 
-  using cce_st_integrand_tags =
-      Cce::integrand_terms_to_compute_for_bondi_variable<
-          Cce::Tags::BondiSTTheta>;
+  using cce_st_integrand_tags = tmpl::flatten<
+      tmpl::list<Cce::integrand_terms_to_compute_for_bondi_variable<
+                     Cce::Tags::BondiSTTheta>,
+                 Cce::Tags::Integrand<Cce::Tags::BondiSTduX>>>;
   using ccm_matching_tags = tmpl::list<
       Cce::Tags::BondiJCauchyView, Cce::Tags::Psi0Match,
       Cce::Tags::Dy<Cce::Tags::Psi0Match>,
