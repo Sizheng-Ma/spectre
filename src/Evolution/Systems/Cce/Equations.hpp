@@ -64,8 +64,8 @@ struct integrand_terms_to_compute_for_bondi_variable_impl<Tags::BondiBeta> {
 };
 
 template <>
-struct integrand_terms_to_compute_for_bondi_variable_impl<Tags::BondiSTduX> {
-  using type = tmpl::list<Tags::Integrand<Tags::BondiSTduX>>;
+struct integrand_terms_to_compute_for_bondi_variable_impl<Tags::BondiSTduXInt> {
+  using type = tmpl::list<Tags::Integrand<Tags::BondiSTduXInt>>;
 };
 
 template <>
@@ -250,7 +250,7 @@ struct ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiQ>> {
 };
 
 template <>
-struct ComputeBondiIntegrand<Tags::Integrand<Tags::BondiSTduX>> {
+struct ComputeBondiIntegrand<Tags::Integrand<Tags::BondiSTduXInt>> {
  public:
   using pre_swsh_derivative_tags = tmpl::list<>;
   using swsh_derivative_tags = tmpl::list<Spectral::Swsh::Tags::Derivative<
@@ -261,7 +261,7 @@ struct ComputeBondiIntegrand<Tags::Integrand<Tags::BondiSTduX>> {
   using temporary_tags = tmpl::list<>;
 
   using return_tags =
-      tmpl::append<tmpl::list<Tags::Integrand<Tags::BondiSTduX>>,
+      tmpl::append<tmpl::list<Tags::Integrand<Tags::BondiSTduXInt>>,
                    temporary_tags>;
   using argument_tags =
       tmpl::append<pre_swsh_derivative_tags, swsh_derivative_tags,

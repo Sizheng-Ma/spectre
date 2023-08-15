@@ -36,7 +36,7 @@ void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
       0.5 * (-eth_st_psi * conj(bondi_u) - conj(eth_st_psi) * bondi_u);
 }
 
-void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiSTduX>>::apply_impl(
+void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiSTduXInt>>::apply_impl(
     gsl::not_null<SpinWeighted<ComplexDataVector, 0>*> integrand_for_duX,
     const SpinWeighted<ComplexDataVector, 0>& ethethbar_st_X,
     const SpinWeighted<ComplexDataVector, 0>& one_minus_y,

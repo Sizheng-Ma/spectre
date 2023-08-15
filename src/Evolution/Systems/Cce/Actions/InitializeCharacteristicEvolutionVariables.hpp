@@ -79,8 +79,10 @@ struct InitializeCharacteristicEvolutionVariables {
       typename Metavariables::st_cce_boundary_communication_tags>;
   using st_gauge_boundary_variable_tag =
       ::Tags::Variables<typename Metavariables::st_gauge_boundary_tag>;
-  using st_gauge_boundary_variable_ana_tag =
-      ::Tags::Variables<tmpl::list<Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::BondiSTduX>>>;
+  using st_gauge_boundary_variable_ana_tag = ::Tags::Variables<tmpl::list<
+      Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::BondiSTduXInt>>>;
+  using st_variable_ana_temp_tag =
+      ::Tags::Variables<tmpl::list<Cce::Tags::BondiSTduXInt>>;
   using scri_variables_tag =
       ::Tags::Variables<typename Metavariables::cce_scri_tags>;
   using st_scri_variables_tag =
@@ -121,7 +123,8 @@ struct InitializeCharacteristicEvolutionVariables {
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>,
       ccm_tag, st_scri_variables_tag, st_boundary_value_variables_tag,
-      st_gauge_boundary_variable_tag,st_gauge_boundary_variable_ana_tag>;
+      st_gauge_boundary_variable_tag, st_gauge_boundary_variable_ana_tag,
+      st_variable_ana_temp_tag>;
   using simple_tags =
       tmpl::append<StepChoosers::step_chooser_simple_tags<Metavariables, true>,
                    simple_tags_for_evolution>;
@@ -171,7 +174,9 @@ struct InitializeCharacteristicEvolutionVariables {
         typename ccm_tag::type{boundary_size},
         typename st_scri_variables_tag::type{boundary_size},
         typename st_boundary_value_variables_tag::type{boundary_size},
-        typename st_gauge_boundary_variable_tag::type{boundary_size},typename st_gauge_boundary_variable_ana_tag::type{boundary_size});
+        typename st_gauge_boundary_variable_tag::type{boundary_size},
+        typename st_gauge_boundary_variable_ana_tag::type{boundary_size},
+        typename st_variable_ana_temp_tag::type{boundary_size});
   }
 };
 
