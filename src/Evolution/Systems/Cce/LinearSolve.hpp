@@ -214,5 +214,10 @@ struct RadialIntegrateBondi<BoundaryPrefix, Tags::BondiH> {
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
       size_t l_max, size_t number_of_radial_points);
 };
+
+
+// struct ConstructAnaSolution {
+//     using return_tag=tmpl
+// }
 /// @}
 }  // namespace Cce
