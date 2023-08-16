@@ -217,6 +217,7 @@ struct CharacteristicEvolution {
       scalar_tensor_computation,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiSTTheta>,
+      Actions::FilterSwshVolumeQuantity<Tags::BondiSTduX>,
       ::Actions::MutateApply<
           CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>>>,
       Actions::CalculateScriInputs,
@@ -250,6 +251,7 @@ struct CharacteristicEvolution {
       scalar_tensor_computation,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiSTTheta>,
+      Actions::FilterSwshVolumeQuantity<Tags::BondiSTduX>,
       compute_scri_quantities_and_observe,
       compute_st_scri_quantities_and_observe,
       ::Actions::RecordTimeStepperData<cce_system>,
