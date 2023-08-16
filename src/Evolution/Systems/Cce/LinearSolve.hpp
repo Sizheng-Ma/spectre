@@ -220,7 +220,7 @@ struct ConstructAnaSolution {
   using argument_tags =
       tmpl::list<Tags::BondiSTduXInt, Tags::BondiBeta, Tags::BondiSTX,
                  Tags::OneMinusY, Tags::BondiR, Tags::Dy<Tags::BondiSTX>,
-                 Tags::LMax>;
+                 Tags::LMax, Tags::NumberOfRadialPoints>;
   static void apply(
         gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_x_final,
     const Scalar<SpinWeighted<ComplexDataVector, 0>> du_x_int,
@@ -229,7 +229,7 @@ struct ConstructAnaSolution {
     const Scalar<SpinWeighted<ComplexDataVector, 0>> one_minus_y,
     const Scalar<SpinWeighted<ComplexDataVector, 0>> bondi_r,
     const Scalar<SpinWeighted<ComplexDataVector, 0>> dy_st_x,
-    const size_t l_max);
+    const size_t l_max, const size_t number_of_radial_points);
 };
 /// @}
 }  // namespace Cce

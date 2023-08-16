@@ -439,7 +439,9 @@ void ConstructAnaSolution::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 0>> one_minus_y,
     const Scalar<SpinWeighted<ComplexDataVector, 0>> bondi_r,
     const Scalar<SpinWeighted<ComplexDataVector, 0>> dy_st_x,
-    const size_t l_max) {
+    const size_t l_max, const size_t number_of_radial_points) {
+  const size_t boundary_size =
+      Spectral::Swsh::number_of_swsh_collocation_points(l_max);
   SpinWeighted<ComplexDataVector, 0> omega = exp(2. * get(beta));
 
   SpinWeighted<ComplexDataVector, 0> omegaX = omega * get(st_x);
@@ -474,6 +476,26 @@ void ConstructAnaSolution::apply(
       Spectral::Swsh::Tags::EthEthbar>>(
       l_max, 1, make_not_null(&eth_ethbar_omega), make_not_null(&eth_ethbar_X),
       make_not_null(&eth_ethbar_omega_X), omega, get(st_x), omegaX);
+
+  auto dr_X = 0.5 * get(dy_st_x) * square(get(one_minus_y)) / get(bondi_r);
+  auto radius_inverse = 0.5 * get(one_minus_y) / get(bondi_r);
+
+  SpinWeighted<ComplexDataVector, 0> volume_term =
+      (eth_ethbar_omega + omega) * dr_X - eth_ethbar_omega_X * radius_inverse -
+      2 * dr_X * radius_inverse / square(omega) +
+      omega * radius_inverse * eth_ethbar_X;
+
+  ComplexDataVector angular_view_boundary{volume_term.data().data(),
+                                          boundary_size};
+
+  for (size_t i = 0; i < number_of_radial_points; i++) {
+    ComplexDataVector angular_view_full{
+        volume_term.data().data() + i * boundary_size, boundary_size};
+    angular_view_full = angular_view_full - angular_view_boundary;
+  }
+
+  // TODO: add boundary value of du_x_final
+  get(*du_x_final) = 0.5 * (volume_term + get(du_x_int));
 }
 
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiBeta>;
