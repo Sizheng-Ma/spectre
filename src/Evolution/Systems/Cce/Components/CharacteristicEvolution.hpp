@@ -193,6 +193,9 @@ struct CharacteristicEvolution {
       Actions::InsertInterpolationScriData<
           Tags::ScriPlus<Tags::BondiSTPsi>,
           typename Metavariables::cce_boundary_component>,
+      Actions::InsertInterpolationScriData<
+          Tags::ScriPlus<Tags::BondiSTX>,
+          typename Metavariables::cce_boundary_component>,
       Actions::STScriObserveInterpolated<
           observers::ObserverWriter<Metavariables>>>;
 
