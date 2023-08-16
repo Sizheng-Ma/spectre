@@ -472,8 +472,9 @@ void ConstructAnaSolution::apply(
   Spectral::Swsh::angular_derivatives<tmpl::list<
       Spectral::Swsh::Tags::EthEthbar, Spectral::Swsh::Tags::EthEthbar,
       Spectral::Swsh::Tags::EthEthbar>>(
-      l_max, 1, make_not_null(&eth_ethbar_omega), make_not_null(&eth_ethbar_X),
-      make_not_null(&eth_ethbar_omega_X), omega, get(st_x), omegaX);
+      l_max, number_of_radial_points, make_not_null(&eth_ethbar_omega),
+      make_not_null(&eth_ethbar_X), make_not_null(&eth_ethbar_omega_X), omega,
+      get(st_x), omegaX);
 
   auto dr_X = 0.5 * get(dy_st_x) * square(get(one_minus_y)) / get(bondi_r);
   auto radius_inverse = 0.5 * get(one_minus_y) / get(bondi_r);
@@ -483,8 +484,11 @@ void ConstructAnaSolution::apply(
       2 * dr_X * radius_inverse / square(omega) +
       omega * radius_inverse * eth_ethbar_X;
 
-  ComplexDataVector angular_view_boundary{volume_term.data().data(),
-                                          boundary_size};
+  ComplexDataVector angular_view_boundary{boundary_size};
+
+  for (size_t i = 0; i < boundary_size; i++) {
+    angular_view_boundary[i] = volume_term.data()[i];
+  }
 
   for (size_t i = 0; i < number_of_radial_points; i++) {
     ComplexDataVector angular_view_full{
