@@ -188,6 +188,8 @@ struct CharacteristicEvolution {
       ::Actions::MutateApply<PreSwshDerivatives<Tags::Dy<Tags::BondiSTPsi>>>,
       ::Actions::MutateApply<
           CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>>,
+      ::Actions::MutateApply<
+          CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTX>>>,
       Actions::InsertInterpolationScriData<
           Tags::ScriPlus<Tags::BondiSTPsi>,
           typename Metavariables::cce_boundary_component>,
