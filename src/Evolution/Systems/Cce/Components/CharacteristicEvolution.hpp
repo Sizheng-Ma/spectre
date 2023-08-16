@@ -197,6 +197,8 @@ struct CharacteristicEvolution {
           Tags::ScriPlus<Tags::BondiSTX>,
           typename Metavariables::cce_boundary_component>,
       Actions::STScriObserveInterpolated<
+          observers::ObserverWriter<Metavariables>>,
+      Actions::STAnaScriObserveInterpolated<
           observers::ObserverWriter<Metavariables>>>;
 
   using self_start_extract_action_list = tmpl::list<
