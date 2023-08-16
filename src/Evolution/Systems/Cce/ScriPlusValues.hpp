@@ -346,6 +346,20 @@ struct CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>> {
       size_t l_max, size_t number_of_radial_points);
 };
 
+template <>
+struct CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTX>> {
+  using return_tags = tmpl::list<Tags::ScriPlus<Tags::BondiSTX>>;
+  // extra typelist for more convenient testing
+  using tensor_argument_tags = tmpl::list<Tags::BondiSTX>;
+  using argument_tags = tmpl::push_back<tensor_argument_tags, Tags::LMax,
+                                        Tags::NumberOfRadialPoints>;
+
+  static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> scri_st_x,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& st_x,
+      size_t l_max, size_t number_of_radial_points);
+};
+
 /*!
  * \brief Computes the leading part of the strain \f$h\f$ near \f$\mathcal
  * I^+\f$.
