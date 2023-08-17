@@ -239,7 +239,6 @@ void RobinsonTrautman::du_rt_scalar(
        pow<3>(rt_scalar) * get(ethbar_ethbar_rt_scalar) *
            conj(get(ethbar_ethbar_rt_scalar))) /
       12.0;
-  *local_du_rt_scalar += 4. * M_PI / 3. * rt_scalar * square(theta);
 }
 
 void RobinsonTrautman::bondi_u(
