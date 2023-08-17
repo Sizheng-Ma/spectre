@@ -82,6 +82,8 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::ScriPlus<Cce::Tags::Psi2>, Cce::Tags::PartiallyFlatGaugeOmega,
       Cce::Tags::ScriPlus<Cce::Tags::Psi1>, Cce::Tags::BondiUAtScri,
       Cce::Tags::BoundaryValue<Cce::Tags::BondiSTPsi>,
+      Cce::Tags::BoundaryValue<Cce::Tags::BondiR>,
+      Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>,
       Cce::Tags::BoundaryValue<Cce::Tags::BondiSTTheta>,
       Cce::Tags::ScriPlus<Cce::Tags::Psi0>,
       Cce::Tags::Du<
