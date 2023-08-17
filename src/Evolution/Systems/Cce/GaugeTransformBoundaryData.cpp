@@ -138,8 +138,9 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
   get(*evolution_st_theta).data() +=
       real(get(evolution_gauge_u_at_scri).data() * conj(eth_psi).data());
 
-  get(*evolution_st_du_x) = get(cauchy_st_psi) * exp(-4. * get(bondi_beta)) +
-                            0.5 * exp(2. * get(bondi_beta)) * eth_ethbar_psi;
+  get(*evolution_st_du_x) = get(bondi_beta) * 0.0;
+  //   -get(cauchy_st_psi) * exp(-4. * get(bondi_beta)) / get(bondi_r) +
+  //   0.5 * exp(2. * get(bondi_beta)) * eth_ethbar_psi;
 }
 
 void GaugeAdjustedBoundaryValue<Tags::BondiQ>::apply_impl(

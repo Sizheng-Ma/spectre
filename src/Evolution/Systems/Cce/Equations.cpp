@@ -43,7 +43,7 @@ void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiSTduXInt>>::apply_impl(
     const SpinWeighted<ComplexDataVector, 0>& beta,
     const SpinWeighted<ComplexDataVector, 0>& bondi_r,
     const SpinWeighted<ComplexDataVector, 0>& bondi_st_X) {
-  *integrand_for_duX = (bondi_st_X * one_minus_y / bondi_r * exp(-4. * beta) +
+  *integrand_for_duX = (-bondi_st_X * one_minus_y / bondi_r * exp(-4. * beta) +
                         exp(2. * beta) * ethethbar_st_X) /
                        (2. * bondi_r);
 }
