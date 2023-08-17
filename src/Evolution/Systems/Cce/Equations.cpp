@@ -27,15 +27,6 @@
 namespace Cce {
 // suppresses doxygen problems with these functions
 
-void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
-    apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
-                   pole_of_integrand_for_st_theta,
-               const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
-               const SpinWeighted<ComplexDataVector, 1>& bondi_u) {
-  *pole_of_integrand_for_st_theta =
-      0.5 * (-eth_st_psi * conj(bondi_u) - conj(eth_st_psi) * bondi_u);
-}
-
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiSTduXInt>>::apply_impl(
     gsl::not_null<SpinWeighted<ComplexDataVector, 0>*> integrand_for_duX,
     const SpinWeighted<ComplexDataVector, 0>& ethethbar_st_X,
@@ -149,7 +140,41 @@ void Npsi5(SpinWeighted<ComplexDataVector, 0>& result,
            const SpinWeighted<ComplexDataVector, 1>& eth_st_psi) {
   result.data() = 2 * real(bondi_u.data() * conj(eth_st_psi).data());
 }
+
+void compute_norm(
+    const SpinWeighted<ComplexDataVector, 0> to_compare,
+    const SpinWeighted<ComplexDataVector, 0> regular_integrand_for_st_theta) {
+  SpinWeighted<ComplexDataVector, 0> final_diff =
+      to_compare - (regular_integrand_for_st_theta);
+
+  double norm = 0;
+
+  for (size_t iiiii = 0; iiiii < final_diff.size(); iiiii++) {
+    norm += square(abs(final_diff.data()[iiiii]));
+  }
+
+  norm /= final_diff.size();
+
+  norm = sqrt(norm);
+
+  std::cout << norm << std::endl;
+}
 }  // namespace detail
+
+void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
+    apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
+                   pole_of_integrand_for_st_theta,
+               const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
+               const SpinWeighted<ComplexDataVector, 1>& bondi_u) {
+  SpinWeighted<ComplexDataVector, 0> n_psi5;
+  detail::Npsi5(n_psi5, bondi_u, eth_st_psi);
+
+  *pole_of_integrand_for_st_theta =
+      0.5 * (-eth_st_psi * conj(bondi_u) - conj(eth_st_psi) * bondi_u);
+
+  detail::compute_norm(*pole_of_integrand_for_st_theta, -0.5 * n_psi5);
+  //   *pole_of_integrand_for_st_theta = -0.5 * n_psi5;
+}
 
 void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
     apply_impl(
@@ -301,22 +326,6 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
   detail::Npsi4DividedbyOneMinuesY2(n_psi4, eth_st_psi, dy_bondi_u, ethbar_u,
                                     bondi_u, eth_dy_st_psi, dy_st_psi, bondi_r,
                                     eth_r_divided_by_r);
-  detail::Npsi5(n_psi5, bondi_u, eth_st_psi);
-
-  SpinWeighted<ComplexDataVector, 0> final_diff =
-      to_compare - (*regular_integrand_for_st_theta);
-
-  double norm = 0;
-
-  for (size_t iiiii = 0; iiiii < final_diff.size(); iiiii++) {
-    norm += square(abs(final_diff.data()[iiiii]));
-  }
-
-  norm /= final_diff.size();
-
-  norm = sqrt(norm);
-
-  std::cout << norm << std::endl;
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
