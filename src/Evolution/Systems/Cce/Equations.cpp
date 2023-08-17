@@ -141,6 +141,19 @@ void Npsi5(SpinWeighted<ComplexDataVector, 0>& result,
   result.data() = 2 * real(bondi_u.data() * conj(eth_st_psi).data());
 }
 
+void Tau(SpinWeighted<ComplexDataVector, 0>& result,
+         const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
+         const SpinWeighted<ComplexDataVector, 0>& dy_w,
+         const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
+         const SpinWeighted<ComplexDataVector, 0>& dy_dy_st_psi,
+         const SpinWeighted<ComplexDataVector, 0>& bondi_w,
+         const SpinWeighted<ComplexDataVector, 0>& bondi_r) {
+  result = 0.5 * one_minus_y * dy_w * dy_st_psi +
+           0.25 * square(one_minus_y) / bondi_r * dy_dy_st_psi +
+           0.5 * square(one_minus_y) * bondi_w * dy_dy_st_psi +
+           0.5 * bondi_w * dy_st_psi;
+}
+
 void compute_norm(
     const SpinWeighted<ComplexDataVector, 0> to_compare,
     const SpinWeighted<ComplexDataVector, 0> regular_integrand_for_st_theta) {
@@ -172,7 +185,7 @@ void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
   *pole_of_integrand_for_st_theta =
       0.5 * (-eth_st_psi * conj(bondi_u) - conj(eth_st_psi) * bondi_u);
 
-  detail::compute_norm(*pole_of_integrand_for_st_theta, -0.5 * n_psi5);
+  //   detail::compute_norm(*pole_of_integrand_for_st_theta, -0.5 * n_psi5);
   //   *pole_of_integrand_for_st_theta = -0.5 * n_psi5;
 }
 
@@ -318,7 +331,7 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
   SpinWeighted<ComplexDataVector, 0> n_psi2;
   SpinWeighted<ComplexDataVector, 0> n_psi3;
   SpinWeighted<ComplexDataVector, 0> n_psi4;
-  SpinWeighted<ComplexDataVector, 0> n_psi5;
+  SpinWeighted<ComplexDataVector, 0> tau;
 
   detail::Npsi1(n_psi1, eth_beta, eth_st_psi, eth_ethbar_st_psi, bondi_k);
   detail::Npsi2(n_psi2, j, eth_eth_st_psi, eth_beta, eth_st_psi, ethbar_j);
@@ -326,6 +339,13 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
   detail::Npsi4DividedbyOneMinuesY2(n_psi4, eth_st_psi, dy_bondi_u, ethbar_u,
                                     bondi_u, eth_dy_st_psi, dy_st_psi, bondi_r,
                                     eth_r_divided_by_r);
+  detail::Tau(tau, one_minus_y, dy_w, dy_st_psi, dy_dy_st_psi, bondi_w,
+              bondi_r);
+
+  auto middle_result = 0.25 * exp2beta / bondi_r * (n_psi1 - n_psi2 + n_psi3) -
+                       0.5 * bondi_r * n_psi4 + tau + from_lhs;
+
+  detail::compute_norm(middle_result, *regular_integrand_for_st_theta);
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
