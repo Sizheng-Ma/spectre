@@ -124,20 +124,20 @@ void Npsi3(SpinWeighted<ComplexDataVector, 0>& result,
   result.data() = real(eth_k.data() * conj(eth_st_psi).data());
 }
 
-void Npsi4(SpinWeighted<ComplexDataVector, 0>& result,
-           const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
-           const SpinWeighted<ComplexDataVector, 1>& dy_bondi_u,
-           const SpinWeighted<ComplexDataVector, 0>& ethbar_u,
-           const SpinWeighted<ComplexDataVector, 1>& bondi_u,
-           const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
-           const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
-           const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
-           const SpinWeighted<ComplexDataVector, 0>& bondi_r,
-           const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r) {
-  auto dr_u = 0.5 * square(one_minus_y) / bondi_r * dy_bondi_u;
-  auto dr_psi = 0.5 * square(one_minus_y) / bondi_r * dy_st_psi;
-  auto eth_dr_psi = 0.5 * square(one_minus_y) / bondi_r *
-                    (eth_dy_st_psi + eth_r_divided_by_r * dy_st_psi);
+void Npsi4DividedbyOneMinuesY2(
+    SpinWeighted<ComplexDataVector, 0>& result,
+    const SpinWeighted<ComplexDataVector, 1>& eth_st_psi,
+    const SpinWeighted<ComplexDataVector, 1>& dy_bondi_u,
+    const SpinWeighted<ComplexDataVector, 0>& ethbar_u,
+    const SpinWeighted<ComplexDataVector, 1>& bondi_u,
+    const SpinWeighted<ComplexDataVector, 1>& eth_dy_st_psi,
+    const SpinWeighted<ComplexDataVector, 0>& dy_st_psi,
+    const SpinWeighted<ComplexDataVector, 0>& bondi_r,
+    const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r) {
+  auto dr_u = 0.5 / bondi_r * dy_bondi_u;
+  auto dr_psi = 0.5 / bondi_r * dy_st_psi;
+  auto eth_dr_psi =
+      0.5 / bondi_r * (eth_dy_st_psi + eth_r_divided_by_r * dy_st_psi);
 
   auto res = 2 * conj(eth_st_psi) * dr_u + 2 * conj(ethbar_u) * dr_psi +
              4 * conj(bondi_u) * eth_dr_psi;
@@ -298,9 +298,9 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
   detail::Npsi1(n_psi1, eth_beta, eth_st_psi, eth_ethbar_st_psi, bondi_k);
   detail::Npsi2(n_psi2, j, eth_eth_st_psi, eth_beta, eth_st_psi, ethbar_j);
   detail::Npsi3(n_psi3, eth_k, eth_st_psi);
-  detail::Npsi4(n_psi4, eth_st_psi, dy_bondi_u, ethbar_u, bondi_u,
-                eth_dy_st_psi, dy_st_psi, one_minus_y, bondi_r,
-                eth_r_divided_by_r);
+  detail::Npsi4DividedbyOneMinuesY2(n_psi4, eth_st_psi, dy_bondi_u, ethbar_u,
+                                    bondi_u, eth_dy_st_psi, dy_st_psi, bondi_r,
+                                    eth_r_divided_by_r);
   detail::Npsi5(n_psi5, bondi_u, eth_st_psi);
 
   SpinWeighted<ComplexDataVector, 0> final_diff =
