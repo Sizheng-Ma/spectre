@@ -437,6 +437,7 @@ void ConstructAnaSolution::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 0>> one_minus_y,
     const Scalar<SpinWeighted<ComplexDataVector, 0>> bondi_r,
     const Scalar<SpinWeighted<ComplexDataVector, 0>> dy_st_x,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>> boundary_du_X,
     const size_t l_max, const size_t number_of_radial_points) {
   const size_t boundary_size =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
@@ -493,7 +494,8 @@ void ConstructAnaSolution::apply(
   for (size_t i = 0; i < number_of_radial_points; i++) {
     ComplexDataVector angular_view_full{
         volume_term.data().data() + i * boundary_size, boundary_size};
-    angular_view_full = angular_view_full - angular_view_boundary;
+    angular_view_full = angular_view_full - angular_view_boundary +
+                        2.0 * get(boundary_du_X).data();
   }
 
   // TODO: add boundary value of du_x_final

@@ -550,8 +550,9 @@ using characteristic_worldtube_boundary_tags = db::wrap_tags_in<
                Tags::Du<Tags::BondiR>, Tags::DuRDividedByR>>;
 
 template <template <typename> class BoundaryPrefix>
-using st_worldtube_boundary_tags =
-    db::wrap_tags_in<BoundaryPrefix, tmpl::list<Tags::BondiSTPsi,Tags::BondiSTTheta>>;
+using st_worldtube_boundary_tags = db::wrap_tags_in<
+    BoundaryPrefix,
+    tmpl::list<Tags::BondiSTPsi, Tags::BondiSTTheta, Tags::BondiSTduX>>;
 }  // namespace Tags
 
 namespace detail {

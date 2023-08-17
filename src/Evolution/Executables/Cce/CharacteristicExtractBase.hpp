@@ -47,7 +47,8 @@ struct CharacteristicExtractDefaults {
 
   using st_cce_boundary_communication_tags =
       tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::BondiSTPsi>,
-      Cce::Tags::BoundaryValue<Cce::Tags::BondiSTTheta>>;
+                 Cce::Tags::BoundaryValue<Cce::Tags::BondiSTTheta>,
+                 Cce::Tags::BoundaryValue<Cce::Tags::BondiSTduX>>;
 
   using st_gauge_boundary_tag = tmpl::list<
       Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::BondiSTTheta>>;
