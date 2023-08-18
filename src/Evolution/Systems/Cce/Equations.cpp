@@ -150,7 +150,7 @@ void Tau(SpinWeighted<ComplexDataVector, 0>& result,
          const SpinWeighted<ComplexDataVector, 0>& bondi_r) {
   result = 0.5 * one_minus_y * dy_w * dy_st_psi +
            0.25 * square(one_minus_y) / bondi_r * dy_dy_st_psi +
-           0.5 * square(one_minus_y) * bondi_w * dy_dy_st_psi +
+           0.5 * one_minus_y * bondi_w * dy_dy_st_psi +
            0.5 * bondi_w * dy_st_psi;
 }
 
