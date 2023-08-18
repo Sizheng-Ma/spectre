@@ -301,9 +301,7 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiQ>>::apply_impl(
               0.5 * ethbar_dy_j / k - dy_beta * eth_r_divided_by_r +
               0.5 * dy_j * conj(eth_r_divided_by_r) / k);
 
-  //   *regular_integrand_for_q +=
-  //       16. * M_PI * eth_st_psi * dy_st_psi -
-  //       16. * M_PI * eth_r_divided_by_r * one_minus_y * square(dy_st_psi);
+  //   *regular_integrand_for_q += 16. * M_PI * eth_st_psi * dy_st_psi;
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiU>>::apply_impl(
@@ -368,36 +366,15 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiW>>::apply_impl(
                     dy_u * conj(eth_r_divided_by_r)) -
              1.0 / r + 0.5 * exp_2_beta * (*script_av + conj(*script_av)) / r);
 
-  SpinWeighted<ComplexDataVector, 0> complex1;
-  SpinWeighted<ComplexDataVector, 0> complex2;
-  SpinWeighted<ComplexDataVector, 0> complex3;
-  SpinWeighted<ComplexDataVector, 0> complex_final;
+  SpinWeighted<ComplexDataVector, 0> complex;
 
-  complex1 = 0.5 * j * square(one_minus_y) * square(conj(eth_r_divided_by_r)) *
-             square(dy_st_psi) / r;
-  complex2 = 0.5 * j * square(conj(eth_st_psi)) / r;
-  complex3 = -j * one_minus_y * dy_st_psi * conj(eth_st_psi) *
-             conj(eth_r_divided_by_r) / r;
+  complex.data() = 2.0 * real(j.data() * square(conj(eth_st_psi)).data());
 
-  complex_final = complex1 + complex2 + complex3 + conj(complex1) +
-                  conj(complex2) + conj(complex3);
+  SpinWeighted<ComplexDataVector, 0> real;
 
-  SpinWeighted<ComplexDataVector, 0> real1;
-  SpinWeighted<ComplexDataVector, 0> real2;
-  SpinWeighted<ComplexDataVector, 0> real3;
-  SpinWeighted<ComplexDataVector, 0> real_final;
+  real.data() = -2.0 * k.data() * square(abs(eth_st_psi.data()));
 
-  real1 = -k * square(one_minus_y) * square(dy_st_psi) *
-          conj(eth_r_divided_by_r) * eth_r_divided_by_r / r;
-
-  real2 = -k * eth_st_psi * conj(eth_st_psi) / r;
-  real3 =
-      k * one_minus_y * dy_st_psi * eth_st_psi * conj(eth_r_divided_by_r) / r;
-
-  real_final = real1 + real2 + real3 + conj(real3);
-
-  //   *regular_integrand_for_w +=
-  //       2 * M_PI * exp_2_beta * (complex_final + real_final);
+  //   *regular_integrand_for_w += M_PI * exp_2_beta / r * (complex + real);
 }
 
 void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiH>>::apply_impl(
@@ -515,10 +492,8 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiH>>::apply_impl(
            0.5 * dy_j * (dy_w + 1.0 / r)) +
       square(one_minus_y) * 0.25 * dy_dy_j / r;
 
-  //   SpinWeighted<ComplexDataVector, 1> from_st;
-
-  //   from_st = eth_st_psi - eth_r_divided_by_r * one_minus_y * dy_st_psi;
-  //   *regular_integrand_for_h += 2 * M_PI * exp_2_beta / r * square(from_st);
+  //   *regular_integrand_for_h += 2 * M_PI * exp_2_beta / r *
+  //   square(eth_st_psi);
 }
 
 void ComputeBondiIntegrand<Tags::LinearFactor<Tags::BondiH>>::apply_impl(
