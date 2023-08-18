@@ -182,8 +182,7 @@ void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
   SpinWeighted<ComplexDataVector, 0> n_psi5;
   detail::Npsi5(n_psi5, bondi_u, eth_st_psi);
 
-  *pole_of_integrand_for_st_theta =
-      0.5 * (-eth_st_psi * conj(bondi_u) - conj(eth_st_psi) * bondi_u);
+  *pole_of_integrand_for_st_theta = -0.5 * n_psi5;
 
   //   detail::compute_norm(*pole_of_integrand_for_st_theta, -0.5 * n_psi5);
   //   *pole_of_integrand_for_st_theta = -0.5 * n_psi5;
