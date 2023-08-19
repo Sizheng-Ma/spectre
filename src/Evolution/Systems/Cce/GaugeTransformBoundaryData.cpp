@@ -122,21 +122,37 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_theta,
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& evolution_gauge_u_at_scri,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& dr_cauchy_st_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& evolution_gauge_r,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_omega,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r_divided_by_r,
     const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta) {
   interpolator.interpolate(make_not_null(&get(*evolution_st_theta)),
                            get(cauchy_st_theta));
 
+  SpinWeighted<ComplexDataVector, 0> evolution_gauge_psi;
+  SpinWeighted<ComplexDataVector, 0> dr_evolution_gauge_psi;
+
+  interpolator.interpolate(make_not_null(&dr_evolution_gauge_psi),
+                           get(dr_cauchy_st_psi));
+  interpolator.interpolate(make_not_null(&evolution_gauge_psi),
+                           get(cauchy_st_psi));
+
   const auto eth_psi =
       Spectral::Swsh::angular_derivative<Spectral::Swsh::Tags::Eth>(
-          l_max, 1, get(cauchy_st_psi));
-
-  const auto eth_ethbar_psi =
-      Spectral::Swsh::angular_derivative<Spectral::Swsh::Tags::EthEthbar>(
-          l_max, 1, get(cauchy_st_psi));
+          l_max, 1, evolution_gauge_psi);
 
   get(*evolution_st_theta).data() +=
       real(get(evolution_gauge_u_at_scri).data() * conj(eth_psi).data());
+
+  get(*evolution_st_theta).data() -=
+      get(evolution_gauge_r).data() / square(get(omega).data()) *
+      get(du_omega).data() * dr_evolution_gauge_psi.data();
+
+  get(*evolution_st_theta) +=
+      get(du_r_divided_by_r) * get(evolution_gauge_r) * dr_evolution_gauge_psi;
 
   get(*evolution_st_du_x) = get(bondi_beta) * 0.0;
   //   -get(cauchy_st_psi) * exp(-4. * get(bondi_beta)) / get(bondi_r) +
