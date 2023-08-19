@@ -45,10 +45,11 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::characteristic_worldtube_boundary_tags<
           Cce::Tags::BoundaryValue>;
 
-  using st_cce_boundary_communication_tags =
-      tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::BondiSTPsi>,
-                 Cce::Tags::BoundaryValue<Cce::Tags::BondiSTTheta>,
-                 Cce::Tags::BoundaryValue<Cce::Tags::BondiSTduX>>;
+  using st_cce_boundary_communication_tags = tmpl::list<
+      Cce::Tags::BoundaryValue<Cce::Tags::BondiSTPsi>,
+      Cce::Tags::BoundaryValue<Cce::Tags::BondiSTTheta>,
+      Cce::Tags::BoundaryValue<Cce::Tags::BondiSTduX>,
+      Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiSTPsi>>>;
 
   using st_gauge_boundary_tag = tmpl::list<
       Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::BondiSTTheta>>;
