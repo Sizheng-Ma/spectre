@@ -55,7 +55,24 @@ void BouncingBlackHole::variables_impl(
 void BouncingBlackHole::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
     size_t output_l_max, double time,
-    tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {}
+    tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {
+  const auto& cartesian_coordinates =
+      cache_or_compute<Tags::CauchyCartesianCoords>(output_l_max, time);
+  const double dt_adjusted_x_coordinate = 4.0 * amplitude_ * frequency_ *
+                                          cos(frequency_ * time) *
+                                          pow<3>(sin(frequency_ * time));
+  const DataVector adjusted_x_coordinate =
+      amplitude_ * pow<4>(sin(frequency_ * time)) +
+      get<0>(cartesian_coordinates);
+  const DataVector r = sqrt(square(adjusted_x_coordinate) +
+                            square(get<1>(cartesian_coordinates)) +
+                            square(get<2>(cartesian_coordinates)));
+
+  auto drdt = adjusted_x_coordinate / r * dt_adjusted_x_coordinate;
+
+  get(*st_psi).data() =
+      cos(time - r) / r * (1 - drdt) - sin(time - r) / square(r) * drdt;
+}
 
 void BouncingBlackHole::variables_impl(
     const gsl::not_null<tnsr::aa<DataVector, 3>*> spacetime_metric,
