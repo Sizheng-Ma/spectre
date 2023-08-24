@@ -105,6 +105,21 @@ void RotatingSchwarzschild::dt_spherical_metric(
 }
 
 void RotatingSchwarzschild::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::BondiSTPsi> /*meta*/) const {}
+
+void RotatingSchwarzschild::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::Dr<Tags::BondiSTPsi>> /*meta*/) const {}
+
+void RotatingSchwarzschild::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {}
+
+void RotatingSchwarzschild::variables_impl(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, -2>>*> news,
     size_t /*output_l_max*/, double /*time*/,
     tmpl::type_<Tags::News> /*meta*/) const {
