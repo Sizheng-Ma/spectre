@@ -27,7 +27,9 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
   const auto boundary_tuple = generator_->variables(
       l_max_, time,
       tmpl::list<gr::Tags::SpacetimeMetric<DataVector, 3>,
-                 gh::Tags::Pi<DataVector, 3>, gh::Tags::Phi<DataVector, 3>>{});
+                 gh::Tags::Pi<DataVector, 3>, gh::Tags::Phi<DataVector, 3>,
+                 Tags::BondiSTPsi, Tags::BondiSTTheta,
+                 Tags::Dr<Tags::BondiSTPsi>>{});
   const auto& spacetime_metric =
       get<gr::Tags::SpacetimeMetric<DataVector, 3>>(boundary_tuple);
   const auto& pi = get<gh::Tags::Pi<DataVector, 3>>(boundary_tuple);

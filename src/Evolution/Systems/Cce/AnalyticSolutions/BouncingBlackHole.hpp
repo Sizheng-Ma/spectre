@@ -181,6 +181,21 @@ struct BouncingBlackHole : public WorldtubeData {
       size_t output_l_max, double time,
       tmpl::type_<Tags::News> /*meta*/) const override;
 
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::BondiSTPsi> /*meta*/) const override;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::Dr<Tags::BondiSTPsi>> /*meta*/) const override;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::BondiSTTheta> /*meta*/) const override;
+
   double amplitude_ = std::numeric_limits<double>::signaling_NaN();
   double mass_ = std::numeric_limits<double>::signaling_NaN();
   double frequency_ = std::numeric_limits<double>::signaling_NaN();

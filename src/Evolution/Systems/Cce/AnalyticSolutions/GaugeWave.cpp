@@ -196,6 +196,21 @@ void GaugeWave::variables_impl(
   get(*news).data() = 0.0;
 }
 
+void GaugeWave::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::BondiSTPsi> /*meta*/) const {}
+
+void GaugeWave::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::Dr<Tags::BondiSTPsi>> /*meta*/) const {}
+
+void GaugeWave::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {}
+
 void GaugeWave::pup(PUP::er& p) {
   SphericalMetricData::pup(p);
   p | mass_;
