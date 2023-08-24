@@ -180,16 +180,22 @@ struct BoundaryComputeAndSendToEvolution<
     bool successfully_populated_st = false;
     db::mutate<Tags::AnalyticBoundaryDataManager,
                ::Tags::Variables<
-                   typename Metavariables::cce_boundary_communication_tags>>(
+                   typename Metavariables::cce_boundary_communication_tags>,
+               ::Tags::Variables<
+                   typename Metavariables::st_cce_boundary_communication_tags>>(
         [&successfully_populated, &time](
             const gsl::not_null<Cce::AnalyticBoundaryDataManager*>
                 worldtube_data_manager,
             const gsl::not_null<Variables<
                 typename Metavariables::cce_boundary_communication_tags>*>
-                boundary_variables) {
+                boundary_variables,
+            const gsl::not_null<Variables<
+                typename Metavariables::st_cce_boundary_communication_tags>*>
+                st_boundary_variables) {
           successfully_populated =
               (*worldtube_data_manager)
                   .populate_hypersurface_boundary_data(boundary_variables,
+                                                       st_boundary_variables,
                                                        time.substep_time());
         },
         make_not_null(&box));

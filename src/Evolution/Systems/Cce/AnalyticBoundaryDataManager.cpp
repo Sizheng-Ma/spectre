@@ -20,6 +20,9 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
     const gsl::not_null<Variables<
         Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>*>
         boundary_data_variables,
+    gsl::not_null<
+        Variables<Tags::st_worldtube_boundary_tags<Tags::BoundaryValue>>*>
+        st_boundary_data_variables,
     const double time) const {
   const auto boundary_tuple = generator_->variables(
       l_max_, time,
@@ -35,14 +38,8 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
   DataVector dt_psi{get<0, 0>(spacetime_metric).size(), 0.0};
   DataVector dr_psi{get<0, 0>(spacetime_metric).size(), 0.0};
 
-  using st_list = tmpl::list<Tags::BoundaryValue<Tags::BondiSTTheta>,
-                             Tags::BoundaryValue<Tags::Dr<Tags::BondiSTPsi>>>;
-
-  Variables<st_list>* boundary_st_variables;
-
-  create_st_boundary_data<st_list>(boundary_st_variables, phi, pi,
-                                   spacetime_metric, dr_psi, dt_psi,
-                                   extraction_radius_, l_max_);
+  create_st_boundary_data(st_boundary_data_variables, phi, pi, spacetime_metric,
+                          dr_psi, dt_psi, extraction_radius_, l_max_);
 
   // auto& beta =
   //     get<Tags::BoundaryValue<Tags::BondiBeta>>(*boundary_data_variables);
