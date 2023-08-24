@@ -35,7 +35,17 @@ std::unique_ptr<WorldtubeData> BouncingBlackHole::get_clone() const {
 void BouncingBlackHole::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
     size_t output_l_max, double time,
-    tmpl::type_<Tags::BondiSTPsi> /*meta*/) const {}
+    tmpl::type_<Tags::BondiSTPsi> /*meta*/) const {
+  const auto& cartesian_coordinates =
+      cache_or_compute<Tags::CauchyCartesianCoords>(output_l_max, time);
+  const DataVector adjusted_x_coordinate =
+      amplitude_ * pow<4>(sin(frequency_ * time)) +
+      get<0>(cartesian_coordinates);
+  const DataVector r = sqrt(square(adjusted_x_coordinate) +
+                            square(get<1>(cartesian_coordinates)) +
+                            square(get<2>(cartesian_coordinates)));
+  get(*st_psi).data() = sin(time - r) / r;
+}
 
 void BouncingBlackHole::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
