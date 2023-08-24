@@ -19,10 +19,10 @@ bool STAnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
         boundary_data_variables,
     const double time,
     const Scalar<SpinWeighted<ComplexDataVector, 0>> bondi_r) const {
-  auto& psi =
-      get<Tags::BoundaryValue<Tags::BondiSTPsi>>(*boundary_data_variables);
-  auto& theta =
-      get<Tags::BoundaryValue<Tags::BondiSTTheta>>(*boundary_data_variables);
+  //   auto& psi =
+  //       get<Tags::BoundaryValue<Tags::BondiSTPsi>>(*boundary_data_variables);
+  //   auto& theta =
+  //       get<Tags::BoundaryValue<Tags::BondiSTTheta>>(*boundary_data_variables);
   auto& duX =
       get<Tags::BoundaryValue<Tags::BondiSTduX>>(*boundary_data_variables);
 
@@ -42,9 +42,8 @@ bool STAnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
   const double u0 = 10;
   const double sigma0 = 1;
   double psi_boundary = exp(-0.5 * square(time - u0) / square(sigma0));
-  get(psi).data() = psi_boundary * perturbed_j.data() / get(bondi_r).data();
-  get(theta).data() = -(time - u0) / square(sigma0) * get(psi).data();
-  get(duX) = get(theta) * get(bondi_r);
+  auto psi = psi_boundary * perturbed_j.data() / get(bondi_r).data();
+  get(duX).data() = -(time - u0) / square(sigma0) * psi * get(bondi_r).data();
   return true;
 }
 
