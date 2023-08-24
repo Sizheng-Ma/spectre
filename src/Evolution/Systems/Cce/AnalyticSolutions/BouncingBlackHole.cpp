@@ -33,6 +33,21 @@ std::unique_ptr<WorldtubeData> BouncingBlackHole::get_clone() const {
 }
 
 void BouncingBlackHole::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::BondiSTPsi> /*meta*/) const {}
+
+void BouncingBlackHole::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::Dr<Tags::BondiSTPsi>> /*meta*/) const {}
+
+void BouncingBlackHole::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {}
+
+void BouncingBlackHole::variables_impl(
     const gsl::not_null<tnsr::aa<DataVector, 3>*> spacetime_metric,
     const size_t l_max, const double time,
     tmpl::type_<gr::Tags::SpacetimeMetric<DataVector, 3>> /*meta*/) const {

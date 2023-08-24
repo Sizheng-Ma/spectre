@@ -77,6 +77,7 @@ struct WorldtubeData : public PUP::able {
 
   /// The set of available tags provided by the analytic solution
   using tags = tmpl::list<
+      Tags::BondiSTPsi, Tags::BondiSTTheta, Tags::Dr<Tags::BondiSTPsi>,
       Tags::CauchyCartesianCoords, Tags::Dr<Tags::CauchyCartesianCoords>,
       gr::Tags::SpacetimeMetric<DataVector, 3>,
       ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
@@ -238,6 +239,20 @@ struct WorldtubeData : public PUP::able {
       size_t output_l_max, double time,
       tmpl::type_<Tags::News> /*meta*/) const = 0;
 
+  virtual void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::BondiSTPsi> /*meta*/) const = 0;
+
+  virtual void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::Dr<Tags::BondiSTPsi>> /*meta*/) const = 0;
+
+  virtual void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::BondiSTTheta> /*meta*/) const = 0;
   template <typename Tag>
   struct IntermediateCache {
     typename Tag::type data;
@@ -252,7 +267,8 @@ struct WorldtubeData : public PUP::able {
 
   using IntermediateCacheTuple =
       tuples::tagged_tuple_from_typelist<tmpl::transform<
-          tmpl::list<Tags::CauchyCartesianCoords,
+          tmpl::list<Tags::BondiSTPsi, Tags::BondiSTTheta,
+                     Tags::Dr<Tags::BondiSTPsi>, Tags::CauchyCartesianCoords,
                      Tags::Dr<Tags::CauchyCartesianCoords>,
                      gr::Tags::SpacetimeMetric<DataVector, 3>,
                      gh::Tags::Pi<DataVector, 3>, gh::Tags::Phi<DataVector, 3>,
