@@ -557,6 +557,136 @@ using st_worldtube_boundary_tags =
 }  // namespace Tags
 
 namespace detail {
+
+template <typename BoundaryTagList, typename BufferTagList,
+          typename ComplexBufferTagList>
+void create_st_boundary_data(
+    const gsl::not_null<Variables<BoundaryTagList>*> bondi_boundary_data,
+    const gsl::not_null<Variables<BufferTagList>*> computation_variables,
+    const gsl::not_null<Variables<ComplexBufferTagList>*> derivative_buffers,
+    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
+    const tnsr::iaa<DataVector, 3>& phi,
+    const tnsr::aa<DataVector, 3>& spacetime_metric,
+    const tnsr::A<DataVector, 3>& null_l,
+    const tnsr::A<DataVector, 3>& du_null_l,
+    const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
+    const CartesianiSphericalJ& inverse_cartesian_to_spherical_jacobian,
+    const DataVector dr_psi, const DataVector dt_psi, const size_t l_max,
+    const double extraction_radius) {
+  const size_t size = Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+
+  // unfortunately, because the dyads are not themselves spin-weighted, they
+  // need a separate Variables
+  Variables<tmpl::list<Tags::detail::DownDyad, Tags::detail::UpDyad>>
+      dyad_variables{size};
+
+  auto& null_metric =
+      get<gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>(
+          *computation_variables);
+  auto& du_null_metric = get<
+      ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>>(
+      *computation_variables);
+  null_metric_and_derivative(
+      make_not_null(&du_null_metric), make_not_null(&null_metric),
+      cartesian_to_spherical_jacobian, dt_spacetime_metric, spacetime_metric);
+
+  auto& inverse_null_metric =
+      get<gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>(
+          *computation_variables);
+
+  // the below scaling process is used to reduce accumulation of numerical
+  // error in the determinant evaluation
+
+  // buffer reuse because the scaled null metric is only needed until the
+  // `determinant_and_inverse` call
+  auto& scaled_null_metric =
+      get<gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>(
+          *computation_variables);
+  for (size_t i = 0; i < 4; ++i) {
+    for (size_t j = i; j < 4; ++j) {
+      if (i > 1 and j > 1) {
+        scaled_null_metric.get(i, j) =
+            null_metric.get(i, j) / square(extraction_radius);
+      } else if (i > 1 or j > 1) {
+        scaled_null_metric.get(i, j) =
+            null_metric.get(i, j) / extraction_radius;
+      } else {
+        scaled_null_metric.get(i, j) = null_metric.get(i, j);
+      }
+    }
+  }
+  // Allocation
+  const auto scaled_inverse_null_metric =
+      determinant_and_inverse(scaled_null_metric).second;
+  for (size_t i = 0; i < 4; ++i) {
+    for (size_t j = i; j < 4; ++j) {
+      if (i > 1 and j > 1) {
+        inverse_null_metric.get(i, j) =
+            scaled_inverse_null_metric.get(i, j) / square(extraction_radius);
+      } else if (i > 1 or j > 1) {
+        inverse_null_metric.get(i, j) =
+            scaled_inverse_null_metric.get(i, j) / extraction_radius;
+      } else {
+        inverse_null_metric.get(i, j) = scaled_inverse_null_metric.get(i, j);
+      }
+    }
+  }
+
+  auto& angular_d_null_l =
+      get<Tags::detail::AngularDNullL>(*computation_variables);
+  auto& buffer_for_derivatives =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          *derivative_buffers));
+  auto& eth_buffer =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                   std::integral_constant<int, 1>>>(
+          *derivative_buffers));
+  for (size_t a = 0; a < 4; ++a) {
+    buffer_for_derivatives.data() =
+        std::complex<double>(1.0, 0.0) * null_l.get(a);
+    Spectral::Swsh::angular_derivatives<tmpl::list<Spectral::Swsh::Tags::Eth>>(
+        l_max, 1, make_not_null(&eth_buffer), buffer_for_derivatives);
+    angular_d_null_l.get(0, a) = -real(eth_buffer.data());
+    angular_d_null_l.get(1, a) = -imag(eth_buffer.data());
+  }
+
+  auto& dlambda_null_metric = get<Tags::detail::DLambda<
+      gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>>(
+      *computation_variables);
+  auto& dlambda_inverse_null_metric = get<Tags::detail::DLambda<
+      gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>>(
+      *computation_variables);
+  dlambda_null_metric_and_inverse(
+      make_not_null(&dlambda_null_metric),
+      make_not_null(&dlambda_inverse_null_metric), angular_d_null_l,
+      cartesian_to_spherical_jacobian, phi, dt_spacetime_metric, du_null_l,
+      inverse_null_metric, null_l, spacetime_metric);
+
+  //   auto& r = get<Tags::BoundaryValue<Tags::BondiR>>(*bondi_boundary_data);
+  Tags::BoundaryValue<Tags::BondiR>::type r;
+  bondi_r(make_not_null(&r), null_metric);
+
+  auto& d_r =
+      get<::Tags::spacetime_deriv<Tags::detail::RealBondiR, tmpl::size_t<3>,
+                                  Frame::RadialNull>>(*computation_variables);
+  d_bondi_r(make_not_null(&d_r), r, dlambda_null_metric, du_null_metric,
+            inverse_null_metric, l_max);
+
+  auto dr_bondi_psi = get<Tags::BoundaryValue<Tags::Dr<Tags::BondiSTPsi>>>(
+      *bondi_boundary_data);
+  auto bondi_theta =
+      get<Tags::BoundaryValue<Tags::BondiSTTheta>>(*bondi_boundary_data);
+
+  auto lr =
+      get<0, 0>(inverse_cartesian_to_spherical_jacobian) * get<1>(null_l) +
+      get<1, 0>(inverse_cartesian_to_spherical_jacobian) * get<2>(null_l) +
+      get<2, 0>(inverse_cartesian_to_spherical_jacobian) * get<3>(null_l);
+
+  get(dr_bondi_psi).data() = (get<0>(null_l) * dt_psi + dr_psi * lr) /
+                             get<1>(null_l);  // TODO this is wrong
+  get(bondi_theta).data() = dt_psi - get<0>(d_r) * get(dr_bondi_psi).data();
+}
 // the common step between the modal input and the Generalized harmonic input
 // that performs the final gauge processing to Bondi scalars and places them in
 // the Variables.
@@ -929,6 +1059,131 @@ void create_bondi_boundary_data(
       make_not_null(&derivative_buffers), dt_spacetime_metric, phi,
       spacetime_metric, null_l, du_null_l, cartesian_to_spherical_jacobian,
       l_max, extraction_radius);
+}
+
+template <typename BoundaryTagList>
+void create_st_boundary_data(
+    const gsl::not_null<Variables<BoundaryTagList>*> bondi_boundary_data,
+    const tnsr::iaa<DataVector, 3>& phi, const tnsr::aa<DataVector, 3>& pi,
+    const tnsr::aa<DataVector, 3>& spacetime_metric, const DataVector dr_psi,
+    const DataVector dt_psi, const double extraction_radius,
+    const size_t l_max) {
+  const size_t size = Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+  Variables<tmpl::list<
+      Tags::detail::CosPhi, Tags::detail::CosTheta, Tags::detail::SinPhi,
+      Tags::detail::SinTheta, Tags::detail::CartesianCoordinates,
+      Tags::detail::CartesianToSphericalJacobian,
+      Tags::detail::InverseCartesianToSphericalJacobian,
+      gr::Tags::SpatialMetric<DataVector, 3>,
+      gr::Tags::InverseSpatialMetric<DataVector, 3>,
+      gr::Tags::Shift<DataVector, 3>,
+      ::Tags::dt<gr::Tags::Shift<DataVector, 3>>, gr::Tags::Lapse<DataVector>,
+      ::Tags::dt<gr::Tags::Lapse<DataVector>>,
+      ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
+      Tags::detail::WorldtubeNormal, ::Tags::dt<Tags::detail::WorldtubeNormal>,
+      gr::Tags::SpacetimeNormalVector<DataVector, 3>, Tags::detail::NullL,
+      ::Tags::dt<Tags::detail::NullL>,
+      // for the detail function called at the end
+      gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>,
+      ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>,
+      gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>,
+      Tags::detail::AngularDNullL,
+      Tags::detail::DLambda<
+          gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>,
+      Tags::detail::DLambda<
+          gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>,
+      ::Tags::spacetime_deriv<Tags::detail::RealBondiR, tmpl::size_t<3>,
+                              Frame::RadialNull>,
+      Tags::detail::DLambda<Tags::detail::DLambda<Tags::detail::RealBondiR>>,
+      ::Tags::deriv<Tags::detail::DLambda<Tags::detail::RealBondiR>,
+                    tmpl::size_t<2>, Frame::RadialNull>>>
+      computation_variables{size};
+
+  Variables<
+      tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                      std::integral_constant<int, 1>>>>
+      derivative_buffers{size};
+
+  auto& cos_phi = get<Tags::detail::CosPhi>(computation_variables);
+  auto& cos_theta = get<Tags::detail::CosTheta>(computation_variables);
+  auto& sin_phi = get<Tags::detail::SinPhi>(computation_variables);
+  auto& sin_theta = get<Tags::detail::SinTheta>(computation_variables);
+  trigonometric_functions_on_swsh_collocation(
+      make_not_null(&cos_phi), make_not_null(&cos_theta),
+      make_not_null(&sin_phi), make_not_null(&sin_theta), l_max);
+
+  auto& cartesian_coords =
+      get<Tags::detail::CartesianCoordinates>(computation_variables);
+  auto& cartesian_to_spherical_jacobian =
+      get<Tags::detail::CartesianToSphericalJacobian>(computation_variables);
+  auto& inverse_cartesian_to_spherical_jacobian =
+      get<Tags::detail::InverseCartesianToSphericalJacobian>(
+          computation_variables);
+  cartesian_to_spherical_coordinates_and_jacobians(
+      make_not_null(&cartesian_coords),
+      make_not_null(&cartesian_to_spherical_jacobian),
+      make_not_null(&inverse_cartesian_to_spherical_jacobian), cos_phi,
+      cos_theta, sin_phi, sin_theta, extraction_radius);
+
+  auto& spatial_metric =
+      get<gr::Tags::SpatialMetric<DataVector, 3>>(computation_variables);
+  gr::spatial_metric(make_not_null(&spatial_metric), spacetime_metric);
+
+  auto& inverse_spatial_metric =
+      get<gr::Tags::InverseSpatialMetric<DataVector, 3>>(computation_variables);
+  inverse_spatial_metric = determinant_and_inverse(spatial_metric).second;
+
+  auto& shift = get<gr::Tags::Shift<DataVector, 3>>(computation_variables);
+  gr::shift(make_not_null(&shift), spacetime_metric, inverse_spatial_metric);
+
+  auto& lapse = get<gr::Tags::Lapse<DataVector>>(computation_variables);
+  gr::lapse(make_not_null(&lapse), shift, spacetime_metric);
+
+  auto& dt_spacetime_metric =
+      get<::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>>(
+          computation_variables);
+
+  gh::time_derivative_of_spacetime_metric(make_not_null(&dt_spacetime_metric),
+                                          lapse, shift, pi, phi);
+
+  auto& dt_worldtube_normal =
+      get<::Tags::dt<Tags::detail::WorldtubeNormal>>(computation_variables);
+  auto& worldtube_normal =
+      get<Tags::detail::WorldtubeNormal>(computation_variables);
+  worldtube_normal_and_derivatives(
+      make_not_null(&worldtube_normal), make_not_null(&dt_worldtube_normal),
+      cos_phi, cos_theta, spacetime_metric, dt_spacetime_metric, sin_phi,
+      sin_theta, inverse_spatial_metric);
+  auto& spacetime_unit_normal =
+      get<gr::Tags::SpacetimeNormalVector<DataVector, 3>>(
+          computation_variables);
+  gr::spacetime_normal_vector(make_not_null(&spacetime_unit_normal), lapse,
+                              shift);
+  auto& dt_lapse =
+      get<::Tags::dt<gr::Tags::Lapse<DataVector>>>(computation_variables);
+  gh::time_deriv_of_lapse(make_not_null(&dt_lapse), lapse, shift,
+                          spacetime_unit_normal, phi, pi);
+  auto& dt_shift =
+      get<::Tags::dt<gr::Tags::Shift<DataVector, 3>>>(computation_variables);
+  gh::time_deriv_of_shift(make_not_null(&dt_shift), lapse, shift,
+                          inverse_spatial_metric, spacetime_unit_normal, phi,
+                          pi);
+
+  auto& du_null_l = get<::Tags::dt<Tags::detail::NullL>>(computation_variables);
+  auto& null_l = get<Tags::detail::NullL>(computation_variables);
+  null_vector_l_and_derivatives(make_not_null(&du_null_l),
+                                make_not_null(&null_l), dt_worldtube_normal,
+                                dt_lapse, dt_spacetime_metric, dt_shift, lapse,
+                                spacetime_metric, shift, worldtube_normal);
+
+  detail::create_st_boundary_data(
+      bondi_boundary_data, make_not_null(&computation_variables),
+      make_not_null(&derivative_buffers), dt_spacetime_metric, phi,
+      spacetime_metric, null_l, du_null_l, cartesian_to_spherical_jacobian,
+      inverse_cartesian_to_spherical_jacobian, dr_psi, dt_psi, l_max,
+      extraction_radius);
 }
 
 /*!

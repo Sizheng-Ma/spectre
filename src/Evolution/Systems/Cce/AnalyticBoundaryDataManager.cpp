@@ -32,6 +32,18 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
   create_bondi_boundary_data(boundary_data_variables, phi, pi, spacetime_metric,
                              extraction_radius_, l_max_);
 
+  DataVector dt_psi;
+  DataVector dr_psi;
+
+  using st_list = tmpl::list<Tags::BoundaryValue<Tags::BondiSTTheta>,
+                             Tags::BoundaryValue<Tags::Dr<Tags::BondiSTPsi>>>;
+
+  Variables<st_list>* boundary_st_variables;
+
+  create_st_boundary_data<st_list>(boundary_st_variables, phi, pi,
+                                   spacetime_metric, dr_psi, dt_psi,
+                                   extraction_radius_, l_max_);
+
   // auto& beta =
   //     get<Tags::BoundaryValue<Tags::BondiBeta>>(*boundary_data_variables);
 
