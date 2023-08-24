@@ -38,15 +38,16 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
                              extraction_radius_, l_max_);
 
   const auto& st_psi = get<Cce::Tags::BondiSTPsi>(boundary_tuple);
-
-  DataVector dt_psi{get<0, 0>(spacetime_metric).size(), 0.0};
-  DataVector dr_psi{get<0, 0>(spacetime_metric).size(), 0.0};
+  const auto& dt_psi = get<Cce::Tags::BondiSTTheta>(boundary_tuple);
+  const auto& dr_psi =
+      get<Cce::Tags::Dr<Cce::Tags::BondiSTPsi>>(boundary_tuple);
 
   get<Tags::BoundaryValue<Tags::BondiSTPsi>>(*st_boundary_data_variables) =
       st_psi;
 
   create_st_boundary_data(st_boundary_data_variables, phi, pi, spacetime_metric,
-                          dr_psi, dt_psi, extraction_radius_, l_max_);
+                          get(dr_psi).data(), get(dt_psi).data(),
+                          extraction_radius_, l_max_);
 
   // auto& beta =
   //     get<Tags::BoundaryValue<Tags::BondiBeta>>(*boundary_data_variables);

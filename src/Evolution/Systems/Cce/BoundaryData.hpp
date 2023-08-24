@@ -571,7 +571,7 @@ void create_st_boundary_data(
     const tnsr::A<DataVector, 3>& du_null_l,
     const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
     const CartesianiSphericalJ& inverse_cartesian_to_spherical_jacobian,
-    const DataVector dr_psi, const DataVector dt_psi, const size_t l_max,
+    const ComplexDataVector dr_psi, const ComplexDataVector dt_psi, const size_t l_max,
     const double extraction_radius) {
   const size_t size = Spectral::Swsh::number_of_swsh_collocation_points(l_max);
 
@@ -1065,9 +1065,9 @@ template <typename BoundaryTagList>
 void create_st_boundary_data(
     const gsl::not_null<Variables<BoundaryTagList>*> bondi_boundary_data,
     const tnsr::iaa<DataVector, 3>& phi, const tnsr::aa<DataVector, 3>& pi,
-    const tnsr::aa<DataVector, 3>& spacetime_metric, const DataVector dr_psi,
-    const DataVector dt_psi, const double extraction_radius,
-    const size_t l_max) {
+    const tnsr::aa<DataVector, 3>& spacetime_metric,
+    const ComplexDataVector dr_psi, const ComplexDataVector dt_psi,
+    const double extraction_radius, const size_t l_max) {
   const size_t size = Spectral::Swsh::number_of_swsh_collocation_points(l_max);
   Variables<tmpl::list<
       Tags::detail::CosPhi, Tags::detail::CosTheta, Tags::detail::SinPhi,
