@@ -81,9 +81,8 @@ struct CharacteristicExtractDefaults {
       tmpl::list<Cce::Tags::News, Cce::Tags::ScriPlus<Cce::Tags::Strain>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi3>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi2>,
-                 Cce::Tags::ScriPlus<Cce::Tags::Psi1>, Cce::Tags::BondiUAtScri,
+                 Cce::Tags::ScriPlus<Cce::Tags::Psi1>,
                  Cce::Tags::BoundaryValue<Cce::Tags::BondiSTPsi>,
-                 Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>,
                  Cce::Tags::BoundaryValue<Cce::Tags::BondiSTTheta>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi0>,
                  Cce::Tags::Du<Cce::Tags::TimeIntegral<
