@@ -673,9 +673,9 @@ void create_st_boundary_data(
   d_bondi_r(make_not_null(&d_r), r, dlambda_null_metric, du_null_metric,
             inverse_null_metric, l_max);
 
-  auto dr_bondi_psi = get<Tags::BoundaryValue<Tags::Dr<Tags::BondiSTPsi>>>(
+  auto& dr_bondi_psi = get<Tags::BoundaryValue<Tags::Dr<Tags::BondiSTPsi>>>(
       *bondi_boundary_data);
-  auto bondi_theta =
+  auto& bondi_theta =
       get<Tags::BoundaryValue<Tags::BondiSTTheta>>(*bondi_boundary_data);
 
   auto lr =
