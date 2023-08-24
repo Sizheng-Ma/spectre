@@ -60,6 +60,9 @@ class AnalyticBoundaryDataManager {
       gsl::not_null<Variables<
           Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>*>
           boundary_data_variables,
+      gsl::not_null<
+          Variables<Tags::st_worldtube_boundary_tags<Tags::BoundaryValue>>*>
+          st_boundary_data_variables,
       double time) const;
 
   /// Use `observers::ThreadedActions::WriteSimpleData` to output the expected
