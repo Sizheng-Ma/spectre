@@ -152,21 +152,12 @@ struct CharacteristicEvolution {
   using scalar_tensor_computation = tmpl::list<
       ::Actions::MutateApply<GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>>,
       Actions::CalculateIntegrandInputsForTag<Tags::BondiSTTheta>,
-      Actions::CalculateIntegrandInputsForTag<Tags::BondiSTduXInt>,
       tmpl::transform<
           integrand_terms_to_compute_for_bondi_variable<Tags::BondiSTTheta>,
           tmpl::bind<::Actions::MutateApply,
                      tmpl::bind<ComputeBondiIntegrand, tmpl::_1>>>,
-      tmpl::transform<
-          integrand_terms_to_compute_for_bondi_variable<Tags::BondiSTduXInt>,
-          tmpl::bind<::Actions::MutateApply,
-                     tmpl::bind<ComputeBondiIntegrand, tmpl::_1>>>,
       ::Actions::MutateApply<RadialIntegrateBondi<
-          Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTTheta>>,
-      ::Actions::MutateApply<RadialIntegrateBondi<
-          Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTduXInt>>,
-      ::Actions::MutateApply<PreSwshDerivatives<Tags::Dy<Tags::BondiSTX>>>,
-      ::Actions::MutateApply<ConstructAnaSolution>>;
+          Tags::EvolutionGaugeBoundaryValue, Tags::BondiSTTheta>>>;
 
   using compute_scri_quantities_and_observe = tmpl::list<
       ::Actions::MutateApply<
@@ -188,17 +179,10 @@ struct CharacteristicEvolution {
       ::Actions::MutateApply<PreSwshDerivatives<Tags::Dy<Tags::BondiSTPsi>>>,
       ::Actions::MutateApply<
           CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>>,
-      ::Actions::MutateApply<
-          CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTX>>>,
       Actions::InsertInterpolationScriData<
           Tags::ScriPlus<Tags::BondiSTPsi>,
           typename Metavariables::cce_boundary_component>,
-      Actions::InsertInterpolationScriData<
-          Tags::ScriPlus<Tags::BondiSTX>,
-          typename Metavariables::cce_boundary_component>,
       Actions::STScriObserveInterpolated<
-          observers::ObserverWriter<Metavariables>>,
-      Actions::STAnaScriObserveInterpolated<
           observers::ObserverWriter<Metavariables>>>;
 
   using self_start_extract_action_list = tmpl::list<
@@ -224,7 +208,6 @@ struct CharacteristicEvolution {
       scalar_tensor_computation,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiSTTheta>,
-      Actions::FilterSwshVolumeQuantity<Tags::BondiSTduX>,
       ::Actions::MutateApply<
           CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>>>,
       Actions::CalculateScriInputs,
@@ -258,7 +241,6 @@ struct CharacteristicEvolution {
       scalar_tensor_computation,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiSTTheta>,
-      Actions::FilterSwshVolumeQuantity<Tags::BondiSTduX>,
       compute_scri_quantities_and_observe,
       compute_st_scri_quantities_and_observe,
       ::Actions::RecordTimeStepperData<cce_system>,

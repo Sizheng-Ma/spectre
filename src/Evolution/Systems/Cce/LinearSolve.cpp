@@ -429,85 +429,11 @@ void RadialIntegrateBondi<BoundaryPrefix, Tags::BondiH>::apply(
                 2 * number_of_angular_points);
 }
 
-void ConstructAnaSolution::apply(
-    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_x_final,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> du_x_int,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> beta,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> st_x,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> one_minus_y,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> bondi_r,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> dy_st_x,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> boundary_du_X,
-    const size_t l_max, const size_t number_of_radial_points) {
-  const size_t boundary_size =
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max);
-  SpinWeighted<ComplexDataVector, 0> omega = exp(2. * get(beta));
-
-  SpinWeighted<ComplexDataVector, 0> omegaX = omega * get(st_x);
-
-  Variables<
-      tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
-                                      std::integral_constant<int, 0>>,
-                 ::Tags::SpinWeighted<::Tags::TempScalar<1, ComplexDataVector>,
-                                      std::integral_constant<int, 0>>,
-                 ::Tags::SpinWeighted<::Tags::TempScalar<2, ComplexDataVector>,
-                                      std::integral_constant<int, 0>>>>
-      computation_buffers{
-          Spectral::Swsh::number_of_swsh_collocation_points(l_max)};
-
-  auto& eth_ethbar_omega =
-      get(get<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
-                                   std::integral_constant<int, 0>>>(
-          computation_buffers));
-
-  auto& eth_ethbar_X =
-      get(get<::Tags::SpinWeighted<::Tags::TempScalar<1, ComplexDataVector>,
-                                   std::integral_constant<int, 0>>>(
-          computation_buffers));
-
-  auto& eth_ethbar_omega_X =
-      get(get<::Tags::SpinWeighted<::Tags::TempScalar<2, ComplexDataVector>,
-                                   std::integral_constant<int, 0>>>(
-          computation_buffers));
-
-  Spectral::Swsh::angular_derivatives<tmpl::list<
-      Spectral::Swsh::Tags::EthEthbar, Spectral::Swsh::Tags::EthEthbar,
-      Spectral::Swsh::Tags::EthEthbar>>(
-      l_max, number_of_radial_points, make_not_null(&eth_ethbar_omega),
-      make_not_null(&eth_ethbar_X), make_not_null(&eth_ethbar_omega_X), omega,
-      get(st_x), omegaX);
-
-  auto dr_X = 0.5 * get(dy_st_x) * square(get(one_minus_y)) / get(bondi_r);
-  auto radius_inverse = 0.5 * get(one_minus_y) / get(bondi_r);
-
-  SpinWeighted<ComplexDataVector, 0> volume_term =
-      (eth_ethbar_omega + omega) * dr_X - eth_ethbar_omega_X * radius_inverse -
-      2 * dr_X * radius_inverse / square(omega) +
-      omega * radius_inverse * eth_ethbar_X;
-
-  ComplexDataVector angular_view_boundary{boundary_size};
-
-  for (size_t i = 0; i < boundary_size; i++) {
-    angular_view_boundary[i] = volume_term.data()[i];
-  }
-
-  for (size_t i = 0; i < number_of_radial_points; i++) {
-    ComplexDataVector angular_view_full{
-        volume_term.data().data() + i * boundary_size, boundary_size};
-    angular_view_full = angular_view_full - angular_view_boundary +
-                        2.0 * get(boundary_du_X).data();
-  }
-
-  // TODO: add boundary value of du_x_final
-  get(*du_x_final) = 0.5 * (volume_term + get(du_x_int));
-}
-
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiBeta>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiQ>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiU>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiW>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiSTTheta>;
-template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiSTduXInt>;
 template struct RadialIntegrateBondi<Tags::BoundaryValue, Tags::BondiH>;
 template struct RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
                                      Tags::BondiBeta>;
@@ -519,8 +445,6 @@ template struct RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
                                      Tags::BondiW>;
 template struct RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
                                      Tags::BondiSTTheta>;
-template struct RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
-                                     Tags::BondiSTduXInt>;
 template struct RadialIntegrateBondi<Tags::EvolutionGaugeBoundaryValue,
                                      Tags::BondiH>;
 

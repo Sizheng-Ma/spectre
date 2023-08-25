@@ -342,21 +342,6 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>::apply(
   get(*st_psi_scri) = -2. * get(boundary_r) * dy_st_psi_scri;
 }
 
-void CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTX>>::apply(
-    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> scri_st_x,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& st_x, size_t l_max,
-    size_t number_of_radial_points) {
-  const size_t number_of_angular_points =
-      Spectral::Swsh::number_of_swsh_collocation_points(l_max);
-
-  const SpinWeighted<ComplexDataVector, 0> dy_st_psi_scri;
-  make_const_view(make_not_null(&dy_st_psi_scri), get(st_x),
-                  (number_of_radial_points - 1) * number_of_angular_points,
-                  number_of_angular_points);
-
-  get(*scri_st_x) = dy_st_psi_scri;
-}
-
 void CalculateScriPlusValue<Tags::ScriPlus<Tags::Strain>>::apply(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, -2>>*> strain,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_bondi_j,
