@@ -215,23 +215,5 @@ struct RadialIntegrateBondi<BoundaryPrefix, Tags::BondiH> {
       size_t l_max, size_t number_of_radial_points);
 };
 
-struct ConstructAnaSolution {
-  using return_tags = tmpl::list<Tags::BondiSTduX>;
-  using argument_tags =
-      tmpl::list<Tags::BondiSTduXInt, Tags::BondiBeta, Tags::BondiSTX,
-                 Tags::OneMinusY, Tags::BondiR, Tags::Dy<Tags::BondiSTX>,
-                 Tags::BoundaryValue<Tags::BondiSTduX>,
-                 Tags::LMax, Tags::NumberOfRadialPoints>;
-  static void apply(
-        gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> du_x_final,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> du_x_int,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> beta,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> st_x,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> one_minus_y,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> bondi_r,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> dy_st_x,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>> boundary_du_X,
-    const size_t l_max, const size_t number_of_radial_points);
-};
 /// @}
 }  // namespace Cce

@@ -117,8 +117,6 @@ void GaugeAdjustedBoundaryValue<Tags::BondiBeta>::apply(
 void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
         evolution_st_theta,
-    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
-        evolution_st_du_x,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_theta,
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& evolution_gauge_u_at_scri,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
@@ -154,7 +152,6 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
   get(*evolution_st_theta) +=
       get(du_r_divided_by_r) * get(evolution_gauge_r) * dr_evolution_gauge_psi;
 
-  get(*evolution_st_du_x) = get(bondi_beta) * 0.0;
   //   -get(cauchy_st_psi) * exp(-4. * get(bondi_beta)) / get(bondi_r) +
   //   0.5 * exp(2. * get(bondi_beta)) * eth_ethbar_psi;
 }

@@ -177,7 +177,6 @@ struct BoundaryComputeAndSendToEvolution<
                     Parallel::GlobalCache<Metavariables>& cache,
                     const ArrayIndex& /*array_index*/, const TimeStepId& time) {
     bool successfully_populated = false;
-    bool successfully_populated_st = false;
     db::mutate<Tags::AnalyticBoundaryDataManager,
                ::Tags::Variables<
                    typename Metavariables::cce_boundary_communication_tags>,
@@ -199,24 +198,8 @@ struct BoundaryComputeAndSendToEvolution<
                                                        time.substep_time());
         },
         make_not_null(&box));
-    const auto& bondi_r = db::get<Tags::BoundaryValue<Tags::BondiR>>(box);
-    db::mutate<Tags::STAnalyticBoundaryDataManager,
-               ::Tags::Variables<
-                   typename Metavariables::st_cce_boundary_communication_tags>>(
-        [&successfully_populated_st, &time, &bondi_r](
-            const gsl::not_null<Cce::STAnalyticBoundaryDataManager*>
-                worldtube_data_manager,
-            const gsl::not_null<Variables<
-                typename Metavariables::st_cce_boundary_communication_tags>*>
-                boundary_variables) {
-          successfully_populated_st =
-              (*worldtube_data_manager)
-                  .populate_hypersurface_boundary_data(
-                      boundary_variables, time.substep_time(), bondi_r);
-        },
-        make_not_null(&box));
 
-    if ((not successfully_populated) or (not successfully_populated_st)) {
+    if (not successfully_populated) {
       ERROR("Insufficient boundary data to proceed, exiting early at time "
             << time.substep_time());
     }
