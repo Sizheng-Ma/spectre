@@ -17,7 +17,6 @@
 #include "Evolution/Systems/Cce/InterfaceManagers/GhLocalTimeStepping.hpp"
 #include "Evolution/Systems/Cce/InterfaceManagers/GhLockstep.hpp"
 #include "Evolution/Systems/Cce/OptionTags.hpp"
-#include "Evolution/Systems/Cce/STAnalyticBoundaryDataManager.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "NumericalAlgorithms/Interpolation/SpanInterpolator.hpp"
 #include "NumericalAlgorithms/Spectral/SwshCollocation.hpp"
@@ -232,14 +231,14 @@ template <typename Metavariables>
 struct InitializeSTWorldtubeBoundary<AnalyticWorldtubeBoundary<Metavariables>>
     : public detail::InitializeWorldtubeBoundaryBase<
           InitializeSTWorldtubeBoundary<AnalyticWorldtubeBoundary<Metavariables>>,
-          tmpl::list<Tags::STAnalyticBoundaryDataManager,
+          tmpl::list<
                      Tags::CceEvolutionPrefix<::Tags::TimeStepper<
                          tmpl::conditional_t<Metavariables::local_time_stepping,
                                              LtsTimeStepper, TimeStepper>>>>,
           typename Metavariables::st_cce_boundary_communication_tags> {
   using base_type = detail::InitializeWorldtubeBoundaryBase<
       InitializeSTWorldtubeBoundary<AnalyticWorldtubeBoundary<Metavariables>>,
-      tmpl::list<Tags::STAnalyticBoundaryDataManager,
+      tmpl::list<
                  Tags::CceEvolutionPrefix<::Tags::TimeStepper<
                      tmpl::conditional_t<Metavariables::local_time_stepping,
                                          LtsTimeStepper, TimeStepper>>>>,

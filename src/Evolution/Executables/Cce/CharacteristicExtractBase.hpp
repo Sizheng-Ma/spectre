@@ -20,11 +20,9 @@
 template <bool EvolveCcm>
 struct CharacteristicExtractDefaults {
   static constexpr bool evolve_ccm = EvolveCcm;
-  using evolved_swsh_tag =
-      tmpl::list<Cce::Tags::BondiSTX, Cce::Tags::BondiSTPsi, Cce::Tags::BondiJ>;
+  using evolved_swsh_tag = tmpl::list<Cce::Tags::BondiSTPsi, Cce::Tags::BondiJ>;
   using evolved_swsh_dt_tag =
-      tmpl::list<Cce::Tags::BondiSTTheta, Cce::Tags::BondiH,
-                 Cce::Tags::BondiSTduX>;
+      tmpl::list<Cce::Tags::BondiSTTheta, Cce::Tags::BondiH>;
   using evolved_coordinates_variables_tag = Tags::Variables<
       tmpl::conditional_t<evolve_ccm,
                           tmpl::list<Cce::Tags::CauchyCartesianCoords,
@@ -48,7 +46,6 @@ struct CharacteristicExtractDefaults {
   using st_cce_boundary_communication_tags = tmpl::list<
       Cce::Tags::BoundaryValue<Cce::Tags::BondiSTPsi>,
       Cce::Tags::BoundaryValue<Cce::Tags::BondiSTTheta>,
-      Cce::Tags::BoundaryValue<Cce::Tags::BondiSTduX>,
       Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiSTPsi>>>;
 
   using st_gauge_boundary_tag = tmpl::list<
@@ -98,8 +95,7 @@ struct CharacteristicExtractDefaults {
                  Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>,
                  Cce::Tags::EthInertialRetardedTime>;
   using cce_st_scri_tags =
-      tmpl::list<Cce::Tags::ScriPlus<Cce::Tags::BondiSTPsi>,
-                 Cce::Tags::ScriPlus<Cce::Tags::BondiSTX>>;
+      tmpl::list<Cce::Tags::ScriPlus<Cce::Tags::BondiSTPsi>>;
   using cce_integrand_tags = tmpl::flatten<tmpl::transform<
       Cce::bondi_hypersurface_step_tags,
       tmpl::bind<Cce::integrand_terms_to_compute_for_bondi_variable,
@@ -107,8 +103,7 @@ struct CharacteristicExtractDefaults {
 
   using cce_st_integrand_tags = tmpl::flatten<
       tmpl::list<Cce::integrand_terms_to_compute_for_bondi_variable<
-                     Cce::Tags::BondiSTTheta>,
-                 Cce::Tags::Integrand<Cce::Tags::BondiSTduXInt>>>;
+                     Cce::Tags::BondiSTTheta>>>;
   using ccm_matching_tags = tmpl::list<
       Cce::Tags::BondiJCauchyView, Cce::Tags::Psi0Match,
       Cce::Tags::Dy<Cce::Tags::Psi0Match>,
@@ -127,9 +122,7 @@ struct CharacteristicExtractDefaults {
   using cce_pre_swsh_derivatives_tags = Cce::all_pre_swsh_derivative_tags;
   using cce_st_pre_swsh_derivatives_tags =
       tmpl::list<Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiSTPsi>>,
-                 Cce::Tags::Dy<Cce::Tags::BondiK>,
-                 Cce::Tags::Dy<Cce::Tags::BondiSTX>,
-                 Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiSTX>>>;
+                 Cce::Tags::Dy<Cce::Tags::BondiK>>;
   using cce_transform_buffer_tags = Cce::all_transform_buffer_tags;
   using cce_swsh_derivative_tags = Cce::all_swsh_derivative_tags;
   using cce_st_swsh_derivative_tags = tmpl::list<
@@ -137,27 +130,18 @@ struct CharacteristicExtractDefaults {
                                        Spectral::Swsh::Tags::Ethbar>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiSTPsi,
                                        Spectral::Swsh::Tags::EthEthbar>,
-      Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiSTX,
-                                       Spectral::Swsh::Tags::EthEthbar>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiK,
                                        Spectral::Swsh::Tags::Eth>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiJbar,
                                        Spectral::Swsh::Tags::Eth>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::Dy<Cce::Tags::BondiSTPsi>,
                                        Spectral::Swsh::Tags::Eth>,
-      Spectral::Swsh::Tags::Derivative<Cce::Tags::Dy<Cce::Tags::BondiSTX>,
-                                       Spectral::Swsh::Tags::Eth>,
-      Spectral::Swsh::Tags::Derivative<Cce::Tags::Dy<Cce::Tags::BondiSTX>,
-                                       Spectral::Swsh::Tags::Ethbar>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiSTPsi,
                                        Spectral::Swsh::Tags::EthEth>>;
   using cce_st_transform_buffer_tags = tmpl::list<
       Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
           Cce::Tags::BondiSTPsi, Spectral::Swsh::Tags::EthEthbar>>,
-      Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
-          Cce::Tags::BondiSTX, Spectral::Swsh::Tags::EthEthbar>>,
       Spectral::Swsh::Tags::SwshTransform<Cce::Tags::BondiK>,
-      Spectral::Swsh::Tags::SwshTransform<Cce::Tags::BondiSTX>,
       Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
           Cce::Tags::BondiK, Spectral::Swsh::Tags::Eth>>,
       Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<

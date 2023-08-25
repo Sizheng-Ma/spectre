@@ -42,17 +42,6 @@ struct BondiSTPsi : db::SimpleTag {
   static std::string name() { return "STPsi"; }
 };
 
-// r*BondiSTPsi
-struct BondiSTX : db::SimpleTag {
-  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
-  static std::string name() { return "STX"; }
-};
-
-struct BondiSTduXInt : db::SimpleTag {
-  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
-  static std::string name() { return "STduXInt"; }
-};
-
 }  // namespace Tags
 }  // namespace Cce
 
@@ -78,7 +67,6 @@ namespace Tags {
 /// grids).
 using BondiH = ::Tags::dt<BondiJ>;
 using BondiSTTheta = ::Tags::dt<BondiSTPsi>;
-using BondiSTduX = ::Tags::dt<BondiSTX>;
 
 /// Bondi parameter \f$\bar{J}\f$
 struct BondiJbar : db::SimpleTag {

@@ -9,7 +9,6 @@
 namespace Cce::ScalarTensor {
 void InitializeSTPsi::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> bondi_st_psi,
-    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> bondi_st_x,
     const size_t l_max, const size_t number_of_radial_points,
     const Scalar<SpinWeighted<ComplexDataVector, 0>> st_psi_boundary,
     const Scalar<SpinWeighted<ComplexDataVector, 0>> bondi_r) {
@@ -35,8 +34,6 @@ void InitializeSTPsi::apply(
   for (size_t i = 0; i < number_of_radial_points; i++) {
     ComplexDataVector angular_view_scalar_tensor_psi{
         get(*bondi_st_psi).data().data() + boundary_size * i, boundary_size};
-    ComplexDataVector angular_view_scalar_tensor_x{
-        get(*bondi_st_x).data().data() + boundary_size * i, boundary_size};
 
     // double ycenter = -0.0;
     // double ymin = -0.8;
@@ -45,7 +42,6 @@ void InitializeSTPsi::apply(
     const double u0 = 10;
     const double sigma0 = 1;
     double psi_boundary = exp(-0.5 * square(u0) / square(sigma0));
-    angular_view_scalar_tensor_x = psi_boundary * perturbed_j.data();
     angular_view_scalar_tensor_psi = get(st_psi_boundary).data() *
                                      one_minus_y_collocation[i] / 2. /
                                      get(bondi_r).data();

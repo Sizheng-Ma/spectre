@@ -27,18 +27,6 @@
 namespace Cce {
 // suppresses doxygen problems with these functions
 
-void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiSTduXInt>>::apply_impl(
-    gsl::not_null<SpinWeighted<ComplexDataVector, 0>*> integrand_for_duX,
-    const SpinWeighted<ComplexDataVector, 0>& ethethbar_st_X,
-    const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
-    const SpinWeighted<ComplexDataVector, 0>& beta,
-    const SpinWeighted<ComplexDataVector, 0>& bondi_r,
-    const SpinWeighted<ComplexDataVector, 0>& bondi_st_X) {
-  *integrand_for_duX = (-bondi_st_X * one_minus_y / bondi_r * exp(-4. * beta) +
-                        exp(2. * beta) * ethethbar_st_X) /
-                       (2. * bondi_r);
-}
-
 namespace detail {
 
 void BH(SpinWeighted<ComplexDataVector, 0>& result,
