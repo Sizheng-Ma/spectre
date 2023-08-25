@@ -81,7 +81,8 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiR> {
 template <>
 struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
   using return_tags =
-      tmpl::list<Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTTheta>>;
+      tmpl::list<Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTTheta>,
+                 Tags::EvolutionGaugeBoundaryValue<Tags::BondiSTPsi>>;
   using argument_tags = tmpl::list<
       Tags::BoundaryValue<Tags::BondiSTTheta>, Tags::BondiUAtScri,
       Tags::BoundaryValue<Tags::BondiSTPsi>,
@@ -95,6 +96,8 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
   static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
           evolution_st_theta,
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          evolution_st_psi,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_theta,
       const Scalar<SpinWeighted<ComplexDataVector, 1>>&
           evolution_gauge_u_at_scri,

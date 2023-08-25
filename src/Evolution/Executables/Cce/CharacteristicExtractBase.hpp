@@ -49,7 +49,8 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiSTPsi>>>;
 
   using st_gauge_boundary_tag = tmpl::list<
-      Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::BondiSTTheta>>;
+      Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::BondiSTTheta>,
+      Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::BondiSTPsi>>;
 
   using cce_gauge_boundary_tags = tmpl::flatten<tmpl::list<
       tmpl::transform<
