@@ -42,9 +42,8 @@ void InitializeSTPsi::apply(
     const double u0 = 10;
     const double sigma0 = 1;
     double psi_boundary = exp(-0.5 * square(u0) / square(sigma0));
-    angular_view_scalar_tensor_psi = get(st_psi_boundary).data() *
-                                     one_minus_y_collocation[i] / 2. /
-                                     get(bondi_r).data();
+    angular_view_scalar_tensor_psi =
+        get(st_psi_boundary).data() * one_minus_y_collocation[i] / 2.;
     // if (one_minus_y_collocation[i] >= (1. - ymax) &&
     //     one_minus_y_collocation[i] <= (1. - ymin)) {
     //   angular_view_scalar_tensor_psi +=
