@@ -683,8 +683,8 @@ void create_st_boundary_data(
       get<1, 0>(inverse_cartesian_to_spherical_jacobian) * get<2>(null_l) +
       get<2, 0>(inverse_cartesian_to_spherical_jacobian) * get<3>(null_l);
 
-  get(dr_bondi_psi).data() = (get<0>(null_l) * dt_psi + dr_psi * lr) /
-                             get<1>(null_l);  // TODO this is wrong
+  get(dr_bondi_psi).data() =
+      (get<0>(null_l) * dt_psi + dr_psi * lr) / get<1>(d_r);
   get(bondi_theta).data() = dt_psi - get<0>(d_r) * get(dr_bondi_psi).data();
 }
 // the common step between the modal input and the Generalized harmonic input
