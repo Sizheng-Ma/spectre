@@ -178,11 +178,6 @@ void RobinsonTrautman::variables_impl(
 void RobinsonTrautman::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
     size_t output_l_max, double time,
-    tmpl::type_<Tags::Dr<Tags::BondiSTPsi>> /*meta*/) const {}
-
-void RobinsonTrautman::variables_impl(
-    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
-    size_t output_l_max, double time,
     tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {}
 
 void RobinsonTrautman::variables_impl(

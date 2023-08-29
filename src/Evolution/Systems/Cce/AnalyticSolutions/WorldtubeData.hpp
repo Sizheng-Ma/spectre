@@ -77,8 +77,8 @@ struct WorldtubeData : public PUP::able {
 
   /// The set of available tags provided by the analytic solution
   using tags = tmpl::list<
-      Tags::BondiSTPsi, Tags::BondiSTTheta, Tags::Dr<Tags::BondiSTPsi>,
-      Tags::CauchyCartesianCoords, Tags::Dr<Tags::CauchyCartesianCoords>,
+      Tags::BondiSTPsi, Tags::BondiSTTheta, Tags::CauchyCartesianCoords,
+      Tags::Dr<Tags::CauchyCartesianCoords>,
       gr::Tags::SpacetimeMetric<DataVector, 3>,
       ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
       gh::Tags::Pi<DataVector, 3>, gh::Tags::Phi<DataVector, 3>,
@@ -247,11 +247,6 @@ struct WorldtubeData : public PUP::able {
   virtual void variables_impl(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
       size_t output_l_max, double time,
-      tmpl::type_<Tags::Dr<Tags::BondiSTPsi>> /*meta*/) const = 0;
-
-  virtual void variables_impl(
-      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
-      size_t output_l_max, double time,
       tmpl::type_<Tags::BondiSTTheta> /*meta*/) const = 0;
   template <typename Tag>
   struct IntermediateCache {
@@ -267,21 +262,20 @@ struct WorldtubeData : public PUP::able {
 
   using IntermediateCacheTuple =
       tuples::tagged_tuple_from_typelist<tmpl::transform<
-          tmpl::list<Tags::BondiSTPsi, Tags::BondiSTTheta,
-                     Tags::Dr<Tags::BondiSTPsi>, Tags::CauchyCartesianCoords,
-                     Tags::Dr<Tags::CauchyCartesianCoords>,
-                     gr::Tags::SpacetimeMetric<DataVector, 3>,
-                     gh::Tags::Pi<DataVector, 3>, gh::Tags::Phi<DataVector, 3>,
-                     gr::Tags::SpatialMetric<DataVector, 3>,
-                     gr::Tags::Shift<DataVector, 3>,
-                     gr::Tags::Lapse<DataVector>,
-                     ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
-                     ::Tags::dt<gr::Tags::SpatialMetric<DataVector, 3>>,
-                     ::Tags::dt<gr::Tags::Shift<DataVector, 3>>,
-                     ::Tags::dt<gr::Tags::Lapse<DataVector>>,
-                     Tags::Dr<gr::Tags::SpatialMetric<DataVector, 3>>,
-                     Tags::Dr<gr::Tags::Shift<DataVector, 3>>,
-                     Tags::Dr<gr::Tags::Lapse<DataVector>>, Tags::News>,
+          tmpl::list<
+              Tags::BondiSTPsi, Tags::BondiSTTheta, Tags::CauchyCartesianCoords,
+              Tags::Dr<Tags::CauchyCartesianCoords>,
+              gr::Tags::SpacetimeMetric<DataVector, 3>,
+              gh::Tags::Pi<DataVector, 3>, gh::Tags::Phi<DataVector, 3>,
+              gr::Tags::SpatialMetric<DataVector, 3>,
+              gr::Tags::Shift<DataVector, 3>, gr::Tags::Lapse<DataVector>,
+              ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
+              ::Tags::dt<gr::Tags::SpatialMetric<DataVector, 3>>,
+              ::Tags::dt<gr::Tags::Shift<DataVector, 3>>,
+              ::Tags::dt<gr::Tags::Lapse<DataVector>>,
+              Tags::Dr<gr::Tags::SpatialMetric<DataVector, 3>>,
+              Tags::Dr<gr::Tags::Shift<DataVector, 3>>,
+              Tags::Dr<gr::Tags::Lapse<DataVector>>, Tags::News>,
           tmpl::bind<IntermediateCacheTag, tmpl::_1>>>;
 
   // NOLINTNEXTLINE(spectre-mutable)

@@ -253,11 +253,6 @@ struct SphericalMetricData : public WorldtubeData {
   void variables_impl(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
       size_t output_l_max, double time,
-      tmpl::type_<Tags::Dr<Tags::BondiSTPsi>> /*meta*/) const override;
-
-  void variables_impl(
-      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
-      size_t output_l_max, double time,
       tmpl::type_<Tags::BondiSTTheta> /*meta*/) const override;
 
   /// Must be overriden in the derived class; should compute the spacetime

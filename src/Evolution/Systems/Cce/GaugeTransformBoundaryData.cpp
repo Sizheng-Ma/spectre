@@ -143,7 +143,6 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_theta,
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& evolution_gauge_u_at_scri,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& dr_cauchy_st_psi,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& evolution_gauge_r,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_omega,
@@ -154,10 +153,6 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
   interpolator.interpolate(make_not_null(&get(*evolution_st_theta)),
                            get(cauchy_st_theta));
 
-  SpinWeighted<ComplexDataVector, 0> dr_evolution_gauge_psi;
-
-  interpolator.interpolate(make_not_null(&dr_evolution_gauge_psi),
-                           get(dr_cauchy_st_psi));
   interpolator.interpolate(make_not_null(&get(*evolution_st_psi)),
                            get(cauchy_st_psi));
 
@@ -167,13 +162,6 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
 
   get(*evolution_st_theta).data() +=
       real(get(evolution_gauge_u_at_scri).data() * conj(eth_psi).data());
-
-  get(*evolution_st_theta).data() -=
-      get(evolution_gauge_r).data() / square(get(omega).data()) *
-      get(du_omega).data() * dr_evolution_gauge_psi.data();
-
-  get(*evolution_st_theta) +=
-      get(du_r_divided_by_r) * get(evolution_gauge_r) * dr_evolution_gauge_psi;
 
   //   -get(cauchy_st_psi) * exp(-4. * get(bondi_beta)) / get(bondi_r) +
   //   0.5 * exp(2. * get(bondi_beta)) * eth_ethbar_psi;
