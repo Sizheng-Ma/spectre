@@ -175,15 +175,14 @@ struct CharacteristicEvolution {
           observers::ObserverWriter<Metavariables>,
           typename Metavariables::cce_boundary_component>>;
 
-  using compute_st_scri_quantities_and_observe = tmpl::list<
-      ::Actions::MutateApply<PreSwshDerivatives<Tags::Dy<Tags::BondiSTPsi>>>,
-      ::Actions::MutateApply<
-          CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>>,
-      Actions::InsertInterpolationScriData<
-          Tags::ScriPlus<Tags::BondiSTPsi>,
-          typename Metavariables::cce_boundary_component>,
-      Actions::STScriObserveInterpolated<
-          observers::ObserverWriter<Metavariables>>>;
+  using compute_st_scri_quantities_and_observe =
+      tmpl::list<::Actions::MutateApply<
+                     CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>>,
+                 Actions::InsertInterpolationScriData<
+                     Tags::ScriPlus<Tags::BondiSTPsi>,
+                     typename Metavariables::cce_boundary_component>,
+                 Actions::STScriObserveInterpolated<
+                     observers::ObserverWriter<Metavariables>>>;
 
   using self_start_extract_action_list = tmpl::list<
       Actions::RequestBoundaryData<

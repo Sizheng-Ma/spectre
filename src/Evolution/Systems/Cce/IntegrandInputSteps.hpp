@@ -93,8 +93,9 @@ struct TagsToComputeForImpl<Tags::BondiU> {
 template <>
 struct TagsToComputeForImpl<Tags::BondiSTTheta> {
   using pre_swsh_derivative_tags =
-      tmpl::list<Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>,Tags::Dy<Tags::BondiW>,
-                 Tags::Dy<Tags::BondiBeta>, Tags::Dy<Tags::BondiK>>;
+      tmpl::list<Tags::Dy<Tags::Dy<Tags::BondiSTPsi>>,
+                 Tags::Dy<Tags::BondiSTPsi>, Tags::Dy<Tags::BondiW>,
+                 Tags::Dy<Tags::BondiU>>;
   using second_swsh_derivative_tags =
       tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
                                                   Spectral::Swsh::Tags::EthEth>,
@@ -105,12 +106,12 @@ struct TagsToComputeForImpl<Tags::BondiSTTheta> {
                                                   Spectral::Swsh::Tags::Eth>,
                  Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
                                                   Spectral::Swsh::Tags::Eth>,
-                 Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
-                                                  Spectral::Swsh::Tags::Eth>,
                  Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
                                                   Spectral::Swsh::Tags::Ethbar>,
                  Spectral::Swsh::Tags::Derivative<Tags::BondiU,
                                                   Spectral::Swsh::Tags::Ethbar>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiBeta,
+                                                  Spectral::Swsh::Tags::Eth>,
                  Spectral::Swsh::Tags::Derivative<Tags::BondiK,
                                                   Spectral::Swsh::Tags::Eth>>;
 };
