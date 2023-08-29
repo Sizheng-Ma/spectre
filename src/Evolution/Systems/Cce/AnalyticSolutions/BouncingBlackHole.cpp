@@ -46,32 +46,6 @@ void BouncingBlackHole::variables_impl(
                             square(get<2>(cartesian_coordinates)));
   get(*st_psi).data() = sin(time - r) / r;
 }
-
-void BouncingBlackHole::variables_impl(
-    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
-    size_t output_l_max, double time,
-    tmpl::type_<Tags::Dr<Tags::BondiSTPsi>> /*meta*/) const {
-  const auto& cartesian_coordinates =
-      cache_or_compute<Tags::CauchyCartesianCoords>(output_l_max, time);
-  const DataVector adjusted_x_coordinate =
-      amplitude_ * pow<4>(sin(frequency_ * time)) +
-      get<0>(cartesian_coordinates);
-  const DataVector r = sqrt(square(adjusted_x_coordinate) +
-                            square(get<1>(cartesian_coordinates)) +
-                            square(get<2>(cartesian_coordinates)));
-
-  const DataVector rprime = sqrt(square(get<0>(cartesian_coordinates)) +
-                                 square(get<1>(cartesian_coordinates)) +
-                                 square(get<2>(cartesian_coordinates)));
-  auto drdrprime =
-      adjusted_x_coordinate / r * get<0>(cartesian_coordinates) / rprime +
-      square(get<1>(cartesian_coordinates)) / r / rprime +
-      square(get<2>(cartesian_coordinates)) / r / rprime;
-
-  get(*st_psi).data() =
-      cos(time - r) / r * (-drdrprime) - sin(time - r) / square(r) * drdrprime;
-}
-
 void BouncingBlackHole::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
     size_t output_l_max, double time,

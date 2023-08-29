@@ -86,7 +86,6 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
   using argument_tags = tmpl::list<
       Tags::BoundaryValue<Tags::BondiSTTheta>, Tags::BondiUAtScri,
       Tags::BoundaryValue<Tags::BondiSTPsi>,
-      Tags::BoundaryValue<Tags::Dr<Tags::BondiSTPsi>>,
       Tags::EvolutionGaugeBoundaryValue<Tags::BondiR>,
       Tags::PartiallyFlatGaugeOmega, Tags::Du<Tags::PartiallyFlatGaugeOmega>,
       Tags::EvolutionGaugeBoundaryValue<Tags::DuRDividedByR>,
@@ -103,7 +102,6 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
       const Scalar<SpinWeighted<ComplexDataVector, 1>>&
           evolution_gauge_u_at_scri,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dr_cauchy_st_psi,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& evolution_gauge_r,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_omega,
