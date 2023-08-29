@@ -182,7 +182,7 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
   make_const_view(make_not_null(&surface_psi), get(volume_psi), 0,
                   Spectral::Swsh::number_of_swsh_collocation_points(l_max));
 
-  hihihi::compute_norm(get(cauchy_st_psi), surface_psi);
+  hihihi::compute_norm(get(*evolution_st_psi), surface_psi);
 }
 
 void GaugeAdjustedBoundaryValue<Tags::BondiQ>::apply_impl(
