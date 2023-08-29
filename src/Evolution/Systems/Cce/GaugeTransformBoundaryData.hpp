@@ -91,7 +91,8 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
       Tags::PartiallyFlatGaugeOmega, Tags::Du<Tags::PartiallyFlatGaugeOmega>,
       Tags::EvolutionGaugeBoundaryValue<Tags::DuRDividedByR>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
-      Tags::LMax, Tags::EvolutionGaugeBoundaryValue<Tags::BondiBeta>>;
+      Tags::LMax, Tags::EvolutionGaugeBoundaryValue<Tags::BondiBeta>,
+      Tags::BondiSTPsi>;
 
   static void apply(
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
@@ -108,7 +109,8 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_omega,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r_divided_by_r,
       const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta);
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi);
 };
 
 /*!
