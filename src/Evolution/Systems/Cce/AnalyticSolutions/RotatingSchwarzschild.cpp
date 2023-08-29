@@ -112,11 +112,6 @@ void RotatingSchwarzschild::variables_impl(
 void RotatingSchwarzschild::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
     size_t output_l_max, double time,
-    tmpl::type_<Tags::Dr<Tags::BondiSTPsi>> /*meta*/) const {}
-
-void RotatingSchwarzschild::variables_impl(
-    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
-    size_t output_l_max, double time,
     tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {}
 
 void RotatingSchwarzschild::variables_impl(

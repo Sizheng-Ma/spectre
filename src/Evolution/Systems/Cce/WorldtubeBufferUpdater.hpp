@@ -106,7 +106,6 @@ using cce_bondi_input_tags =
 
 using cce_st_input_tags =
     tmpl::list<Spectral::Swsh::Tags::SwshTransform<Tags::BondiSTPsi>,
-               Spectral::Swsh::Tags::SwshTransform<Tags::Dr<Tags::BondiSTPsi>>,
                Spectral::Swsh::Tags::SwshTransform<Tags::BondiSTTheta>>;
 
 /// \cond

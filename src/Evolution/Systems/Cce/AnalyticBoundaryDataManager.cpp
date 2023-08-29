@@ -28,8 +28,7 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
       l_max_, time,
       tmpl::list<gr::Tags::SpacetimeMetric<DataVector, 3>,
                  gh::Tags::Pi<DataVector, 3>, gh::Tags::Phi<DataVector, 3>,
-                 Tags::BondiSTPsi, Tags::BondiSTTheta,
-                 Tags::Dr<Tags::BondiSTPsi>>{});
+                 Tags::BondiSTPsi, Tags::BondiSTTheta>{});
   const auto& spacetime_metric =
       get<gr::Tags::SpacetimeMetric<DataVector, 3>>(boundary_tuple);
   const auto& pi = get<gh::Tags::Pi<DataVector, 3>>(boundary_tuple);
@@ -39,15 +38,16 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
 
   const auto& st_psi = get<Cce::Tags::BondiSTPsi>(boundary_tuple);
   const auto& dt_psi = get<Cce::Tags::BondiSTTheta>(boundary_tuple);
-  const auto& dr_psi =
-      get<Cce::Tags::Dr<Cce::Tags::BondiSTPsi>>(boundary_tuple);
 
   get<Tags::BoundaryValue<Tags::BondiSTPsi>>(*st_boundary_data_variables) =
       st_psi;
+  get<Tags::BoundaryValue<Tags::BondiSTTheta>>(*st_boundary_data_variables) =
+      dt_psi;
 
-  create_st_boundary_data(st_boundary_data_variables, phi, pi, spacetime_metric,
-                          get(dr_psi).data(), get(dt_psi).data(),
-                          extraction_radius_, l_max_);
+  //   create_st_boundary_data(st_boundary_data_variables, phi, pi,
+  //   spacetime_metric,
+  //                           get(dr_psi).data(), get(dt_psi).data(),
+  //                           extraction_radius_, l_max_);
 
   // auto& beta =
   //     get<Tags::BoundaryValue<Tags::BondiBeta>>(*boundary_data_variables);
