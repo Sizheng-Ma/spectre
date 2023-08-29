@@ -3,6 +3,8 @@
 
 #include "Evolution/Systems/Cce/GaugeTransformBoundaryData.hpp"
 
+#include <iostream>
+
 #include "DataStructures/DataBox/Prefixes.hpp"
 #include "DataStructures/SpinWeighted.hpp"
 #include "DataStructures/Tags.hpp"
@@ -12,7 +14,6 @@
 #include "NumericalAlgorithms/Spectral/SwshCollocation.hpp"
 #include "NumericalAlgorithms/Spectral/SwshDerivatives.hpp"
 #include "NumericalAlgorithms/Spectral/SwshInterpolation.hpp"
-
 
 namespace Cce {
 
@@ -114,6 +115,27 @@ void GaugeAdjustedBoundaryValue<Tags::BondiBeta>::apply(
   get(*evolution_gauge_beta).data() -= 0.5 * log(get(omega).data());
 }
 
+namespace hihihi {
+void compute_norm(
+    const SpinWeighted<ComplexDataVector, 0> to_compare,
+    const SpinWeighted<ComplexDataVector, 0> regular_integrand_for_st_theta) {
+  SpinWeighted<ComplexDataVector, 0> final_diff =
+      to_compare - (regular_integrand_for_st_theta);
+
+  double norm = 0;
+
+  for (size_t iiiii = 0; iiiii < final_diff.size(); iiiii++) {
+    norm += square(abs(final_diff.data()[iiiii]));
+  }
+
+  norm /= final_diff.size();
+
+  norm = sqrt(norm);
+
+  std::cout << norm << std::endl;
+}
+}  // namespace hihihi
+
 void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
         evolution_st_theta,
@@ -127,7 +149,8 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_omega,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r_divided_by_r,
     const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
-    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta) {
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi) {
   interpolator.interpolate(make_not_null(&get(*evolution_st_theta)),
                            get(cauchy_st_theta));
 
@@ -154,6 +177,12 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
 
   //   -get(cauchy_st_psi) * exp(-4. * get(bondi_beta)) / get(bondi_r) +
   //   0.5 * exp(2. * get(bondi_beta)) * eth_ethbar_psi;
+
+  const SpinWeighted<ComplexDataVector, 0> surface_psi;
+  make_const_view(make_not_null(&surface_psi), get(volume_psi), 0,
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+
+  hihihi::compute_norm(get(cauchy_st_psi), surface_psi);
 }
 
 void GaugeAdjustedBoundaryValue<Tags::BondiQ>::apply_impl(

@@ -238,7 +238,7 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiSTTheta>>::
       0.25 * exp2beta / bondi_r * (n_psi1 - n_psi2 + n_psi3) -
       0.5 * bondi_r * n_psi4 + tau + from_lhs;
 
-  detail::compute_norm(*regular_integrand_for_st_theta, to_compare);
+  //   detail::compute_norm(*regular_integrand_for_st_theta, to_compare);
 }
 
 void ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>>::apply_impl(
