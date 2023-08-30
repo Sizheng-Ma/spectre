@@ -18,6 +18,130 @@
 #include "Utilities/TMPL.hpp"
 #include "Utilities/TaggedTuple.hpp"
 
+namespace Cce {
+
+namespace detail1 {
+DataVector a0(DataVector u) { return sin(u); }
+DataVector a0dot(DataVector u) { return cos(u); }
+
+DataVector a2(DataVector u) { return -0.5 * cos(u); }
+DataVector a2dot(DataVector u) { return 0.5 * sin(u); }
+
+DataVector a3(DataVector u) { return 0.5 * sin(u); }
+DataVector a3dot(DataVector u) { return 0.5 * cos(u); }
+
+DataVector a4(DataVector u) { return 0.75 * cos(u) - 9. / 8. * sin(u); }
+DataVector a4dot(DataVector u) { return -0.75 * sin(u) - 9. / 8. * cos(u); }
+
+DataVector a5(DataVector u) { return -77. / 20 * cos(u) - 1.5 * sin(u); }
+DataVector a5dot(DataVector u) { return 77. / 20 * sin(u) - 1.5 * cos(u); }
+
+DataVector a6(DataVector u) { return 15. / 16 * cos(u) + 51. / 4. * sin(u); }
+DataVector a6dot(DataVector u) { return 15. / 16 * cos(u) + 51. / 4. * sin(u); }
+
+DataVector a7(DataVector u) {
+  return (1287. * cos(u)) / 28. - (1809. * sin(u)) / 80.;
+}
+DataVector a7dot(DataVector u) {
+  return -(1287. * sin(u)) / 28. - (1809. * cos(u)) / 80.;
+}
+
+DataVector a8(DataVector u) {
+  return -(12579. * cos(u) / 80.) - (19857. * sin(u)) / 128.;
+}
+DataVector a8dot(DataVector u) {
+  return (12579. * sin(u) / 80.) - (19857. * cos(u)) / 128.;
+}
+
+DataVector a9(DataVector u) {
+  return -(73557. * cos(u) / 160) + (133813. * sin(u)) / 140.;
+}
+DataVector a9dot(DataVector u) {
+  return (73557. * sin(u) / 160) + (133813. * cos(u)) / 140.;
+}
+
+DataVector a10(DataVector u) {
+  return (49797063. * cos(u)) / 8960. + (1272267. * sin(u)) / 1600.;
+}
+DataVector a10dot(DataVector u) {
+  return -(49797063. * sin(u)) / 8960. + (1272267. * cos(u)) / 1600.;
+}
+
+DataVector a11(DataVector u) {
+  return -((116136241. * cos(u)) / 24640) - (57286503. * sin(u)) / 1792.;
+}
+DataVector a11dot(DataVector u) {
+  return ((116136241. * sin(u)) / 24640) - (57286503. * cos(u)) / 1792.;
+}
+
+void inverse_r_dot(DataVector& deriv, const int n, const DataVector r,
+                   const DataVector drdt) {
+  deriv = -n / pow(r, n + 1) * drdt;
+}
+
+void bc_psi(ComplexDataVector& theta, const DataVector u, const DataVector r) {
+  theta = a0(u) / r;
+
+  theta += a2(u) / pow(r, 3);
+  theta += a3(u) / pow(r, 4);
+  theta += a4(u) / pow(r, 5);
+  theta += a5(u) / pow(r, 6);
+  theta += a6(u) / pow(r, 7);
+  theta += a7(u) / pow(r, 8);
+  theta += a8(u) / pow(r, 9);
+  theta += a9(u) / pow(r, 10);
+  theta += a10(u) / pow(r, 11);
+  theta += a11(u) / pow(r, 12);
+}
+
+void bc_theta(ComplexDataVector& theta, const DataVector u,
+              const DataVector drdt, const DataVector r) {
+  auto dudt = 1. - drdt;
+  theta = a0dot(u) * dudt / r - (0 + 1) / square(r) * a0(u) * drdt;
+
+  int iii = 2;
+  theta += a2dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a2(u) * drdt;
+
+  iii = 3;
+  theta += a3dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a3(u) * drdt;
+
+  iii = 4;
+  theta += a4dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a4(u) * drdt;
+
+  iii = 5;
+  theta += a5dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a5(u) * drdt;
+
+  iii = 6;
+  theta += a6dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a6(u) * drdt;
+
+  iii = 7;
+  theta += a7dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a7(u) * drdt;
+
+  iii = 8;
+  theta += a8dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a8(u) * drdt;
+
+  iii = 9;
+  theta += a9dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a9(u) * drdt;
+
+  iii = 10;
+  theta += a10dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a10(u) * drdt;
+
+  iii = 11;
+  theta += a11dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a11(u) * drdt;
+}
+}  // namespace detail1
+}  // namespace Cce
+
 namespace Cce::Solutions {
 
 BouncingBlackHole::BouncingBlackHole(const double amplitude,
@@ -44,7 +168,9 @@ void BouncingBlackHole::variables_impl(
   const DataVector r = sqrt(square(adjusted_x_coordinate) +
                             square(get<1>(cartesian_coordinates)) +
                             square(get<2>(cartesian_coordinates)));
-  get(*st_psi).data() = sin(time - r) / r;
+
+  detail1::bc_psi(get(*st_psi).data(), time - r, r);
+  //    = sin(time - r) / r;
 }
 void BouncingBlackHole::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
@@ -64,8 +190,10 @@ void BouncingBlackHole::variables_impl(
 
   auto drdt = adjusted_x_coordinate / r * dt_adjusted_x_coordinate;
 
-  get(*st_psi).data() =
-      cos(time - r) / r * (1 - drdt) - sin(time - r) / square(r) * drdt;
+  detail1::bc_theta(get(*st_psi).data(), time - r, drdt, r);
+
+  //   get(*st_psi).data() =
+  //       cos(time - r) / r * (1 - drdt) - sin(time - r) / square(r) * drdt;
 }
 
 void BouncingBlackHole::variables_impl(
