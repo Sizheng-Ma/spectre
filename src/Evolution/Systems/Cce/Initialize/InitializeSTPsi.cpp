@@ -6,6 +6,84 @@
 #include "NumericalAlgorithms/Spectral/SwshCollocation.hpp"
 #include "NumericalAlgorithms/Spectral/SwshInterpolation.hpp"
 
+namespace Cce {
+
+namespace detail2 {
+DataVector a0(DataVector u) { return sin(u); }
+DataVector a0dot(DataVector u) { return cos(u); }
+
+DataVector a2(DataVector u) { return -0.5 * cos(u); }
+DataVector a2dot(DataVector u) { return 0.5 * sin(u); }
+
+DataVector a3(DataVector u) { return 0.5 * sin(u); }
+DataVector a3dot(DataVector u) { return 0.5 * cos(u); }
+
+DataVector a4(DataVector u) { return 0.75 * cos(u) - 9. / 8. * sin(u); }
+DataVector a4dot(DataVector u) { return -0.75 * sin(u) - 9. / 8. * cos(u); }
+
+DataVector a5(DataVector u) { return -77. / 20 * cos(u) - 1.5 * sin(u); }
+DataVector a5dot(DataVector u) { return 77. / 20 * sin(u) - 1.5 * cos(u); }
+
+DataVector a6(DataVector u) { return 15. / 16 * cos(u) + 51. / 4. * sin(u); }
+DataVector a6dot(DataVector u) { return 15. / 16 * cos(u) + 51. / 4. * sin(u); }
+
+DataVector a7(DataVector u) {
+  return (1287. * cos(u)) / 28. - (1809. * sin(u)) / 80.;
+}
+DataVector a7dot(DataVector u) {
+  return -(1287. * sin(u)) / 28. - (1809. * cos(u)) / 80.;
+}
+
+DataVector a8(DataVector u) {
+  return -(12579. * cos(u) / 80.) - (19857. * sin(u)) / 128.;
+}
+DataVector a8dot(DataVector u) {
+  return (12579. * sin(u) / 80.) - (19857. * cos(u)) / 128.;
+}
+
+DataVector a9(DataVector u) {
+  return -(73557. * cos(u) / 160) + (133813. * sin(u)) / 140.;
+}
+DataVector a9dot(DataVector u) {
+  return (73557. * sin(u) / 160) + (133813. * cos(u)) / 140.;
+}
+
+DataVector a10(DataVector u) {
+  return (49797063. * cos(u)) / 8960. + (1272267. * sin(u)) / 1600.;
+}
+DataVector a10dot(DataVector u) {
+  return -(49797063. * sin(u)) / 8960. + (1272267. * cos(u)) / 1600.;
+}
+
+DataVector a11(DataVector u) {
+  return -((116136241. * cos(u)) / 24640) - (57286503. * sin(u)) / 1792.;
+}
+DataVector a11dot(DataVector u) {
+  return ((116136241. * sin(u)) / 24640) - (57286503. * cos(u)) / 1792.;
+}
+
+void inverse_r_dot(DataVector& deriv, const int n, const DataVector r,
+                   const DataVector drdt) {
+  deriv = -n / pow(r, n + 1) * drdt;
+}
+
+void bc_psi(ComplexDataVector& theta, const DataVector u,
+            const ComplexDataVector r) {
+  theta = a0(u) * r;
+
+  theta += a2(u) * pow(r, 3);
+  theta += a3(u) * pow(r, 4);
+  theta += a4(u) * pow(r, 5);
+  theta += a5(u) * pow(r, 6);
+  theta += a6(u) * pow(r, 7);
+  theta += a7(u) * pow(r, 8);
+  theta += a8(u) * pow(r, 9);
+  theta += a9(u) * pow(r, 10);
+  theta += a10(u) * pow(r, 11);
+  theta += a11(u) * pow(r, 12);
+}
+}  // namespace detail2
+}  // namespace Cce
 namespace Cce::ScalarTensor {
 void InitializeSTPsi::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> bondi_st_psi,
@@ -42,8 +120,12 @@ void InitializeSTPsi::apply(
     const double u0 = 10;
     const double sigma0 = 1;
     double psi_boundary = exp(-0.5 * square(u0) / square(sigma0));
-    angular_view_scalar_tensor_psi =
-        get(st_psi_boundary).data() * one_minus_y_collocation[i] / 2.;
+    // angular_view_scalar_tensor_psi =
+    //     get(st_psi_boundary).data() * one_minus_y_collocation[i] / 2.;
+
+    detail2::bc_psi(angular_view_scalar_tensor_psi, real(-get(bondi_r).data()),
+                    one_minus_y_collocation[i] / 2. / get(bondi_r).data());
+
     // if (one_minus_y_collocation[i] >= (1. - ymax) &&
     //     one_minus_y_collocation[i] <= (1. - ymin)) {
     //   angular_view_scalar_tensor_psi +=
