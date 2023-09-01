@@ -116,10 +116,11 @@ void GaugeAdjustedBoundaryValue<Tags::BondiBeta>::apply(
 }
 
 namespace hihihi {
+template <int N>
 void compute_norm(
-    const SpinWeighted<ComplexDataVector, 0> to_compare,
-    const SpinWeighted<ComplexDataVector, 0> regular_integrand_for_st_theta) {
-  SpinWeighted<ComplexDataVector, 0> final_diff =
+    const SpinWeighted<ComplexDataVector, N> to_compare,
+    const SpinWeighted<ComplexDataVector, N> regular_integrand_for_st_theta) {
+  SpinWeighted<ComplexDataVector, N> final_diff =
       to_compare - (regular_integrand_for_st_theta);
 
   double norm = 0;
@@ -170,7 +171,7 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
   make_const_view(make_not_null(&surface_psi), get(volume_psi), 0,
                   Spectral::Swsh::number_of_swsh_collocation_points(l_max));
 
-  hihihi::compute_norm(get(*evolution_st_psi), surface_psi);
+  hihihi::compute_norm<0>(get(*evolution_st_psi), surface_psi);
 }
 
 void GaugeAdjustedBoundaryValue<Tags::BondiQ>::apply_impl(
