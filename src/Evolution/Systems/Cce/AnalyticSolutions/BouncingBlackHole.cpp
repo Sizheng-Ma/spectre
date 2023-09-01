@@ -96,7 +96,7 @@ void bc_psi(ComplexDataVector& theta, const DataVector u, const DataVector r) {
 
 void bc_theta(ComplexDataVector& theta, const DataVector u,
               const DataVector drdt, const DataVector r) {
-  auto dudt = 1. - drdt;
+  auto dudt = 1. - drdt / (1. - 2. / r);
   theta = a0dot(u) * dudt / r - (0 + 1) / square(r) * a0(u) * drdt;
 
   int iii = 2;
@@ -169,7 +169,9 @@ void BouncingBlackHole::variables_impl(
                             square(get<1>(cartesian_coordinates)) +
                             square(get<2>(cartesian_coordinates)));
 
-  detail1::bc_psi(get(*st_psi).data(), time - r, r);
+  auto rs = r + 2 * log(r / 2. - 1.);
+
+  detail1::bc_psi(get(*st_psi).data(), time - rs, r);
   //    = sin(time - r) / r;
 }
 void BouncingBlackHole::variables_impl(
@@ -190,7 +192,9 @@ void BouncingBlackHole::variables_impl(
 
   auto drdt = adjusted_x_coordinate / r * dt_adjusted_x_coordinate;
 
-  detail1::bc_theta(get(*st_psi).data(), time - r, drdt, r);
+  auto rs = r + 2 * log(r / 2. - 1.);
+
+  detail1::bc_theta(get(*st_psi).data(), time - rs, drdt, r);
 
   //   get(*st_psi).data() =
   //       cos(time - r) / r * (1 - drdt) - sin(time - r) / square(r) * drdt;
