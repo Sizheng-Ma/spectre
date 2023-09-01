@@ -142,10 +142,11 @@ void Tau(SpinWeighted<ComplexDataVector, 0>& result,
            0.5 * bondi_w * dy_st_psi;
 }
 
+template <int N>
 void compute_norm(
-    const SpinWeighted<ComplexDataVector, 0> to_compare,
-    const SpinWeighted<ComplexDataVector, 0> regular_integrand_for_st_theta) {
-  SpinWeighted<ComplexDataVector, 0> final_diff =
+    const SpinWeighted<ComplexDataVector, N> to_compare,
+    const SpinWeighted<ComplexDataVector, N> regular_integrand_for_st_theta) {
+  SpinWeighted<ComplexDataVector, N> final_diff =
       to_compare - (regular_integrand_for_st_theta);
 
   double norm = 0;
@@ -172,7 +173,7 @@ void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::BondiSTTheta>>::
 
   *pole_of_integrand_for_st_theta = -0.5 * n_psi5;
 
-  //   detail::compute_norm(*pole_of_integrand_for_st_theta, -0.5 * n_psi5);
+  //   detail::compute_norm<0>(*pole_of_integrand_for_st_theta, -0.5 * n_psi5);
   //   *pole_of_integrand_for_st_theta = -0.5 * n_psi5;
 }
 
