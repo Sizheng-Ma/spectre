@@ -123,7 +123,9 @@ void InitializeSTPsi::apply(
     // angular_view_scalar_tensor_psi =
     //     get(st_psi_boundary).data() * one_minus_y_collocation[i] / 2.;
 
-    detail2::bc_psi(angular_view_scalar_tensor_psi, real(-get(bondi_r).data()),
+    auto rs = get(bondi_r).data() + 2 * log(get(bondi_r).data() / 2 - 1.);
+
+    detail2::bc_psi(angular_view_scalar_tensor_psi, real(-rs),
                     one_minus_y_collocation[i] / 2. / get(bondi_r).data());
 
     // if (one_minus_y_collocation[i] >= (1. - ymax) &&
