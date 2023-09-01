@@ -78,62 +78,60 @@ void inverse_r_dot(DataVector& deriv, const int n, const DataVector r,
 void bc_psi(ComplexDataVector& theta, const double u, const double r) {
   theta = a0(u) / r;
 
-  theta += a2(u) / pow(r, 3);
-  theta += a3(u) / pow(r, 4);
-  theta += a4(u) / pow(r, 5);
-  theta += a5(u) / pow(r, 6);
-  theta += a6(u) / pow(r, 7);
-  theta += a7(u) / pow(r, 8);
-  theta += a8(u) / pow(r, 9);
-  theta += a9(u) / pow(r, 10);
-  theta += a10(u) / pow(r, 11);
-  theta += a11(u) / pow(r, 12);
+  // theta += a2(u) / pow(r, 3);
+  // theta += a3(u) / pow(r, 4);
+  // theta += a4(u) / pow(r, 5);
+  // theta += a5(u) / pow(r, 6);
+  // theta += a6(u) / pow(r, 7);
+  // theta += a7(u) / pow(r, 8);
+  // theta += a8(u) / pow(r, 9);
+  // theta += a9(u) / pow(r, 10);
+  // theta += a10(u) / pow(r, 11);
+  // theta += a11(u) / pow(r, 12);
 }
 
-void bc_theta(ComplexDataVector& theta, const double u, const double drdt,
-              const double r) {
-  auto dudt = 1. - drdt / (1. - 2. / r);
-  theta = a0dot(u) * dudt / r - (0 + 1) / square(r) * a0(u) * drdt;
+void bc_theta(ComplexDataVector& theta, const double u, const double r) {
+  theta = a0dot(u) / r;
 
-  int iii = 2;
-  theta += a2dot(u) * dudt / pow(r, iii + 1) -
-           (iii + 1) / pow(r, iii + 2) * a2(u) * drdt;
+  //   int iii = 2;
+  //   theta += a2dot(u) * dudt / pow(r, iii + 1) -
+  //            (iii + 1) / pow(r, iii + 2) * a2(u) * drdt;
 
-  iii = 3;
-  theta += a3dot(u) * dudt / pow(r, iii + 1) -
-           (iii + 1) / pow(r, iii + 2) * a3(u) * drdt;
+  //   iii = 3;
+  //   theta += a3dot(u) * dudt / pow(r, iii + 1) -
+  //            (iii + 1) / pow(r, iii + 2) * a3(u) * drdt;
 
-  iii = 4;
-  theta += a4dot(u) * dudt / pow(r, iii + 1) -
-           (iii + 1) / pow(r, iii + 2) * a4(u) * drdt;
+  //   iii = 4;
+  //   theta += a4dot(u) * dudt / pow(r, iii + 1) -
+  //            (iii + 1) / pow(r, iii + 2) * a4(u) * drdt;
 
-  iii = 5;
-  theta += a5dot(u) * dudt / pow(r, iii + 1) -
-           (iii + 1) / pow(r, iii + 2) * a5(u) * drdt;
+  //   iii = 5;
+  //   theta += a5dot(u) * dudt / pow(r, iii + 1) -
+  //            (iii + 1) / pow(r, iii + 2) * a5(u) * drdt;
 
-  iii = 6;
-  theta += a6dot(u) * dudt / pow(r, iii + 1) -
-           (iii + 1) / pow(r, iii + 2) * a6(u) * drdt;
+  //   iii = 6;
+  //   theta += a6dot(u) * dudt / pow(r, iii + 1) -
+  //            (iii + 1) / pow(r, iii + 2) * a6(u) * drdt;
 
-  iii = 7;
-  theta += a7dot(u) * dudt / pow(r, iii + 1) -
-           (iii + 1) / pow(r, iii + 2) * a7(u) * drdt;
+  //   iii = 7;
+  //   theta += a7dot(u) * dudt / pow(r, iii + 1) -
+  //            (iii + 1) / pow(r, iii + 2) * a7(u) * drdt;
 
-  iii = 8;
-  theta += a8dot(u) * dudt / pow(r, iii + 1) -
-           (iii + 1) / pow(r, iii + 2) * a8(u) * drdt;
+  //   iii = 8;
+  //   theta += a8dot(u) * dudt / pow(r, iii + 1) -
+  //            (iii + 1) / pow(r, iii + 2) * a8(u) * drdt;
 
-  iii = 9;
-  theta += a9dot(u) * dudt / pow(r, iii + 1) -
-           (iii + 1) / pow(r, iii + 2) * a9(u) * drdt;
+  //   iii = 9;
+  //   theta += a9dot(u) * dudt / pow(r, iii + 1) -
+  //            (iii + 1) / pow(r, iii + 2) * a9(u) * drdt;
 
-  iii = 10;
-  theta += a10dot(u) * dudt / pow(r, iii + 1) -
-           (iii + 1) / pow(r, iii + 2) * a10(u) * drdt;
+  //   iii = 10;
+  //   theta += a10dot(u) * dudt / pow(r, iii + 1) -
+  //            (iii + 1) / pow(r, iii + 2) * a10(u) * drdt;
 
-  iii = 11;
-  theta += a11dot(u) * dudt / pow(r, iii + 1) -
-           (iii + 1) / pow(r, iii + 2) * a11(u) * drdt;
+  //   iii = 11;
+  //   theta += a11dot(u) * dudt / pow(r, iii + 1) -
+  //            (iii + 1) / pow(r, iii + 2) * a11(u) * drdt;
 }
 }  // namespace Cce::detail4
 
@@ -228,8 +226,8 @@ void RotatingSchwarzschild::variables_impl(
     size_t output_l_max, double time,
     tmpl::type_<Tags::BondiSTPsi> /*meta*/) const {
   auto r = extraction_radius_;
-  auto rs = r + 2 * log(r / 2. - 1.);
-  detail4::bc_psi(get(*st_psi).data(), time - rs, r);
+  // auto rs = r + 2 * log(r / 2. - 1.);
+  detail4::bc_psi(get(*st_psi).data(), time - r, r);
 }
 
 void RotatingSchwarzschild::variables_impl(
@@ -237,9 +235,8 @@ void RotatingSchwarzschild::variables_impl(
     size_t output_l_max, double time,
     tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {
   auto r = extraction_radius_;
-  auto rs = r + 2 * log(r / 2. - 1.);
 
-  detail4::bc_theta(get(*st_psi).data(), time - rs, r * 0, r);
+  detail4::bc_theta(get(*st_psi).data(), time - r, r);
 }
 
 void RotatingSchwarzschild::variables_impl(
