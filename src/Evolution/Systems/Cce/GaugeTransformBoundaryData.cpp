@@ -137,6 +137,11 @@ void GaugeAdjustedBoundaryValue<Tags::BondiBeta>::apply(
   get(*evolution_gauge_beta).data() -= 0.5 * log(get(omega).data());
 }
 
+void print_constraint::apply(
+    const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_over_r,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi) {}
+
 void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
         evolution_st_theta,

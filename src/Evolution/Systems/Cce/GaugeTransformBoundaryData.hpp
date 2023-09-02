@@ -78,6 +78,18 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiR> {
       const Spectral::Swsh::SwshInterpolator& interpolator);
 };
 
+struct print_constraint {
+  using return_tags = tmpl::list<>;
+  using argument_tags =
+      tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                                  Spectral::Swsh::Tags::Eth>,
+                 Tags::EthRDividedByR, Tags::Dy<Tags::BondiSTPsi>>;
+  static void apply(
+      const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_psi,
+      const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_over_r,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi);
+};
+
 template <>
 struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
   using return_tags =
