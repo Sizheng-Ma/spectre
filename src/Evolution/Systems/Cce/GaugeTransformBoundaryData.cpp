@@ -172,7 +172,14 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
   get(*evolution_st_theta).data() +=
       real(get(evolution_gauge_u_at_scri).data() * conj(eth_psi).data());
 
-  hihihi::compute_norm<0>(surface_psi, get(*evolution_st_psi));
+  auto consttraint = get(dy_psi) * 2. + get(volume_psi);
+  const SpinWeighted<ComplexDataVector, 0> consttraintsurf;
+
+  make_const_view(make_not_null(&consttraintsurf), get(dy_psi), 0,
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+
+  hihihi::compute_norm<0>(consttraintsurf * 2.0 + surface_psi,
+                          surface_psi * 0.0);
 }
 
 void GaugeAdjustedBoundaryValue<Tags::BondiQ>::apply_impl(
