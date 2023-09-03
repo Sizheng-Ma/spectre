@@ -83,11 +83,13 @@ struct print_constraint {
   using argument_tags =
       tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
                                                   Spectral::Swsh::Tags::Eth>,
-                 Tags::EthRDividedByR, Tags::Dy<Tags::BondiSTPsi>>;
+                 Tags::EthRDividedByR, Tags::Dy<Tags::BondiSTPsi>,
+                 Tags::BondiSTPsi, Tags::LMax>;
   static void apply(
       const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_psi,
       const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_over_r,
-      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi);
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& psi, const size_t lmax);
 };
 
 template <>
