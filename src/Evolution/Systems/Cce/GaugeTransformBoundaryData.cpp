@@ -142,15 +142,24 @@ void print_constraint::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_over_r,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& psi, const size_t l_max) {
+  const SpinWeighted<ComplexDataVector, 0> surfacepsi;
+  make_const_view(make_not_null(&surfacepsi), get(psi), 0,
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+
+  const auto grid_eth_psi =
+      Spectral::Swsh::angular_derivative<Spectral::Swsh::Tags::Eth>(l_max, 1,
+                                                                    surfacepsi);
+
   SpinWeighted<ComplexDataVector, 1> res =
-      get(eth_psi) + get(eth_r_over_r) * get(psi);
+      get(eth_psi) + 2. * get(eth_r_over_r) * get(dy_psi);
 
   const SpinWeighted<ComplexDataVector, 1> consttraintsurf;
 
   make_const_view(make_not_null(&consttraintsurf), res, 0,
                   Spectral::Swsh::number_of_swsh_collocation_points(l_max));
 
-  hihihi::compute_norm<1>(res, res * 0.0);
+  hihihi::compute_norm<1>(consttraintsurf, grid_eth_psi);
+  hihihi::compute_norm<1>(consttraintsurf, grid_eth_psi * 0);
 }
 
 void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
