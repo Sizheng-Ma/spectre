@@ -243,6 +243,7 @@ struct CharacteristicEvolution {
       Actions::FilterSwshVolumeQuantity<Tags::BondiSTTheta>,
       compute_scri_quantities_and_observe,
       compute_st_scri_quantities_and_observe,
+      ::Actions::MutateApply<print_constraint>,
       ::Actions::RecordTimeStepperData<cce_system>,
       ::Actions::UpdateU<cce_system>,
       ::Actions::ChangeStepSize<typename Metavariables::cce_step_choosers>,
