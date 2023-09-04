@@ -158,7 +158,7 @@ void print_constraint::apply(
   make_const_view(make_not_null(&consttraintsurf), res, 0,
                   Spectral::Swsh::number_of_swsh_collocation_points(l_max));
 
-  //   hihihi::compute_norm<1>(consttraintsurf, grid_eth_psi);
+  hihihi::compute_norm<1>(consttraintsurf, grid_eth_psi);
   //   hihihi::compute_norm<1>(consttraintsurf, grid_eth_psi * 0);
 }
 
@@ -206,7 +206,7 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
                   Spectral::Swsh::number_of_swsh_collocation_points(l_max) * 0,
                   Spectral::Swsh::number_of_swsh_collocation_points(l_max));
 
-  hihihi::compute_norm<0>(consttraintsurf, consttraintsurf * 0.0);
+  hihihi::compute_norm<0>(get(*evolution_st_psi), surface_psi);
 }
 
 void GaugeAdjustedBoundaryValue<Tags::BondiQ>::apply_impl(
