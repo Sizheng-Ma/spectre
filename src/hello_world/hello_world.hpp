@@ -14,6 +14,8 @@ void print_data_vector();
 size_t get_vector_size(const size_t l_max);
 std::vector<double> transpose_wt_data(const std::vector<double>& data,
                                       const size_t l_max);
+std::vector<double> transpose_ccm_data(const std::vector<double>& data,
+                                      const size_t l_max);
 
 void initialize_j(std::vector<std::complex<double>>& finalbondij,
                   std::vector<double>& cauchy_x, std::vector<double>& cauchy_y,
