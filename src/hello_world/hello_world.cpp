@@ -164,6 +164,16 @@ std::vector<double> transpose_wt_data(const std::vector<double>& data,
   return data_transposed;
 }
 
+std::vector<double> transpose_ccm_data(const std::vector<double>& data,
+                                       const size_t l_max) {
+  const size_t theta_extent = l_max + 1;
+  const size_t phi_extent = 2 * l_max + 1;
+  auto data_transposed = data;
+  // TODO: check this
+  transpose(make_not_null(&data_transposed), data, phi_extent, theta_extent);
+  return data_transposed;
+}
+
 void initialize_j(std::vector<std::complex<double>>& finalbondij,
                   std::vector<double>& cauchy_x, std::vector<double>& cauchy_y,
                   std::vector<double>& cauchy_z,
