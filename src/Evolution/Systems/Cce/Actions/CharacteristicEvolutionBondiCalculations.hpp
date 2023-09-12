@@ -43,7 +43,6 @@ struct CalculateIntegrandInputsForTag {
       const Parallel::GlobalCache<Metavariables>& /*cache*/,
       const ArrayIndex& /*array_index*/, const ActionList /*meta*/,
       const ParallelComponent* const /*meta*/) {
-    // TagsToComputeForImpl, IntegrandInputSteps
     mutate_all_pre_swsh_derivatives_for_tag<BondiTag>(make_not_null(&box));
     mutate_all_swsh_derivatives_for_tag<BondiTag>(make_not_null(&box));
     return {Parallel::AlgorithmExecution::Continue, std::nullopt};
