@@ -356,6 +356,7 @@ void ccm_functions(
     std::vector<std::complex<double>>& psi2,
     std::vector<std::complex<double>>& psi3,
     std::vector<std::complex<double>>& psi4, std::vector<double>& dt_u_scri,
+    std::vector<std::complex<double>>& psi0_ccm,
     const size_t l_max, const size_t number_of_radial_points,
     const std::vector<std::vector<double>>& spacetime_metric,
     const std::vector<std::vector<double>>& pi,
@@ -780,6 +781,9 @@ void ccm_functions(
       get<Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>(
           spectre_box);
 
+  auto& psi0_for_ccm_from_spectre =
+      get<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>(spectre_box);
+
   for (unsigned int i = 0; i < get(eth_inertial_retarded_time_from_cce).size();
        i++) {
     eth_inertial_retarded_time.push_back(
@@ -805,6 +809,9 @@ void ccm_functions(
   }
   for (unsigned int i = 0; i < get(psi4_from_cce).size(); i++) {
     psi4.push_back(get(psi4_from_cce).data()[i]);
+  }
+  for (unsigned int i = 0; i < get(psi0_for_ccm_from_spectre).size(); i++) {
+    psi0_ccm.push_back(get(psi0_for_ccm_from_spectre).data()[i]);
   }
   //   std::cout << real(get(psi3).data())[0] << " " <<
   //   imag(get(psi3).data())[0]
