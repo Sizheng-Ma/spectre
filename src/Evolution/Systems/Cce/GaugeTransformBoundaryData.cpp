@@ -158,7 +158,7 @@ void print_constraint::apply(
   make_const_view(make_not_null(&consttraintsurf), res, 0,
                   Spectral::Swsh::number_of_swsh_collocation_points(l_max));
 
-  hihihi::compute_norm<1>(consttraintsurf, grid_eth_psi);
+  //   hihihi::compute_norm<1>(consttraintsurf, grid_eth_psi);
   //   hihihi::compute_norm<1>(consttraintsurf, grid_eth_psi * 0);
 }
 
@@ -209,6 +209,21 @@ void GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>::apply(
   hihihi::compute_norm<0>(get(*evolution_st_psi), surface_psi);
 }
 
+void STWTMonitor::apply(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+        evolution_st_monitor,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
+    const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi) {
+  SpinWeighted<ComplexDataVector, 0> evolution_st_psi;
+  interpolator.interpolate(make_not_null(&evolution_st_psi),
+                           get(cauchy_st_psi));
+
+  const SpinWeighted<ComplexDataVector, 0> surface_psi;
+  make_const_view(make_not_null(&surface_psi), get(volume_psi), 0,
+                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+  get(*evolution_st_monitor) = evolution_st_psi - surface_psi;
+}
 void GaugeAdjustedBoundaryValue<Tags::BondiQ>::apply_impl(
     const gsl::not_null<SpinWeighted<ComplexDataVector, 1>*> evolution_gauge_q,
     const SpinWeighted<ComplexDataVector, 1>& cauchy_gauge_dr_u,

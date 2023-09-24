@@ -152,6 +152,7 @@ struct CharacteristicEvolution {
   using scalar_tensor_computation = tmpl::list<
       ::Actions::MutateApply<PreSwshDerivatives<Tags::Dy<Tags::BondiSTPsi>>>,
       ::Actions::MutateApply<GaugeAdjustedBoundaryValue<Tags::BondiSTTheta>>,
+      ::Actions::MutateApply<STWTMonitor>,
       Actions::CalculateIntegrandInputsForTag<Tags::BondiSTTheta>,
       tmpl::transform<
           integrand_terms_to_compute_for_bondi_variable<Tags::BondiSTTheta>,
