@@ -184,6 +184,10 @@ struct PartiallyFlatGaugeOmega : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 
+struct STMonitor : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
+
 /// The conformal factor in the Cauchy coordinates, similar to Eq. (32) of
 /// \cite Moxon2020gha, but without hat.
 struct CauchyGaugeOmega : db::SimpleTag {

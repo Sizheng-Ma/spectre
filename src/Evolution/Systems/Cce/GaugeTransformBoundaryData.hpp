@@ -129,6 +129,21 @@ struct GaugeAdjustedBoundaryValue<Tags::BondiSTTheta> {
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y);
 };
 
+struct STWTMonitor {
+  using return_tags =
+      tmpl::list<Tags::EvolutionGaugeBoundaryValue<Tags::STMonitor>>;
+  using argument_tags = tmpl::list<
+      Tags::BoundaryValue<Tags::BondiSTPsi>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Tags::LMax, Tags::BondiSTPsi>;
+
+  static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          evolution_st_monitor,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
+      const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi);
+};
 /*!
  * \brief Computes the evolution gauge \f$\partial_{\hat u} \hat R / \hat R\f$
  * on the worldtube.

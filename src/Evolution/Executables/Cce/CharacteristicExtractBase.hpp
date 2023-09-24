@@ -72,6 +72,7 @@ struct CharacteristicExtractDefaults {
       Spectral::Swsh::Tags::Derivative<Cce::Tags::PartiallyFlatGaugeOmega,
                                        Spectral::Swsh::Tags::Eth>,
       Cce::all_boundary_pre_swsh_derivative_tags_for_scri,
+      Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::STMonitor>,
       Cce::all_boundary_swsh_derivative_tags_for_scri>>;
 
   using scri_values_to_observe =
@@ -79,6 +80,7 @@ struct CharacteristicExtractDefaults {
                  Cce::Tags::ScriPlus<Cce::Tags::Psi3>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi2>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi1>,
+                 Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::STMonitor>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi0>,
                  Cce::Tags::Du<Cce::Tags::TimeIntegral<
                      Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>,
