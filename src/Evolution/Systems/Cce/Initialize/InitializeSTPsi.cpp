@@ -77,16 +77,26 @@ void bc_psi(ComplexDataVector& theta, const ComplexDataVector u,
             const ComplexDataVector r) {
   theta = a0(u) * r;
 
-  theta += a2(u) * pow(r, 3);
-  theta += a3(u) * pow(r, 4);
-  theta += a4(u) * pow(r, 5);
-  theta += a5(u) * pow(r, 6);
-  theta += a6(u) * pow(r, 7);
-  theta += a7(u) * pow(r, 8);
-  theta += a8(u) * pow(r, 9);
-  theta += a9(u) * pow(r, 10);
-  theta += a10(u) * pow(r, 11);
-  theta += a11(u) * pow(r, 12);
+  ComplexDataVector radial_profile = square(r)*r; 
+  theta += a2(u) * radial_profile;
+  radial_profile*=r;
+  theta += a3(u) * radial_profile;
+  radial_profile*=r;
+  theta += a4(u) * radial_profile;
+  radial_profile*=r;
+  theta += a5(u) * radial_profile;
+  radial_profile*=r;
+  theta += a6(u) * radial_profile;
+  radial_profile*=r;
+  theta += a7(u) * radial_profile;
+  radial_profile*=r;
+  theta += a8(u) * radial_profile;
+  radial_profile*=r;
+  theta += a9(u) * radial_profile;
+  radial_profile*=r;
+  theta += a10(u) * radial_profile;
+  radial_profile*=r;
+  theta += a11(u) * radial_profile;
 }
 }  // namespace detail2
 }  // namespace Cce
