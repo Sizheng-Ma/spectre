@@ -9,53 +9,59 @@
 namespace Cce {
 
 namespace detail2 {
-DataVector a0(DataVector u) { return sin(u); }
+ComplexDataVector a0(ComplexDataVector u) { return sin(u); }
 DataVector a0dot(DataVector u) { return cos(u); }
 
-DataVector a2(DataVector u) { return -0.5 * cos(u); }
+ComplexDataVector a2(ComplexDataVector u) { return -0.5 * cos(u); }
 DataVector a2dot(DataVector u) { return 0.5 * sin(u); }
 
-DataVector a3(DataVector u) { return 0.5 * sin(u); }
+ComplexDataVector a3(ComplexDataVector u) { return 0.5 * sin(u); }
 DataVector a3dot(DataVector u) { return 0.5 * cos(u); }
 
-DataVector a4(DataVector u) { return 0.75 * cos(u) - 9. / 8. * sin(u); }
+ComplexDataVector a4(ComplexDataVector u) {
+  return 0.75 * cos(u) - 9. / 8. * sin(u);
+}
 DataVector a4dot(DataVector u) { return -0.75 * sin(u) - 9. / 8. * cos(u); }
 
-DataVector a5(DataVector u) { return -77. / 20 * cos(u) - 1.5 * sin(u); }
+ComplexDataVector a5(ComplexDataVector u) {
+  return -77. / 20 * cos(u) - 1.5 * sin(u);
+}
 DataVector a5dot(DataVector u) { return 77. / 20 * sin(u) - 1.5 * cos(u); }
 
-DataVector a6(DataVector u) { return 15. / 16 * cos(u) + 51. / 4. * sin(u); }
+ComplexDataVector a6(ComplexDataVector u) {
+  return 15. / 16 * cos(u) + 51. / 4. * sin(u);
+}
 DataVector a6dot(DataVector u) { return 15. / 16 * cos(u) + 51. / 4. * sin(u); }
 
-DataVector a7(DataVector u) {
+ComplexDataVector a7(ComplexDataVector u) {
   return (1287. * cos(u)) / 28. - (1809. * sin(u)) / 80.;
 }
 DataVector a7dot(DataVector u) {
   return -(1287. * sin(u)) / 28. - (1809. * cos(u)) / 80.;
 }
 
-DataVector a8(DataVector u) {
+ComplexDataVector a8(ComplexDataVector u) {
   return -(12579. * cos(u) / 80.) - (19857. * sin(u)) / 128.;
 }
 DataVector a8dot(DataVector u) {
   return (12579. * sin(u) / 80.) - (19857. * cos(u)) / 128.;
 }
 
-DataVector a9(DataVector u) {
+ComplexDataVector a9(ComplexDataVector u) {
   return -(73557. * cos(u) / 160) + (133813. * sin(u)) / 140.;
 }
 DataVector a9dot(DataVector u) {
   return (73557. * sin(u) / 160) + (133813. * cos(u)) / 140.;
 }
 
-DataVector a10(DataVector u) {
+ComplexDataVector a10(ComplexDataVector u) {
   return (49797063. * cos(u)) / 8960. + (1272267. * sin(u)) / 1600.;
 }
 DataVector a10dot(DataVector u) {
   return -(49797063. * sin(u)) / 8960. + (1272267. * cos(u)) / 1600.;
 }
 
-DataVector a11(DataVector u) {
+ComplexDataVector a11(ComplexDataVector u) {
   return -((116136241. * cos(u)) / 24640) - (57286503. * sin(u)) / 1792.;
 }
 DataVector a11dot(DataVector u) {
@@ -67,7 +73,7 @@ void inverse_r_dot(DataVector& deriv, const int n, const DataVector r,
   deriv = -n / pow(r, n + 1) * drdt;
 }
 
-void bc_psi(ComplexDataVector& theta, const DataVector u,
+void bc_psi(ComplexDataVector& theta, const ComplexDataVector u,
             const ComplexDataVector r) {
   theta = a0(u) * r;
 
@@ -120,13 +126,13 @@ void InitializeSTPsi::apply(
     const double u0 = 10;
     const double sigma0 = 1;
     double psi_boundary = exp(-0.5 * square(u0) / square(sigma0));
-    angular_view_scalar_tensor_psi =
-        get(st_psi_boundary).data() * one_minus_y_collocation[i] / 2.;
+    // angular_view_scalar_tensor_psi =
+    //     get(st_psi_boundary).data() * one_minus_y_collocation[i] / 2.;
 
-    // auto rs = get(bondi_r).data() + 2 * log(get(bondi_r).data() / 2 - 1.);
+    auto u0new = -get(bondi_r).data() - 4 * log(get(bondi_r).data() / 2 - 1.);
 
-    // detail2::bc_psi(angular_view_scalar_tensor_psi, real(-rs),
-    //                 one_minus_y_collocation[i] / 2. / get(bondi_r).data());
+    detail2::bc_psi(angular_view_scalar_tensor_psi, u0new,
+                    one_minus_y_collocation[i] / 2. / get(bondi_r).data());
 
     // if (one_minus_y_collocation[i] >= (1. - ymax) &&
     //     one_minus_y_collocation[i] <= (1. - ymin)) {
