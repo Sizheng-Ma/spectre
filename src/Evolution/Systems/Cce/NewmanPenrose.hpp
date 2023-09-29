@@ -187,4 +187,15 @@ struct InnerBoundaryWeyl {
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_beta_cauchy,
       const size_t l_max);
 };
+
+struct GetWijForTest {
+  using return_tags = tmpl::list<Tags::WxxForSpECTest>;
+  using argument_tags = tmpl::list<Tags::BoundaryValue<Tags::Psi0Match>,
+                                   Tags::CauchyAngularCoords>;
+  static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> wxx,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi_0,
+      const tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>
+          angular_coordinates);
+};
 }  // namespace Cce

@@ -177,6 +177,10 @@ struct CauchyGaugeC : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
 };
 
+struct WxxForSpECTest : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
+
 /// The spin-weight 0 angular Jacobian factor in the Cauchy coordinates, similar
 /// to Eq. (31b) of \cite Moxon2020gha, but without hat.
 struct CauchyGaugeD : db::SimpleTag {

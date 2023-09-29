@@ -739,6 +739,9 @@ void ccm_functions(
   //       });
   // }
 
+  /*************************for_test*****************************/
+
+  ::Actions::MutateApply<Cce::InnerBoundaryWeyl>;
   /*************************after_cce*****************************/
   //   std::cout << "final: BondiH size: "
   //             << get(get<Cce::Tags::BondiH>(spectre_box)).size() <<
