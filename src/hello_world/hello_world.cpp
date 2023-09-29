@@ -357,7 +357,8 @@ void ccm_functions(
     std::vector<std::complex<double>>& psi3,
     std::vector<std::complex<double>>& psi4, std::vector<double>& dt_u_scri,
     std::vector<std::complex<double>>& psi0_ccm,
-    const size_t l_max, const size_t number_of_radial_points,
+    std::vector<std::complex<double>>& wxx_test_for_spec, const size_t l_max,
+    const size_t number_of_radial_points,
     const std::vector<std::vector<double>>& spacetime_metric,
     const std::vector<std::vector<double>>& pi,
     const std::vector<std::vector<std::vector<double>>>& phi,
@@ -741,7 +742,7 @@ void ccm_functions(
 
   /*************************for_test*****************************/
 
-  ::Actions::MutateApply<Cce::InnerBoundaryWeyl>;
+  db::mutate_apply<Cce::GetWijForTest>(make_not_null(&spectre_box));
   /*************************after_cce*****************************/
   //   std::cout << "final: BondiH size: "
   //             << get(get<Cce::Tags::BondiH>(spectre_box)).size() <<
@@ -787,6 +788,8 @@ void ccm_functions(
   auto& psi0_for_ccm_from_spectre =
       get<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>(spectre_box);
 
+  auto& wij_ccm = get<Cce::Tags::WxxForSpECTest>(spectre_box);
+
   for (unsigned int i = 0; i < get(eth_inertial_retarded_time_from_cce).size();
        i++) {
     eth_inertial_retarded_time.push_back(
@@ -816,6 +819,10 @@ void ccm_functions(
   for (unsigned int i = 0; i < get(psi0_for_ccm_from_spectre).size(); i++) {
     psi0_ccm.push_back(get(psi0_for_ccm_from_spectre).data()[i]);
   }
+  for (unsigned int i = 0; i < get(wij_ccm).size(); i++) {
+    wxx_test_for_spec.push_back(get(wij_ccm).data()[i]);
+  }
+
   //   std::cout << real(get(psi3).data())[0] << " " <<
   //   imag(get(psi3).data())[0]
   //             << std::endl;
