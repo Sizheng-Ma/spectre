@@ -190,6 +190,7 @@ struct CharacteristicEvolution {
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
+      ::Actions::MutateApply<GetWijForTest>,
       ::Actions::MutateApply<
           CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>>>,
       Actions::CalculateScriInputs,
@@ -224,6 +225,7 @@ struct CharacteristicEvolution {
       tmpl::transform<bondi_hypersurface_step_tags,
                       tmpl::bind<hypersurface_computation, tmpl::_1>>,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
+      ::Actions::MutateApply<GetWijForTest>,
       compute_scri_quantities_and_observe,
       ::Actions::RecordTimeStepperData<cce_system>,
       ::Actions::UpdateU<cce_system>,

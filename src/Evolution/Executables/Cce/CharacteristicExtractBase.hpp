@@ -95,6 +95,8 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::TetradCoeffTheta, Cce::Tags::TetradCoeffPhi,
       Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>>>;
 
+  using spec_test_tag_tag = tmpl::list<Cce::Tags::WxxForSpECTest>;
+
   using cce_integration_independent_tags = tmpl::conditional_t<
       uses_partially_flat_cartesian_coordinates,
       tmpl::append<Cce::pre_computation_tags, ccm_matching_tags,

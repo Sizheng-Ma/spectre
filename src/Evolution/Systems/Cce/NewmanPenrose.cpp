@@ -214,4 +214,26 @@ void InnerBoundaryWeyl::apply(
   get(*tetrad_coeff_theta_bound) = coeff_theta;
   get(*tetrad_coeff_phi_bound) = coeff_phi;
 }
+
+void GetWijForTest::apply(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> wxx,
+    const Scalar<SpinWeighted<ComplexDataVector, 2>>& psi_0,
+    const tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>
+        angular_coordinates) {
+  auto theta_coords = get<0>(angular_coordinates);
+  auto phi_coords = get<1>(angular_coordinates);
+
+  double theta_coeff_inte = 1.0;
+  double phi_coeff_inte = 0.0;
+
+  ComplexDataVector tetrad;
+
+  tetrad = std::complex<double>(1.0, 0.0) *
+           (theta_coeff_inte - phi_coeff_inte) * cos(theta_coords) *
+           cos(phi_coords);
+  tetrad -= std::complex<double>(0.0, 1.0) * sin(phi_coords) *
+            (theta_coeff_inte + phi_coeff_inte);
+
+  get(*wxx).data() = 4. * real(conj(get(psi_0).data()) * tetrad * tetrad);
+}
 }  // namespace Cce
