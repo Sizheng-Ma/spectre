@@ -52,8 +52,13 @@ void ccm_functions(
     const std::vector<std::vector<double>>& inertial_cart,
     const std::vector<double>& intertial_time);
 
-namespace spectre {
+void ccm_interpolation(std::vector<std::complex<double>>& psi0_ccm_interpolated,
+                       const std::vector<double>& cauchy_theta,
+                       const std::vector<double>& cauchy_phi,
+                       const size_t l_max,
+                       const std::vector<std::complex<double>>& psi0_ccm);
 
+namespace spectre {
 struct MyScriPlusInterpolationManager;
 
 struct InterpolationInterface {
@@ -102,8 +107,8 @@ struct InterpolationInterface {
  private:
   MyScriPlusInterpolationManager* my_scri_plus_interpolation_manager_;
   size_t scri_output_density_, l_max_, observation_l_max_;
-};
-}  // namespace spectre
+  };
+  }  // namespace spectre
 
 // struct test {
 //   using a = tmpl::list<>;
