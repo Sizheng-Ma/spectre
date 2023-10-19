@@ -370,7 +370,6 @@ void ccm_functions(
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   // TODO this is hardcoded
-  double this_time = 0;
   const size_t filter_l_max = l_max - 2;
   const size_t scri_interpolation_order = 5;
   const double radial_filter_alpha = 35.0;
@@ -466,26 +465,6 @@ void ccm_functions(
         gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
                     *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
                     *du_r_r, spacetime_metric, pi, phi, l_max, radius);
-        // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
-        //   //   get(*bondi_beta).data()[i] =
-        //   //       bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   //   get(*bondi_dr_j).data()[i] =
-        //   //       bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   //   get(*bondi_du_r).data()[i] =
-        //   //       bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   //   get(*bondi_h).data()[i] =
-        //   //       bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   //   get(*bondi_j).data()[i] =
-        //   //       bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   //   get(*bondi_q).data()[i] =
-        //   //       bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   //   get(*bondi_r).data()[i] =
-        //   //       bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   //   get(*bondi_u).data()[i] =
-        //   //       bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   //   get(*bondi_w).data()[i] =
-        //   //       bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
-        // }
       },
       make_not_null(&spectre_box));
 
