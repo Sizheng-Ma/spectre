@@ -579,6 +579,14 @@ void ccm_functions(
         db::mutate_apply<mutator>(make_not_null(&spectre_box));
       });
 
+  db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>(
+      [&l_max](const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
+                   psi_0_bound) {
+        Spectral::Swsh::filter_swsh_boundary_quantity(
+            make_not_null(&get(*psi_0_bound)), l_max, l_max - 3);
+      },
+      make_not_null(&spectre_box));
+
   /****************************hypersurface_computation*************************************/
   ;
   tmpl::for_each<Cce::bondi_hypersurface_step_tags>([&spectre_box](
