@@ -164,7 +164,9 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
   //                              << "\n");
   // tnsr::a<DataVector, Dim, Frame::Inertial> theta_vec;
   // tnsr::a<DataVector, Dim, Frame::Inertial> phi_vec;
-  tnsr::a<ComplexDataVector, Dim, Frame::Inertial> m_vec;
+  tnsr::A<ComplexDataVector, Dim, Frame::Inertial> m_vec;
+  tnsr::a<ComplexDataVector, Dim, Frame::Inertial> m_vec_lower(
+      get_size(get<0>(coords)), std::complex<double>(0.0, 0.0));
   //theta_vec.get(0) = 0.*cos(phi_coords);
   //theta_vec.get(1) = cos(theta_coords) * cos(phi_coords);
   //theta_vec.get(2) = cos(theta_coords) * sin(phi_coords);
@@ -192,13 +194,21 @@ std::optional<std::string> ConstraintPreservingBjorhus<Dim>::dg_time_derivative(
   (m_vec).get(3) =
       (std::complex<double>(-1.0, 0.0) *
        (theta_coeff_inte.data() - phi_coeff_inte.data()) * sin(theta_coords));
+
+  for (size_t a = 0; a <= Dim; ++a) {
+    for (size_t b = 0; b <= Dim; ++b) {
+      m_vec_lower.get(a) += spacetime_metric.get(a, b) * m_vec.get(b);
+    }
+  }
+
   tnsr::aa<DataVector, Dim, Frame::Inertial> w_ccm;
 
   for (size_t a = 0; a <= Dim; ++a)
     {
         for (size_t b = 0; b < a + 1; ++b)
-              (w_ccm).get(a,b) = 2.*2.*real(conj(psi0_inte.data()) *
-                          m_vec.get(a) * m_vec.get(b));
+      (w_ccm).get(a, b) = 2. * 2. *
+                          real(conj(psi0_inte.data()) * m_vec_lower.get(a) *
+                               m_vec_lower.get(b));
      }
 
 
