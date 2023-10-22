@@ -60,6 +60,12 @@ void ccm_interpolation(std::vector<std::complex<double>>& psi0_ccm_interpolated,
                        const size_t l_max,
                        const std::vector<std::complex<double>>& psi0_ccm);
 
+void ccm_interpolation0(std::vector<std::complex<double>>& psi0_ccm_interpolated,
+                       const std::vector<double>& cauchy_theta,
+                       const std::vector<double>& cauchy_phi,
+                       const size_t l_max,
+                       const std::vector<std::complex<double>>& psi0_ccm);
+
 namespace spectre {
 struct MyScriPlusInterpolationManager;
 
