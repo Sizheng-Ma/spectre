@@ -364,7 +364,10 @@ void ccm_functions(
     std::vector<std::complex<double>>& psi3,
     std::vector<std::complex<double>>& psi4, std::vector<double>& dt_u_scri,
     std::vector<std::complex<double>>& psi0_ccm,
-    std::vector<std::complex<double>>& wxx_test_for_spec, const size_t l_max,
+    std::vector<std::complex<double>>& wxx_test_for_spec,
+    std::vector<std::complex<double>>& coeff_theta,
+    std::vector<std::complex<double>>& coeff_phi,
+    const size_t l_max,
     const size_t number_of_radial_points,
     const std::vector<std::vector<double>>& spacetime_metric,
     const std::vector<std::vector<double>>& pi,
@@ -646,6 +649,10 @@ void ccm_functions(
       get<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>(spectre_box);
 
   auto& wij_ccm = get<Cce::Tags::WxxForSpECTest>(spectre_box);
+  auto& ccm_tetrad_coeff_theta =
+      get<Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffTheta>>(spectre_box);
+  auto& ccm_tetrad_coeff_phi =
+      get<Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffPhi>>(spectre_box);
 
   for (unsigned int i = 0; i < get(eth_inertial_retarded_time_from_cce).size();
        i++) {
@@ -678,6 +685,14 @@ void ccm_functions(
   }
   for (unsigned int i = 0; i < get(wij_ccm).size(); i++) {
     wxx_test_for_spec.push_back(get(wij_ccm).data()[i]);
+  }
+
+  for (unsigned int i = 0; i < get(ccm_tetrad_coeff_theta).size(); i++) {
+    coeff_theta.push_back(get(ccm_tetrad_coeff_theta).data()[i]);
+  }
+
+  for (unsigned int i = 0; i < get(ccm_tetrad_coeff_phi).size(); i++) {
+    coeff_phi.push_back(get(ccm_tetrad_coeff_phi).data()[i]);
   }
 
   //   std::cout << real(get(psi3).data())[0] << " " <<
