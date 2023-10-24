@@ -3,6 +3,8 @@
 
 #include "Evolution/Systems/Cce/GaugeTransformBoundaryData.hpp"
 
+#include <iostream>
+
 #include "DataStructures/DataBox/Prefixes.hpp"
 #include "DataStructures/SpinWeighted.hpp"
 #include "DataStructures/Tags.hpp"
@@ -791,7 +793,7 @@ void TestOmega::apply(
   l2normd = sqrt(l2normd);
   l2normc /= productc.size();
   l2normc = sqrt(l2normc);
-  Parallel::printf("%e %e %e\n", l2norm, l2normc, l2normd);
+  std::cout << l2norm << " " << l2normc << " " << l2normd << std::endl;
 }
 
 void InitializeGauge::apply(
