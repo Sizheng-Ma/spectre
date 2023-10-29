@@ -164,6 +164,8 @@ struct CharacteristicEvolution {
   using compute_scri_quantities_and_observe = tmpl::list<
       ::Actions::MutateApply<
           CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>>>,
+      ::Actions::MutateApply<
+          CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiBeta>>>,
       Actions::CalculateScriInputs,
       tmpl::transform<typename metavariables::cce_scri_tags,
                       tmpl::bind<::Actions::MutateApply,
