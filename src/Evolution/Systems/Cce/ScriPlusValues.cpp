@@ -371,6 +371,16 @@ void CalculateScriPlusValue<Tags::EthInertialRetardedTime>::apply(
       l_max, 1, make_not_null(&get(*eth_inertial_time)), get(inertial_time));
 }
 
+void CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiBeta>>::apply(
+    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> scri_beta,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& beta) {
+  const SpinWeighted<ComplexDataVector, 0> exp_2_beta_at_scri;
+  make_const_view(make_not_null(&exp_2_beta_at_scri), get(beta),
+                  get(beta).size() - get(*scri_beta).size(),
+                  get(*scri_beta).size());
+  get(*scri_beta) = exp_2_beta_at_scri;
+}
+
 void CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>>::apply(
     const gsl::not_null<Scalar<DataVector>*> dt_inertial_time,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& exp_2_beta) {
