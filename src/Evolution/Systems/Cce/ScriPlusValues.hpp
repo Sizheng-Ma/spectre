@@ -409,6 +409,16 @@ struct CalculateScriPlusValue<::Tags::dt<Tags::InertialRetardedTime>> {
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& exp_2_beta);
 };
 
+template <>
+struct CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiBeta>> {
+  using return_tags = tmpl::list<Tags::ScriPlus<Tags::BondiBeta>>;
+  using argument_tags = tmpl::list<Tags::BondiBeta>;
+
+  static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> scri_beta,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& beta);
+};
+
 /// Determines the angular derivative of the asymptotic inertial time, useful
 /// for asymptotic coordinate transformations.
 template <>
