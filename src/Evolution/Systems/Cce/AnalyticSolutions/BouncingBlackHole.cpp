@@ -169,7 +169,7 @@ void BouncingBlackHole::variables_impl(
                             square(get<1>(cartesian_coordinates)) +
                             square(get<2>(cartesian_coordinates)));
 
-  auto rs = r + 2 * log(r / 2. - 1.);
+  auto rs = r + 2 * mass_ * log(r / 2. - 1.);
 
   detail1::bc_psi(get(*st_psi).data(), time + r - 2 * rs, r);
   //    = sin(time - r) / r;
@@ -192,7 +192,7 @@ void BouncingBlackHole::variables_impl(
 
   auto drdt = adjusted_x_coordinate / r * dt_adjusted_x_coordinate;
 
-  auto rs = r + 2 * log(r / 2. - 1.);
+  auto rs = r + 2 * mass_ * log(r / 2. - 1.);
 
   detail1::bc_theta(get(*st_psi).data(), time + r - 2 * rs, drdt, r);
 
