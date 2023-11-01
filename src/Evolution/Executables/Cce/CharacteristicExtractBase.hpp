@@ -80,7 +80,6 @@ struct CharacteristicExtractDefaults {
                  Cce::Tags::ScriPlus<Cce::Tags::Psi3>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi2>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi1>,
-                 Cce::Tags::ScriPlus<Cce::Tags::BondiBeta>,
                  Cce::Tags::EvolutionGaugeBoundaryValue<Cce::Tags::STMonitor>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi0>,
                  Cce::Tags::Du<Cce::Tags::TimeIntegral<
