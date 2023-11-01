@@ -132,6 +132,8 @@ struct CharacteristicExtractDefaults {
                                        Spectral::Swsh::Tags::Ethbar>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiSTPsi,
                                        Spectral::Swsh::Tags::EthEthbar>,
+      Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiSTPsi,
+                                       Spectral::Swsh::Tags::Ethbar>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiK,
                                        Spectral::Swsh::Tags::Eth>,
       Spectral::Swsh::Tags::Derivative<Cce::Tags::BondiJbar,
@@ -150,7 +152,11 @@ struct CharacteristicExtractDefaults {
           Cce::Tags::BondiSTPsi, Spectral::Swsh::Tags::EthEth>>,
       Spectral::Swsh::Tags::SwshTransform<Cce::Tags::Dy<Cce::Tags::BondiSTPsi>>,
       Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
-          Cce::Tags::Dy<Cce::Tags::BondiSTPsi>, Spectral::Swsh::Tags::Eth>>>;
+          Cce::Tags::Dy<Cce::Tags::BondiSTPsi>, Spectral::Swsh::Tags::Eth>>,
+      Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
+          Cce::Tags::BondiSTPsi, Spectral::Swsh::Tags::Ethbar>>,
+      Spectral::Swsh::Tags::SwshTransform<Spectral::Swsh::Tags::Derivative<
+          Cce::Tags::Dy<Cce::Tags::BondiSTPsi>, Spectral::Swsh::Tags::Ethbar>>>;
 
   using cce_angular_coordinate_tags =
       tmpl::conditional_t<evolve_ccm,
