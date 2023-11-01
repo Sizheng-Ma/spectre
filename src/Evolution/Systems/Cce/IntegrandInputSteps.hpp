@@ -104,8 +104,12 @@ struct TagsToComputeForImpl<Tags::BondiSTTheta> {
   using swsh_derivative_tags =
       tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiSTPsi>,
                                                   Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiSTPsi>,
+                                                  Spectral::Swsh::Tags::Ethbar>,
                  Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
                                                   Spectral::Swsh::Tags::Eth>,
+                 Spectral::Swsh::Tags::Derivative<Tags::BondiSTPsi,
+                                                  Spectral::Swsh::Tags::Ethbar>,
                  Spectral::Swsh::Tags::Derivative<Tags::BondiJ,
                                                   Spectral::Swsh::Tags::Ethbar>,
                  Spectral::Swsh::Tags::Derivative<Tags::BondiU,
