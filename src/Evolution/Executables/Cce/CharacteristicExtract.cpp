@@ -28,6 +28,9 @@ extern "C" void CkRegisterMainModule() {
        &register_derived_classes_with_charm<Cce::WorldtubeDataManager>,
        &register_derived_classes_with_charm<intrp::SpanInterpolator>,
        &register_derived_classes_with_charm<Cce::Solutions::WorldtubeData>,
+       &register_derived_classes_with_charm<
+           Cce::STWorldtubeBufferUpdater<Cce::cce_bondi_input_tags>>,
+       &register_derived_classes_with_charm<Cce::STWorldtubeDataManager>,
        &register_factory_classes_with_charm<metavariables>},
       {});
 }
