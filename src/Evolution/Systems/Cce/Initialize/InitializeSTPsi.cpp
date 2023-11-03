@@ -68,6 +68,21 @@ DataVector a11dot(DataVector u) {
   return ((116136241. * sin(u)) / 24640) - (57286503. * cos(u)) / 1792.;
 }
 
+ComplexDataVector a12(ComplexDataVector u) {
+  return -((16472195091. * cos(u)) / 89600) + (419653067. * sin(u)) / 5120.;
+}
+
+ComplexDataVector a13(ComplexDataVector u) {
+  return ((197057851611. * cos(u)) / 232960) + (517853793843. * sin(u)) / 492800.;
+}
+
+ComplexDataVector a14(ComplexDataVector u) {
+  return ((23027722022071. * cos(u)) / 3942400) - (2420206444191. * sin(u)) / 313600.;
+}
+
+ComplexDataVector a15(ComplexDataVector u) {
+  return -((166944468961581. * cos(u)) / 2464000) - (218435295225339. * sin(u)) / 7321600.;
+}
 void inverse_r_dot(DataVector& deriv, const int n, const DataVector r,
                    const DataVector drdt) {
   deriv = -n / pow(r, n + 1) * drdt;
@@ -97,6 +112,14 @@ void bc_psi(ComplexDataVector& theta, const ComplexDataVector u,
   theta += a10(u) * radial_profile;
   radial_profile*=r;
   theta += a11(u) * radial_profile;
+  radial_profile*=r;
+  theta += a12(u) * radial_profile;
+  radial_profile*=r;
+  theta += a13(u) * radial_profile;
+  radial_profile*=r;
+  theta += a14(u) * radial_profile;
+  radial_profile*=r;
+  theta += a15(u) * radial_profile;
 }
 }  // namespace detail2
 }  // namespace Cce
