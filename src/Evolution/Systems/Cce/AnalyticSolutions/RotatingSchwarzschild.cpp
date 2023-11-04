@@ -35,7 +35,7 @@ double a5(double u) { return -77. / 20 * cos(u) - 1.5 * sin(u); }
 double a5dot(double u) { return 77. / 20 * sin(u) - 1.5 * cos(u); }
 
 double a6(double u) { return 15. / 16 * cos(u) + 51. / 4. * sin(u); }
-double a6dot(double u) { return 15. / 16 * cos(u) + 51. / 4. * sin(u); }
+double a6dot(double u) { return -15. / 16 * sin(u) + 51. / 4. * cos(u); }
 
 double a7(double u) { return (1287. * cos(u)) / 28. - (1809. * sin(u)) / 80.; }
 double a7dot(double u) {
