@@ -31,7 +31,7 @@ DataVector a5dot(DataVector u) { return 77. / 20 * sin(u) - 1.5 * cos(u); }
 ComplexDataVector a6(ComplexDataVector u) {
   return 15. / 16 * cos(u) + 51. / 4. * sin(u);
 }
-DataVector a6dot(DataVector u) { return 15. / 16 * cos(u) + 51. / 4. * sin(u); }
+DataVector a6dot(DataVector u) { return -15. / 16 * sin(u) + 51. / 4. * cos(u); }
 
 ComplexDataVector a7(ComplexDataVector u) {
   return (1287. * cos(u)) / 28. - (1809. * sin(u)) / 80.;
