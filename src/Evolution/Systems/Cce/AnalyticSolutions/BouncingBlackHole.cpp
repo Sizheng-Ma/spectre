@@ -122,8 +122,8 @@ void bc_psi(ComplexDataVector& theta, const DataVector u, const DataVector r) {
   theta += a11(u) / pow(r, 12);
   theta += a12(u) / pow(r, 13);
   theta += a13(u) / pow(r, 14);
-  theta += a14(u) / pow(r, 14);
-  theta += a15(u) / pow(r, 14);
+  theta += a14(u) / pow(r, 15);
+  theta += a15(u) / pow(r, 16);
 }
 
 void bc_theta(ComplexDataVector& theta, const DataVector u,
