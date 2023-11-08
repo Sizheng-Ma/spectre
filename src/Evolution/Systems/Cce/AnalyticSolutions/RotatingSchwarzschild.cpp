@@ -70,6 +70,34 @@ double a11dot(double u) {
   return ((116136241. * sin(u)) / 24640) - (57286503. * cos(u)) / 1792.;
 }
 
+double a12(double u) {
+  return -((16472195091. * cos(u)) / 89600) + (419653067. * sin(u)) / 5120.;
+}
+double a12dot(double u) {
+  return ((16472195091. * sin(u)) / 89600) + (419653067. * cos(u)) / 5120.;
+}
+
+double a13(double u) {
+  return ((197057851611. * cos(u)) / 232960) + (517853793843. * sin(u)) / 492800.;
+}
+double a13dot(double u) {
+  return -((197057851611. * sin(u)) / 232960) + (517853793843. * cos(u)) / 492800.;
+}
+
+double a14(double u) {
+  return ((23027722022071. * cos(u)) / 3942400) - (2420206444191. * sin(u)) / 313600.;
+}
+double a14dot(double u) {
+  return -((23027722022071. * sin(u)) / 3942400) - (2420206444191. * cos(u)) / 313600.;
+}
+
+double a15(double u) {
+  return -((166944468961581. * cos(u)) / 2464000) - (218435295225339. * sin(u)) / 7321600.;
+}
+double a15dot(double u) {
+    return ((166944468961581. * sin(u)) / 2464000) - (218435295225339. * cos(u)) / 7321600.;
+}
+
 void inverse_r_dot(DataVector& deriv, const int n, const DataVector r,
                    const DataVector drdt) {
   deriv = -n / pow(r, n + 1) * drdt;
@@ -88,6 +116,10 @@ void bc_psi(ComplexDataVector& theta, const double u, const double r) {
   theta += a9(u) / pow(r, 10);
   theta += a10(u) / pow(r, 11);
   theta += a11(u) / pow(r, 12);
+  theta += a12(u) / pow(r, 13);
+  theta += a13(u) / pow(r, 14);
+  theta += a14(u) / pow(r, 15);
+  theta += a15(u) / pow(r, 16);
 }
 
 void bc_theta(ComplexDataVector& theta, const double u, const double r) {
@@ -135,6 +167,22 @@ void bc_theta(ComplexDataVector& theta, const double u, const double r) {
   iii = 11;
   theta += a11dot(u) * dudt / pow(r, iii + 1) -
            (iii + 1) / pow(r, iii + 2) * a11(u) * drdt;
+        
+  iii = 12;
+  theta += a12dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a12(u) * drdt;
+
+  iii = 13;
+  theta += a13dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a13(u) * drdt;
+
+  iii = 14;
+  theta += a14dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a14(u) * drdt;
+
+  iii = 15;
+  theta += a15dot(u) * dudt / pow(r, iii + 1) -
+           (iii + 1) / pow(r, iii + 2) * a15(u) * drdt;
 }
 }  // namespace Cce::detail4
 
