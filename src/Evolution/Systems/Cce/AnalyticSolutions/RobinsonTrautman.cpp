@@ -173,12 +173,16 @@ void RobinsonTrautman::prepare_solution(const size_t l_max,
 void RobinsonTrautman::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
     size_t output_l_max, double time,
-    tmpl::type_<Tags::BondiSTPsi> /*meta*/) const {}
+    tmpl::type_<Tags::BondiSTPsi> /*meta*/) const {
+       get(*st_psi).data() = 1;
+    }
 
 void RobinsonTrautman::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
     size_t output_l_max, double time,
-    tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {}
+    tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {
+         get(*st_psi).data() = 0;
+    }
 
 void RobinsonTrautman::variables_impl(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, -2>>*> news,
