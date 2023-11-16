@@ -292,12 +292,16 @@ void TeukolskyWave::dt_spherical_metric(
 void TeukolskyWave::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
     size_t output_l_max, double time,
-    tmpl::type_<Tags::BondiSTPsi> /*meta*/) const {}
+    tmpl::type_<Tags::BondiSTPsi> /*meta*/) const {
+        get(*st_psi).data()=sin(time);
+    }
 
 void TeukolskyWave::variables_impl(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> st_psi,
     size_t output_l_max, double time,
-    tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {}
+    tmpl::type_<Tags::BondiSTTheta> /*meta*/) const {
+        get(*st_psi).data()=cos(time);
+    }
 
 void TeukolskyWave::variables_impl(
     const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, -2>>*> news,
