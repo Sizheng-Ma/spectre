@@ -30,6 +30,7 @@ set(LIBS_TO_LINK
   Printf
   Serialization
   Time
+  SizhengHelloWorld
   Utilities
   )
 
