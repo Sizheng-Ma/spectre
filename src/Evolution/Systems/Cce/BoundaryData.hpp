@@ -245,6 +245,7 @@ void worldtube_normal_and_derivatives(
 void null_vector_l_and_derivatives(
     gsl::not_null<tnsr::A<DataVector, 3>*> du_null_l,
     gsl::not_null<tnsr::A<DataVector, 3>*> null_l,
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> spec_norm,
     const tnsr::I<DataVector, 3>& dt_worldtube_normal,
     const Scalar<DataVector>& dt_lapse,
     const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
@@ -587,7 +588,8 @@ using characteristic_worldtube_boundary_tags = db::wrap_tags_in<
         tmpl::list<Tags::BondiBeta, Tags::BondiU, Tags::Dr<Tags::BondiU>,
                    Tags::BondiQ, Tags::BondiW, Tags::BondiJ,
                    Tags::Dr<Tags::BondiJ>, Tags::BondiH, Tags::Du<Tags::BondiJ>,
-                   Tags::BondiR, Tags::Du<Tags::BondiR>, Tags::DuRDividedByR>,
+                   Tags::BondiR, Tags::Du<Tags::BondiR>, Tags::DuRDividedByR,
+                   Tags::SpECNormalization>,
         tmpl::conditional_t<
             IncludeKleinGordon,
             tmpl::list<Cce::Tags::KleinGordonPsi, Cce::Tags::KleinGordonPi>,

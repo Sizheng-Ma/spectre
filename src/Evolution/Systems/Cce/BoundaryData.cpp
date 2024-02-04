@@ -602,6 +602,7 @@ void worldtube_normal_and_derivatives(
 void null_vector_l_and_derivatives(
     const gsl::not_null<tnsr::A<DataVector, 3>*> du_null_l,
     const gsl::not_null<tnsr::A<DataVector, 3>*> null_l,
+    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> spec_norm,
     const tnsr::I<DataVector, 3>& dt_worldtube_normal,
     const Scalar<DataVector>& dt_lapse,
     const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
@@ -642,6 +643,7 @@ void null_vector_l_and_derivatives(
   DataVector& one_divided_by_denominator =
       get(get<::Tags::TempScalar<0>>(aggregated_buffer));
   one_divided_by_denominator = 1.0 / denominator;
+  get(*spec_norm).data() = std::complex<double>(1.0, 0) * denominator;
   get<0>(*null_l) = one_divided_by_denominator * one_divided_by_lapse;
   for (size_t i = 0; i < 3; ++i) {
     null_l->get(i + 1) =
@@ -1419,8 +1421,11 @@ void create_bondi_boundary_data(
 
   auto& du_null_l = get<::Tags::dt<Tags::detail::NullL>>(computation_variables);
   auto& null_l = get<Tags::detail::NullL>(computation_variables);
+  auto& spec_norm =
+      get<Tags::BoundaryValue<Tags::SpECNormalization>>(*bondi_boundary_data);
   null_vector_l_and_derivatives(make_not_null(&du_null_l),
-                                make_not_null(&null_l), dt_worldtube_normal,
+                                make_not_null(&null_l),
+                                make_not_null(&spec_norm), dt_worldtube_normal,
                                 dt_lapse, dt_spacetime_metric, dt_shift, lapse,
                                 spacetime_metric, shift, worldtube_normal);
 
@@ -1616,10 +1621,13 @@ void create_bondi_boundary_data(
 
   auto& du_null_l = get<::Tags::dt<Tags::detail::NullL>>(computation_variables);
   auto& null_l = get<Tags::detail::NullL>(computation_variables);
+  auto& spec_norm =
+      get<Tags::BoundaryValue<Tags::SpECNormalization>>(*bondi_boundary_data);
   null_vector_l_and_derivatives(
-      make_not_null(&du_null_l), make_not_null(&null_l), dt_worldtube_normal,
-      dt_cartesian_lapse, dt_spacetime_metric, dt_cartesian_shift,
-      cartesian_lapse, spacetime_metric, cartesian_shift, worldtube_normal);
+      make_not_null(&du_null_l), make_not_null(&null_l),
+      make_not_null(&spec_norm), dt_worldtube_normal, dt_cartesian_lapse,
+      dt_spacetime_metric, dt_cartesian_shift, cartesian_lapse,
+      spacetime_metric, cartesian_shift, worldtube_normal);
 
   // pass to the next step that is common between the 'modal' input and 'GH'
   // input strategies
@@ -1773,10 +1781,13 @@ void create_bondi_boundary_data(
 
   auto& du_null_l = get<::Tags::dt<Tags::detail::NullL>>(computation_variables);
   auto& null_l = get<Tags::detail::NullL>(computation_variables);
+  auto& spec_norm =
+      get<Tags::BoundaryValue<Tags::SpECNormalization>>(*bondi_boundary_data);
   null_vector_l_and_derivatives(
-      make_not_null(&du_null_l), make_not_null(&null_l), dt_worldtube_normal,
-      cartesian_dt_lapse, dt_spacetime_metric, cartesian_dt_shift,
-      cartesian_lapse, spacetime_metric, cartesian_shift, worldtube_normal);
+      make_not_null(&du_null_l), make_not_null(&null_l),
+      make_not_null(&spec_norm), dt_worldtube_normal, cartesian_dt_lapse,
+      dt_spacetime_metric, cartesian_dt_shift, cartesian_lapse,
+      spacetime_metric, cartesian_shift, worldtube_normal);
 
   // pass to the next step that is common between the 'modal' input and 'GH'
   // input strategies
@@ -1991,10 +2002,13 @@ void create_bondi_boundary_data_from_unnormalized_spec_modes(
 
   auto& du_null_l = get<::Tags::dt<Tags::detail::NullL>>(computation_variables);
   auto& null_l = get<Tags::detail::NullL>(computation_variables);
+  auto& spec_norm =
+      get<Tags::BoundaryValue<Tags::SpECNormalization>>(*bondi_boundary_data);
   null_vector_l_and_derivatives(
-      make_not_null(&du_null_l), make_not_null(&null_l), dt_worldtube_normal,
-      dt_cartesian_lapse, dt_spacetime_metric, dt_cartesian_shift,
-      cartesian_lapse, spacetime_metric, cartesian_shift, worldtube_normal);
+      make_not_null(&du_null_l), make_not_null(&null_l),
+      make_not_null(&spec_norm), dt_worldtube_normal, dt_cartesian_lapse,
+      dt_spacetime_metric, dt_cartesian_shift, cartesian_lapse,
+      spacetime_metric, cartesian_shift, worldtube_normal);
 
   // pass to the next step that is common between the 'modal' input and 'GH'
   // input strategies
