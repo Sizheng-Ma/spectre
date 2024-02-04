@@ -135,6 +135,14 @@ struct BondiJCauchyView : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
 };
 
+struct TetradCoeffTheta : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
+
+struct TetradCoeffPhi : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
+};
+
 /// The derivative with respect to the numerical coordinate \f$y = 1 - 2R/r\f$,
 /// where \f$R(u, \theta, \phi)\f$ is Bondi radius of the worldtube.
 template <typename Tag>
@@ -183,6 +191,10 @@ struct PartiallyFlatGaugeD : db::SimpleTag {
 /// to Eq. (31a) of \cite Moxon2020gha, but without hat.
 struct CauchyGaugeC : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
+};
+
+struct WxxForSpECTest : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 
 /// The spin-weight 0 angular Jacobian factor in the Cauchy coordinates, similar
