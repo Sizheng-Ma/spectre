@@ -15,6 +15,7 @@ set(LIBS_TO_LINK
   SpinWeightedSphericalHarmonics
   Time
   Utilities
+  SizhengHelloWorld
   )
 
 function(add_cce_executable EXECUTABLE BOUNDARY_COMPONENT SYSTEM)
