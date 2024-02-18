@@ -99,7 +99,7 @@ constexpr size_t minimum_number_of_points =
  */
 template <Basis basis>
 constexpr size_t maximum_number_of_points =
-    basis == Basis::FiniteDifference ? 40 : 20;
+    basis == Basis::FiniteDifference ? 40 : 41;
 
 /*!
  * \brief Compute the function values of the basis function \f$\Phi_k(x)\f$
