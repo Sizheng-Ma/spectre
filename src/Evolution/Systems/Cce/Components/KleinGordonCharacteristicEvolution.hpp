@@ -69,7 +69,9 @@ struct KleinGordonCharacteristicEvolution
       tmpl::transform<
           integrand_terms_to_compute_for_bondi_variable<Tags::KleinGordonPi>,
           tmpl::bind<::Actions::MutateApply,
-                     tmpl::bind<ComputeBondiIntegrand, tmpl::_1>>>>;
+                     tmpl::bind<ComputeBondiIntegrand, tmpl::_1>>>,
+      ::Actions::MutateApply<RadialIntegrateBondi<
+          Tags::EvolutionGaugeBoundaryValue, Tags::KleinGordonPi>>>;
 
   using simple_tags_from_options =
       Parallel::get_simple_tags_from_options<initialize_action_list>;
