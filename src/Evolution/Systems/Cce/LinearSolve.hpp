@@ -29,7 +29,8 @@ namespace Cce {
  *
  * for \f$f\f$ given integrand \f$g\f$.
  */
-const Matrix& precomputed_cce_q_integrator(size_t number_of_radial_grid_points);
+const Matrix& precomputed_cce_q_integrator(size_t number_of_radial_grid_points,
+                                           double coeff);
 
 /*!
  * \brief A utility function for evaluating the \f$Q\f$ and \f$W\f$ hypersurface
@@ -47,6 +48,7 @@ const Matrix& precomputed_cce_q_integrator(size_t number_of_radial_grid_points);
  * integrand and `l_max` is required to determine the shape of the spin-weighted
  * spherical harmonic mesh.
  */
+template <int coeff>
 void radial_integrate_cce_pole_equations(
     gsl::not_null<ComplexDataVector*> integral_result,
     const ComplexDataVector& pole_of_integrand,
