@@ -553,9 +553,23 @@ void ccm_functions(
       [&radius](const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
                     theta_tetrad) { get(*theta_tetrad).data() *= radius; },
       make_not_null(&spectre_box));
+  db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffTheta>>(
+      [&l_max](const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+                   theta_tetrad) {
+        Spectral::Swsh::filter_swsh_boundary_quantity(
+            make_not_null(&get(*theta_tetrad)), l_max, l_max - 3);
+      },
+      make_not_null(&spectre_box));
   db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffPhi>>(
       [&radius](const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
                     phi_tetrad) { get(*phi_tetrad).data() *= radius; },
+      make_not_null(&spectre_box));
+  db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffPhi>>(
+      [&l_max](const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
+                   phi_tetrad) {
+        Spectral::Swsh::filter_swsh_boundary_quantity(
+            make_not_null(&get(*phi_tetrad)), l_max, l_max - 3);
+      },
       make_not_null(&spectre_box));
   db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>(
       [&l_max](const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
