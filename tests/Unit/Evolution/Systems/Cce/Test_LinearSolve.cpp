@@ -203,7 +203,7 @@ void test_regular_integration(const gsl::not_null<Generator*> gen,
 template <typename BondiValueTag, typename Generator>
 void test_pole_integration(const gsl::not_null<Generator*> gen,
                            const size_t number_of_radial_grid_points,
-                           const size_t l_max) {
+                           const size_t l_max, const double coeff) {
   UniformCustomDistribution<double> dist(0.1, 5.0);
   const size_t number_of_radial_polynomials = 5;
 
@@ -222,10 +222,10 @@ void test_pole_integration(const gsl::not_null<Generator*> gen,
   // and matching order-by-order in (1 - y).
   db::mutate<TestHelpers::RadialPolyCoefficientsFor<
       Tags::PoleOfIntegrand<BondiValueTag>>>(
-      [](const gsl::not_null<Scalar<ComplexModalVector>*>
-             pole_of_integrand_modes,
-         const Scalar<ComplexModalVector>& bondi_value_modes) {
-        get(*pole_of_integrand_modes)[0] = 2.0 * get(bondi_value_modes)[0];
+      [&coeff](const gsl::not_null<Scalar<ComplexModalVector>*>
+                   pole_of_integrand_modes,
+               const Scalar<ComplexModalVector>& bondi_value_modes) {
+        get(*pole_of_integrand_modes)[0] = coeff * get(bondi_value_modes)[0];
       },
       make_not_null(&box),
       db::get<TestHelpers::RadialPolyCoefficientsFor<BondiValueTag>>(box));
@@ -478,11 +478,14 @@ SPECTRE_TEST_CASE("Unit.Evolution.Systems.Cce.LinearSolve", "[Unit][Cce]") {
   test_regular_integration<Tags::BondiU>(make_not_null(&gen),
                                          number_of_radial_grid_points, l_max);
   test_pole_integration<Tags::BondiQ>(make_not_null(&gen),
-                                      number_of_radial_grid_points, l_max);
+                                      number_of_radial_grid_points, l_max, 2.0);
   test_pole_integration<Tags::BondiW>(make_not_null(&gen),
-                                      number_of_radial_grid_points, l_max);
+                                      number_of_radial_grid_points, l_max, 2.0);
   test_pole_integration_with_linear_operator<Tags::BondiH>(
       make_not_null(&gen), number_of_radial_grid_points, l_max);
+
+  //   test_pole_integration<Tags::KleinGordonPi>(
+  //       make_not_null(&gen), number_of_radial_grid_points, l_max, 1.0);
 }
 }  // namespace
 }  // namespace Cce
