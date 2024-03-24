@@ -42,6 +42,8 @@ template <typename Metavariables>
 struct KleinGordonH5WorldtubeBoundary;
 template <typename Metavariables>
 struct GhWorldtubeBoundary;
+template <typename Metavariables>
+struct KleinGordonAnalyticWorldtubeBoundary;
 /// \endcond
 namespace Actions {
 
@@ -250,6 +252,39 @@ struct InitializeWorldtubeBoundary<AnalyticWorldtubeBoundary<Metavariables>>
                  Tags::CceEvolutionPrefix<
                      ::Tags::ConcreteTimeStepper<TimeStepperType>>>,
       typename Metavariables::cce_boundary_communication_tags>;
+  using base_type::apply;
+  using typename base_type::simple_tags;
+  using compute_tags = time_stepper_ref_tags<TimeStepperType>;
+  using const_global_cache_tags =
+      tmpl::list<Tags::LMax, Tags::SpecifiedEndTime, Tags::SpecifiedStartTime>;
+  using typename base_type::simple_tags_from_options;
+};
+
+template <typename Metavariables>
+struct InitializeWorldtubeBoundary<
+    KleinGordonAnalyticWorldtubeBoundary<Metavariables>>
+    : public detail::InitializeWorldtubeBoundaryBase<
+          InitializeWorldtubeBoundary<
+              KleinGordonAnalyticWorldtubeBoundary<Metavariables>>,
+          tmpl::list<Tags::AnalyticBoundaryDataManager,
+                     Tags::KleinGordonAnalyticBoundaryDataManager,
+                     Tags::CceEvolutionPrefix<::Tags::ConcreteTimeStepper<
+                         tmpl::conditional_t<Metavariables::local_time_stepping,
+                                             LtsTimeStepper, TimeStepper>>>>,
+          typename Metavariables::cce_boundary_communication_tags,
+          typename Metavariables::klein_gordon_boundary_communication_tags> {
+  using TimeStepperType =
+      tmpl::conditional_t<Metavariables::local_time_stepping, LtsTimeStepper,
+                          TimeStepper>;
+  using base_type = detail::InitializeWorldtubeBoundaryBase<
+      InitializeWorldtubeBoundary<
+          KleinGordonAnalyticWorldtubeBoundary<Metavariables>>,
+      tmpl::list<Tags::AnalyticBoundaryDataManager,
+                 Tags::KleinGordonAnalyticBoundaryDataManager,
+                 Tags::CceEvolutionPrefix<
+                     ::Tags::ConcreteTimeStepper<TimeStepperType>>>,
+      typename Metavariables::cce_boundary_communication_tags,
+      typename Metavariables::klein_gordon_boundary_communication_tags>;
   using base_type::apply;
   using typename base_type::simple_tags;
   using compute_tags = time_stepper_ref_tags<TimeStepperType>;
