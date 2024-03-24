@@ -587,6 +587,23 @@ struct AnalyticBoundaryDataManager : db::SimpleTag {
   }
 };
 
+/// A tag that constructs a `KleinGordonAnalyticBoundaryDataManager` from
+/// options
+struct KleinGordonAnalyticBoundaryDataManager : db::SimpleTag {
+  using type = ::Cce::KleinGordonAnalyticBoundaryDataManager;
+  using option_tags = tmpl::list<OptionTags::ExtractionRadius, OptionTags::LMax,
+                                 OptionTags::KleinGordonAnalyticSolution>;
+
+  static constexpr bool pass_metavariables = false;
+  static Cce::KleinGordonAnalyticBoundaryDataManager create_from_options(
+      const double extraction_radius, const size_t l_max,
+      const std::unique_ptr<Cce::Solutions::KleinGordonWorldtubeData>&
+          worldtube_data) {
+    return ::Cce::KleinGordonAnalyticBoundaryDataManager(
+        l_max, extraction_radius, worldtube_data->get_clone());
+  }
+};
+
 /// Represents whether the news should be provided at noninertial times.
 ///
 /// \details Currently, this is only useful for analytic solutions for which the

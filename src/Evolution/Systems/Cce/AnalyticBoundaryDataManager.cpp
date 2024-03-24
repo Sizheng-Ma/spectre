@@ -39,4 +39,37 @@ void AnalyticBoundaryDataManager::pup(PUP::er& p) {
   p | extraction_radius_;
   p | generator_;
 }
+
+KleinGordonAnalyticBoundaryDataManager::KleinGordonAnalyticBoundaryDataManager(
+    const size_t l_max, const double extraction_radius,
+    std::unique_ptr<Solutions::KleinGordonWorldtubeData> generator)
+    : l_max_{l_max},
+      generator_{std::move(generator)},
+      extraction_radius_{extraction_radius} {}
+
+bool KleinGordonAnalyticBoundaryDataManager::
+    populate_hypersurface_boundary_data(
+        const gsl::not_null<
+            Variables<Tags::klein_gordon_worldtube_boundary_tags>*>
+            boundary_data_variables,
+        const double time) const {
+  const auto boundary_tuple = generator_->variables(
+      l_max_, time, tmpl::list<Tags::KleinGordonPi, Tags::KleinGordonPsi>{});
+
+  const auto& kg_psi = get<Cce::Tags::KleinGordonPsi>(boundary_tuple);
+  const auto& kg_pi = get<Cce::Tags::KleinGordonPi>(boundary_tuple);
+
+  get<Tags::BoundaryValue<Tags::KleinGordonPsi>>(*boundary_data_variables) =
+      kg_psi;
+  get<Tags::BoundaryValue<Tags::KleinGordonPi>>(*boundary_data_variables) =
+      kg_pi;
+
+  return true;
+}
+
+void KleinGordonAnalyticBoundaryDataManager::pup(PUP::er& p) {
+  p | l_max_;
+  p | extraction_radius_;
+  p | generator_;
+}
 }  // namespace Cce
