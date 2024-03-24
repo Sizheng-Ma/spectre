@@ -45,3 +45,8 @@ add_cce_executable(
   Cce::KleinGordonH5WorldtubeBoundary
   KleinGordonCharacteristicExtract
   )
+  add_cce_executable(
+    KleinGordonAnalyticTestCharacteristicExtract
+    Cce::KleinGordonAnalyticWorldtubeBoundary
+    KleinGordonCharacteristicExtract
+    )
