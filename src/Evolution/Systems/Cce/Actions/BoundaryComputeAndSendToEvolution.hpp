@@ -291,6 +291,77 @@ struct BoundaryComputeAndSendToEvolution<
   }
 };
 
+template <typename Metavariables, typename EvolutionComponent>
+struct BoundaryComputeAndSendToEvolution<
+    KleinGordonAnalyticWorldtubeBoundary<Metavariables>, EvolutionComponent> {
+  template <typename ParallelComponent, typename DbTagList, typename ArrayIndex>
+  static void apply(db::DataBox<DbTagList>& box,
+                    Parallel::GlobalCache<Metavariables>& cache,
+                    const ArrayIndex& /*array_index*/, const TimeStepId& time) {
+    bool tensor_successfully_populated = false;
+    bool klein_gordon_successfully_populated = false;
+    db::mutate<
+        Tags::AnalyticBoundaryDataManager,
+        Tags::KleinGordonAnalyticBoundaryDataManager,
+        ::Tags::Variables<
+            typename Metavariables::cce_boundary_communication_tags>,
+        ::Tags::Variables<
+            typename Metavariables::klein_gordon_boundary_communication_tags>>(
+        [&tensor_successfully_populated, &klein_gordon_successfully_populated,
+         &time](
+            const gsl::not_null<Cce::AnalyticBoundaryDataManager*>
+                tensor_worldtube_data_manager,
+            const gsl::not_null<Cce::KleinGordonAnalyticBoundaryDataManager*>
+                klein_gordon_worldtube_data_manager,
+            const gsl::not_null<Variables<
+                typename Metavariables::cce_boundary_communication_tags>*>
+                tensor_boundary_variables,
+            const gsl::not_null<
+                Variables<typename Metavariables::
+                              klein_gordon_boundary_communication_tags>*>
+                klein_gordon_boundary_variables) {
+          tensor_successfully_populated =
+              (*tensor_worldtube_data_manager)
+                  .populate_hypersurface_boundary_data(
+                      tensor_boundary_variables, time.substep_time());
+
+          klein_gordon_successfully_populated =
+              (*klein_gordon_worldtube_data_manager)
+                  .populate_hypersurface_boundary_data(
+                      klein_gordon_boundary_variables, time.substep_time());
+        },
+        make_not_null(&box));
+
+    if (not tensor_successfully_populated) {
+      ERROR(
+          "Insufficient tensor boundary data to proceed, exiting early at "
+          "time " +
+          std::to_string(time.substep_time()));
+    }
+
+    if (not klein_gordon_successfully_populated) {
+      ERROR(
+          "Insufficient scalar boundary data to proceed, exiting early at "
+          "time " +
+          std::to_string(time.substep_time()));
+    }
+    Parallel::receive_data<Cce::ReceiveTags::BoundaryData<
+        typename Metavariables::cce_boundary_communication_tags>>(
+        Parallel::get_parallel_component<EvolutionComponent>(cache), time,
+        db::get<::Tags::Variables<
+            typename Metavariables::cce_boundary_communication_tags>>(box),
+        true);
+
+    Parallel::receive_data<Cce::ReceiveTags::BoundaryData<
+        typename Metavariables::klein_gordon_boundary_communication_tags>>(
+        Parallel::get_parallel_component<EvolutionComponent>(cache), time,
+        db::get<::Tags::Variables<
+            typename Metavariables::klein_gordon_boundary_communication_tags>>(
+            box),
+        true);
+  }
+};
+
 /*!
  * \ingroup ActionsGroup
  * \brief Submits a request for CCE boundary data at the specified `time` to the
