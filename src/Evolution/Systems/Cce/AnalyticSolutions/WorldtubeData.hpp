@@ -39,6 +39,10 @@ using cce_analytic_solutions_cache_tags = tmpl::list<
     Tags::Dr<gr::Tags::Shift<DataVector, 3>>,
     Tags::Dr<gr::Tags::Lapse<DataVector>>, Tags::News>;
 
+using kg_cce_analytic_solutions_cache_tags =
+    tmpl::list<Tags::CauchyCartesianCoords, Tags::KleinGordonPsi,
+               Tags::KleinGordonPi>;
+
 /// \cond
 class BouncingBlackHole;
 class GaugeWave;
@@ -277,6 +281,90 @@ struct WorldtubeData
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, -2>>*> news,
       size_t output_l_max, double time,
       tmpl::type_<Tags::News> /*meta*/) const = 0;
+
+  double extraction_radius_ = std::numeric_limits<double>::quiet_NaN();
+};
+
+struct KleinGordonWorldtubeData
+    : public PUP::able,
+      WorldtubeDataBase<kg_cce_analytic_solutions_cache_tags> {
+  using creatable_classes = tmpl::list<>;
+
+  /// The set of available tags provided by the analytic solution
+  using tags = tmpl::list<Tags::CauchyCartesianCoords, Tags::KleinGordonPsi,
+                          Tags::KleinGordonPi>;
+
+  WRAPPED_PUPable_abstract(KleinGordonWorldtubeData);  // NOLINT
+
+  // clang doesn't manage to use = default correctly in this case
+  // NOLINTNEXTLINE(modernize-use-equals-default)
+  KleinGordonWorldtubeData() {}
+
+  explicit KleinGordonWorldtubeData(const double extraction_radius)
+      : extraction_radius_{extraction_radius} {}
+
+  explicit KleinGordonWorldtubeData(CkMigrateMessage* msg) : PUP::able(msg) {}
+
+  ~KleinGordonWorldtubeData() override = default;
+
+  virtual std::unique_ptr<KleinGordonWorldtubeData> get_clone() const = 0;
+
+  /*!
+   * \brief Retrieve worldtube data represented by the analytic solution, at
+   * boundary angular resolution `l_max` and time `time`
+   *
+   * \details The set of requested tags are specified by the final argument,
+   * which must be a `tmpl::list` of tags to be retrieved. The set of available
+   * tags is found in `WorldtubeData::tags`, and includes coordinate and
+   * Jacobian quantities as well as metric quantities and derivatives thereof.
+   */
+  template <typename... Tags>
+  tuples::TaggedTuple<Tags...> variables(
+      // NOLINTNEXTLINE(readability-avoid-const-params-in-decls)
+      const size_t output_l_max, const double time,
+      tmpl::list<Tags...> /*meta*/) const {
+    prepare_solution(output_l_max, time);
+    return {cache_or_compute<Tags>(output_l_max, time)...};
+  }
+
+  void pup(PUP::er& p) override;
+
+ protected:
+  template <typename Tag>
+  const auto& cache_or_compute(const size_t output_l_max,
+                               const double time) const {
+    auto& item_cache = get<IntermediateCacheTag<Tag>>(intermediate_cache_);
+    if (item_cache.l_max == output_l_max and item_cache.time == time) {
+      return item_cache.data;
+    }
+    auto& item = item_cache.data;
+    set_number_of_grid_points(
+        make_not_null(&item),
+        Spectral::Swsh::number_of_swsh_collocation_points(output_l_max));
+    variables_impl(make_not_null(&item), output_l_max, time,
+                   tmpl::type_<Tag>{});
+    item_cache.l_max = output_l_max;
+    item_cache.time = time;
+    return item;
+  }
+  virtual void prepare_solution(size_t output_l_max, double time) const = 0;
+
+  // note that function template cannot be virtual, so we have to emulate
+  // template specializations through function overloads
+  virtual void variables_impl(
+      gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_coordinates,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::CauchyCartesianCoords> /*meta*/) const;
+
+  virtual void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::KleinGordonPsi> /*meta*/) const = 0;
+
+  virtual void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_pi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::KleinGordonPi> /*meta*/) const = 0;
 
   double extraction_radius_ = std::numeric_limits<double>::quiet_NaN();
 };
