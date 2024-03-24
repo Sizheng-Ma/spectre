@@ -15,6 +15,7 @@
 #include "DataStructures/Tags.hpp"
 #include "DataStructures/Tensor/Tensor.hpp"
 #include "DataStructures/Variables.hpp"
+#include "Evolution/Systems/Cce/AnalyticSolutions/KleinGordonWaveHelper.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "NumericalAlgorithms/SpinWeightedSphericalHarmonics/SwshCollocation.hpp"
 #include "NumericalAlgorithms/SpinWeightedSphericalHarmonics/SwshInterpolation.hpp"
@@ -205,5 +206,76 @@ void GaugeWave::pup(PUP::er& p) {
   p | duration_;
 }
 
+KleinGordonGaugeWave::KleinGordonGaugeWave(
+    const double extraction_radius, const double mass, const double frequency,
+    const double amplitude, const double peak_time, const double duration)
+    : extraction_radius_{extraction_radius},
+      mass_{mass},
+      frequency_{frequency},
+      amplitude_{amplitude},
+      peak_time_{peak_time},
+      duration_{duration} {}
+
+std::unique_ptr<KleinGordonWorldtubeData> KleinGordonGaugeWave::get_clone()
+    const {
+  return std::make_unique<KleinGordonGaugeWave>(*this);
+}
+
+double KleinGordonGaugeWave::coordinate_wave_function(const double time) const {
+  const auto retarded_time = time - extraction_radius_;
+  return amplitude_ * sin(frequency_ * retarded_time) *
+         exp(-square(retarded_time - peak_time_) / square(duration_));
+}
+
+double KleinGordonGaugeWave::du_coordinate_wave_function(
+    const double time) const {
+  const auto retarded_time = time - extraction_radius_;
+  return amplitude_ *
+         (-2.0 * (retarded_time - peak_time_) / square(duration_) *
+              sin(frequency_ * retarded_time) +
+          frequency_ * cos(frequency_ * retarded_time)) *
+         exp(-square(retarded_time - peak_time_) / square(duration_));
+}
+
+void KleinGordonGaugeWave::variables_impl(
+    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_psi,
+    const size_t /*output_l_max*/, const double time,
+    tmpl::type_<Tags::KleinGordonPsi> /*meta*/) const {
+  const auto wave_f = coordinate_wave_function(time);
+  auto r = extraction_radius_;
+  auto r_fac = 4 * mass_ * log(r / (2. * mass_) - 1.0);
+
+  double u = time - r + wave_f / r - r_fac;
+  KleinGordon::bc_psi(make_not_null(&get(*kg_psi).data()),
+                      DataVector(get(*kg_psi).size(), u),
+                      DataVector(get(*kg_psi).size(), 1. / r));
+}
+
+void KleinGordonGaugeWave::variables_impl(
+    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_pi,
+    const size_t /*output_l_max*/, const double time,
+    tmpl::type_<Tags::KleinGordonPi> /*meta*/) const {
+  const auto wave_f = coordinate_wave_function(time);
+  const auto du_wave_f = du_coordinate_wave_function(time);
+  auto r = extraction_radius_;
+  auto r_fac = 4 * mass_ * log(r / (2. * mass_) - 1.);
+
+  double u = time - r + wave_f / r - r_fac;
+  double du = 1 + du_wave_f / r;
+  KleinGordon::bc_theta(
+      make_not_null(&get(*kg_pi).data()), DataVector(get(*kg_pi).size(), u),
+      DataVector(get(*kg_pi).size(), r), DataVector(get(*kg_pi).size(), du));
+}
+
+void KleinGordonGaugeWave::pup(PUP::er& p) {
+  p | extraction_radius_;
+  p | mass_;
+  p | frequency_;
+  p | amplitude_;
+  p | peak_time_;
+  p | duration_;
+}
+
 PUP::able::PUP_ID GaugeWave::my_PUP_ID = 0;
+PUP::able::PUP_ID KleinGordonGaugeWave::my_PUP_ID = 0;
 }  // namespace Cce::Solutions
