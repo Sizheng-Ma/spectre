@@ -179,6 +179,23 @@ struct AnalyticWorldtubeBoundary
   using end_time_tag = Tags::SpecifiedEndTime;
 };
 
+template <class Metavariables>
+struct KleinGordonAnalyticWorldtubeBoundary
+    : public WorldtubeComponentBase<
+          KleinGordonAnalyticWorldtubeBoundary<Metavariables>, Metavariables> {
+  using base_type = WorldtubeComponentBase<
+      KleinGordonAnalyticWorldtubeBoundary<Metavariables>, Metavariables>;
+  using base_type::execute_next_phase;
+  using base_type::initialize;
+  using typename base_type::chare_type;
+  using const_global_cache_tags = tmpl::list<Tags::AnalyticInitializeJ>;
+  using typename base_type::metavariables;
+  using typename base_type::options;
+  using typename base_type::phase_dependent_action_list;
+  using typename base_type::simple_tags_from_options;
+  using end_time_tag = Tags::SpecifiedEndTime;
+};
+
 /*!
  * \brief Component that supplies CCE worldtube boundary data sourced from a
  * running GH system.
