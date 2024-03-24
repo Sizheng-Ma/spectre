@@ -272,5 +272,95 @@ struct GaugeWave : public SphericalMetricData {
   double peak_time_ = std::numeric_limits<double>::signaling_NaN();
   double duration_ = std::numeric_limits<double>::signaling_NaN();
 };
+
+struct KleinGordonGaugeWave : public KleinGordonWorldtubeData {
+  struct ExtractionRadius {
+    using type = double;
+    static constexpr Options::String help{
+        "The extraction radius of the spherical solution"};
+    static type lower_bound() { return 0.0; }
+  };
+  struct Mass {
+    using type = double;
+    static constexpr Options::String help{
+        "The mass of the Schwarzschild solution."};
+    static type lower_bound() { return 0.0; }
+  };
+  struct Frequency {
+    using type = double;
+    static constexpr Options::String help{
+        "The frequency of the oscillation of the gauge wave."};
+    static type lower_bound() { return 0.0; }
+  };
+  struct Amplitude {
+    using type = double;
+    static constexpr Options::String help{"The amplitude of the gauge wave."};
+    static type lower_bound() { return 0.0; }
+  };
+  struct PeakTime {
+    using type = double;
+    static constexpr Options::String help{
+        "The time of the peak of the Gaussian envelope."};
+    static type lower_bound() { return 0.0; }
+  };
+  struct Duration {
+    using type = double;
+    static constexpr Options::String help{
+        "The characteristic duration of the Gaussian envelope."};
+    static type lower_bound() { return 0.0; }
+  };
+
+  using options = tmpl::list<ExtractionRadius, Mass, Frequency, Amplitude,
+                             PeakTime, Duration>;
+
+  static constexpr Options::String help = {
+      "Analytic solution representing worldtube data for a pure-gauge "
+      "perturbation near a Schwarzschild metric in spherical coordinates"};
+
+  WRAPPED_PUPable_decl_template(KleinGordonGaugeWave);  // NOLINT
+
+  explicit KleinGordonGaugeWave(CkMigrateMessage* /*unused*/) {}
+
+  // clang doesn't manage to use = default correctly in this case
+  // NOLINTNEXTLINE(modernize-use-equals-default)
+  KleinGordonGaugeWave() {}
+
+  KleinGordonGaugeWave(double extraction_radius, double mass, double frequency,
+                       double amplitude, double peak_time, double duration);
+
+  std::unique_ptr<KleinGordonWorldtubeData> get_clone() const override;
+
+  void pup(PUP::er& p) override;
+
+ private:
+  double coordinate_wave_function(double time) const;
+
+  double du_coordinate_wave_function(double time) const;
+
+ protected:
+  /// A no-op as the gauge wave solution does not have substantial
+  /// shared computation to prepare before the separate component calculations.
+  void prepare_solution(const size_t /*output_l_max*/,
+                        const double /*time*/) const override {}
+
+  using KleinGordonWorldtubeData::variables_impl;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::KleinGordonPsi> /*meta*/) const override;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_pi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::KleinGordonPi> /*meta*/) const override;
+
+  double extraction_radius_ = std::numeric_limits<double>::signaling_NaN();
+  double mass_ = std::numeric_limits<double>::signaling_NaN();
+  double frequency_ = std::numeric_limits<double>::signaling_NaN();
+  double amplitude_ = std::numeric_limits<double>::signaling_NaN();
+  double peak_time_ = std::numeric_limits<double>::signaling_NaN();
+  double duration_ = std::numeric_limits<double>::signaling_NaN();
+};
 }  // namespace Solutions
 }  // namespace Cce
