@@ -456,5 +456,9 @@ struct SelfStartGhInterfaceManager : db::SimpleTag {
     return Cce::InterfaceManagers::GhLockstep();
   }
 };
+
+struct STMonitor : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
 }  // namespace Tags
 }  // namespace Cce
