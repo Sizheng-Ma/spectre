@@ -841,4 +841,19 @@ struct InitializeGauge {
       gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> omega,
       size_t l_max);
 };
+
+struct STWTMonitor {
+  using return_tags = tmpl::list<Tags::STMonitor>;
+  using argument_tags = tmpl::list<
+      Tags::BoundaryValue<Tags::KleinGordonPsi>,
+      Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
+      Tags::LMax, Tags::KleinGordonPsi>;
+
+  static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+          evolution_st_monitor,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& cauchy_st_psi,
+      const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi);
+};
 }  // namespace Cce
