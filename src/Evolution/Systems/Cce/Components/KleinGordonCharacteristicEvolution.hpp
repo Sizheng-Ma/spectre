@@ -91,7 +91,8 @@ struct KleinGordonCharacteristicEvolution
       // iterations immediately following restarts
       Actions::InitializeFirstHypersurface<
           evolve_ccm, typename Metavariables::cce_boundary_component>,
-      Actions::InitializeKleinGordonFirstHypersurface,
+      Actions::InitializeKleinGordonFirstHypersurface<
+          typename Metavariables::cce_boundary_component>,
       tmpl::conditional_t<
           tt::is_a_v<AnalyticWorldtubeBoundary,
                      typename Metavariables::cce_boundary_component>,
@@ -134,7 +135,8 @@ struct KleinGordonCharacteristicEvolution
           typename Metavariables::klein_gordon_boundary_communication_tags>,
       Actions::InitializeFirstHypersurface<
           evolve_ccm, typename Metavariables::cce_boundary_component>,
-      Actions::InitializeKleinGordonFirstHypersurface,
+      Actions::InitializeKleinGordonFirstHypersurface<
+          typename Metavariables::cce_boundary_component>,
       tmpl::conditional_t<
           tt::is_a_v<AnalyticWorldtubeBoundary,
                      typename Metavariables::cce_boundary_component>,
