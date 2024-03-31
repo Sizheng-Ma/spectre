@@ -80,13 +80,17 @@ void InverseCubic<true>::apply(
         one_minus_y_collocation[i] * one_minus_y_coefficient +
         pow<3>(one_minus_y_collocation[i]) * one_minus_y_cubed_coefficient;
 
-    double ycenter = -0.0;
+    double ycenter = -0.;
+    double ymin = -0.9;
+    double ymax = 0.9;
     double width = 0.15;
-    angular_view_j +=
-        perturbed_j.data() * 0.000 * std::complex(0.0, 1.0) *
-        exp(-pow(1.0 - one_minus_y_collocation[i] - ycenter, 2.0) / width /
-            width) *
-        one_minus_y_collocation[i];
+    if (one_minus_y_collocation[i] >= (1. - ymax) &&
+        one_minus_y_collocation[i] <= (1. - ymin)) {
+      angular_view_j +=
+          perturbed_j.data() * 0 *
+          exp(-pow(1.0 - one_minus_y_collocation[i] - ycenter, 2.0) / width /
+              width);
+    }
   }
   Spectral::Swsh::create_angular_and_cartesian_coordinates(
       cartesian_cauchy_coordinates, angular_cauchy_coordinates, l_max);
@@ -146,13 +150,17 @@ void InverseCubic<true>::operator()(
         one_minus_y_collocation[i] * one_minus_y_coefficient +
         pow<3>(one_minus_y_collocation[i]) * one_minus_y_cubed_coefficient;
 
-    double ycenter = -0.0;
+    double ycenter = -0.;
+    double ymin = -0.9;
+    double ymax = 0.9;
     double width = 0.15;
-    angular_view_j +=
-        perturbed_j.data() * 0.000 * std::complex(0.0, 1.0) *
-        exp(-pow(1.0 - one_minus_y_collocation[i] - ycenter, 2.0) / width /
-            width) *
-        one_minus_y_collocation[i];
+    if (one_minus_y_collocation[i] >= (1. - ymax) &&
+        one_minus_y_collocation[i] <= (1. - ymin)) {
+      angular_view_j +=
+          perturbed_j.data() * 0 *
+          exp(-pow(1.0 - one_minus_y_collocation[i] - ycenter, 2.0) / width /
+              width);
+    }
   }
   Spectral::Swsh::create_angular_and_cartesian_coordinates(
       cartesian_cauchy_coordinates, angular_cauchy_coordinates, l_max);
