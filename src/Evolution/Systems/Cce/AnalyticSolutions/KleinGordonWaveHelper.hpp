@@ -56,7 +56,8 @@ DataVector a15dot(const DataVector& u);
 void bc_psi(gsl::not_null<ComplexDataVector*> theta, const DataVector& u,
             const DataVector& one_over_r);
 void bc_theta(gsl::not_null<ComplexDataVector*> theta, const DataVector& u,
-              const DataVector& r, const DataVector& dudt);
+              const DataVector& r, const DataVector& dudt,
+              const DataVector& drdt);
 }  // namespace KleinGordon
 }  // namespace Solutions
 }  // namespace Cce
