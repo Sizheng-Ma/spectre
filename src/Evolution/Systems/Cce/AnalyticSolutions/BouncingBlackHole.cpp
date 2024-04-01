@@ -11,6 +11,7 @@
 #include "DataStructures/SpinWeighted.hpp"
 #include "DataStructures/Tensor/Tensor.hpp"
 #include "Evolution/Systems/Cce/AnalyticSolutions/BouncingBlackHole.hpp"
+#include "Evolution/Systems/Cce/AnalyticSolutions/KleinGordonWaveHelper.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "Evolution/Systems/GeneralizedHarmonic/Tags.hpp"
 #include "PointwiseFunctions/GeneralRelativity/Tags.hpp"
@@ -307,5 +308,74 @@ void BouncingBlackHole::pup(PUP::er& p) {
   p | frequency_;
 }
 
+KleinGordonBouncingBlackHole::KleinGordonBouncingBlackHole(
+    const double amplitude, const double extraction_radius, const double mass,
+    const double period)
+    : KleinGordonWorldtubeData(extraction_radius),
+      amplitude_{amplitude},
+      mass_{mass},
+      frequency_{2.0 * M_PI / period} {}
+
+std::unique_ptr<KleinGordonWorldtubeData>
+KleinGordonBouncingBlackHole::get_clone() const {
+  return std::make_unique<KleinGordonBouncingBlackHole>(*this);
+}
+
+void KleinGordonBouncingBlackHole::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_psi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::KleinGordonPsi> /*meta*/) const {
+  const auto& cartesian_coordinates =
+      cache_or_compute<Tags::CauchyCartesianCoords>(output_l_max, time);
+  const DataVector adjusted_x_coordinate =
+      amplitude_ * pow<4>(sin(frequency_ * time)) +
+      get<0>(cartesian_coordinates);
+  const DataVector r = sqrt(square(adjusted_x_coordinate) +
+                            square(get<1>(cartesian_coordinates)) +
+                            square(get<2>(cartesian_coordinates)));
+
+  auto rs = r + 2 * mass_ * log(r / 2. - 1.);
+
+  KleinGordon::bc_psi(make_not_null(&get(*kg_psi).data()), time + r - 2. * rs,
+                      1. / r);
+  //    = sin(time - r) / r;
+}
+
+void KleinGordonBouncingBlackHole::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_pi,
+    size_t output_l_max, double time,
+    tmpl::type_<Tags::KleinGordonPi> /*meta*/) const {
+  const auto& cartesian_coordinates =
+      cache_or_compute<Tags::CauchyCartesianCoords>(output_l_max, time);
+  const double dt_adjusted_x_coordinate = 4.0 * amplitude_ * frequency_ *
+                                          cos(frequency_ * time) *
+                                          pow<3>(sin(frequency_ * time));
+  const DataVector adjusted_x_coordinate =
+      amplitude_ * pow<4>(sin(frequency_ * time)) +
+      get<0>(cartesian_coordinates);
+  const DataVector r = sqrt(square(adjusted_x_coordinate) +
+                            square(get<1>(cartesian_coordinates)) +
+                            square(get<2>(cartesian_coordinates)));
+
+  auto drdt = adjusted_x_coordinate / r * dt_adjusted_x_coordinate;
+
+  auto rs = r + 2 * mass_ * log(r / 2. - 1.);
+  auto dudt = 1. + drdt - 2. * drdt / (1 - 2. / r);
+
+  KleinGordon::bc_theta(make_not_null(&get(*kg_pi).data()), time + r - 2 * rs,
+                        r, dudt);
+
+  //   get(*st_psi).data() =
+  //       cos(time - r) / r * (1 - drdt) - sin(time - r) / square(r) * drdt;
+}
+
+void KleinGordonBouncingBlackHole::pup(PUP::er& p) {
+  KleinGordonWorldtubeData::pup(p);
+  p | amplitude_;
+  p | mass_;
+  p | frequency_;
+}
+
 PUP::able::PUP_ID BouncingBlackHole::my_PUP_ID = 0;
+PUP::able::PUP_ID KleinGordonBouncingBlackHole::my_PUP_ID = 0;
 }  // namespace Cce::Solutions
