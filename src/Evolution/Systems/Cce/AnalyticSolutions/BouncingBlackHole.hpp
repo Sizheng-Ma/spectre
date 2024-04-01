@@ -185,4 +185,79 @@ struct BouncingBlackHole : public WorldtubeData {
   double mass_ = std::numeric_limits<double>::signaling_NaN();
   double frequency_ = std::numeric_limits<double>::signaling_NaN();
 };
+
+struct KleinGordonBouncingBlackHole : public KleinGordonWorldtubeData {
+  struct Amplitude {
+    using type = double;
+    static constexpr Options::String help{
+        "The coordinate distance of the gauge oscillation"};
+    static type lower_bound() { return 0.0; }
+    static type suggested_value() { return 2.0; }
+  };
+  struct ExtractionRadius {
+    using type = double;
+    static constexpr Options::String help{
+        "The extraction radius of the spherical solution"};
+    static type lower_bound() { return 0.0; }
+    static type suggested_value() { return 20.0; }
+  };
+  struct Mass {
+    using type = double;
+    static constexpr Options::String help{
+        "The mass of the Schwarzschild black hole"};
+    static type lower_bound() { return 0.0; }
+    static type suggested_value() { return 1.0; }
+  };
+  struct Period {
+    using type = double;
+    static constexpr Options::String help{
+        "The period of the coordinate oscillation"};
+    static type lower_bound() { return 0.0; }
+    static type suggested_value() { return 40.0; }
+  };
+
+  static constexpr Options::String help{
+      "Analytic solution in which a static black hole is placed in an "
+      "oscillating coordinate system"};
+
+  using options = tmpl::list<Amplitude, ExtractionRadius, Mass, Period>;
+
+  WRAPPED_PUPable_decl_template(KleinGordonBouncingBlackHole);  // NOLINT
+
+  explicit KleinGordonBouncingBlackHole(CkMigrateMessage* msg)
+      : KleinGordonWorldtubeData(msg) {}
+
+  // clang doesn't manage to use = default correctly in this case
+  // NOLINTNEXTLINE(modernize-use-equals-default)
+  KleinGordonBouncingBlackHole() {}
+
+  KleinGordonBouncingBlackHole(double amplitude, double extraction_radius,
+                               double mass, double period);
+
+  std::unique_ptr<KleinGordonWorldtubeData> get_clone() const override;
+
+  void pup(PUP::er& p) override;
+
+ protected:
+  // The bouncing black hole solution is easily computed directly, so requires
+  // no additional preparation.
+  void prepare_solution(const size_t /*l_max*/,
+                        const double /*time*/) const override{};
+
+  using KleinGordonWorldtubeData::variables_impl;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::KleinGordonPsi> /*meta*/) const override;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_pi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::KleinGordonPi> /*meta*/) const override;
+
+  double amplitude_ = std::numeric_limits<double>::signaling_NaN();
+  double mass_ = std::numeric_limits<double>::signaling_NaN();
+  double frequency_ = std::numeric_limits<double>::signaling_NaN();
+};
 }  // namespace Cce::Solutions
