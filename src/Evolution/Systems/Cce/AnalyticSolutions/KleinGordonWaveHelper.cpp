@@ -124,10 +124,8 @@ void bc_psi(const gsl::not_null<ComplexDataVector*> theta, const DataVector& u,
 }
 
 void bc_theta(const gsl::not_null<ComplexDataVector*> theta,
-              const DataVector& u, const DataVector& r,
-              const DataVector& dudt) {
-  DataVector drdt = 0 * dudt;
-
+              const DataVector& u, const DataVector& r, const DataVector& dudt,
+              const DataVector& drdt) {
   *theta = a0dot(u) * dudt / r - (0 + 1) / square(r) * a0(u) * drdt;
 
   int iii = 2;

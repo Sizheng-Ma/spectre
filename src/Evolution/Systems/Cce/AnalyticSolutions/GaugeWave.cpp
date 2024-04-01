@@ -264,7 +264,8 @@ void KleinGordonGaugeWave::variables_impl(
   double du = 1 + du_wave_f / r;
   KleinGordon::bc_theta(
       make_not_null(&get(*kg_pi).data()), DataVector(get(*kg_pi).size(), u),
-      DataVector(get(*kg_pi).size(), r), DataVector(get(*kg_pi).size(), du));
+      DataVector(get(*kg_pi).size(), r), DataVector(get(*kg_pi).size(), du),
+      DataVector(get(*kg_pi).size(), du * 0));
 }
 
 void KleinGordonGaugeWave::pup(PUP::er& p) {
