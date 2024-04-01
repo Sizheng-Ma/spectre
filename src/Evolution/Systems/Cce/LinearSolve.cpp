@@ -103,6 +103,16 @@ const Matrix& precomputed_cce_q_integrator(
   return lazy_matrix_cache(number_of_radial_grid_points);
 }
 
+const Matrix& precomputed_cce_kg_integrator(
+    const size_t number_of_radial_grid_points, const double coeff) {
+  static const auto lazy_matrix_cache = make_static_cache<CacheRange<
+      1_st, Spectral::maximum_number_of_points<Spectral::Basis::Legendre> + 1>>(
+      [&coeff](const size_t local_number_of_radial_points) {
+        return q_integration_matrix(local_number_of_radial_points, coeff);
+      });
+  return lazy_matrix_cache(number_of_radial_grid_points);
+}
+
 template <>
 void radial_integrate_cce_pole_equations<2>(
     const gsl::not_null<ComplexDataVector*> integral_result,
@@ -149,7 +159,7 @@ void radial_integrate_cce_pole_equations<1>(
 
   apply_matrices(integral_result,
                  std::array<Matrix, 3>{{Matrix{}, Matrix{},
-                                        precomputed_cce_q_integrator(
+                                        precomputed_cce_kg_integrator(
                                             number_of_radial_points, 1.0)}},
                  integrand,
                  Spectral::Swsh::swsh_volume_mesh_for_radial_operations(
