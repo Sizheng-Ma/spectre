@@ -363,7 +363,7 @@ void KleinGordonBouncingBlackHole::variables_impl(
   auto dudt = 1. + drdt - 2. * drdt / (1 - 2. / r);
 
   KleinGordon::bc_theta(make_not_null(&get(*kg_pi).data()), time + r - 2 * rs,
-                        r, dudt);
+                        r, dudt, drdt);
 
   //   get(*st_psi).data() =
   //       cos(time - r) / r * (1 - drdt) - sin(time - r) / square(r) * drdt;
