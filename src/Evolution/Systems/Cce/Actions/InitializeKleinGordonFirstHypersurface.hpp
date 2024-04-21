@@ -77,6 +77,7 @@ struct InitializeKleinGordonFirstHypersurface {
 
               Solutions::KleinGordon::bc_psi(
                   make_not_null(&angular_view_kg_psi), u0new, one_over_r);
+              // angular_view_kg_psi *= 0;
             }
           },
           make_not_null(&box), db::get<Tags::BoundaryValue<Tags::BondiR>>(box),

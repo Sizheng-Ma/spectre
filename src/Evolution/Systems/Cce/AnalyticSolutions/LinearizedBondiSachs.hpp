@@ -561,4 +561,52 @@ struct LinearizedBondiSachs : public SphericalMetricData {
 
   double frequency_ = 0.0;
 };
+
+struct KleinGordonLinearizedBondiSachs : public KleinGordonWorldtubeData {
+  struct Frequency {
+    using type = double;
+    static constexpr Options::String help{
+        "The frequency of the linearized modes."};
+    static type lower_bound() { return 0.0; }
+  };
+
+  static constexpr Options::String help{
+      "A linearized Bondi-Sachs analytic solution"};
+
+  using options = tmpl::list<Frequency>;
+
+  WRAPPED_PUPable_decl_template(KleinGordonLinearizedBondiSachs);  // NOLINT
+
+  explicit KleinGordonLinearizedBondiSachs(CkMigrateMessage* /*unused*/) {}
+
+  // clang doesn't manage to use = default correctly in this case
+  // NOLINTNEXTLINE(hicpp-use-equals-default,modernize-use-equals-default)
+  KleinGordonLinearizedBondiSachs() {}
+
+  KleinGordonLinearizedBondiSachs(double frequency);
+
+  std::unique_ptr<KleinGordonWorldtubeData> get_clone() const override;
+
+  void pup(PUP::er& p) override;
+
+ protected:
+  /// A no-op as the linearized solution does not have substantial shared
+  /// computation to prepare before the separate component calculations.
+  void prepare_solution(const size_t /*output_l_max*/,
+                        const double /*time*/) const override {}
+
+  using KleinGordonWorldtubeData::variables_impl;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::KleinGordonPsi> /*meta*/) const override;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_pi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::KleinGordonPi> /*meta*/) const override;
+
+  double frequency_ = 0.0;
+};
 }  // namespace Cce::Solutions
