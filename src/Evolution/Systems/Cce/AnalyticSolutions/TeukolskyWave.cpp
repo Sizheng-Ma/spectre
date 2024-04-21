@@ -309,5 +309,30 @@ void TeukolskyWave::pup(PUP::er& p) {
   p | duration_;
 }
 
+KleinGordonTeukolskyWave::KleinGordonTeukolskyWave(const double frequency)
+    : frequency_{frequency} {}
+
+std::unique_ptr<KleinGordonWorldtubeData> KleinGordonTeukolskyWave::get_clone()
+    const {
+  return std::make_unique<KleinGordonTeukolskyWave>(*this);
+}
+
+void KleinGordonTeukolskyWave::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_psi,
+    size_t /*output_l_max*/, double time,
+    tmpl::type_<Tags::KleinGordonPsi> /*meta*/) const {
+  get(*kg_psi).data() = sin(frequency_ * time);
+}
+
+void KleinGordonTeukolskyWave::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_pi,
+    size_t /*output_l_max*/, double time,
+    tmpl::type_<Tags::KleinGordonPi> /*meta*/) const {
+  get(*kg_pi).data() = frequency_ * cos(frequency_ * time);
+}
+
+void KleinGordonTeukolskyWave::pup(PUP::er& p) { p | frequency_; }
+
 PUP::able::PUP_ID TeukolskyWave::my_PUP_ID = 0;
+PUP::able::PUP_ID KleinGordonTeukolskyWave::my_PUP_ID = 0;
 }  // namespace Cce::Solutions
