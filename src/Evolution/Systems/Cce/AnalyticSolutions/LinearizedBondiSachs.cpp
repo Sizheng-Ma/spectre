@@ -609,5 +609,31 @@ void LinearizedBondiSachs::pup(PUP::er& p) {
   p | frequency_;
 }
 
+KleinGordonLinearizedBondiSachs::KleinGordonLinearizedBondiSachs(
+    const double frequency)
+    : frequency_{frequency} {}
+
+std::unique_ptr<KleinGordonWorldtubeData>
+KleinGordonLinearizedBondiSachs::get_clone() const {
+  return std::make_unique<KleinGordonLinearizedBondiSachs>(*this);
+}
+
+void KleinGordonLinearizedBondiSachs::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_psi,
+    size_t /*output_l_max*/, double time,
+    tmpl::type_<Tags::KleinGordonPsi> /*meta*/) const {
+  get(*kg_psi).data() = sin(frequency_ * time);
+}
+
+void KleinGordonLinearizedBondiSachs::variables_impl(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_pi,
+    size_t /*output_l_max*/, double time,
+    tmpl::type_<Tags::KleinGordonPi> /*meta*/) const {
+  get(*kg_pi).data() = frequency_ * cos(frequency_ * time);
+}
+
+void KleinGordonLinearizedBondiSachs::pup(PUP::er& p) { p | frequency_; }
+
 PUP::able::PUP_ID LinearizedBondiSachs::my_PUP_ID = 0;
+PUP::able::PUP_ID KleinGordonLinearizedBondiSachs::my_PUP_ID = 0;
 }  // namespace Cce::Solutions

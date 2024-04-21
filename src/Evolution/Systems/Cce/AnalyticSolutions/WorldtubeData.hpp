@@ -52,6 +52,7 @@ class RotatingSchwarzschild;
 class TeukolskyWave;
 class KleinGordonGaugeWave;
 class KleinGordonBouncingBlackHole;
+class KleinGordonLinearizedBondiSachs;
 /// \endcond
 
 template <typename CacheTagList>
@@ -291,7 +292,8 @@ struct KleinGordonWorldtubeData
     : public PUP::able,
       WorldtubeDataBase<kg_cce_analytic_solutions_cache_tags> {
   using creatable_classes =
-      tmpl::list<KleinGordonGaugeWave, KleinGordonBouncingBlackHole>;
+      tmpl::list<KleinGordonGaugeWave, KleinGordonBouncingBlackHole,
+                 KleinGordonLinearizedBondiSachs>;
 
   /// The set of available tags provided by the analytic solution
   using tags = tmpl::list<Tags::CauchyCartesianCoords, Tags::KleinGordonPsi,
