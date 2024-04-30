@@ -320,6 +320,7 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi0>>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_bondi_j,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_dy_dy_bondi_j,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& boundary_r,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
     const size_t l_max, const size_t number_of_radial_points) {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
@@ -334,10 +335,17 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi0>>::apply(
                   (number_of_radial_points - 1) * number_of_angular_points,
                   number_of_angular_points);
 
+  const SpinWeighted<ComplexDataVector, 0> dy_psi_at_scri;
+  make_const_view(make_not_null(&dy_psi_at_scri), get(dy_psi),
+                  (number_of_radial_points - 1) * number_of_angular_points,
+                  number_of_angular_points);
+
   // extra 1/2 factor to agree with SXS tetrad normalization
   get(*psi_0) = -pow<3>(get(boundary_r)) *
-                (3.0 * conj(dy_j_at_scri) * square(dy_j_at_scri) -
+                (3.0 * conj(dy_j_at_scri) * square(dy_j_at_scri)/2 -
                  2.0 * dy_dy_dy_j_at_scri);
+
+get(*psi_0)+=8.0 * pow<3>(get(boundary_r))*M_PI*dy_j_at_scri*square(dy_psi_at_scri);
 }
 
 void CalculateScriPlusValue<Tags::ScriPlus<Tags::BondiSTPsi>>::apply(
