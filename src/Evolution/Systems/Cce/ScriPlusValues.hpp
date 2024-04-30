@@ -321,7 +321,8 @@ struct CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi0>> {
   using tensor_argument_tags =
       tmpl::list<Tags::Dy<Tags::BondiJ>,
                  Tags::Dy<Tags::Dy<Tags::Dy<Tags::BondiJ>>>,
-                 Tags::EvolutionGaugeBoundaryValue<Tags::BondiR>>;
+                 Tags::EvolutionGaugeBoundaryValue<Tags::BondiR>,
+                 Tags::Dy<Tags::KleinGordonPsi>>;
   using argument_tags = tmpl::push_back<tensor_argument_tags, Tags::LMax,
                                         Tags::NumberOfRadialPoints>;
 
@@ -330,6 +331,7 @@ struct CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi0>> {
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_bondi_j,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_dy_dy_bondi_j,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& boundary_r,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
       size_t l_max, size_t number_of_radial_points);
 };
 
