@@ -217,7 +217,8 @@ struct CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi2>> {
                                        Spectral::Swsh::Tags::Ethbar>,
       Tags::Dy<Tags::Dy<Tags::BondiW>>, Tags::Dy<Tags::BondiJ>,
       Tags::Dy<Tags::Du<Tags::BondiJ>>,
-      Tags::EvolutionGaugeBoundaryValue<Tags::BondiR>, Tags::EthRDividedByR>;
+      Tags::EvolutionGaugeBoundaryValue<Tags::BondiR>, Tags::EthRDividedByR,
+      Tags::Dy<Tags::BondiSTTheta>, Tags::Dy<Tags::BondiSTPsi>>;
   using argument_tags = tmpl::push_back<tensor_argument_tags, Tags::LMax,
                                         Tags::NumberOfRadialPoints>;
 
@@ -235,6 +236,8 @@ struct CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi2>> {
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_du_bondi_j,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& boundary_r,
       const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_divided_by_r,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_theta,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
       size_t l_max, size_t number_of_radial_points);
 };
 

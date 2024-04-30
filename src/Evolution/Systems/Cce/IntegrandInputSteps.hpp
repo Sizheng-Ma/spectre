@@ -378,6 +378,8 @@ using all_pre_swsh_derivative_tags_for_scri =
                Tags::Dy<Tags::Dy<Tags::BondiW>>,
                Tags::Dy<Tags::Dy<Tags::BondiQ>>,
                Tags::Dy<Tags::Dy<Tags::BondiU>>,
+               Tags::Dy<Tags::BondiSTTheta>,
+               Tags::Dy<Tags::BondiSTPsi>,
                Tags::Dy<Tags::Dy<Tags::Dy<Tags::BondiJ>>>,
                Tags::Dy<Tags::Dy<Tags::Dy<Tags::BondiU>>>,
                Tags::Dy<Tags::Dy<Tags::Dy<Tags::BondiBeta>>>,

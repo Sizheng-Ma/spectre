@@ -175,6 +175,8 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi2>>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& dy_du_bondi_j,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& boundary_r,
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_divided_by_r,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_theta,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
     const size_t l_max, const size_t number_of_radial_points) {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
@@ -233,6 +235,16 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi2>>::apply(
                   (number_of_radial_points - 1) * number_of_angular_points,
                   number_of_angular_points);
 
+  const SpinWeighted<ComplexDataVector, 0> dy_theta_at_scri;
+  make_const_view(make_not_null(&dy_theta_at_scri), get(dy_theta),
+                  (number_of_radial_points - 1) * number_of_angular_points,
+                  number_of_angular_points);
+
+  const SpinWeighted<ComplexDataVector, 0> dy_psi_at_scri;
+  make_const_view(make_not_null(&dy_psi_at_scri), get(dy_psi),
+                  (number_of_radial_points - 1) * number_of_angular_points,
+                  number_of_angular_points);
+
   get(*psi_2) =
       -0.5 * get(boundary_r) *
       (-exp_2_beta_at_scri * (conj(ethbar_dy_q_at_scri) +
@@ -248,6 +260,8 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi2>>::apply(
                  conj(eth_r_divided_by_r_view) * conj(dy_u_at_scri)) +
             dy_j_at_scri * conj(dy_du_j_at_scri) - dy_dy_w_at_scri)) /
       exp_2_beta_at_scri;
+
+      get(*psi_2)-=16*M_PI/3.*get(boundary_r)*get(boundary_r)*dy_psi_at_scri*dy_theta_at_scri/exp_2_beta_at_scri;
 }
 
 void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi1>>::apply(
