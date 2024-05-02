@@ -177,6 +177,7 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi2>>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_divided_by_r,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_theta,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& du_r_divided_by_r,
     const size_t l_max, const size_t number_of_radial_points) {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
@@ -261,7 +262,7 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi2>>::apply(
             dy_j_at_scri * conj(dy_du_j_at_scri) - dy_dy_w_at_scri)) /
       exp_2_beta_at_scri;
 
-      get(*psi_2)-=16*M_PI/3.*get(boundary_r)*get(boundary_r)*dy_psi_at_scri*dy_theta_at_scri/exp_2_beta_at_scri;
+      get(*psi_2)-=16*M_PI/3.*get(boundary_r)*get(boundary_r)*dy_psi_at_scri*(dy_theta_at_scri+get(du_r_divided_by_r)*dy_psi_at_scri)/exp_2_beta_at_scri;
 }
 
 void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi1>>::apply(
