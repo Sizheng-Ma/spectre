@@ -159,13 +159,13 @@ void InitializeSTPsi::apply(
     const double u0 = 10;
     const double sigma0 = 1;
     double psi_boundary = exp(-0.5 * square(u0) / square(sigma0));
-    // angular_view_scalar_tensor_psi =
-    //     get(st_psi_boundary).data() * one_minus_y_collocation[i] / 2.;
+    angular_view_scalar_tensor_psi =
+        get(st_psi_boundary).data() * one_minus_y_collocation[i] / 2.;
 
-    auto u0new = -get(bondi_r).data() - 4 * log(get(bondi_r).data() / 2 - 1.);
+    // auto u0new = -get(bondi_r).data() - 4 * log(get(bondi_r).data() / 2 - 1.);
 
-    detail2::bc_psi(angular_view_scalar_tensor_psi, u0new,
-                    one_minus_y_collocation[i] / 2. / get(bondi_r).data());
+    // detail2::bc_psi(angular_view_scalar_tensor_psi, u0new,
+    //                 one_minus_y_collocation[i] / 2. / get(bondi_r).data());
 
     // if (one_minus_y_collocation[i] >= (1. - ymax) &&
     //     one_minus_y_collocation[i] <= (1. - ymin)) {
