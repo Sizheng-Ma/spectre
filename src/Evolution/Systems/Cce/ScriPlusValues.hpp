@@ -276,7 +276,10 @@ struct CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi1>> {
                                        Spectral::Swsh::Tags::Eth>,
       Tags::Dy<Tags::BondiJ>, Tags::Dy<Tags::BondiQ>,
       Tags::Dy<Tags::Dy<Tags::BondiQ>>,
-      Tags::EvolutionGaugeBoundaryValue<Tags::BondiR>, Tags::EthRDividedByR>;
+      Tags::EvolutionGaugeBoundaryValue<Tags::BondiR>, Tags::EthRDividedByR,
+      Tags::BondiJ, Tags::BondiK, Tags::Dy<Tags::BondiSTPsi>,
+      Spectral::Swsh::Tags::Derivative<Tags::Dy<Tags::BondiSTPsi>,
+                                                  Spectral::Swsh::Tags::Eth>>;
   using argument_tags = tmpl::push_back<tensor_argument_tags, Tags::LMax,
                                         Tags::NumberOfRadialPoints>;
 
@@ -289,6 +292,10 @@ struct CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi1>> {
       const Scalar<SpinWeighted<ComplexDataVector, 1>>& dy_dy_bondi_q,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& boundary_r,
       const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_divided_by_r,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& bondi_j,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_k,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
+      const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_dy_psi,
       size_t l_max, size_t number_of_radial_points);
 };
 
