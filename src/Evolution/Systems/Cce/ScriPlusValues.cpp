@@ -274,6 +274,10 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi1>>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& dy_dy_bondi_q,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& boundary_r,
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_r_divided_by_r,
+      const Scalar<SpinWeighted<ComplexDataVector, 2>>& bondi_j,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_k,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi,
+      const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_dy_psi,
     const size_t l_max, const size_t number_of_radial_points) {
   const size_t number_of_angular_points =
       Spectral::Swsh::number_of_swsh_collocation_points(l_max);
@@ -309,11 +313,43 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi1>>::apply(
                   (number_of_radial_points - 1) * number_of_angular_points,
                   number_of_angular_points);
 
+  const SpinWeighted<ComplexDataVector, 2> bondi_j_view;
+  make_const_view(make_not_null(&bondi_j_view),
+                  get(bondi_j),
+                  (number_of_radial_points - 1) * number_of_angular_points,
+                  number_of_angular_points);
+
+  const SpinWeighted<ComplexDataVector, 0> bondi_k_view;
+  make_const_view(make_not_null(&bondi_k_view),
+                  get(bondi_k),
+                  (number_of_radial_points - 1) * number_of_angular_points,
+                  number_of_angular_points);
+
+  const SpinWeighted<ComplexDataVector, 0> dy_psi_view;
+  make_const_view(make_not_null(&dy_psi_view),
+                  get(dy_psi),
+                  (number_of_radial_points - 1) * number_of_angular_points,
+                  number_of_angular_points);
+
+  const SpinWeighted<ComplexDataVector, 1> eth_dy_psi_view;
+  make_const_view(make_not_null(&eth_dy_psi_view),
+                  get(eth_dy_psi),
+                  (number_of_radial_points - 1) * number_of_angular_points,
+                  number_of_angular_points);
+
   // extra -1/sqrt(2) factor to agree with SXS tetrad normalization
   get(*psi_1) = -0.5 * square(get(boundary_r)) *
                 (6.0 * (eth_dy_dy_beta_at_scri +
                         2.0 * eth_r_divided_by_r_view * dy_dy_beta_at_scri) -
                  dy_j_at_scri * conj(dy_q_at_scri) - dy_dy_q_at_scri);
+
+  auto eth_psi1=eth_dy_psi_view+eth_r_divided_by_r_view*dy_psi_view;
+
+  auto parenthesis = eth_psi1 - conj(eth_psi1) * bondi_j_view/(1.0+bondi_k_view);
+
+  auto correction = sqrt(2) * M_PI * 4 * square(get(boundary_r)) * dy_psi_view * sqrt(1.0+bondi_k_view) * parenthesis;
+
+  get(*psi_1) -=correction;
 }
 
 void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi0>>::apply(
