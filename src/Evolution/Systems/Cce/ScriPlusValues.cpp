@@ -322,7 +322,7 @@ void CalculateScriPlusValue<Tags::ScriPlus<Tags::Psi0>>::apply(
 
   // extra 1/2 factor to agree with SXS tetrad normalization
   get(*psi_0) = -pow<3>(get(boundary_r)) *
-                (3.0 * conj(dy_j_at_scri) * square(dy_j_at_scri) -
+                (3.0 * conj(dy_j_at_scri) * square(dy_j_at_scri) / 2.0 -
                  2.0 * dy_dy_dy_j_at_scri);
 }
 
