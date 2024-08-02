@@ -57,7 +57,7 @@ struct EvolutionMetavars : CharacteristicExtractDefaults<false> {
 
   using cce_step_choosers =
       tmpl::list<StepChoosers::Constant<StepChooserUse::LtsStep>,
-                 StepChoosers::Increase<StepChooserUse::LtsStep>,
+                 StepChoosers::LimitIncrease<StepChooserUse::LtsStep>,
                  StepChoosers::ErrorControl<StepChooserUse::LtsStep,
                                             Tags::Variables<evolved_swsh_tags>,
                                             swsh_vars_selector>,
