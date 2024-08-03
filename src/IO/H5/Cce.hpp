@@ -178,6 +178,8 @@ class Cce : public h5::Object {
                                                    "Psi2",
                                                    "Psi3",
                                                    "Psi4",
+                                                   "KleinGordonPsi",
+                                                   "STMonitor",
                                                    "Strain"};
   std::string sxs_format_str_{"sxs_format"};
   std::string sxs_version_str_{"SpECTRE_CCE_v1"};
