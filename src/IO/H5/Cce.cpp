@@ -80,8 +80,9 @@ Cce::Cce(const bool exists, detail::OpenGroup&& group, const hid_t /*location*/,
 
     for (const std::string& bondi_var : bondi_variables_) {
       DataSet& dataset = bondi_datasets_.at(bondi_var);
+      std::string new_name = bondi_var + ".dat";
       dataset.id =
-          H5Dopen2(cce_group_.id(), bondi_var.c_str(), h5::h5p_default());
+          H5Dopen2(cce_group_.id(), new_name.c_str(), h5::h5p_default());
       CHECK_H5(dataset.id, "Failed to open dataset");
 
       hid_t space_id = H5Dget_space(dataset.id);
@@ -113,8 +114,9 @@ Cce::Cce(const bool exists, detail::OpenGroup&& group, const hid_t /*location*/,
 
     for (const std::string& bondi_var : bondi_variables_) {
       DataSet& dataset = bondi_datasets_.at(bondi_var);
+      std::string new_name = bondi_var + ".dat";
       dataset.id = h5::detail::create_extensible_dataset(
-          cce_group_.id(), bondi_var, dataset.size,
+          cce_group_.id(), new_name, dataset.size,
           std::array<hsize_t, 2>{{4, legend_.size()}},
           {{h5s_unlimited(), legend_.size()}});
       CHECK_H5(dataset.id, "Failed to create dataset");
