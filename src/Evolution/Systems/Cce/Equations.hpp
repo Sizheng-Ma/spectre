@@ -166,13 +166,14 @@ struct ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>> {
       tmpl::list<Tags::Dy<Tags::BondiJ>, Tags::BondiJ>;
   using swsh_derivative_tags = tmpl::list<>;
   using integration_independent_tags = tmpl::list<Tags::OneMinusY>;
+  using kg_source_tag = tmpl::list<Tags::KleinGordonSource<Tags::BondiBeta>>;
   using temporary_tags = tmpl::list<>;
 
   using return_tags = tmpl::append<tmpl::list<Tags::Integrand<Tags::BondiBeta>>,
                                    temporary_tags>;
   using argument_tags =
       tmpl::append<pre_swsh_derivative_tags, swsh_derivative_tags,
-                   integration_independent_tags>;
+                   integration_independent_tags, kg_source_tag>;
 
   template <typename... Args>
   static void apply(
@@ -187,7 +188,8 @@ struct ComputeBondiIntegrand<Tags::Integrand<Tags::BondiBeta>> {
       gsl::not_null<SpinWeighted<ComplexDataVector, 0>*> integrand_for_beta,
       const SpinWeighted<ComplexDataVector, 2>& dy_j,
       const SpinWeighted<ComplexDataVector, 2>& j,
-      const SpinWeighted<ComplexDataVector, 0>& one_minus_y);
+      const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
+      const SpinWeighted<ComplexDataVector, 0>& kg_source);
 };
 
 /*!
@@ -305,6 +307,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiQ>> {
                                        Spectral::Swsh::Tags::Ethbar>>;
   using integration_independent_tags =
       tmpl::list<Tags::EthRDividedByR, Tags::BondiK>;
+  using kg_source_tag = tmpl::list<Tags::KleinGordonSource<Tags::BondiQ>>;
   using temporary_tags =
       tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
                                       std::integral_constant<int, 1>>>;
@@ -314,7 +317,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiQ>> {
                    temporary_tags>;
   using argument_tags =
       tmpl::append<pre_swsh_derivative_tags, swsh_derivative_tags,
-                   integration_independent_tags>;
+                   integration_independent_tags, kg_source_tag>;
 
   template <typename... Args>
   static void apply(
@@ -341,7 +344,8 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiQ>> {
       const SpinWeighted<ComplexDataVector, 1>& ethbar_dy_j,
       const SpinWeighted<ComplexDataVector, 1>& ethbar_j,
       const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
-      const SpinWeighted<ComplexDataVector, 0>& k);
+      const SpinWeighted<ComplexDataVector, 0>& k,
+      const SpinWeighted<ComplexDataVector, 1>& kg_source);
 };
 
 /*!
@@ -527,6 +531,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiW>> {
                                        Spectral::Swsh::Tags::Ethbar>>;
   using integration_independent_tags =
       tmpl::list<Tags::EthRDividedByR, Tags::BondiK, Tags::BondiR>;
+  using kg_source_tag = tmpl::list<Tags::KleinGordonSource<Tags::BondiW>>;
   using temporary_tags =
       tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
                                       std::integral_constant<int, 0>>>;
@@ -536,7 +541,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiW>> {
                    temporary_tags>;
   using argument_tags =
       tmpl::append<pre_swsh_derivative_tags, swsh_derivative_tags,
-                   integration_independent_tags>;
+                   integration_independent_tags, kg_source_tag>;
 
   template <typename... Args>
   static void apply(
@@ -569,7 +574,8 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiW>> {
       const SpinWeighted<ComplexDataVector, 1>& ethbar_j,
       const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
       const SpinWeighted<ComplexDataVector, 0>& k,
-      const SpinWeighted<ComplexDataVector, 0>& r);
+      const SpinWeighted<ComplexDataVector, 0>& r,
+      const SpinWeighted<ComplexDataVector, 0>& kg_source);
 };
 
 /*!
@@ -768,6 +774,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiH>> {
   using integration_independent_tags =
       tmpl::list<Tags::DuRDividedByR, Tags::EthRDividedByR, Tags::BondiK,
                  Tags::OneMinusY, Tags::BondiR>;
+  using kg_source_tag = tmpl::list<Tags::KleinGordonSource<Tags::BondiH>>;
   using temporary_tags =
       tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
                                       std::integral_constant<int, 0>>,
@@ -781,7 +788,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiH>> {
                    temporary_tags>;
   using argument_tags =
       tmpl::append<pre_swsh_derivative_tags, swsh_derivative_tags,
-                   integration_independent_tags>;
+                   integration_independent_tags, kg_source_tag>;
 
   template <typename... Args>
   static void apply(
@@ -834,7 +841,8 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::BondiH>> {
       const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
       const SpinWeighted<ComplexDataVector, 0>& k,
       const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
-      const SpinWeighted<ComplexDataVector, 0>& r);
+      const SpinWeighted<ComplexDataVector, 0>& r,
+      const SpinWeighted<ComplexDataVector, 2>& kg_source);
 };
 
 /*!
