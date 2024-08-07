@@ -14,7 +14,7 @@
 #include "NumericalAlgorithms/SpinWeightedSphericalHarmonics/SwshCollocation.hpp"
 #include "NumericalAlgorithms/SpinWeightedSphericalHarmonics/SwshDerivatives.hpp"
 #include "NumericalAlgorithms/SpinWeightedSphericalHarmonics/SwshInterpolation.hpp"
-#include "Parallel/Printf.hpp"
+// #include "Parallel/Printf.hpp"
 
 namespace Cce {
 
