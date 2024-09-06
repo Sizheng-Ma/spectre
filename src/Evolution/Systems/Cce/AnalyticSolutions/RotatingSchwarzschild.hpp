@@ -145,4 +145,70 @@ struct RotatingSchwarzschild : public SphericalMetricData {
   double frequency_ = std::numeric_limits<double>::signaling_NaN();
   double mass_ = std::numeric_limits<double>::signaling_NaN();
 };
+
+struct KleinGordonRotatingSchwarzschild : public KleinGordonWorldtubeData {
+  struct ExtractionRadius {
+    using type = double;
+    static constexpr Options::String help{
+        "The extraction radius of the spherical solution"};
+    static type lower_bound() { return 0.0; }
+  };
+  struct Mass {
+    using type = double;
+    static constexpr Options::String help{
+        "The mass of the Schwarzschild black hole"};
+    static type lower_bound() { return 0.0; }
+  };
+  struct Frequency {
+    using type = double;
+    static constexpr Options::String help{
+        "The frequency of the coordinate rotation."};
+    static type lower_bound() { return 0.0; }
+  };
+
+  using options = tmpl::list<ExtractionRadius, Mass, Frequency>;
+
+  static constexpr Options::String help = {
+      "Analytic solution representing a Schwarzschild black hole in a rotating "
+      "frame"};
+
+  WRAPPED_PUPable_decl_template(KleinGordonRotatingSchwarzschild);  // NOLINT
+
+  explicit KleinGordonRotatingSchwarzschild(CkMigrateMessage* /*unused*/) {}
+
+  // clang doesn't manage to use = default correctly in this case
+  // NOLINTNEXTLINE(modernize-use-equals-default)
+  KleinGordonRotatingSchwarzschild() {}
+
+  KleinGordonRotatingSchwarzschild(double extraction_radius, double mass,
+                                   double frequency);
+
+  ~KleinGordonRotatingSchwarzschild() override = default;
+
+  std::unique_ptr<KleinGordonWorldtubeData> get_clone() const override;
+
+  void pup(PUP::er& p) override;
+
+ protected:
+  /// A no-op as the rotating Schwarzschild solution does not have substantial
+  /// shared computation to prepare before the separate component calculations.
+  void prepare_solution(const size_t /*output_l_max*/,
+                        const double /*time*/) const override {}
+
+  using KleinGordonWorldtubeData::variables_impl;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_psi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::KleinGordonPsi> /*meta*/) const override;
+
+  void variables_impl(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_pi,
+      size_t output_l_max, double time,
+      tmpl::type_<Tags::KleinGordonPi> /*meta*/) const override;
+
+  double frequency_ = std::numeric_limits<double>::signaling_NaN();
+  double mass_ = std::numeric_limits<double>::signaling_NaN();
+  double extraction_radius_ = std::numeric_limits<double>::signaling_NaN();
+};
 }  // namespace Cce::Solutions
