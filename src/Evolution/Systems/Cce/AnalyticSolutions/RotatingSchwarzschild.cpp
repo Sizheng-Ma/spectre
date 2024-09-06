@@ -12,6 +12,7 @@
 #include "DataStructures/Tags.hpp"
 #include "DataStructures/Tensor/Tensor.hpp"
 #include "DataStructures/Variables.hpp"
+#include "Evolution/Systems/Cce/AnalyticSolutions/KleinGordonWaveHelper.hpp"
 #include "Evolution/Systems/Cce/Tags.hpp"
 #include "NumericalAlgorithms/SpinWeightedSphericalHarmonics/SwshCollocation.hpp"
 #include "NumericalAlgorithms/SpinWeightedSphericalHarmonics/SwshInterpolation.hpp"
@@ -117,5 +118,50 @@ void RotatingSchwarzschild::pup(PUP::er& p) {
   p | frequency_;
 }
 
+KleinGordonRotatingSchwarzschild::KleinGordonRotatingSchwarzschild(
+    const double extraction_radius, const double mass, const double frequency)
+    : frequency_{frequency},
+      mass_{mass},
+      extraction_radius_{extraction_radius} {}
+
+std::unique_ptr<KleinGordonWorldtubeData>
+KleinGordonRotatingSchwarzschild::get_clone() const {
+  return std::make_unique<KleinGordonRotatingSchwarzschild>(*this);
+}
+
+void KleinGordonRotatingSchwarzschild::variables_impl(
+    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_psi,
+    const size_t /*output_l_max*/, const double time,
+    tmpl::type_<Tags::KleinGordonPsi> /*meta*/) const {
+  auto r = extraction_radius_;
+  auto rs = r + 2.0 * mass_ * log(r / (2. * mass_) - 1.0);
+  auto u = time + r - 2.0 * rs;
+
+  KleinGordon::bc_psi(make_not_null(&get(*kg_psi).data()),
+                      DataVector(get(*kg_psi).size(), u),
+                      DataVector(get(*kg_psi).size(), 1. / r));
+}
+
+void KleinGordonRotatingSchwarzschild::variables_impl(
+    const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> kg_pi,
+    const size_t /*output_l_max*/, const double time,
+    tmpl::type_<Tags::KleinGordonPi> /*meta*/) const {
+  auto r = extraction_radius_;
+  auto rs = r + 2.0 * mass_ * log(r / (2. * mass_) - 1.0);
+  auto u = time + r - 2.0 * rs;
+
+  KleinGordon::bc_theta(
+      make_not_null(&get(*kg_pi).data()), DataVector(get(*kg_pi).size(), u),
+      DataVector(get(*kg_pi).size(), r), DataVector(get(*kg_pi).size(), 1.0),
+      DataVector(get(*kg_pi).size(), 0));
+}
+
+void KleinGordonRotatingSchwarzschild::pup(PUP::er& p) {
+  p | extraction_radius_;
+  p | mass_;
+  p | frequency_;
+}
+
 PUP::able::PUP_ID RotatingSchwarzschild::my_PUP_ID = 0;
+PUP::able::PUP_ID KleinGordonRotatingSchwarzschild::my_PUP_ID = 0;
 }  // namespace Cce::Solutions
