@@ -122,16 +122,17 @@ void InverseCubic<false>::operator()(
         one_minus_y_collocation[i] * one_minus_y_coefficient +
         pow<3>(one_minus_y_collocation[i]) * one_minus_y_cubed_coefficient;
 
-    double ycenter = -0.;
-    double ymin = -0.9;
-    double ymax = 0.9;
-    double width = 0.15;
-    if (one_minus_y_collocation[i] >= (1. - ymax) &&
-        one_minus_y_collocation[i] <= (1. - ymin)) {
+    double rcenter = 10.;
+    double width = 4;
+    // auto rrrr = 4./one_minus_y_collocation[i];
+    auto xxxx = 1/(one_minus_y_collocation[i]/2+1);
+    double xmin =0.6;
+    double xmax =0.8;
+    if (xxxx>=xmin && xxxx<=xmax) {
+angular_view_j*=0;
       angular_view_j +=
           perturbed_j.data() * 1e-4 *
-          exp(-pow(1.0 - one_minus_y_collocation[i] - ycenter, 2.0) / width /
-              width);
+         pow(xxxx-xmin,1)*pow(xmax-xxxx,1);
     }
   }
   Spectral::Swsh::create_angular_and_cartesian_coordinates(
