@@ -344,7 +344,7 @@ void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::KleinGordonPi>>::
                const SpinWeighted<ComplexDataVector, 1>& eth_kg_psi,
                const SpinWeighted<ComplexDataVector, 1>& bondi_u) {
   *pole_of_integrand_for_kg_pi =
-      -real(bondi_u.data() * conj(eth_kg_psi).data());
+      -real(bondi_u.data() * conj(eth_kg_psi).data()) * 0.0;
 }
 
 void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::KleinGordonPi>>::
@@ -385,19 +385,22 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::KleinGordonPi>>::
   SpinWeighted<ComplexDataVector, 0> n_psi4;
   SpinWeighted<ComplexDataVector, 0> tau;
 
-  detail::klein_gordon_rhs_npsi1(make_not_null(&n_psi1), eth_beta, eth_kg_psi,
-                                 eth_ethbar_kg_psi, bondi_k);
-  detail::klein_gordon_rhs_npsi2(make_not_null(&n_psi2), j, eth_eth_kg_psi,
-                                 eth_beta, eth_kg_psi, ethbar_j);
-  detail::klein_gordon_rhs_npsi3(make_not_null(&n_psi3), eth_k, eth_kg_psi);
-  detail::klein_gordon_rhs_npsi4_divided_by_one_minues_y_squared(
-      make_not_null(&n_psi4), eth_kg_psi, dy_bondi_u, ethbar_u, bondi_u,
-      eth_dy_kg_psi, dy_kg_psi, bondi_r, eth_r_divided_by_r);
-  detail::klein_gordon_rhs_tau(make_not_null(&tau), one_minus_y, dy_w,
-                               dy_kg_psi, dy_dy_kg_psi, bondi_w, bondi_r);
+  //   detail::klein_gordon_rhs_npsi1(make_not_null(&n_psi1), eth_beta,
+  //   eth_kg_psi,
+  //                                  eth_ethbar_kg_psi, bondi_k);
+  //   detail::klein_gordon_rhs_npsi2(make_not_null(&n_psi2), j, eth_eth_kg_psi,
+  //                                  eth_beta, eth_kg_psi, ethbar_j);
+  //   detail::klein_gordon_rhs_npsi3(make_not_null(&n_psi3), eth_k,
+  //   eth_kg_psi);
+  //   detail::klein_gordon_rhs_npsi4_divided_by_one_minues_y_squared(
+  //       make_not_null(&n_psi4), eth_kg_psi, dy_bondi_u, ethbar_u, bondi_u,
+  //       eth_dy_kg_psi, dy_kg_psi, bondi_r, eth_r_divided_by_r);
 
-  *regular_integrand_for_kg_pi =
-      0.25 * exp2beta / bondi_r * (n_psi1 - n_psi2 + n_psi3) -
-      0.5 * bondi_r * n_psi4 + tau + from_lhs;
+  auto bondi_w_new = -square(one_minus_y) / 8.0;
+  auto dy_w_new = one_minus_y / 4.0;
+  detail::klein_gordon_rhs_tau(make_not_null(&tau), one_minus_y, dy_w_new,
+                               dy_kg_psi, dy_dy_kg_psi, bondi_w_new, bondi_r);
+
+  *regular_integrand_for_kg_pi = tau;
 }
 }  // namespace Cce
