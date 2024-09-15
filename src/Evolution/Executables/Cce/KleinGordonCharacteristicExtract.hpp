@@ -113,6 +113,8 @@ struct EvolutionMetavars : CharacteristicExtractDefaults<false> {
   using scri_values_to_observe =
       tmpl::append<cce_base::scri_values_to_observe,
                    tmpl::list<Cce::Tags::STMonitor,
+                              Cce::Tags::EvolutionGaugeBoundaryValue<
+                                  Cce::Tags::KleinGordonPi>,
                               Cce::Tags::ScriPlus<Cce::Tags::KleinGordonPsi>>>;
 
   using cce_scri_tags =

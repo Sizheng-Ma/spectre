@@ -171,16 +171,18 @@ class Cce : public h5::Object {
   detail::OpenGroup cce_group_{};
   std::string header_;
   std::unordered_map<std::string, DataSet> bondi_datasets_;
-  std::unordered_set<std::string> bondi_variables_{"EthInertialRetardedTime",
-                                                   "News",
-                                                   "Psi0",
-                                                   "Psi1",
-                                                   "Psi2",
-                                                   "Psi3",
-                                                   "Psi4",
-                                                   "KleinGordonPsi",
-                                                   "STMonitor",
-                                                   "Strain"};
+  std::unordered_set<std::string> bondi_variables_{
+      "EthInertialRetardedTime",
+      "News",
+      "Psi0",
+      "Psi1",
+      "Psi2",
+      "Psi3",
+      "Psi4",
+      "KleinGordonPsi",
+      "STMonitor",
+      "EvolutionGaugeBoundaryValue(KGPi)",
+      "Strain"};
   std::string sxs_format_str_{"sxs_format"};
   std::string sxs_version_str_{"SpECTRE_CCE_v1"};
   /// \endcond HIDDEN_SYMBOLS

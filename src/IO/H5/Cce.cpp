@@ -7,6 +7,7 @@
 #include <cstddef>
 #include <cstdint>
 #include <hdf5.h>
+#include <iostream>
 #include <string>
 #include <unordered_map>
 #include <unordered_set>
@@ -154,6 +155,9 @@ Cce::~Cce() {
 
 void Cce::append(
     const std::unordered_map<std::string, std::vector<double>>& data) {
+  for (const auto& name_and_dataset : bondi_datasets_) {
+    // std::cout << name_and_dataset.first << std::endl;
+  }
   for (const std::string& bondi_var : bondi_variables_) {
     if (not data.contains(bondi_var)) {
       ERROR("Passed in data does not contain the bondi variable " << bondi_var);
