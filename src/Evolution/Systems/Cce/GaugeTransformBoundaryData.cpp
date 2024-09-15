@@ -409,18 +409,20 @@ void GaugeAdjustedBoundaryValue<Tags::KleinGordonPi>::apply(
     const Scalar<SpinWeighted<ComplexDataVector, 1>>& evolution_gauge_u_at_scri,
     const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi) {
-  interpolator.interpolate(make_not_null(&get(*evolution_kg_pi)),
-                           get(cauchy_kg_pi));
+  //   interpolator.interpolate(make_not_null(&get(*evolution_kg_pi)),
+  //                            get(cauchy_kg_pi));
 
-  const SpinWeighted<ComplexDataVector, 0> surface_psi;
-  make_const_view(make_not_null(&surface_psi), get(volume_psi), 0,
-                  Spectral::Swsh::number_of_swsh_collocation_points(l_max));
-  SpinWeighted<ComplexDataVector, 1> eth_psi =
-      Spectral::Swsh::angular_derivative<Spectral::Swsh::Tags::Eth>(
-          l_max, 1, surface_psi);
+  //   const SpinWeighted<ComplexDataVector, 0> surface_psi;
+  //   make_const_view(make_not_null(&surface_psi), get(volume_psi), 0,
+  //                   Spectral::Swsh::number_of_swsh_collocation_points(l_max));
+  //   SpinWeighted<ComplexDataVector, 1> eth_psi =
+  //       Spectral::Swsh::angular_derivative<Spectral::Swsh::Tags::Eth>(
+  //           l_max, 1, surface_psi);
 
-  get(*evolution_kg_pi).data() +=
-      real(get(evolution_gauge_u_at_scri).data() * conj(eth_psi).data());
+  //   get(*evolution_kg_pi).data() +=
+  //       real(get(evolution_gauge_u_at_scri).data() * conj(eth_psi).data());
+
+  get(*evolution_kg_pi) = get(cauchy_kg_pi);
 }
 
 void GaugeUpdateTimeDerivatives::apply(
@@ -799,7 +801,7 @@ void STWTMonitor::apply(
   const SpinWeighted<ComplexDataVector, 0> surface_psi;
   make_const_view(make_not_null(&surface_psi), get(volume_psi), 0,
                   Spectral::Swsh::number_of_swsh_collocation_points(l_max));
-  get(*evolution_st_monitor) = evolution_st_psi - surface_psi;
+  get(*evolution_st_monitor) = get(cauchy_st_psi) - surface_psi;
 }
 
 template struct GaugeUpdateOmega<Tags::PartiallyFlatGaugeC,

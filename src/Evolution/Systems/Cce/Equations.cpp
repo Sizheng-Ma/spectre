@@ -73,9 +73,8 @@ void klein_gordon_rhs_tau(
     const SpinWeighted<ComplexDataVector, 0>& dy_dy_kg_psi,
     const SpinWeighted<ComplexDataVector, 0>& bondi_w,
     const SpinWeighted<ComplexDataVector, 0>& bondi_r) {
-  *result = one_minus_y * dy_w * dy_kg_psi +
-            0.5 * square(one_minus_y) / bondi_r * dy_dy_kg_psi +
-            one_minus_y * bondi_w * dy_dy_kg_psi + bondi_w * dy_kg_psi;
+  *result = 0.5 * square(one_minus_y) / 2 * dy_dy_kg_psi +
+            bondi_w * (one_minus_y * dy_dy_kg_psi - dy_kg_psi);
   (*result).data() *= 0.5;
 }
 }  // namespace detail

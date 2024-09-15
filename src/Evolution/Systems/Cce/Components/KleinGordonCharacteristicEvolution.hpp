@@ -151,8 +151,8 @@ struct KleinGordonCharacteristicEvolution
           bondi_hypersurface_step_tags,
           tmpl::bind<::Actions::MutateApply,
                      tmpl::bind<ComputeKleinGordonSource, tmpl::_1>>>,
-      tmpl::transform<bondi_hypersurface_step_tags,
-                      tmpl::bind<hypersurface_computation, tmpl::_1>>,
+      //   tmpl::transform<bondi_hypersurface_step_tags,
+      //                   tmpl::bind<hypersurface_computation, tmpl::_1>>,
       klein_gordon_hypersurface_computation,
       Actions::FilterSwshVolumeQuantity<Tags::BondiH>,
       Actions::FilterSwshVolumeQuantity<Tags::KleinGordonPi>,
@@ -166,8 +166,8 @@ struct KleinGordonCharacteristicEvolution
       Actions::RequestNextBoundaryData<
           typename Metavariables::cce_boundary_component,
           KleinGordonCharacteristicEvolution<Metavariables>>,
-      ::Actions::AdvanceTime,
-      Actions::ExitIfEndTimeReached, ::Actions::Goto<CceEvolutionLabelTag>>;
+      ::Actions::AdvanceTime, Actions::ExitIfEndTimeReached,
+      ::Actions::Goto<CceEvolutionLabelTag>>;
 
   using phase_dependent_action_list = tmpl::list<
       Parallel::PhaseActions<Parallel::Phase::Initialization,
