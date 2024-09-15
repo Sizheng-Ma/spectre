@@ -863,4 +863,15 @@ struct STWTMonitor {
       const Spectral::Swsh::SwshInterpolator& interpolator, const size_t l_max,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& volume_psi);
 };
+
+struct CalculateOneMinusYdYKGPsi {
+  using return_tags = tmpl::list<Tags::OneMinusYdYKGPsi>;
+  using argument_tags =
+      tmpl::list<Tags::OneMinusY, Tags::Dy<Tags::KleinGordonPsi>>;
+
+  static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> result,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
+      const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi);
+};
 }  // namespace Cce

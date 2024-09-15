@@ -804,6 +804,13 @@ void STWTMonitor::apply(
   get(*evolution_st_monitor) = get(cauchy_st_psi) - surface_psi;
 }
 
+void CalculateOneMinusYdYKGPsi::apply(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> result,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& one_minus_y,
+    const Scalar<SpinWeighted<ComplexDataVector, 0>>& dy_psi) {
+  get(*result) = get(one_minus_y) * get(dy_psi);
+}
+
 template struct GaugeUpdateOmega<Tags::PartiallyFlatGaugeC,
                                  Tags::PartiallyFlatGaugeD,
                                  Tags::PartiallyFlatGaugeOmega>;

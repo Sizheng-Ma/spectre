@@ -460,5 +460,9 @@ struct SelfStartGhInterfaceManager : db::SimpleTag {
 struct STMonitor : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
+
+struct OneMinusYdYKGPsi : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
 }  // namespace Tags
 }  // namespace Cce

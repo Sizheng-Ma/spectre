@@ -72,9 +72,11 @@ void klein_gordon_rhs_tau(
     const SpinWeighted<ComplexDataVector, 0>& dy_kg_psi,
     const SpinWeighted<ComplexDataVector, 0>& dy_dy_kg_psi,
     const SpinWeighted<ComplexDataVector, 0>& bondi_w,
-    const SpinWeighted<ComplexDataVector, 0>& bondi_r) {
+    const SpinWeighted<ComplexDataVector, 0>& bondi_r,
+    const SpinWeighted<ComplexDataVector, 0>& dy_one_minus_y_dy_psi) {
   *result = 0.5 * square(one_minus_y) / 2 * dy_dy_kg_psi +
-            bondi_w * (one_minus_y * dy_dy_kg_psi - dy_kg_psi);
+            bondi_w * (dy_one_minus_y_dy_psi);
+  // bondi_w * (one_minus_y * dy_dy_kg_psi - dy_kg_psi);
   (*result).data() *= 0.5;
 }
 }  // namespace detail
@@ -347,32 +349,34 @@ void ComputeBondiIntegrand<Tags::PoleOfIntegrand<Tags::KleinGordonPi>>::
 }
 
 void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::KleinGordonPi>>::
-    apply_impl(gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
-                   regular_integrand_for_kg_pi,
-               // pre_swsh_derivative_tags
-               const SpinWeighted<ComplexDataVector, 0>& dy_dy_kg_psi,
-               const SpinWeighted<ComplexDataVector, 0>& dy_kg_psi,
-               const SpinWeighted<ComplexDataVector, 1>& dy_bondi_u,
-               const SpinWeighted<ComplexDataVector, 0>& dy_w,
-               // swsh_derivative_tags
-               const SpinWeighted<ComplexDataVector, 1>& eth_dy_kg_psi,
-               const SpinWeighted<ComplexDataVector, 2>& eth_eth_kg_psi,
-               const SpinWeighted<ComplexDataVector, 1>& eth_kg_psi,
-               const SpinWeighted<ComplexDataVector, 1>& ethbar_j,
-               const SpinWeighted<ComplexDataVector, 0>& ethbar_u,
-               const SpinWeighted<ComplexDataVector, 1>& eth_beta,
-               const SpinWeighted<ComplexDataVector, 1>& eth_j_jbar,
-               const SpinWeighted<ComplexDataVector, 0>& eth_ethbar_kg_psi,
-               // integration_independent_tags
-               const SpinWeighted<ComplexDataVector, 2>& j,
-               const SpinWeighted<ComplexDataVector, 0>& exp2beta,
-               const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r,
-               const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
-               const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
-               const SpinWeighted<ComplexDataVector, 0>& bondi_r,
-               const SpinWeighted<ComplexDataVector, 0>& bondi_k,
-               const SpinWeighted<ComplexDataVector, 1>& bondi_u,
-               const SpinWeighted<ComplexDataVector, 0>& bondi_w) {
+    apply_impl(
+        gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>
+            regular_integrand_for_kg_pi,
+        // pre_swsh_derivative_tags
+        const SpinWeighted<ComplexDataVector, 0>& dy_dy_kg_psi,
+        const SpinWeighted<ComplexDataVector, 0>& dy_kg_psi,
+        const SpinWeighted<ComplexDataVector, 1>& dy_bondi_u,
+        const SpinWeighted<ComplexDataVector, 0>& dy_w,
+        // swsh_derivative_tags
+        const SpinWeighted<ComplexDataVector, 1>& eth_dy_kg_psi,
+        const SpinWeighted<ComplexDataVector, 2>& eth_eth_kg_psi,
+        const SpinWeighted<ComplexDataVector, 1>& eth_kg_psi,
+        const SpinWeighted<ComplexDataVector, 1>& ethbar_j,
+        const SpinWeighted<ComplexDataVector, 0>& ethbar_u,
+        const SpinWeighted<ComplexDataVector, 1>& eth_beta,
+        const SpinWeighted<ComplexDataVector, 1>& eth_j_jbar,
+        const SpinWeighted<ComplexDataVector, 0>& eth_ethbar_kg_psi,
+        // integration_independent_tags
+        const SpinWeighted<ComplexDataVector, 2>& j,
+        const SpinWeighted<ComplexDataVector, 0>& exp2beta,
+        const SpinWeighted<ComplexDataVector, 0>& du_r_divided_by_r,
+        const SpinWeighted<ComplexDataVector, 0>& one_minus_y,
+        const SpinWeighted<ComplexDataVector, 1>& eth_r_divided_by_r,
+        const SpinWeighted<ComplexDataVector, 0>& bondi_r,
+        const SpinWeighted<ComplexDataVector, 0>& bondi_k,
+        const SpinWeighted<ComplexDataVector, 1>& bondi_u,
+        const SpinWeighted<ComplexDataVector, 0>& bondi_w,
+        const SpinWeighted<ComplexDataVector, 0>& dy_one_minus_y_dy_psi) {
   SpinWeighted<ComplexDataVector, 1> eth_k = 0.5 * eth_j_jbar / bondi_k;
   // `from_lhs` comes from switching \Pi to \breve{\Pi} on the left-hand side
   SpinWeighted<ComplexDataVector, 0> from_lhs =
@@ -398,7 +402,8 @@ void ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::KleinGordonPi>>::
   auto bondi_w_new = -square(one_minus_y) / 8.0;
   auto dy_w_new = one_minus_y / 4.0;
   detail::klein_gordon_rhs_tau(make_not_null(&tau), one_minus_y, dy_w_new,
-                               dy_kg_psi, dy_dy_kg_psi, bondi_w_new, bondi_r);
+                               dy_kg_psi, dy_dy_kg_psi, bondi_w_new, bondi_r,
+                               dy_one_minus_y_dy_psi);
 
   *regular_integrand_for_kg_pi = tau;
 }

@@ -95,7 +95,8 @@ void klein_gordon_rhs_tau(
     const SpinWeighted<ComplexDataVector, 0>& dy_kg_psi,
     const SpinWeighted<ComplexDataVector, 0>& dy_dy_kg_psi,
     const SpinWeighted<ComplexDataVector, 0>& bondi_w,
-    const SpinWeighted<ComplexDataVector, 0>& bondi_r);
+    const SpinWeighted<ComplexDataVector, 0>& bondi_r,
+    const SpinWeighted<ComplexDataVector, 0>& dy_one_minus_y_dy_psi);
 }  // namespace detail
 
 /// \brief A struct for providing a `tmpl::list` of integrand tags that need to
@@ -1070,7 +1071,8 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::KleinGordonPi>> {
   using integration_independent_tags =
       tmpl::list<Tags::BondiJ, Tags::Exp2Beta, Tags::DuRDividedByR,
                  Tags::OneMinusY, Tags::EthRDividedByR, Tags::BondiR,
-                 Tags::BondiK, Tags::BondiU, Tags::BondiW>;
+                 Tags::BondiK, Tags::BondiU, Tags::BondiW,
+                 Tags::Dy<Tags::OneMinusYdYKGPsi>>;
 
   using return_tags = tmpl::list<Tags::RegularIntegrand<Tags::KleinGordonPi>>;
   using argument_tags =
@@ -1112,6 +1114,7 @@ struct ComputeBondiIntegrand<Tags::RegularIntegrand<Tags::KleinGordonPi>> {
       const SpinWeighted<ComplexDataVector, 0>& bondi_r,
       const SpinWeighted<ComplexDataVector, 0>& bondi_k,
       const SpinWeighted<ComplexDataVector, 1>& bondi_u,
-      const SpinWeighted<ComplexDataVector, 0>& bondi_w);
+      const SpinWeighted<ComplexDataVector, 0>& bondi_w,
+      const SpinWeighted<ComplexDataVector, 0>& dy_one_minus_y_dy_psi);
 };
 }  // namespace Cce

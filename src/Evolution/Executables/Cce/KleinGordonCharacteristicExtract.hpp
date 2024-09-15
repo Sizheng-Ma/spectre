@@ -108,7 +108,9 @@ struct EvolutionMetavars : CharacteristicExtractDefaults<false> {
 
   using klein_gordon_cce_integrand_tags =
       tmpl::list<Cce::Tags::PoleOfIntegrand<Cce::Tags::KleinGordonPi>,
-                 Cce::Tags::RegularIntegrand<Cce::Tags::KleinGordonPi>>;
+                 Cce::Tags::RegularIntegrand<Cce::Tags::KleinGordonPi>,
+                 Cce::Tags::OneMinusYdYKGPsi,
+                 Cce::Tags::Dy<Cce::Tags::OneMinusYdYKGPsi>>;
 
   using scri_values_to_observe =
       tmpl::append<cce_base::scri_values_to_observe,

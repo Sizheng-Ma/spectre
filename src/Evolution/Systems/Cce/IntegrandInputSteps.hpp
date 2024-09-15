@@ -176,7 +176,8 @@ struct TagsToComputeForImpl<Tags::KleinGordonSource<Tags::BondiQ>> {
 template <>
 struct TagsToComputeForImpl<Tags::KleinGordonPi> {
   using pre_swsh_derivative_tags =
-      tmpl::list<Tags::Dy<Tags::Dy<Tags::KleinGordonPsi>>>;
+      tmpl::list<Tags::Dy<Tags::Dy<Tags::KleinGordonPsi>>,
+                 Tags::Dy<Tags::OneMinusYdYKGPsi>>;
   using second_swsh_derivative_tags =
       tmpl::list<Spectral::Swsh::Tags::Derivative<Tags::KleinGordonPsi,
                                                   Spectral::Swsh::Tags::EthEth>,
