@@ -42,6 +42,8 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::characteristic_worldtube_boundary_tags<
           Cce::Tags::BoundaryValue>;
 
+  using ccm_wt_constraints_tags = tmpl::list<Cce::Tags::CCMConstraintOmega,Cce::Tags::CCMConstraintc,Cce::Tags::CCMConstraintd>;
+
   using cce_gauge_boundary_tags = tmpl::flatten<tmpl::list<
       tmpl::transform<
           tmpl::list<Cce::Tags::BondiR, Cce::Tags::DuRDividedByR,
