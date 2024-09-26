@@ -774,6 +774,10 @@ void GaugeUpdateOmega<GaugeC, GaugeD, GaugeOmega>::apply(
 }
 
 void TestOmega::apply(
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+        ccmconstraintomega,
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> ccmconstraintc,
+    gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> ccmconstraintd,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
     const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
     const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_c_inertial,
@@ -812,7 +816,9 @@ void TestOmega::apply(
   l2normd = sqrt(l2normd);
   l2normc /= productc.size();
   l2normc = sqrt(l2normc);
-  std::cout << l2norm << " " << l2normc << " " << l2normd << std::endl;
+  get(*ccmconstraintomega).data()[0] = l2norm;
+  get(*ccmconstraintc).data()[0] = l2normc;
+  get(*ccmconstraintd).data()[0] = l2normd;
 }
 
 void InitializeGauge::apply(
