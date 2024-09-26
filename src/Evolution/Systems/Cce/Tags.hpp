@@ -88,6 +88,21 @@ struct BondiJbar : db::SimpleTag {
   static std::string name() { return "Jbar"; }
 };
 
+struct CCMConstraintOmega : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+  static std::string name() { return "CCMConstraintOmega"; }
+};
+
+struct CCMConstraintc : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+  static std::string name() { return "CCMConstraintc"; }
+};
+
+struct CCMConstraintd : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+  static std::string name() { return "CCMConstraintd"; }
+};
+
 /// Bondi parameter \f$K = \sqrt{1 + J \bar{J}}\f$
 struct BondiK : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;

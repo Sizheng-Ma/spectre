@@ -366,8 +366,8 @@ void ccm_functions(
     std::vector<std::complex<double>>& psi0_ccm,
     std::vector<std::complex<double>>& wxx_test_for_spec,
     std::vector<std::complex<double>>& coeff_theta,
-    std::vector<std::complex<double>>& coeff_phi,
-    const size_t l_max,
+    std::vector<std::complex<double>>& coeff_phi, double& ccmconstraintomega,
+    double& ccmconstraintc, double& ccmconstraintd, const size_t l_max,
     const size_t number_of_radial_points,
     const std::vector<std::vector<double>>& spacetime_metric,
     const std::vector<std::vector<double>>& pi,
@@ -733,6 +733,13 @@ void ccm_functions(
   // for (unsigned int i = 0; i < dv_psi0.size(); i++) {
   //   psi0.push_back(dv_psi0.at(i));
   // }
+
+  auto& l2norm = get<Cce::Tags::CCMConstraintOmega>(spectre_box);
+  auto& l2normc = get<Cce::Tags::CCMConstraintc>(spectre_box);
+  auto& l2normd = get<Cce::Tags::CCMConstraintd>(spectre_box);
+  ccmconstraintomega = abs(get(l2norm).data()[0]);
+  ccmconstraintc = abs(get(l2normc).data()[0]);
+  ccmconstraintd = abs(get(l2normd).data()[0]);
 }
 
 void ccm_interpolation(std::vector<std::complex<double>>& psi0_ccm_interpolated,
