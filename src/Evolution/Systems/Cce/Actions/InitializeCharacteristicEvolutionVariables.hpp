@@ -77,6 +77,8 @@ struct InitializeCharacteristicEvolutionVariables {
                    typename Metavariables::cce_gauge_boundary_tags>>;
   using scri_variables_tag =
       ::Tags::Variables<typename Metavariables::cce_scri_tags>;
+  using ccm_wt_constraints_tag_variable =
+      ::Tags::Variables<typename Metavariables::ccm_wt_constraints_tags>;
   using volume_variables_tag = ::Tags::Variables<
       tmpl::append<typename Metavariables::cce_integrand_tags,
                    typename Metavariables::cce_integration_independent_tags,
@@ -111,7 +113,7 @@ struct InitializeCharacteristicEvolutionVariables {
       swsh_derivative_variables_tag,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::CauchyAngularCoords>,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>,
-      ccm_tag, spec_test_tags>;
+      ccm_tag, spec_test_tags, ccm_wt_constraints_tag_variable>;
   using simple_tags =
       tmpl::append<StepChoosers::step_chooser_simple_tags<Metavariables, true>,
                    simple_tags_for_evolution>;
@@ -159,7 +161,8 @@ struct InitializeCharacteristicEvolutionVariables {
         typename swsh_derivative_variables_tag::type{volume_size, 0.0},
         Spectral::Swsh::SwshInterpolator{}, Spectral::Swsh::SwshInterpolator{},
         typename ccm_tag::type{boundary_size},
-        typename spec_test_tags::type{boundary_size});
+        typename spec_test_tags::type{boundary_size},
+        typename ccm_wt_constraints_tag_variable::type{1, 0.0});
   }
 };
 
