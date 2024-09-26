@@ -832,9 +832,13 @@ struct TestOmega {
       Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD, Tags::CauchyGaugeC,
       Tags::CauchyGaugeD,
       Spectral::Swsh::Tags::SwshInterpolator<Tags::PartiallyFlatAngularCoords>>;
-  using return_tags = tmpl::list<>;
+  using return_tags = tmpl::list<Tags::CCMConstraintOmega, Tags::CCMConstraintc,
+                                 Tags::CCMConstraintd>;
 
   static void apply(
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> ccmconstraintomega,
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> ccmconstraintc,
+      gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*> ccmconstraintd,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& omeganohat,
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& omega,
       const Scalar<SpinWeighted<ComplexDataVector, 2>>& gauge_c_inertial,
