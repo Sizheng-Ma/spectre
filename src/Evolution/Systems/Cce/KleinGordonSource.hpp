@@ -136,4 +136,22 @@ struct ComputeKleinGordonSource<Tags::BondiH> {
       const Scalar<SpinWeighted<ComplexDataVector, 0>>& bondi_r,
       const Scalar<SpinWeighted<ComplexDataVector, 1>>& eth_kg_psi);
 };
+
+template <typename Tag>
+struct AddKleinGordonSourceToIntegrand {
+  using return_tags = tmpl::list<Tags::RegularIntegrand<Tag>>;
+  using argument_tags = tmpl::list<Tags::KleinGordonSource<Tag>>;
+  static void apply(
+      gsl::not_null<Tag::type*> regular_integrand,
+      const SpinWeighted<ComplexDataVector, Tag::type::type::spin>& kg_source);
+};
+
+template <>
+struct AddKleinGordonSourceToIntegrand<Tags::BondiBeta> {
+  using return_tags = tmpl::list<Tags::Integrand<Tags::BondiBeta>>;
+  using argument_tags = tmpl::list<Tags::KleinGordonSource<Tags::BondiBeta>>;
+  static void apply(gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
+                        integrand_for_beta,
+                    const SpinWeighted<ComplexDataVector, 0>& kg_source);
+};
 }  // namespace Cce
