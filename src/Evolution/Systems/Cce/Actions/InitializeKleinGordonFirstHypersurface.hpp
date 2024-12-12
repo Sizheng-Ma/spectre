@@ -75,8 +75,9 @@ struct InitializeKleinGordonFirstHypersurface {
               auto one_over_r =
                   one_minus_y_collocation[i] / 2. / real(get(bondi_r).data());
 
-              Solutions::KleinGordon::bc_psi(
-                  make_not_null(&angular_view_kg_psi), u0new, one_over_r);
+              angular_view_kg_psi = one_over_r * sin(-1000);
+              // Solutions::KleinGordon::bc_psi(
+              //     make_not_null(&angular_view_kg_psi), u0new, one_over_r);
               // angular_view_kg_psi *= 0;
             }
           },

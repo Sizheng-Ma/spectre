@@ -1,7 +1,7 @@
 # Distributed under the MIT License.
 # See LICENSE.txt for details.
 
-Executable: AnalyticTestCharacteristicExtract
+Executable: KleinGordonAnalyticTestCharacteristicExtract
 Testing:
   Check: parse;execute_check_output
   Timeout: 20
@@ -24,13 +24,7 @@ Evolution:
 
 ResourceInfo:
   AvoidGlobalProc0: false
-  Singletons:
-    CharacteristicEvolution:
-      Proc: Auto
-      Exclusive: false
-    AnalyticWorldtubeBoundary:
-      Proc: Auto
-      Exclusive: false
+  Singletons: Auto
 
 Observers:
   VolumeFileName: "CharacteristicExtractUnusedVolume"
@@ -45,7 +39,7 @@ EventsAndTriggersAtSlabs:
     Events:
       - ObserveTimeStep:
           SubfileName: CceTimeStep
-          PrintTimeToTerminal: false
+          PrintTimeToTerminal: true
 
 EventsAndTriggersAtSteps:
 
@@ -53,31 +47,60 @@ Cce:
   Evolution:
     TimeStepper:
       AdamsBashforth:
-        Order: 3
+        Order: 3 # Going to higher order doesn't seem necessary for CCE
     StepChoosers:
-      - Constant: 0.1
+      - Constant: 0.1 # Don't take steps bigger than 0.1M
       - LimitIncrease:
           Factor: 2
+      - ErrorControl(SwshVars):
+          AbsoluteTolerance: 1e-8
+          RelativeTolerance: 1e-6
+          # These factors control how much the time step is changed at once.
+          MaxFactor: 2
+          MinFactor: 0.25
+          # How close to the "perfect" time step we take. Since the "perfect"
+          # value assumes a linear system, we need some safety factor since our
+          # system is nonlinear, and also so that we reduce how often we retake
+          # time steps.
+          SafetyFactor: 0.9
+      - ErrorControl(CoordVars):
+          AbsoluteTolerance: 1e-8
+          RelativeTolerance: 1e-7
+          # These factors control how much the time step is changed at once.
+          MaxFactor: 2
+          MinFactor: 0.25
+          # How close to the "perfect" time step we take. Since the "perfect"
+          # value assumes a linear system, we need some safety factor since our
+          # system is nonlinear, and also so that we reduce how often we retake
+          # time steps.
+          SafetyFactor: 0.9
 
-  LMax: 8
-  NumberOfRadialPoints: 8
-  ObservationLMax: 8
+  LMax: 12
+  NumberOfRadialPoints: 12
+  ObservationLMax: 4
 
-  StartTime: 0.0
-  EndTime: 0.8
-  ExtractionRadius: 30.0
+  StartTime: -1000.0
+  EndTime: -960.0
+  ExtractionRadius: &radius 30.0
 
   AnalyticSolution:
     BouncingBlackHole:
-      Period: 40.0
-      ExtractionRadius: 30.0
+      Period: &period 40.0
+      ExtractionRadius: *radius
       Mass: 1.0
-      Amplitude: 2.0
+      Amplitude: &amp 0.0 
+
+  KleinGordonAnalyticSolution:
+    KleinGordonBouncingBlackHole:
+      Period: *period
+      ExtractionRadius: *radius
+      Mass: 1.0
+      Amplitude: *amp
 
   Filtering:
     RadialFilterHalfPower: 24
     RadialFilterAlpha: 35.0
-    FilterLMax: 6
+    FilterLMax: 10
 
   ScriInterpOrder: 3
   ScriOutputDensity: 1

@@ -689,10 +689,9 @@ void create_bondi_boundary_data(
   d_bondi_r(make_not_null(&d_r), r, dlambda_null_metric, du_null_metric,
             inverse_null_metric, l_max);
   get(get<Tags::BoundaryValue<Tags::DuRDividedByR>>(*bondi_boundary_data))
-      .data() =
-      std::complex<double>(1.0, 0.0) * get<0>(d_r) / get(r).data();
+      .data() = std::complex<double>(-1.0, 0.0) / get(r).data();
   get(get<Tags::BoundaryValue<Tags::Du<Tags::BondiR>>>(*bondi_boundary_data))
-      .data() = std::complex<double>(1.0, 0.0) * get<0>(d_r);
+      .data() = std::complex<double>(-1.0, 0.0);
 
   auto& down_dyad = get<Tags::detail::DownDyad>(dyad_variables);
   auto& up_dyad = get<Tags::detail::UpDyad>(dyad_variables);

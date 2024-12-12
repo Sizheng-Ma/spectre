@@ -30,7 +30,7 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
   const auto& pi = get<gh::Tags::Pi<DataVector, 3>>(boundary_tuple);
   const auto& phi = get<gh::Tags::Phi<DataVector, 3>>(boundary_tuple);
   create_bondi_boundary_data(boundary_data_variables, phi, pi, spacetime_metric,
-                             extraction_radius_, l_max_);
+                             -time, l_max_);
   return true;
 }
 
