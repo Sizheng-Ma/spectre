@@ -973,6 +973,108 @@ void create_bondi_boundary_data(
       l_max, extraction_radius);
 }
 
+template <typename BoundaryTagList>
+void create_bondi_boundary_data_spacelike_char(
+    const gsl::not_null<Variables<BoundaryTagList>*> bondi_boundary_data,
+    const tnsr::iaa<DataVector, 3>& phi, const tnsr::aa<DataVector, 3>& pi,
+    const tnsr::aa<DataVector, 3>& spacetime_metric,
+    const double extraction_radius, const size_t l_max) {
+  const size_t size = Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+  // Most allocations required for the full boundary computation are merged into
+  // a single, large Variables allocation. There remain a handful of cases in
+  // the computational functions called where an intermediate quantity that is
+  // not re-used is allocated rather than taking a buffer. These cases are
+  // marked with code comments 'Allocation'; In the future, if allocations are
+  // identified as a point to optimize, those buffers may be allocated here and
+  // passed as function arguments
+  Variables<tmpl::list<
+      Tags::detail::CosPhi, Tags::detail::CosTheta, Tags::detail::SinPhi,
+      Tags::detail::SinTheta, Tags::detail::CartesianCoordinates,
+      Tags::detail::CartesianToSphericalJacobian,
+      Tags::detail::InverseCartesianToSphericalJacobian,
+      gr::Tags::SpatialMetric<DataVector, 3>,
+      gr::Tags::InverseSpatialMetric<DataVector, 3>,
+      gr::Tags::Shift<DataVector, 3>,
+      ::Tags::dt<gr::Tags::Shift<DataVector, 3>>, gr::Tags::Lapse<DataVector>,
+      ::Tags::dt<gr::Tags::Lapse<DataVector>>,
+      ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
+      Tags::detail::WorldtubeNormal, ::Tags::dt<Tags::detail::WorldtubeNormal>,
+      gr::Tags::SpacetimeNormalVector<DataVector, 3>, Tags::detail::NullL,
+      ::Tags::dt<Tags::detail::NullL>,
+      // for the detail function called at the end
+      gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>,
+      ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>,
+      gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>,
+      Tags::detail::AngularDNullL,
+      Tags::detail::DLambda<
+          gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>,
+      Tags::detail::DLambda<
+          gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>,
+      ::Tags::spacetime_deriv<Tags::detail::RealBondiR, tmpl::size_t<3>,
+                              Frame::RadialNull>,
+      Tags::detail::DLambda<Tags::detail::DLambda<Tags::detail::RealBondiR>>,
+      ::Tags::deriv<Tags::detail::DLambda<Tags::detail::RealBondiR>,
+                    tmpl::size_t<2>, Frame::RadialNull>>>
+      computation_variables{size};
+
+  Variables<
+      tmpl::list<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                      std::integral_constant<int, 0>>,
+                 ::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                      std::integral_constant<int, 1>>>>
+      derivative_buffers{size};
+
+  auto& cos_phi = get<Tags::detail::CosPhi>(computation_variables);
+  auto& cos_theta = get<Tags::detail::CosTheta>(computation_variables);
+  auto& sin_phi = get<Tags::detail::SinPhi>(computation_variables);
+  auto& sin_theta = get<Tags::detail::SinTheta>(computation_variables);
+  trigonometric_functions_on_swsh_collocation(
+      make_not_null(&cos_phi), make_not_null(&cos_theta),
+      make_not_null(&sin_phi), make_not_null(&sin_theta), l_max);
+
+  // NOTE: to handle the singular values of polar coordinates, the phi
+  // components of all tensors are scaled according to their sin(theta)
+  // prefactors.
+  // so, any down-index component get<2>(A) represents 1/sin(theta) A_\phi,
+  // and any up-index component get<2>(A) represents sin(theta) A^\phi.
+  // This holds for Jacobians, and so direct application of the Jacobians
+  // brings the factors through.
+  auto& cartesian_coords =
+      get<Tags::detail::CartesianCoordinates>(computation_variables);
+  auto& cartesian_to_spherical_jacobian =
+      get<Tags::detail::CartesianToSphericalJacobian>(computation_variables);
+  auto& inverse_cartesian_to_spherical_jacobian =
+      get<Tags::detail::InverseCartesianToSphericalJacobian>(
+          computation_variables);
+  cartesian_to_spherical_coordinates_and_jacobians(
+      make_not_null(&cartesian_coords),
+      make_not_null(&cartesian_to_spherical_jacobian),
+      make_not_null(&inverse_cartesian_to_spherical_jacobian), cos_phi,
+      cos_theta, sin_phi, sin_theta, extraction_radius);
+
+  auto& spatial_metric =
+      get<gr::Tags::SpatialMetric<DataVector, 3>>(computation_variables);
+  gr::spatial_metric(make_not_null(&spatial_metric), spacetime_metric);
+
+  auto& inverse_spatial_metric =
+      get<gr::Tags::InverseSpatialMetric<DataVector, 3>>(computation_variables);
+  // Allocation
+  inverse_spatial_metric = determinant_and_inverse(spatial_metric).second;
+
+  auto& shift = get<gr::Tags::Shift<DataVector, 3>>(computation_variables);
+  gr::shift(make_not_null(&shift), spacetime_metric, inverse_spatial_metric);
+
+  auto& lapse = get<gr::Tags::Lapse<DataVector>>(computation_variables);
+  gr::lapse(make_not_null(&lapse), shift, spacetime_metric);
+
+  auto& dt_spacetime_metric =
+      get<::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>>(
+          computation_variables);
+
+  gh::time_derivative_of_spacetime_metric(make_not_null(&dt_spacetime_metric),
+                                          lapse, shift, pi, phi);
+}
+
 /*!
  * \brief Process the worldtube data from modal metric components and
  * derivatives to desired Bondi quantities, placing the result in the passed
