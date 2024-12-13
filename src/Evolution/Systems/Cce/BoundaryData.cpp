@@ -21,6 +21,26 @@
 
 namespace Cce {
 
+void dr_spatial_metric(const gsl::not_null<tnsr::ii<DataVector, 3>*> dr_gamma,
+                       const tnsr::iaa<DataVector, 3>& phi,
+                       const Scalar<DataVector>& cos_phi,
+                       const Scalar<DataVector>& cos_theta,
+                       const Scalar<DataVector>& sin_phi,
+                       const Scalar<DataVector>& sin_theta) {
+  const size_t size = get(cos_phi).size();
+  set_number_of_grid_points(dr_gamma, size);
+
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t j = i; j < 3; ++j) {
+      dr_gamma->get(i, j) =
+          phi.get(0, i + 1, j + 1) * get(sin_theta) * get(cos_phi);
+      dr_gamma->get(i, j) +=
+          phi.get(1, i + 1, j + 1) * get(sin_theta) * get(sin_phi);
+      dr_gamma->get(i, j) += phi.get(2, i + 1, j + 1) * get(cos_theta);
+    }
+  }
+}
+
 void trigonometric_functions_on_swsh_collocation(
     const gsl::not_null<Scalar<DataVector>*> cos_phi,
     const gsl::not_null<Scalar<DataVector>*> cos_theta,

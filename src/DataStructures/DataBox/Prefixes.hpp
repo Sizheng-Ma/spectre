@@ -31,6 +31,12 @@ struct dt : db::PrefixTag, db::SimpleTag {
   using tag = Tag;
 };
 
+template <typename Tag>
+struct dr : db::PrefixTag, db::SimpleTag {
+  using type = typename Tag::type;
+  using tag = Tag;
+};
+
 /*!
  * \ingroup DataBoxTagsGroup
  * \brief Prefix indicating spatial derivatives

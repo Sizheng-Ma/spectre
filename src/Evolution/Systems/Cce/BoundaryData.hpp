@@ -222,6 +222,13 @@ void null_metric_and_derivative(
     const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
     const tnsr::aa<DataVector, 3>& spacetime_metric);
 
+void dr_spatial_metric(gsl::not_null<tnsr::ii<DataVector, 3>*> dr_gamma,
+                       const tnsr::iaa<DataVector, 3>& phi,
+                       const Scalar<DataVector>& cos_phi,
+                       const Scalar<DataVector>& cos_theta,
+                       const Scalar<DataVector>& sin_phi,
+                       const Scalar<DataVector>& sin_theta);
+
 /*!
  * \brief Computes the spatial unit normal vector \f$s^i\f$ to the spherical
  * worldtube surface and its first time derivative.
@@ -859,6 +866,7 @@ void create_bondi_boundary_data(
       ::Tags::dt<gr::Tags::Lapse<DataVector>>,
       ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
       Tags::detail::WorldtubeNormal, ::Tags::dt<Tags::detail::WorldtubeNormal>,
+      ::Tags::dr<Tags::detail::WorldtubeNormal>,
       gr::Tags::SpacetimeNormalVector<DataVector, 3>, Tags::detail::NullL,
       ::Tags::dt<Tags::detail::NullL>,
       // for the detail function called at the end
@@ -993,12 +1001,14 @@ void create_bondi_boundary_data_spacelike_char(
       Tags::detail::CartesianToSphericalJacobian,
       Tags::detail::InverseCartesianToSphericalJacobian,
       gr::Tags::SpatialMetric<DataVector, 3>,
+      ::Tags::dr<gr::Tags::SpatialMetric<DataVector, 3>>,
       gr::Tags::InverseSpatialMetric<DataVector, 3>,
       gr::Tags::Shift<DataVector, 3>,
       ::Tags::dt<gr::Tags::Shift<DataVector, 3>>, gr::Tags::Lapse<DataVector>,
       ::Tags::dt<gr::Tags::Lapse<DataVector>>,
       ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
       Tags::detail::WorldtubeNormal, ::Tags::dt<Tags::detail::WorldtubeNormal>,
+      ::Tags::dr<Tags::detail::WorldtubeNormal>,
       gr::Tags::SpacetimeNormalVector<DataVector, 3>, Tags::detail::NullL,
       ::Tags::dt<Tags::detail::NullL>,
       // for the detail function called at the end
@@ -1073,6 +1083,12 @@ void create_bondi_boundary_data_spacelike_char(
 
   gh::time_derivative_of_spacetime_metric(make_not_null(&dt_spacetime_metric),
                                           lapse, shift, pi, phi);
+
+  auto& dr_spacetial_metric =
+      get<::Tags::dr<gr::Tags::SpatialMetric<DataVector, 3>>>(
+          computation_variables);
+  dr_spatial_metric(make_not_null(&dr_spacetial_metric), phi, cos_phi,
+                    cos_theta, sin_phi, sin_theta);
 }
 
 /*!
