@@ -50,6 +50,10 @@ namespace detail {
 // Boundary data computation; these tags are currently not used outside
 // intermediate steps of the procedure in `BoundaryData.hpp`
 
+struct NormNormalX : db::SimpleTag {
+  using type = Scalar<DataVector>;
+};
+
 struct CosPhi : db::SimpleTag {
   using type = Scalar<DataVector>;
 };

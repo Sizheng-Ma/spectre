@@ -21,6 +21,26 @@
 
 namespace Cce {
 
+void norm_normal_X_and_derivatives(
+    const gsl::not_null<Scalar<DataVector>*> X,
+    const gsl::not_null<Scalar<DataVector>*> dr_X,
+    const tnsr::II<DataVector, 3>& inverse_spatial_metric,
+    const Scalar<DataVector>& cos_phi, const Scalar<DataVector>& cos_theta,
+    const Scalar<DataVector>& sin_phi, const Scalar<DataVector>& sin_theta) {
+  const size_t size = get(cos_phi).size();
+  set_number_of_grid_points(X, size);
+
+  // Allocation
+  Variables<tmpl::list<::Tags::Tempi<0, 3>, ::Tags::TempScalar<1>>>
+      aggregated_buffers{size};
+  tnsr::i<DataVector, 3>& sigma = get<::Tags::Tempi<0, 3>>(aggregated_buffers);
+  get<0>(sigma) = get(cos_phi) * (get(sin_theta));
+  get<1>(sigma) = get(sin_phi) * (get(sin_theta));
+  get<2>(sigma) = get(cos_theta);
+
+  magnitude(X, sigma, inverse_spatial_metric);
+}
+
 void dr_spatial_metric(const gsl::not_null<tnsr::ii<DataVector, 3>*> dr_gamma,
                        const tnsr::iaa<DataVector, 3>& phi,
                        const Scalar<DataVector>& cos_phi,

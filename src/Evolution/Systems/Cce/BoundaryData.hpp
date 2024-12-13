@@ -229,6 +229,13 @@ void dr_spatial_metric(gsl::not_null<tnsr::ii<DataVector, 3>*> dr_gamma,
                        const Scalar<DataVector>& sin_phi,
                        const Scalar<DataVector>& sin_theta);
 
+void norm_normal_X_and_derivatives(
+    gsl::not_null<Scalar<DataVector>*> X,
+    gsl::not_null<Scalar<DataVector>*> dr_X,
+    const tnsr::II<DataVector, 3>& inverse_spatial_metric,
+    const Scalar<DataVector>& cos_phi, const Scalar<DataVector>& cos_theta,
+    const Scalar<DataVector>& sin_phi, const Scalar<DataVector>& sin_theta);
+
 /*!
  * \brief Computes the spatial unit normal vector \f$s^i\f$ to the spherical
  * worldtube surface and its first time derivative.
@@ -998,6 +1005,7 @@ void create_bondi_boundary_data_spacelike_char(
   Variables<tmpl::list<
       Tags::detail::CosPhi, Tags::detail::CosTheta, Tags::detail::SinPhi,
       Tags::detail::SinTheta, Tags::detail::CartesianCoordinates,
+      Tags::detail::NormNormalX, ::Tags::dr<Tags::detail::NormNormalX>,
       Tags::detail::CartesianToSphericalJacobian,
       Tags::detail::InverseCartesianToSphericalJacobian,
       gr::Tags::SpatialMetric<DataVector, 3>,
@@ -1089,6 +1097,13 @@ void create_bondi_boundary_data_spacelike_char(
           computation_variables);
   dr_spatial_metric(make_not_null(&dr_spacetial_metric), phi, cos_phi,
                     cos_theta, sin_phi, sin_theta);
+
+  auto& norm_normal_x = get<Tags::detail::NormNormalX>(computation_variables);
+  auto& norm_normal_dr_x =
+      get<::Tags::dr<Tags::detail::NormNormalX>>(computation_variables);
+  norm_normal_X_and_derivatives(
+      make_not_null(&norm_normal_x), make_not_null(&norm_normal_dr_x),
+      inverse_spatial_metric, cos_phi, cos_theta, sin_phi, sin_theta);
 }
 
 /*!
