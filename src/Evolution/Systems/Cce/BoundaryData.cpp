@@ -557,6 +557,89 @@ void null_metric_and_derivative(
   }
 }
 
+void spacelike_worldtube_normal_and_derivatives(
+    const gsl::not_null<tnsr::I<DataVector, 3>*> worldtube_normal,
+    const gsl::not_null<tnsr::I<DataVector, 3>*> dt_worldtube_normal,
+    const gsl::not_null<tnsr::I<DataVector, 3>*> dr_worldtube_normal,
+    const Scalar<DataVector>& cos_phi, const Scalar<DataVector>& cos_theta,
+    const tnsr::aa<DataVector, 3>& spacetime_metric,
+    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
+    const tnsr::ii<DataVector, 3>& dr_spacetial_metric,
+    const Scalar<DataVector>& sin_phi, const Scalar<DataVector>& sin_theta,
+    const tnsr::II<DataVector, 3>& inverse_spatial_metric) {
+  const size_t size = get<0, 0>(spacetime_metric).size();
+
+  // Allocation
+  Variables<tmpl::list<::Tags::Tempi<0, 3>, ::Tags::TempScalar<1>>>
+      aggregated_buffers{size};
+  tnsr::i<DataVector, 3>& sigma = get<::Tags::Tempi<0, 3>>(aggregated_buffers);
+  get<0>(sigma) = get(cos_phi) * square(get(sin_theta));
+  get<1>(sigma) = get(sin_phi) * square(get(sin_theta));
+  get<2>(sigma) = get(sin_theta) * get(cos_theta);
+
+  // Allocation
+  magnitude(make_not_null(&get<::Tags::TempScalar<1>>(aggregated_buffers)),
+            sigma, inverse_spatial_metric);
+  const DataVector& norm_of_sigma =
+      get(get<::Tags::TempScalar<1>>(aggregated_buffers));
+
+  get<0>(sigma) /= norm_of_sigma;
+  get<1>(sigma) /= norm_of_sigma;
+  get<2>(sigma) /= norm_of_sigma;
+
+  for (size_t i = 0; i < 3; ++i) {
+    worldtube_normal->get(i) = inverse_spatial_metric.get(i, 0) * sigma.get(0);
+    for (size_t j = 1; j < 3; ++j) {
+      worldtube_normal->get(i) +=
+          inverse_spatial_metric.get(i, j) * sigma.get(j);
+    }
+  }
+
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t m = 0; m < 3; ++m) {
+      for (size_t n = 0; n < 3; ++n) {
+        if (UNLIKELY(m == 0 and n == 0)) {
+          dt_worldtube_normal->get(i) =
+              (0.5 * worldtube_normal->get(i) * get<0>(*worldtube_normal) -
+               inverse_spatial_metric.get(i, 0)) *
+              get<0>(*worldtube_normal) * get<1, 1>(dt_spacetime_metric);
+        } else {
+          dt_worldtube_normal->get(i) +=
+              (0.5 * worldtube_normal->get(i) * worldtube_normal->get(m) -
+               inverse_spatial_metric.get(i, m)) *
+              worldtube_normal->get(n) * dt_spacetime_metric.get(m + 1, n + 1);
+        }
+      }
+    }
+  }
+
+  tnsr::ii<DataVector, 3> temp_buffer{size};
+  tnsr::i<DataVector, 3> temp_buffer_1{size};
+
+  for (size_t i = 0; i < 3; ++i) {
+    for (size_t j = i; j < 3; ++j) {
+      temp_buffer.get(i, j) =
+          inverse_spatial_metric.get(i, j) -
+          0.5 * worldtube_normal->get(i) * worldtube_normal->get(j);
+    }
+  }
+  for (size_t i = 0; i < 3; ++i) {
+    temp_buffer_1.get(i) =
+        worldtube_normal->get(0) * dr_spacetial_metric.get(0, i);
+    for (size_t j = 1; j < 3; ++j) {
+      temp_buffer_1.get(i) +=
+          worldtube_normal->get(j) * dr_spacetial_metric.get(j, i);
+    }
+  }
+  for (size_t i = 0; i < 3; ++i) {
+    dr_worldtube_normal->get(i) = -temp_buffer_1.get(0) * temp_buffer.get(i, 0);
+    for (size_t j = 1; j < 3; ++j) {
+      dr_worldtube_normal->get(i) +=
+          -temp_buffer_1.get(j) * temp_buffer.get(i, j);
+    }
+  }
+}
+
 void worldtube_normal_and_derivatives(
     const gsl::not_null<tnsr::I<DataVector, 3>*> worldtube_normal,
     const gsl::not_null<tnsr::I<DataVector, 3>*> dt_worldtube_normal,

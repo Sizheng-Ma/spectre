@@ -255,6 +255,17 @@ void worldtube_normal_and_derivatives(
     const Scalar<DataVector>& sin_phi, const Scalar<DataVector>& sin_theta,
     const tnsr::II<DataVector, 3>& inverse_spatial_metric);
 
+void spacelike_worldtube_normal_and_derivatives(
+    gsl::not_null<tnsr::I<DataVector, 3>*> worldtube_normal,
+    gsl::not_null<tnsr::I<DataVector, 3>*> dt_worldtube_normal,
+    gsl::not_null<tnsr::I<DataVector, 3>*> dr_worldtube_normal,
+    const Scalar<DataVector>& cos_phi, const Scalar<DataVector>& cos_theta,
+    const tnsr::aa<DataVector, 3>& spacetime_metric,
+    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
+    const tnsr::ii<DataVector, 3>& dr_spacetial_metric,
+    const Scalar<DataVector>& sin_phi, const Scalar<DataVector>& sin_theta,
+    const tnsr::II<DataVector, 3>& inverse_spatial_metric);
+
 /*!
  * \brief Computes the null 4-vector \f$l^\mu\f$ on the worldtube surface that
  * is to be used as the CCE hypersurface generator, and the first time
@@ -873,7 +884,6 @@ void create_bondi_boundary_data(
       ::Tags::dt<gr::Tags::Lapse<DataVector>>,
       ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
       Tags::detail::WorldtubeNormal, ::Tags::dt<Tags::detail::WorldtubeNormal>,
-      ::Tags::dr<Tags::detail::WorldtubeNormal>,
       gr::Tags::SpacetimeNormalVector<DataVector, 3>, Tags::detail::NullL,
       ::Tags::dt<Tags::detail::NullL>,
       // for the detail function called at the end
@@ -1097,6 +1107,18 @@ void create_bondi_boundary_data_spacelike_char(
           computation_variables);
   dr_spatial_metric(make_not_null(&dr_spacetial_metric), phi, cos_phi,
                     cos_theta, sin_phi, sin_theta);
+
+  auto& dt_worldtube_normal =
+      get<::Tags::dt<Tags::detail::WorldtubeNormal>>(computation_variables);
+  auto& dr_worldtube_normal =
+      get<::Tags::dr<Tags::detail::WorldtubeNormal>>(computation_variables);
+  auto& worldtube_normal =
+      get<Tags::detail::WorldtubeNormal>(computation_variables);
+  spacelike_worldtube_normal_and_derivatives(
+      make_not_null(&worldtube_normal), make_not_null(&dt_worldtube_normal),
+      make_not_null(&dr_worldtube_normal), cos_phi, cos_theta, spacetime_metric,
+      dt_spacetime_metric, dr_spacetial_metric, sin_phi, sin_theta,
+      inverse_spatial_metric);
 
   auto& norm_normal_x = get<Tags::detail::NormNormalX>(computation_variables);
   auto& norm_normal_dr_x =
