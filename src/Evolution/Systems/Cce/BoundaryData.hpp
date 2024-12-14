@@ -231,6 +231,15 @@ void dr_spatial_metric(gsl::not_null<tnsr::ii<DataVector, 3>*> dr_gamma,
                        const Scalar<DataVector>& sin_phi,
                        const Scalar<DataVector>& sin_theta);
 
+void dr_lapse_shift(gsl::not_null<Scalar<DataVector>*> dr_lapse,
+                    gsl::not_null<tnsr::I<DataVector, 3>*> dr_shift,
+                    const tnsr::i<DataVector, 3>& deriv_lapse,
+                    const tnsr::iJ<DataVector, 3>& deriv_shift,
+                    const Scalar<DataVector>& cos_phi,
+                    const Scalar<DataVector>& cos_theta,
+                    const Scalar<DataVector>& sin_phi,
+                    const Scalar<DataVector>& sin_theta);
+
 void norm_normal_X_and_derivatives(
     gsl::not_null<Scalar<DataVector>*> X,
     gsl::not_null<Scalar<DataVector>*> dr_X,
@@ -1026,8 +1035,10 @@ void create_bondi_boundary_data_spacelike_char(
       ::Tags::dr<gr::Tags::SpatialMetric<DataVector, 3>>,
       gr::Tags::InverseSpatialMetric<DataVector, 3>,
       gr::Tags::Shift<DataVector, 3>,
+      ::Tags::dr<gr::Tags::Shift<DataVector, 3>>,
       ::Tags::dt<gr::Tags::Shift<DataVector, 3>>, gr::Tags::Lapse<DataVector>,
       ::Tags::dt<gr::Tags::Lapse<DataVector>>,
+      ::Tags::dr<gr::Tags::Lapse<DataVector>>,
       ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
       Tags::detail::WorldtubeNormal, ::Tags::dt<Tags::detail::WorldtubeNormal>,
       ::Tags::dr<Tags::detail::WorldtubeNormal>,
@@ -1139,8 +1150,8 @@ void create_bondi_boundary_data_spacelike_char(
                               shift);
   auto& dt_lapse =
       get<::Tags::dt<gr::Tags::Lapse<DataVector>>>(computation_variables);
-  //   auto& dx_lapse =
-  //       get<::Tags::dt<gr::Tags::Lapse<DataVector>>>(computation_variables);
+  auto& dr_lapse =
+      get<::Tags::dr<gr::Tags::Lapse<DataVector>>>(computation_variables);
   tnsr::i<DataVector, 3> spatial_dev_lapse;
   gh::time_deriv_of_lapse(make_not_null(&dt_lapse), lapse, shift,
                           spacetime_unit_normal, phi, pi);
@@ -1152,12 +1163,18 @@ void create_bondi_boundary_data_spacelike_char(
       determinant_and_inverse(spacetime_metric).second;
   auto& dt_shift =
       get<::Tags::dt<gr::Tags::Shift<DataVector, 3>>>(computation_variables);
+  auto& dr_shift =
+      get<::Tags::dt<gr::Tags::Shift<DataVector, 3>>>(computation_variables);
   gh::time_deriv_of_shift(make_not_null(&dt_shift), lapse, shift,
                           inverse_spatial_metric, spacetime_unit_normal, phi,
                           pi);
   gh::spatial_deriv_of_shift(make_not_null(&spatial_dev_shift), lapse,
                              inverse_spacetime_metric, spacetime_unit_normal,
                              phi);
+
+  dr_lapse_shift(make_not_null(&dr_lapse), make_not_null(&dr_shift),
+                 spatial_dev_lapse, spatial_dev_shift, cos_phi, cos_theta,
+                 sin_phi, sin_theta);
 }
 
 /*!

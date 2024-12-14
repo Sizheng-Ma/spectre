@@ -46,6 +46,28 @@ void norm_normal_X_and_derivatives(
   get(*dr_X) *= -0.5 * get(*X);
 }
 
+void dr_lapse_shift(const gsl::not_null<Scalar<DataVector>*> dr_lapse,
+                    const gsl::not_null<tnsr::I<DataVector, 3>*> dr_shift,
+                    const tnsr::i<DataVector, 3>& deriv_lapse,
+                    const tnsr::iJ<DataVector, 3>& deriv_shift,
+                    const Scalar<DataVector>& cos_phi,
+                    const Scalar<DataVector>& cos_theta,
+                    const Scalar<DataVector>& sin_phi,
+                    const Scalar<DataVector>& sin_theta) {
+  const size_t size = get(cos_phi).size();
+  set_number_of_grid_points(dr_lapse, size);
+  set_number_of_grid_points(dr_shift, size);
+  get(*dr_lapse) = deriv_lapse.get(0) * get(sin_theta) * get(cos_phi);
+  get(*dr_lapse) += deriv_lapse.get(1) * get(sin_theta) * get(sin_phi);
+  get(*dr_lapse) += deriv_lapse.get(2) * get(cos_theta);
+
+  for (size_t i = 0; i < 3; ++i) {
+    dr_shift->get(i) = deriv_shift.get(0, i) * get(sin_theta) * get(cos_phi);
+    dr_shift->get(i) += deriv_shift.get(1, i) * get(sin_theta) * get(sin_phi);
+    dr_shift->get(i) += deriv_shift.get(2, i) * get(cos_theta);
+  }
+}
+
 void dr_spatial_metric(const gsl::not_null<tnsr::ii<DataVector, 3>*> dr_gamma,
                        const tnsr::iaa<DataVector, 3>& phi,
                        const Scalar<DataVector>& cos_phi,
