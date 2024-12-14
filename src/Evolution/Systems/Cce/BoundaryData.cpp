@@ -21,6 +21,22 @@
 
 namespace Cce {
 
+void dr_spacetime_normal_vector(
+    const gsl::not_null<tnsr::A<DataVector, 3>*> dr_n,
+    const Scalar<DataVector>& lapse, const Scalar<DataVector>& dr_lapse,
+    const tnsr::I<DataVector, 3>& shift,
+    const tnsr::I<DataVector, 3>& dr_shift) {
+  const size_t size = get(lapse).size();
+  set_number_of_grid_points(dr_n, size);
+
+  dr_n->get(0) = -get(dr_lapse) / square(get(lapse));
+  for (size_t i = 1; i < 4; ++i) {
+    dr_n->get(i) =
+        (shift.get(i) * get(dr_lapse) - get(lapse) * dr_shift.get(i)) /
+        square(get(lapse));
+  }
+}
+
 void norm_normal_X_and_derivatives(
     const gsl::not_null<Scalar<DataVector>*> X,
     const gsl::not_null<Scalar<DataVector>*> dr_X,

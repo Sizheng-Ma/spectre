@@ -240,6 +240,12 @@ void dr_lapse_shift(gsl::not_null<Scalar<DataVector>*> dr_lapse,
                     const Scalar<DataVector>& sin_phi,
                     const Scalar<DataVector>& sin_theta);
 
+void dr_spacetime_normal_vector(gsl::not_null<tnsr::A<DataVector, 3>*> dr_n,
+                                const Scalar<DataVector>& lapse,
+                                const Scalar<DataVector>& dr_lapse,
+                                const tnsr::I<DataVector, 3>& shift,
+                                const tnsr::I<DataVector, 3>& dr_shift);
+
 void norm_normal_X_and_derivatives(
     gsl::not_null<Scalar<DataVector>*> X,
     gsl::not_null<Scalar<DataVector>*> dr_X,
@@ -1042,8 +1048,9 @@ void create_bondi_boundary_data_spacelike_char(
       ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
       Tags::detail::WorldtubeNormal, ::Tags::dt<Tags::detail::WorldtubeNormal>,
       ::Tags::dr<Tags::detail::WorldtubeNormal>,
-      gr::Tags::SpacetimeNormalVector<DataVector, 3>, Tags::detail::NullL,
-      ::Tags::dt<Tags::detail::NullL>,
+      gr::Tags::SpacetimeNormalVector<DataVector, 3>,
+      ::Tags::dr<gr::Tags::SpacetimeNormalVector<DataVector, 3>>,
+      Tags::detail::NullL, ::Tags::dt<Tags::detail::NullL>,
       // for the detail function called at the end
       gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>,
       ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>,
@@ -1175,6 +1182,12 @@ void create_bondi_boundary_data_spacelike_char(
   dr_lapse_shift(make_not_null(&dr_lapse), make_not_null(&dr_shift),
                  spatial_dev_lapse, spatial_dev_shift, cos_phi, cos_theta,
                  sin_phi, sin_theta);
+
+  auto& dr_spacetime_unit_normal =
+      get<::Tags::dr<gr::Tags::SpacetimeNormalVector<DataVector, 3>>>(
+          computation_variables);
+  dr_spacetime_normal_vector(make_not_null(&dr_spacetime_unit_normal), lapse,
+                             dr_lapse, shift, dr_shift);
 }
 
 /*!
