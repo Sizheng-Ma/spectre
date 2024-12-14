@@ -17,6 +17,8 @@
 #include "NumericalAlgorithms/SpinWeightedSphericalHarmonics/SwshCollocation.hpp"
 #include "NumericalAlgorithms/SpinWeightedSphericalHarmonics/SwshDerivatives.hpp"
 #include "PointwiseFunctions/GeneralRelativity/GeneralizedHarmonic/Phi.hpp"
+#include "PointwiseFunctions/GeneralRelativity/GeneralizedHarmonic/SpatialDerivOfLapse.hpp"
+#include "PointwiseFunctions/GeneralRelativity/GeneralizedHarmonic/SpatialDerivOfShift.hpp"
 #include "PointwiseFunctions/GeneralRelativity/GeneralizedHarmonic/TimeDerivOfLapse.hpp"
 #include "PointwiseFunctions/GeneralRelativity/GeneralizedHarmonic/TimeDerivOfShift.hpp"
 #include "PointwiseFunctions/GeneralRelativity/GeneralizedHarmonic/TimeDerivativeOfSpacetimeMetric.hpp"
@@ -1129,6 +1131,33 @@ void create_bondi_boundary_data_spacelike_char(
       make_not_null(&norm_normal_x), make_not_null(&norm_normal_dr_x),
       inverse_spatial_metric, worldtube_normal, dr_spacetial_metric, cos_phi,
       cos_theta, sin_phi, sin_theta);
+
+  auto& spacetime_unit_normal =
+      get<gr::Tags::SpacetimeNormalVector<DataVector, 3>>(
+          computation_variables);
+  gr::spacetime_normal_vector(make_not_null(&spacetime_unit_normal), lapse,
+                              shift);
+  auto& dt_lapse =
+      get<::Tags::dt<gr::Tags::Lapse<DataVector>>>(computation_variables);
+  //   auto& dx_lapse =
+  //       get<::Tags::dt<gr::Tags::Lapse<DataVector>>>(computation_variables);
+  tnsr::i<DataVector, 3> spatial_dev_lapse;
+  gh::time_deriv_of_lapse(make_not_null(&dt_lapse), lapse, shift,
+                          spacetime_unit_normal, phi, pi);
+  gh::spatial_deriv_of_lapse(make_not_null(&spatial_dev_lapse), lapse,
+                             spacetime_unit_normal, phi);
+
+  tnsr::iJ<DataVector, 3> spatial_dev_shift;
+  auto inverse_spacetime_metric =
+      determinant_and_inverse(spacetime_metric).second;
+  auto& dt_shift =
+      get<::Tags::dt<gr::Tags::Shift<DataVector, 3>>>(computation_variables);
+  gh::time_deriv_of_shift(make_not_null(&dt_shift), lapse, shift,
+                          inverse_spatial_metric, spacetime_unit_normal, phi,
+                          pi);
+  gh::spatial_deriv_of_shift(make_not_null(&spatial_dev_shift), lapse,
+                             inverse_spacetime_metric, spacetime_unit_normal,
+                             phi);
 }
 
 /*!
