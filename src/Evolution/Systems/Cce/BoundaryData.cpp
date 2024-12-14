@@ -25,10 +25,13 @@ void norm_normal_X_and_derivatives(
     const gsl::not_null<Scalar<DataVector>*> X,
     const gsl::not_null<Scalar<DataVector>*> dr_X,
     const tnsr::II<DataVector, 3>& inverse_spatial_metric,
+    const tnsr::I<DataVector, 3>& worldtube_normal,
+    const tnsr::ii<DataVector, 3>& dr_spacetial_metric,
     const Scalar<DataVector>& cos_phi, const Scalar<DataVector>& cos_theta,
     const Scalar<DataVector>& sin_phi, const Scalar<DataVector>& sin_theta) {
   const size_t size = get(cos_phi).size();
   set_number_of_grid_points(X, size);
+  set_number_of_grid_points(dr_X, size);
 
   // Allocation
   Variables<tmpl::list<::Tags::Tempi<0, 3>, ::Tags::TempScalar<1>>>
@@ -39,6 +42,8 @@ void norm_normal_X_and_derivatives(
   get<2>(sigma) = get(cos_theta);
 
   magnitude(X, sigma, inverse_spatial_metric);
+  dot_product(dr_X, worldtube_normal, worldtube_normal, dr_spacetial_metric);
+  get(*dr_X) *= -0.5 * get(*X);
 }
 
 void dr_spatial_metric(const gsl::not_null<tnsr::ii<DataVector, 3>*> dr_gamma,

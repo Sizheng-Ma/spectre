@@ -233,6 +233,8 @@ void norm_normal_X_and_derivatives(
     gsl::not_null<Scalar<DataVector>*> X,
     gsl::not_null<Scalar<DataVector>*> dr_X,
     const tnsr::II<DataVector, 3>& inverse_spatial_metric,
+    const tnsr::I<DataVector, 3>& worldtube_normal,
+    const tnsr::ii<DataVector, 3>& dr_spacetial_metric,
     const Scalar<DataVector>& cos_phi, const Scalar<DataVector>& cos_theta,
     const Scalar<DataVector>& sin_phi, const Scalar<DataVector>& sin_theta);
 
@@ -1125,7 +1127,8 @@ void create_bondi_boundary_data_spacelike_char(
       get<::Tags::dr<Tags::detail::NormNormalX>>(computation_variables);
   norm_normal_X_and_derivatives(
       make_not_null(&norm_normal_x), make_not_null(&norm_normal_dr_x),
-      inverse_spatial_metric, cos_phi, cos_theta, sin_phi, sin_theta);
+      inverse_spatial_metric, worldtube_normal, dr_spacetial_metric, cos_phi,
+      cos_theta, sin_phi, sin_theta);
 }
 
 /*!
