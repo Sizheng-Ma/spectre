@@ -1206,6 +1206,14 @@ void create_bondi_boundary_data_spacelike_char(
       make_not_null(&du_null_l), make_not_null(&null_l), norm_normal_x,
       norm_normal_dr_lnx, dr_worldtube_normal, worldtube_normal,
       spacetime_unit_normal, dr_spacetime_unit_normal, extraction_radius);
+
+  // pass to the next step that is common between the 'modal' input and 'GH'
+  // input strategies
+  detail::create_bondi_boundary_data(
+      bondi_boundary_data, make_not_null(&computation_variables),
+      make_not_null(&derivative_buffers), dt_spacetime_metric, phi,
+      spacetime_metric, null_l, du_null_l, cartesian_to_spherical_jacobian,
+      l_max, extraction_radius);
 }
 
 /*!
