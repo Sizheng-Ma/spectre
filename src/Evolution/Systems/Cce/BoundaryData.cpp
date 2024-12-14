@@ -21,6 +21,42 @@
 
 namespace Cce {
 
+void spacelike_null_vector_l_and_derivatives(
+    const gsl::not_null<tnsr::A<DataVector, 3>*> du_null_l,
+    const gsl::not_null<tnsr::A<DataVector, 3>*> null_l,
+    const Scalar<DataVector>& norm_normal_x,
+    const Scalar<DataVector>& norm_normal_dr_lnx,
+    const tnsr::I<DataVector, 3>& dr_worldtube_normal,
+    const tnsr::I<DataVector, 3>& worldtube_normal,
+    const tnsr::A<DataVector, 3>& spacetime_unit_normal,
+    const tnsr::A<DataVector, 3>& dr_spacetime_unit_normal,
+    const double extraction_radius) {
+  const size_t size = dr_worldtube_normal.get(0).size();
+  set_number_of_grid_points(du_null_l, size);
+  set_number_of_grid_points(null_l, size);
+
+  null_l->get(0) =
+      spacetime_unit_normal.get(0) * get(norm_normal_x) / extraction_radius;
+  for (size_t i = 1; i < 4; ++i) {
+    null_l->get(i) =
+        (spacetime_unit_normal.get(i) + worldtube_normal.get(i - 1)) *
+        get(norm_normal_x) / extraction_radius;
+  }
+
+  auto scalar_temp = get(norm_normal_dr_lnx) - 1. / extraction_radius;
+
+  du_null_l->get(0) =
+      dr_spacetime_unit_normal.get(0) * get(norm_normal_x) / extraction_radius;
+  for (size_t i = 1; i < 4; ++i) {
+    du_null_l->get(i) =
+        (dr_spacetime_unit_normal.get(i) + dr_worldtube_normal.get(i - 1)) *
+        get(norm_normal_x) / extraction_radius;
+  }
+  for (size_t i = 0; i < 4; ++i) {
+    du_null_l->get(i) += null_l->get(i) * scalar_temp;
+  }
+}
+
 void dr_spacetime_normal_vector(
     const gsl::not_null<tnsr::A<DataVector, 3>*> dr_n,
     const Scalar<DataVector>& lapse, const Scalar<DataVector>& dr_lapse,
@@ -39,7 +75,7 @@ void dr_spacetime_normal_vector(
 
 void norm_normal_X_and_derivatives(
     const gsl::not_null<Scalar<DataVector>*> X,
-    const gsl::not_null<Scalar<DataVector>*> dr_X,
+    const gsl::not_null<Scalar<DataVector>*> dr_lnX,
     const tnsr::II<DataVector, 3>& inverse_spatial_metric,
     const tnsr::I<DataVector, 3>& worldtube_normal,
     const tnsr::ii<DataVector, 3>& dr_spacetial_metric,
@@ -47,7 +83,7 @@ void norm_normal_X_and_derivatives(
     const Scalar<DataVector>& sin_phi, const Scalar<DataVector>& sin_theta) {
   const size_t size = get(cos_phi).size();
   set_number_of_grid_points(X, size);
-  set_number_of_grid_points(dr_X, size);
+  set_number_of_grid_points(dr_lnX, size);
 
   // Allocation
   Variables<tmpl::list<::Tags::Tempi<0, 3>, ::Tags::TempScalar<1>>>
@@ -58,8 +94,8 @@ void norm_normal_X_and_derivatives(
   get<2>(sigma) = get(cos_theta);
 
   magnitude(X, sigma, inverse_spatial_metric);
-  dot_product(dr_X, worldtube_normal, worldtube_normal, dr_spacetial_metric);
-  get(*dr_X) *= -0.5 * get(*X);
+  dot_product(dr_lnX, worldtube_normal, worldtube_normal, dr_spacetial_metric);
+  get(*dr_lnX) *= -0.5;
 }
 
 void dr_lapse_shift(const gsl::not_null<Scalar<DataVector>*> dr_lapse,

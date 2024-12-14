@@ -248,7 +248,7 @@ void dr_spacetime_normal_vector(gsl::not_null<tnsr::A<DataVector, 3>*> dr_n,
 
 void norm_normal_X_and_derivatives(
     gsl::not_null<Scalar<DataVector>*> X,
-    gsl::not_null<Scalar<DataVector>*> dr_X,
+    gsl::not_null<Scalar<DataVector>*> dr_lnX,
     const tnsr::II<DataVector, 3>& inverse_spatial_metric,
     const tnsr::I<DataVector, 3>& worldtube_normal,
     const tnsr::ii<DataVector, 3>& dr_spacetial_metric,
@@ -306,6 +306,17 @@ void null_vector_l_and_derivatives(
     const tnsr::aa<DataVector, 3>& spacetime_metric,
     const tnsr::I<DataVector, 3>& shift,
     const tnsr::I<DataVector, 3>& worldtube_normal);
+
+void spacelike_null_vector_l_and_derivatives(
+    gsl::not_null<tnsr::A<DataVector, 3>*> du_null_l,
+    gsl::not_null<tnsr::A<DataVector, 3>*> null_l,
+    const Scalar<DataVector>& norm_normal_x,
+    const Scalar<DataVector>& norm_normal_dr_lnx,
+    const tnsr::I<DataVector, 3>& dr_worldtube_normal,
+    const tnsr::I<DataVector, 3>& worldtube_normal,
+    const tnsr::A<DataVector, 3>& spacetime_unit_normal,
+    const tnsr::A<DataVector, 3>& dr_spacetime_unit_normal,
+    const double extraction_radius);
 
 /*!
  * \brief Computes the partial derivative of the spacetime metric and inverse
@@ -1143,10 +1154,10 @@ void create_bondi_boundary_data_spacelike_char(
       inverse_spatial_metric);
 
   auto& norm_normal_x = get<Tags::detail::NormNormalX>(computation_variables);
-  auto& norm_normal_dr_x =
+  auto& norm_normal_dr_lnx =
       get<::Tags::dr<Tags::detail::NormNormalX>>(computation_variables);
   norm_normal_X_and_derivatives(
-      make_not_null(&norm_normal_x), make_not_null(&norm_normal_dr_x),
+      make_not_null(&norm_normal_x), make_not_null(&norm_normal_dr_lnx),
       inverse_spatial_metric, worldtube_normal, dr_spacetial_metric, cos_phi,
       cos_theta, sin_phi, sin_theta);
 
@@ -1188,6 +1199,13 @@ void create_bondi_boundary_data_spacelike_char(
           computation_variables);
   dr_spacetime_normal_vector(make_not_null(&dr_spacetime_unit_normal), lapse,
                              dr_lapse, shift, dr_shift);
+
+  auto& du_null_l = get<::Tags::dt<Tags::detail::NullL>>(computation_variables);
+  auto& null_l = get<Tags::detail::NullL>(computation_variables);
+  spacelike_null_vector_l_and_derivatives(
+      make_not_null(&du_null_l), make_not_null(&null_l), norm_normal_x,
+      norm_normal_dr_lnx, dr_worldtube_normal, worldtube_normal,
+      spacetime_unit_normal, dr_spacetime_unit_normal, extraction_radius);
 }
 
 /*!
