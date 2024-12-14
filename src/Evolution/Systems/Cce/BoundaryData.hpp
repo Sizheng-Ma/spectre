@@ -228,8 +228,10 @@ void spacelike_null_metric_and_derivative(
     gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*> du_null_metric,
     gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*> null_metric,
     const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
-    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
-    const tnsr::aa<DataVector, 3>& spacetime_metric);
+    const tnsr::ii<DataVector, 3>& spatial_metric
+    // const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
+    // const tnsr::aa<DataVector, 3>& spacetime_metric
+);
 
 void dr_spatial_metric(gsl::not_null<tnsr::ii<DataVector, 3>*> dr_gamma,
                        const tnsr::iaa<DataVector, 3>& phi,

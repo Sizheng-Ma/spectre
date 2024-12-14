@@ -455,12 +455,19 @@ void spacelike_null_metric_and_derivative(
     const gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*>
         null_metric,
     const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
-    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
-    const tnsr::aa<DataVector, 3>& spacetime_metric) {
+    const tnsr::ii<DataVector, 3>& spatial_metric
+    // const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
+    // const tnsr::aa<DataVector, 3>& spacetime_metric
+) {
   // u lambda A
-  const size_t size = get<0, 0>(spacetime_metric).size();
+  const size_t size = get<0, 0>(spatial_metric).size();
   set_number_of_grid_points(null_metric, size);
   set_number_of_grid_points(du_null_metric, size);
+
+  // dx/dr   dy/dr  dz/dr
+  // get<0, 0>(cartesian_to_spherical_jacobian)
+  // get<0, 1>(cartesian_to_spherical_jacobian)
+  // get<0, 2>(cartesian_to_spherical_jacobian)
 
   // get<0, 0>(*null_metric) = ;
   get<0, 1>(*null_metric) = -1.0;
