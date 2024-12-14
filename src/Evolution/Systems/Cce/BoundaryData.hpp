@@ -224,6 +224,13 @@ void null_metric_and_derivative(
     const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
     const tnsr::aa<DataVector, 3>& spacetime_metric);
 
+void spacelike_null_metric_and_derivative(
+    gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*> du_null_metric,
+    gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*> null_metric,
+    const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
+    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
+    const tnsr::aa<DataVector, 3>& spacetime_metric);
+
 void dr_spatial_metric(gsl::not_null<tnsr::ii<DataVector, 3>*> dr_gamma,
                        const tnsr::iaa<DataVector, 3>& phi,
                        const Scalar<DataVector>& cos_phi,
@@ -656,6 +663,41 @@ using klein_gordon_worldtube_boundary_tags =
 }  // namespace Tags
 
 namespace detail {
+// the common step between the modal input and the Generalized harmonic input
+// that performs the final gauge processing to Bondi scalars and places them in
+// the Variables.
+template <typename BoundaryTagList, typename BufferTagList,
+          typename ComplexBufferTagList>
+void create_bondi_boundary_data_spacelike_char(
+    const gsl::not_null<Variables<BoundaryTagList>*> bondi_boundary_data,
+    const gsl::not_null<Variables<BufferTagList>*> computation_variables,
+    const gsl::not_null<Variables<ComplexBufferTagList>*> derivative_buffers,
+    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
+    const tnsr::iaa<DataVector, 3>& phi,
+    const tnsr::aa<DataVector, 3>& spacetime_metric,
+    const tnsr::A<DataVector, 3>& null_l,
+    const tnsr::A<DataVector, 3>& du_null_l,
+    const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
+    const size_t l_max, const double extraction_radius) {
+  const size_t size = Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+
+  // unfortunately, because the dyads are not themselves spin-weighted, they
+  // need a separate Variables
+  Variables<tmpl::list<Tags::detail::DownDyad, Tags::detail::UpDyad>>
+      dyad_variables{size};
+
+  auto& null_metric =
+      get<gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>(
+          *computation_variables);
+  auto& du_null_metric = get<
+      ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>>(
+      *computation_variables);
+  //   spacelike_null_metric_and_derivative(
+  //       make_not_null(&du_null_metric), make_not_null(&null_metric),
+  //       cartesian_to_spherical_jacobian, dt_spacetime_metric,
+  //       spacetime_metric);
+}
+
 // the common step between the modal input and the Generalized harmonic input
 // that performs the final gauge processing to Bondi scalars and places them in
 // the Variables.
@@ -1209,7 +1251,7 @@ void create_bondi_boundary_data_spacelike_char(
 
   // pass to the next step that is common between the 'modal' input and 'GH'
   // input strategies
-  detail::create_bondi_boundary_data(
+  detail::create_bondi_boundary_data_spacelike_char(
       bondi_boundary_data, make_not_null(&computation_variables),
       make_not_null(&derivative_buffers), dt_spacetime_metric, phi,
       spacetime_metric, null_l, du_null_l, cartesian_to_spherical_jacobian,

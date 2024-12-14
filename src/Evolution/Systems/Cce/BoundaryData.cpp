@@ -449,6 +449,23 @@ void cartesian_lapse_and_derivatives_from_modes(
   }
 }
 
+void spacelike_null_metric_and_derivative(
+    const gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*>
+        du_null_metric,
+    const gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*>
+        null_metric,
+    const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
+    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
+    const tnsr::aa<DataVector, 3>& spacetime_metric) {
+  // u lambda A
+  const size_t size = get<0, 0>(spacetime_metric).size();
+  set_number_of_grid_points(null_metric, size);
+  set_number_of_grid_points(du_null_metric, size);
+
+  // get<0, 0>(*null_metric) = ;
+  get<0, 1>(*null_metric) = -1.0;
+}
+
 void deriv_cartesian_metric_lapse_shift_from_nodes(
     const gsl::not_null<tnsr::ijj<DataVector, 3>*> d_cartesian_spatial_metric,
     const gsl::not_null<tnsr::iJ<DataVector, 3>*> d_cartesian_shift,
