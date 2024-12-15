@@ -494,6 +494,11 @@ void spacelike_null_metric_and_derivative(
           dxdr_lower_with_metric.get(i);
     }
   }
+
+  // lambda lambda & lambda A
+  for (size_t i = 0; i < 3; ++i) {
+    null_metric->get(1, i + 1) = 0.0;
+  }
 }
 
 void deriv_cartesian_metric_lapse_shift_from_nodes(
