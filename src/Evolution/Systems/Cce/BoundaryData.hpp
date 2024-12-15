@@ -705,6 +705,48 @@ void create_bondi_boundary_data_spacelike_char(
       make_not_null(&du_null_metric), make_not_null(&null_metric),
       cartesian_to_spherical_jacobian, spatial_metric, dr_spatial_metric,
       extraction_radius);
+
+  auto& inverse_null_metric =
+      get<gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>(
+          *computation_variables);
+
+  // the below scaling process is used to reduce accumulation of numerical
+  // error in the determinant evaluation
+
+  // buffer reuse because the scaled null metric is only needed until the
+  // `determinant_and_inverse` call
+  auto& scaled_null_metric =
+      get<gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>(
+          *computation_variables);
+  for (size_t i = 0; i < 4; ++i) {
+    for (size_t j = i; j < 4; ++j) {
+      if (i > 1 and j > 1) {
+        scaled_null_metric.get(i, j) =
+            null_metric.get(i, j) / square(extraction_radius);
+      } else if (i > 1 or j > 1) {
+        scaled_null_metric.get(i, j) =
+            null_metric.get(i, j) / extraction_radius;
+      } else {
+        scaled_null_metric.get(i, j) = null_metric.get(i, j);
+      }
+    }
+  }
+  // Allocation
+  const auto scaled_inverse_null_metric =
+      determinant_and_inverse(scaled_null_metric).second;
+  for (size_t i = 0; i < 4; ++i) {
+    for (size_t j = i; j < 4; ++j) {
+      if (i > 1 and j > 1) {
+        inverse_null_metric.get(i, j) =
+            scaled_inverse_null_metric.get(i, j) / square(extraction_radius);
+      } else if (i > 1 or j > 1) {
+        inverse_null_metric.get(i, j) =
+            scaled_inverse_null_metric.get(i, j) / extraction_radius;
+      } else {
+        inverse_null_metric.get(i, j) = scaled_inverse_null_metric.get(i, j);
+      }
+    }
+  }
 }
 
 // the common step between the modal input and the Generalized harmonic input
