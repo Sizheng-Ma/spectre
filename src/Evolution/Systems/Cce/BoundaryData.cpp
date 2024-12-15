@@ -499,6 +499,43 @@ void spacelike_null_metric_and_derivative(
   for (size_t i = 0; i < 3; ++i) {
     null_metric->get(1, i + 1) = 0.0;
   }
+
+  // AB
+  for (size_t A = 0; A < 2; ++A) {
+    for (size_t B = A; B < 2; ++B) {
+      null_metric->get(A + 2, B + 2) =
+          cartesian_to_spherical_jacobian.get(A + 1, 0) *
+          cartesian_to_spherical_jacobian.get(B + 1, 0) *
+          spatial_metric.get(0, 0);
+
+      for (size_t i = 1; i < 3; ++i) {
+        null_metric->get(A + 2, B + 2) +=
+            cartesian_to_spherical_jacobian.get(A + 1, i) *
+            cartesian_to_spherical_jacobian.get(B + 1, i) *
+            spatial_metric.get(i, i);
+      }
+
+      for (size_t i = 0; i < 3; ++i) {
+        for (size_t j = i + 1; j < 3; ++j) {
+          // the off-diagonal pieces must be explicitly symmetrized
+          null_metric->get(A + 2, B + 2) +=
+              (cartesian_to_spherical_jacobian.get(A + 1, i) *
+                   cartesian_to_spherical_jacobian.get(B + 1, j) +
+               cartesian_to_spherical_jacobian.get(A + 1, j) *
+                   cartesian_to_spherical_jacobian.get(B + 1, i)) *
+              spatial_metric.get(i, j);
+        }
+      }
+    }
+  }
+
+  // symmetrize
+  for (size_t a = 0; a < 4; ++a) {
+    for (size_t b = 0; b < a; ++b) {
+      null_metric->get(a, b) = null_metric->get(b, a);
+      // du_null_metric->get(a, b) = du_null_metric->get(b, a);
+    }
+  }
 }
 
 void deriv_cartesian_metric_lapse_shift_from_nodes(
