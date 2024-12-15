@@ -10,6 +10,7 @@
 #include "DataStructures/SpinWeighted.hpp"
 #include "DataStructures/Tags/TempTensor.hpp"
 #include "DataStructures/Tensor/EagerMath/Magnitude.hpp"
+#include "DataStructures/Tensor/EagerMath/RaiseOrLowerIndex.hpp"
 #include "DataStructures/Tensor/Tensor.hpp"
 #include "DataStructures/Tensor/TypeAliases.hpp"
 #include "DataStructures/Variables.hpp"
@@ -459,18 +460,40 @@ void spacelike_null_metric_and_derivative(
     // const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
     // const tnsr::aa<DataVector, 3>& spacetime_metric
 ) {
-  // u lambda A
+  // for null_metric u lambda A
   const size_t size = get<0, 0>(spatial_metric).size();
   set_number_of_grid_points(null_metric, size);
   set_number_of_grid_points(du_null_metric, size);
 
-  // dx/dr   dy/dr  dz/dr
-  // get<0, 0>(cartesian_to_spherical_jacobian)
-  // get<0, 1>(cartesian_to_spherical_jacobian)
-  // get<0, 2>(cartesian_to_spherical_jacobian)
+  tnsr::I<DataVector, 3> dxdr{size};
+  tnsr::i<DataVector, 3> dxdr_lower_with_metric{size};
+  dxdr.get(0) = get<0, 0>(cartesian_to_spherical_jacobian);
+  dxdr.get(1) = get<0, 1>(cartesian_to_spherical_jacobian);
+  dxdr.get(2) = get<0, 2>(cartesian_to_spherical_jacobian);
 
-  // get<0, 0>(*null_metric) = ;
+  raise_or_lower_index(make_not_null(&dxdr_lower_with_metric), dxdr,
+                       spatial_metric);
+
+  {
+    Scalar<DataVector> temp_variable;
+    dot_product(make_not_null(&temp_variable), dxdr, dxdr, spatial_metric);
+    //  uu
+    get<0, 0>(*null_metric) = get(temp_variable);
+  }
+
+  // u lambda
   get<0, 1>(*null_metric) = -1.0;
+
+  // u A
+  for (size_t A = 0; A < 2; ++A) {
+    null_metric->get(0, A + 2) = cartesian_to_spherical_jacobian.get(A + 1, 0) *
+                                 dxdr_lower_with_metric.get(0);
+    for (size_t i = 1; i < 3; ++i) {
+      null_metric->get(0, A + 2) +=
+          cartesian_to_spherical_jacobian.get(A + 1, i) *
+          dxdr_lower_with_metric.get(i);
+    }
+  }
 }
 
 void deriv_cartesian_metric_lapse_shift_from_nodes(
