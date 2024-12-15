@@ -1020,6 +1020,26 @@ void null_vector_l_and_derivatives(
         du_denominator;
   }
 }
+void spacelike_dlambda_null_metric_and_inverse(
+    gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*>
+        dlambda_null_metric,
+    gsl::not_null<tnsr::AA<DataVector, 3, Frame::RadialNull>*>
+        dlambda_inverse_null_metric,
+    const AngulariCartesianA& angular_d_null_l,
+    const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
+    const tnsr::iaa<DataVector, 3>& phi,
+    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
+    const tnsr::A<DataVector, 3>& du_null_l,
+    const tnsr::AA<DataVector, 3, Frame::RadialNull>& inverse_null_metric,
+    const tnsr::A<DataVector, 3>& null_l,
+    const tnsr::aa<DataVector, 3>& spacetime_metric) {
+  // first, the (down-index) null metric
+  const size_t size = get<0, 0>(spacetime_metric).size();
+  set_number_of_grid_points(dlambda_null_metric, size);
+  set_number_of_grid_points(dlambda_inverse_null_metric, size);
+
+  // for null_metric u lambda A
+}
 
 void dlambda_null_metric_and_inverse(
     const gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*>

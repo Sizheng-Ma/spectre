@@ -354,6 +354,20 @@ void dlambda_null_metric_and_inverse(
     const tnsr::A<DataVector, 3>& null_l,
     const tnsr::aa<DataVector, 3>& spacetime_metric);
 
+void spacelike_dlambda_null_metric_and_inverse(
+    gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*>
+        dlambda_null_metric,
+    gsl::not_null<tnsr::AA<DataVector, 3, Frame::RadialNull>*>
+        dlambda_inverse_null_metric,
+    const AngulariCartesianA& angular_d_null_l,
+    const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
+    const tnsr::iaa<DataVector, 3>& phi,
+    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
+    const tnsr::A<DataVector, 3>& du_null_l,
+    const tnsr::AA<DataVector, 3, Frame::RadialNull>& inverse_null_metric,
+    const tnsr::A<DataVector, 3>& null_l,
+    const tnsr::aa<DataVector, 3>& spacetime_metric);
+
 /*!
  * \brief Computes the Bondi radius of the worldtube.
  *
@@ -773,6 +787,11 @@ void create_bondi_boundary_data_spacelike_char(
   auto& dlambda_inverse_null_metric = get<Tags::detail::DLambda<
       gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>>(
       *computation_variables);
+  //   spacelike_dlambda_null_metric_and_inverse(
+  //       make_not_null(&dlambda_null_metric),
+  //       make_not_null(&dlambda_inverse_null_metric), angular_d_null_l,
+  //       cartesian_to_spherical_jacobian, phi, dt_spacetime_metric, du_null_l,
+  //       inverse_null_metric, null_l, spacetime_metric);
 }
 
 // the common step between the modal input and the Generalized harmonic input
