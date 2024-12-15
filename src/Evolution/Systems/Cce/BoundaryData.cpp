@@ -456,7 +456,9 @@ void spacelike_null_metric_and_derivative(
     const gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*>
         null_metric,
     const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
-    const tnsr::ii<DataVector, 3>& spatial_metric
+    const tnsr::ii<DataVector, 3>& spatial_metric,
+    const tnsr::ii<DataVector, 3>& dr_spatial_metric,
+    const double extraction_radius
     // const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
     // const tnsr::aa<DataVector, 3>& spacetime_metric
 ) {
@@ -479,25 +481,52 @@ void spacelike_null_metric_and_derivative(
     dot_product(make_not_null(&temp_variable), dxdr, dxdr, spatial_metric);
     //  uu
     get<0, 0>(*null_metric) = get(temp_variable);
+    dot_product(make_not_null(&temp_variable), dxdr, dxdr, dr_spatial_metric);
+    get<0, 0>(*du_null_metric) = -get(temp_variable);
   }
 
   // u lambda
   get<0, 1>(*null_metric) = -1.0;
+  get<0, 1>(*du_null_metric) = 0.0;
 
   // u A
   for (size_t A = 0; A < 2; ++A) {
-    null_metric->get(0, A + 2) = cartesian_to_spherical_jacobian.get(A + 1, 0) *
-                                 dxdr_lower_with_metric.get(0);
+    null_metric->get(0, A + 2) =
+        -cartesian_to_spherical_jacobian.get(A + 1, 0) *
+        dxdr_lower_with_metric.get(0);
     for (size_t i = 1; i < 3; ++i) {
       null_metric->get(0, A + 2) +=
-          cartesian_to_spherical_jacobian.get(A + 1, i) *
+          -cartesian_to_spherical_jacobian.get(A + 1, i) *
           dxdr_lower_with_metric.get(i);
+    }
+  }
+  {
+    tnsr::ii<DataVector, 3> metric_temp{size};
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = i; j < 3; ++j) {
+        metric_temp.get(i, j) = dr_spatial_metric.get(i, j) +
+                                spatial_metric.get(i, j) / extraction_radius;
+      }
+    }
+    tnsr::i<DataVector, 3> dxdr_lower_with_temp_metric{size};
+    raise_or_lower_index(make_not_null(&dxdr_lower_with_temp_metric), dxdr,
+                         metric_temp);
+    for (size_t A = 0; A < 2; ++A) {
+      du_null_metric->get(0, A + 2) =
+          cartesian_to_spherical_jacobian.get(A + 1, 0) *
+          dxdr_lower_with_temp_metric.get(0);
+      for (size_t i = 1; i < 3; ++i) {
+        du_null_metric->get(0, A + 2) +=
+            cartesian_to_spherical_jacobian.get(A + 1, i) *
+            dxdr_lower_with_temp_metric.get(i);
+      }
     }
   }
 
   // lambda lambda & lambda A
   for (size_t i = 0; i < 3; ++i) {
     null_metric->get(1, i + 1) = 0.0;
+    du_null_metric->get(1, i + 1) = 0.0;
   }
 
   // AB
@@ -529,11 +558,50 @@ void spacelike_null_metric_and_derivative(
     }
   }
 
+  {
+    tnsr::ii<DataVector, 3> metric_temp{size};
+    for (size_t i = 0; i < 3; ++i) {
+      for (size_t j = i; j < 3; ++j) {
+        metric_temp.get(i, j) =
+            dr_spatial_metric.get(i, j) +
+            2.0 * spatial_metric.get(i, j) / extraction_radius;
+      }
+    }
+
+    for (size_t A = 0; A < 2; ++A) {
+      for (size_t B = A; B < 2; ++B) {
+        du_null_metric->get(A + 2, B + 2) =
+            cartesian_to_spherical_jacobian.get(A + 1, 0) *
+            cartesian_to_spherical_jacobian.get(B + 1, 0) *
+            metric_temp.get(0, 0);
+
+        for (size_t i = 1; i < 3; ++i) {
+          du_null_metric->get(A + 2, B + 2) +=
+              cartesian_to_spherical_jacobian.get(A + 1, i) *
+              cartesian_to_spherical_jacobian.get(B + 1, i) *
+              metric_temp.get(i, i);
+        }
+
+        for (size_t i = 0; i < 3; ++i) {
+          for (size_t j = i + 1; j < 3; ++j) {
+            // the off-diagonal pieces must be explicitly symmetrized
+            du_null_metric->get(A + 2, B + 2) +=
+                (cartesian_to_spherical_jacobian.get(A + 1, i) *
+                     cartesian_to_spherical_jacobian.get(B + 1, j) +
+                 cartesian_to_spherical_jacobian.get(A + 1, j) *
+                     cartesian_to_spherical_jacobian.get(B + 1, i)) *
+                metric_temp.get(i, j);
+          }
+        }
+      }
+    }
+  }
+
   // symmetrize
   for (size_t a = 0; a < 4; ++a) {
     for (size_t b = 0; b < a; ++b) {
       null_metric->get(a, b) = null_metric->get(b, a);
-      // du_null_metric->get(a, b) = du_null_metric->get(b, a);
+      du_null_metric->get(a, b) = du_null_metric->get(b, a);
     }
   }
 }

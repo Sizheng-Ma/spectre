@@ -228,7 +228,9 @@ void spacelike_null_metric_and_derivative(
     gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*> du_null_metric,
     gsl::not_null<tnsr::aa<DataVector, 3, Frame::RadialNull>*> null_metric,
     const SphericaliCartesianJ& cartesian_to_spherical_jacobian,
-    const tnsr::ii<DataVector, 3>& spatial_metric
+    const tnsr::ii<DataVector, 3>& spatial_metric,
+    const tnsr::ii<DataVector, 3>& dr_spatial_metric,
+    const double extraction_radius
     // const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
     // const tnsr::aa<DataVector, 3>& spacetime_metric
 );
@@ -694,10 +696,15 @@ void create_bondi_boundary_data_spacelike_char(
   auto& du_null_metric = get<
       ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>>(
       *computation_variables);
-  //   spacelike_null_metric_and_derivative(
-  //       make_not_null(&du_null_metric), make_not_null(&null_metric),
-  //       cartesian_to_spherical_jacobian, dt_spacetime_metric,
-  //       spacetime_metric);
+  const auto& spatial_metric =
+      get<gr::Tags::SpatialMetric<DataVector, 3>>(*computation_variables);
+  const auto& dr_spatial_metric =
+      get<::Tags::dr<gr::Tags::SpatialMetric<DataVector, 3>>>(
+          *computation_variables);
+  spacelike_null_metric_and_derivative(
+      make_not_null(&du_null_metric), make_not_null(&null_metric),
+      cartesian_to_spherical_jacobian, spatial_metric, dr_spatial_metric,
+      extraction_radius);
 }
 
 // the common step between the modal input and the Generalized harmonic input
