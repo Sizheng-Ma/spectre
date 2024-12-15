@@ -747,6 +747,32 @@ void create_bondi_boundary_data_spacelike_char(
       }
     }
   }
+
+  auto& angular_d_null_l =
+      get<Tags::detail::AngularDNullL>(*computation_variables);
+  auto& buffer_for_derivatives =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                   std::integral_constant<int, 0>>>(
+          *derivative_buffers));
+  auto& eth_buffer =
+      get(get<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                                   std::integral_constant<int, 1>>>(
+          *derivative_buffers));
+  for (size_t a = 0; a < 4; ++a) {
+    buffer_for_derivatives.data() =
+        std::complex<double>(1.0, 0.0) * null_l.get(a);
+    Spectral::Swsh::angular_derivatives<tmpl::list<Spectral::Swsh::Tags::Eth>>(
+        l_max, 1, make_not_null(&eth_buffer), buffer_for_derivatives);
+    angular_d_null_l.get(0, a) = -real(eth_buffer.data());
+    angular_d_null_l.get(1, a) = -imag(eth_buffer.data());
+  }
+
+  auto& dlambda_null_metric = get<Tags::detail::DLambda<
+      gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>>(
+      *computation_variables);
+  auto& dlambda_inverse_null_metric = get<Tags::detail::DLambda<
+      gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>>(
+      *computation_variables);
 }
 
 // the common step between the modal input and the Generalized harmonic input
