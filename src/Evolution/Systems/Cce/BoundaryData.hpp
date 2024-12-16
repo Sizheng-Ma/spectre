@@ -792,6 +792,81 @@ void create_bondi_boundary_data_spacelike_char(
       make_not_null(&dlambda_inverse_null_metric), angular_d_null_l,
       cartesian_to_spherical_jacobian, phi, dt_spacetime_metric, du_null_l,
       inverse_null_metric, null_l, spacetime_metric);
+
+  auto& r = get<Tags::BoundaryValue<Tags::BondiR>>(*bondi_boundary_data);
+  bondi_r(make_not_null(&r), null_metric);
+
+  auto& d_r =
+      get<::Tags::spacetime_deriv<Tags::detail::RealBondiR, tmpl::size_t<3>,
+                                  Frame::RadialNull>>(*computation_variables);
+  d_bondi_r(make_not_null(&d_r), r, dlambda_null_metric, du_null_metric,
+            inverse_null_metric, l_max);
+  get(get<Tags::BoundaryValue<Tags::DuRDividedByR>>(*bondi_boundary_data))
+      .data() = std::complex<double>(1.0, 0.0) * get<0>(d_r) / get(r).data();
+  get(get<Tags::BoundaryValue<Tags::Du<Tags::BondiR>>>(*bondi_boundary_data))
+      .data() = std::complex<double>(1.0, 0.0) * get<0>(d_r);
+
+  auto& down_dyad = get<Tags::detail::DownDyad>(dyad_variables);
+  auto& up_dyad = get<Tags::detail::UpDyad>(dyad_variables);
+  dyads(make_not_null(&down_dyad), make_not_null(&up_dyad));
+
+  beta_worldtube_data(make_not_null(&get<Tags::BoundaryValue<Tags::BondiBeta>>(
+                          *bondi_boundary_data)),
+                      d_r);
+
+  auto& bondi_u = get<Tags::BoundaryValue<Tags::BondiU>>(*bondi_boundary_data);
+  bondi_u_worldtube_data(make_not_null(&bondi_u), down_dyad, d_r,
+                         inverse_null_metric);
+
+  bondi_w_worldtube_data(make_not_null(&get<Tags::BoundaryValue<Tags::BondiW>>(
+                             *bondi_boundary_data)),
+                         d_r, inverse_null_metric, r);
+
+  auto& bondi_j = get<Tags::BoundaryValue<Tags::BondiJ>>(*bondi_boundary_data);
+  bondi_j_worldtube_data(make_not_null(&bondi_j), null_metric, r, up_dyad);
+
+  auto& dr_j =
+      get<Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>>(*bondi_boundary_data);
+  auto& denominator_buffer =
+      get<::Tags::SpinWeighted<::Tags::TempScalar<0, ComplexDataVector>,
+                               std::integral_constant<int, 0>>>(
+          *derivative_buffers);
+  dr_bondi_j(make_not_null(&get<Tags::BoundaryValue<Tags::Dr<Tags::BondiJ>>>(
+                 *bondi_boundary_data)),
+             make_not_null(&denominator_buffer), dlambda_null_metric, d_r,
+             bondi_j, r, up_dyad);
+
+  auto& d2lambda_r = get<
+      Tags::detail::DLambda<Tags::detail::DLambda<Tags::detail::RealBondiR>>>(
+      *computation_variables);
+  d2lambda_bondi_r(make_not_null(&d2lambda_r), d_r, dr_j, bondi_j, r);
+
+  auto& angular_d_dlambda_r =
+      get<::Tags::deriv<Tags::detail::DLambda<Tags::detail::RealBondiR>,
+                        tmpl::size_t<2>, Frame::RadialNull>>(
+          *computation_variables);
+  buffer_for_derivatives.data() = std::complex<double>(1.0, 0.0) * get<1>(d_r);
+  Spectral::Swsh::angular_derivatives<tmpl::list<Spectral::Swsh::Tags::Eth>>(
+      l_max, 1, make_not_null(&eth_buffer), buffer_for_derivatives);
+  angular_d_dlambda_r.get(0) = -real(eth_buffer.data());
+  angular_d_dlambda_r.get(1) = -imag(eth_buffer.data());
+
+  bondi_q_worldtube_data(
+      make_not_null(
+          &get<Tags::BoundaryValue<Tags::BondiQ>>(*bondi_boundary_data)),
+      make_not_null(&get<Tags::BoundaryValue<Tags::Dr<Tags::BondiU>>>(
+          *bondi_boundary_data)),
+      d2lambda_r, dlambda_inverse_null_metric, d_r, down_dyad,
+      angular_d_dlambda_r, inverse_null_metric, bondi_j, r, bondi_u);
+
+  bondi_h_worldtube_data(make_not_null(&get<Tags::BoundaryValue<Tags::BondiH>>(
+                             *bondi_boundary_data)),
+                         d_r, bondi_j, du_null_metric, r, up_dyad);
+
+  du_j_worldtube_data(
+      make_not_null(&get<Tags::BoundaryValue<Tags::Du<Tags::BondiJ>>>(
+          *bondi_boundary_data)),
+      d_r, bondi_j, du_null_metric, dlambda_null_metric, r, up_dyad);
 }
 
 // the common step between the modal input and the Generalized harmonic input
