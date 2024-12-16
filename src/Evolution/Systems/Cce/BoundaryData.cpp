@@ -1038,6 +1038,18 @@ void spacelike_dlambda_null_metric_and_inverse(
   set_number_of_grid_points(dlambda_null_metric, size);
   set_number_of_grid_points(dlambda_inverse_null_metric, size);
 
+  // partial_lambda g_mu_nu
+  tnsr::aa<DataVector, 3> d_lambda_g_mu_nu{size};
+  for (size_t a = 0; a < 4; ++a) {
+    for (size_t b = a; b < 4; ++b) {
+      d_lambda_g_mu_nu.get(a, b) =
+          get<0>(null_l) * (dt_spacetime_metric).get(a, b);
+      for (size_t i = 0; i < 3; ++i) {
+        d_lambda_g_mu_nu.get(a, b) += null_l.get(i + 1) * phi.get(i, a, b);
+      }
+    }
+  }
+
   // for null_metric u lambda A
 }
 
