@@ -1066,6 +1066,32 @@ void spacelike_dlambda_null_metric_and_inverse(
                 spacetime_metric);
     get<0, 0>(*dlambda_null_metric) -= 2.0 * get(temp_variable);
   }
+
+  {
+    for (size_t A = 0; A < 2; ++A) {
+      tnsr::A<DataVector, 3> dxdA{size};
+      dxdA.get(0) = 0 * cartesian_to_spherical_jacobian.get(A + 1, 0);
+      dxdA.get(1) = cartesian_to_spherical_jacobian.get(A + 1, 0);
+      dxdA.get(2) = cartesian_to_spherical_jacobian.get(A + 1, 1);
+      dxdA.get(3) = cartesian_to_spherical_jacobian.get(A + 1, 2);
+
+      tnsr::A<DataVector, 3> dldA{size};
+      for (size_t kk = 0; kk < 4; ++kk) {
+        dldA.get(kk) = angular_d_null_l.get(A, kk);
+      }
+
+      Scalar<DataVector> temp_variable;
+      dot_product(make_not_null(&temp_variable), dldA, dxdr, spacetime_metric);
+      (*dlambda_null_metric).get(0, A + 2) = -get(temp_variable);
+
+      dot_product(make_not_null(&temp_variable), du_null_l, dxdA,
+                  spacetime_metric);
+      (*dlambda_null_metric).get(0, A + 2) += get(temp_variable);
+
+      dot_product(make_not_null(&temp_variable), dxdr, dxdA, d_lambda_g_mu_nu);
+      (*dlambda_null_metric).get(0, A + 2) -= get(temp_variable);
+    }
+  }
 }
 
 void dlambda_null_metric_and_inverse(
