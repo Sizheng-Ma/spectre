@@ -787,11 +787,11 @@ void create_bondi_boundary_data_spacelike_char(
   auto& dlambda_inverse_null_metric = get<Tags::detail::DLambda<
       gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>>(
       *computation_variables);
-  //   spacelike_dlambda_null_metric_and_inverse(
-  //       make_not_null(&dlambda_null_metric),
-  //       make_not_null(&dlambda_inverse_null_metric), angular_d_null_l,
-  //       cartesian_to_spherical_jacobian, phi, dt_spacetime_metric, du_null_l,
-  //       inverse_null_metric, null_l, spacetime_metric);
+  spacelike_dlambda_null_metric_and_inverse(
+      make_not_null(&dlambda_null_metric),
+      make_not_null(&dlambda_inverse_null_metric), angular_d_null_l,
+      cartesian_to_spherical_jacobian, phi, dt_spacetime_metric, du_null_l,
+      inverse_null_metric, null_l, spacetime_metric);
 }
 
 // the common step between the modal input and the Generalized harmonic input
