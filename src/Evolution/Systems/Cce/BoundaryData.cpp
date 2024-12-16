@@ -489,7 +489,7 @@ void spacelike_null_metric_and_derivative(
   get<0, 1>(*null_metric) = -1.0;
   get<0, 1>(*du_null_metric) = 0.0;
 
-  // u A
+  // g_u_A
   for (size_t A = 0; A < 2; ++A) {
     null_metric->get(0, A + 2) =
         -cartesian_to_spherical_jacobian.get(A + 1, 0) *
@@ -500,7 +500,7 @@ void spacelike_null_metric_and_derivative(
           dxdr_lower_with_metric.get(i);
     }
   }
-  {
+  {  // du_g_u_A
     tnsr::ii<DataVector, 3> metric_temp{size};
     for (size_t i = 0; i < 3; ++i) {
       for (size_t j = i; j < 3; ++j) {
@@ -558,13 +558,13 @@ void spacelike_null_metric_and_derivative(
     }
   }
 
-  {
+  {  // du g_AB
     tnsr::ii<DataVector, 3> metric_temp{size};
     for (size_t i = 0; i < 3; ++i) {
       for (size_t j = i; j < 3; ++j) {
         metric_temp.get(i, j) =
-            dr_spatial_metric.get(i, j) +
-            2.0 * spatial_metric.get(i, j) / extraction_radius;
+            -(dr_spatial_metric.get(i, j) +
+              2.0 * spatial_metric.get(i, j) / extraction_radius);
       }
     }
 
