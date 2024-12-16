@@ -1130,6 +1130,53 @@ void spacelike_dlambda_null_metric_and_inverse(
       }
     }
   }
+
+  // Inverse null metric
+  for (size_t a = 0; a < 4; ++a) {
+    for (size_t b = 0; b < 4; ++b) {
+      dlambda_inverse_null_metric->get(a, b) = 0.0;
+    }
+  }
+  for (size_t A = 0; A < 2; ++A) {
+    for (size_t B = A; B < 2; ++B) {
+      for (size_t C = 0; C < 2; ++C) {
+        for (size_t D = 0; D < 2; ++D) {
+          dlambda_inverse_null_metric->get(A + 2, B + 2) -=
+              inverse_null_metric.get(A + 2, C + 2) *
+              inverse_null_metric.get(B + 2, D + 2) *
+              dlambda_null_metric->get(C + 2, D + 2);
+        }
+      }
+    }
+  }
+
+  for (size_t A = 0; A < 2; ++A) {
+    for (size_t B = 0; B < 2; ++B) {
+      dlambda_inverse_null_metric->get(1, A + 2) +=
+          inverse_null_metric.get(A + 2, B + 2) *
+          dlambda_null_metric->get(0, B + 2);
+      for (size_t C = 0; C < 2; ++C) {
+        dlambda_inverse_null_metric->get(1, A + 2) -=
+            inverse_null_metric.get(A + 2, B + 2) *
+            inverse_null_metric.get(1, C + 2) *
+            dlambda_null_metric->get(C + 2, B + 2);
+      }
+    }
+  }
+
+  get<1, 1>(*dlambda_inverse_null_metric) -= get<0, 0>(*dlambda_null_metric);
+
+  for (size_t A = 0; A < 2; ++A) {
+    get<1, 1>(*dlambda_inverse_null_metric) +=
+        2.0 * inverse_null_metric.get(1, A + 2) *
+        dlambda_null_metric->get(0, A + 2);
+    for (size_t B = 0; B < 2; ++B) {
+      get<1, 1>(*dlambda_inverse_null_metric) -=
+          inverse_null_metric.get(1, A + 2) *
+          inverse_null_metric.get(1, B + 2) *
+          dlambda_null_metric->get(A + 2, B + 2);
+    }
+  }
 }
 
 void dlambda_null_metric_and_inverse(
