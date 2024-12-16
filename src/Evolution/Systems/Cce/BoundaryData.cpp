@@ -1051,6 +1051,21 @@ void spacelike_dlambda_null_metric_and_inverse(
   }
 
   // for null_metric u lambda A
+  tnsr::A<DataVector, 3> dxdr{size};
+  dxdr.get(0) = 0 * get<0, 0>(cartesian_to_spherical_jacobian);
+  dxdr.get(1) = get<0, 0>(cartesian_to_spherical_jacobian);
+  dxdr.get(2) = get<0, 1>(cartesian_to_spherical_jacobian);
+  dxdr.get(3) = get<0, 2>(cartesian_to_spherical_jacobian);
+
+  {
+    // uu
+    Scalar<DataVector> temp_variable;
+    dot_product(make_not_null(&temp_variable), dxdr, dxdr, d_lambda_g_mu_nu);
+    get<0, 0>(*dlambda_null_metric) = get(temp_variable);
+    dot_product(make_not_null(&temp_variable), dxdr, du_null_l,
+                spacetime_metric);
+    get<0, 0>(*dlambda_null_metric) -= 2.0 * get(temp_variable);
+  }
 }
 
 void dlambda_null_metric_and_inverse(
