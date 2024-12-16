@@ -1067,7 +1067,7 @@ void spacelike_dlambda_null_metric_and_inverse(
     get<0, 0>(*dlambda_null_metric) -= 2.0 * get(temp_variable);
   }
 
-  {
+  {  // uA
     for (size_t A = 0; A < 2; ++A) {
       tnsr::A<DataVector, 3> dxdA{size};
       dxdA.get(0) = 0 * cartesian_to_spherical_jacobian.get(A + 1, 0);
@@ -1090,6 +1090,44 @@ void spacelike_dlambda_null_metric_and_inverse(
 
       dot_product(make_not_null(&temp_variable), dxdr, dxdA, d_lambda_g_mu_nu);
       (*dlambda_null_metric).get(0, A + 2) -= get(temp_variable);
+    }
+  }
+
+  {  // lambda x
+    get<0, 1>(*dlambda_null_metric) = 0.0;
+    for (size_t a = 1; a < 4; ++a) {
+      dlambda_null_metric->get(1, a) = 0.0;
+    }
+  }
+
+  {  // AB
+    for (size_t A = 0; A < 2; ++A) {
+      tnsr::A<DataVector, 3> dxdA{size};
+      dxdA.get(0) = 0 * cartesian_to_spherical_jacobian.get(A + 1, 0);
+      dxdA.get(1) = cartesian_to_spherical_jacobian.get(A + 1, 0);
+      dxdA.get(2) = cartesian_to_spherical_jacobian.get(A + 1, 1);
+      dxdA.get(3) = cartesian_to_spherical_jacobian.get(A + 1, 2);
+      for (size_t B = A; B < 2; ++B) {
+        tnsr::A<DataVector, 3> dldB{size};
+        for (size_t kk = 0; kk < 4; ++kk) {
+          dldB.get(kk) = angular_d_null_l.get(B, kk);
+        }
+
+        tnsr::A<DataVector, 3> dxdB{size};
+        dxdB.get(0) = 0 * cartesian_to_spherical_jacobian.get(B + 1, 0);
+        dxdB.get(1) = cartesian_to_spherical_jacobian.get(B + 1, 0);
+        dxdB.get(2) = cartesian_to_spherical_jacobian.get(B + 1, 1);
+        dxdB.get(3) = cartesian_to_spherical_jacobian.get(B + 1, 2);
+
+        Scalar<DataVector> temp_variable;
+        dot_product(make_not_null(&temp_variable), dxdA, dldB,
+                    spacetime_metric);
+        (*dlambda_null_metric).get(A + 2, B + 2) = 2.0 * get(temp_variable);
+
+        dot_product(make_not_null(&temp_variable), dxdA, dxdB,
+                    d_lambda_g_mu_nu);
+        (*dlambda_null_metric).get(A + 2, B + 2) += get(temp_variable);
+      }
     }
   }
 }
