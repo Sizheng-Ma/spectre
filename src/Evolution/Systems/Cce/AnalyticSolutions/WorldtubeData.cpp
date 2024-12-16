@@ -37,13 +37,11 @@ void WorldtubeData::variables_impl(
       Spectral::Swsh::ComplexRepresentation::Interleaved>(output_l_max);
   for (const auto collocation_point : collocation) {
     get<0>(*cartesian_coordinates)[collocation_point.offset] =
-        extraction_radius_ * cos(collocation_point.phi) *
-        sin(collocation_point.theta);
+        cos(collocation_point.phi) * sin(collocation_point.theta);
     get<1>(*cartesian_coordinates)[collocation_point.offset] =
-        extraction_radius_ * sin(collocation_point.phi) *
-        sin(collocation_point.theta);
+        sin(collocation_point.phi) * sin(collocation_point.theta);
     get<2>(*cartesian_coordinates)[collocation_point.offset] =
-        extraction_radius_ * cos(collocation_point.theta);
+        cos(collocation_point.theta);
   }
 }
 
@@ -243,7 +241,6 @@ void WorldtubeData::variables_impl(
 }
 
 void WorldtubeData::pup(PUP::er& p) {
-  p | extraction_radius_;
   if (p.isUnpacking()) {
     intermediate_cache_ = IntermediateCacheTuple{};
   }

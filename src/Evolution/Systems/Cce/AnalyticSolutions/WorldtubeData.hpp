@@ -71,9 +71,7 @@ class TeukolskyWave;
  * calculations.
  */
 struct WorldtubeData : public PUP::able {
-  using creatable_classes =
-      tmpl::list<BouncingBlackHole, GaugeWave, LinearizedBondiSachs,
-                 RobinsonTrautman, RotatingSchwarzschild, TeukolskyWave>;
+  using creatable_classes = tmpl::list<BouncingBlackHole>;
 
   /// The set of available tags provided by the analytic solution
   using tags = tmpl::list<
@@ -96,8 +94,7 @@ struct WorldtubeData : public PUP::able {
   // NOLINTNEXTLINE(modernize-use-equals-default)
   WorldtubeData() {}
 
-  explicit WorldtubeData(const double extraction_radius)
-      : extraction_radius_{extraction_radius} {}
+  explicit WorldtubeData(const double extraction_radius) {}
 
   explicit WorldtubeData(CkMigrateMessage* msg) : PUP::able(msg) {}
 
@@ -272,7 +269,6 @@ struct WorldtubeData : public PUP::able {
 
   // NOLINTNEXTLINE(spectre-mutable)
   mutable IntermediateCacheTuple intermediate_cache_;
-  double extraction_radius_ = std::numeric_limits<double>::quiet_NaN();
 };
 }  // namespace Solutions
 }  // namespace Cce
