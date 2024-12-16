@@ -29,14 +29,12 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
       get<gr::Tags::SpacetimeMetric<DataVector, 3>>(boundary_tuple);
   const auto& pi = get<gh::Tags::Pi<DataVector, 3>>(boundary_tuple);
   const auto& phi = get<gh::Tags::Phi<DataVector, 3>>(boundary_tuple);
-  create_bondi_boundary_data(boundary_data_variables, phi, pi, spacetime_metric,
-                             extraction_radius_, l_max_);
+  //   create_bondi_boundary_data(boundary_data_variables, phi, pi,
+  //   spacetime_metric,
+  //                              extraction_radius_, l_max_);
 
-  Variables<Tags::characteristic_worldtube_boundary_tags<Tags::BoundaryValue>>
-      boundary_data_variables_test;
-  create_bondi_boundary_data_spacelike_char(
-      make_not_null(&boundary_data_variables_test), phi, pi, spacetime_metric,
-      extraction_radius_, l_max_);
+  create_bondi_boundary_data_spacelike_char(boundary_data_variables, phi, pi,
+                                            spacetime_metric, -time, l_max_);
   return true;
 }
 
