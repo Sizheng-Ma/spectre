@@ -86,9 +86,8 @@ Cce:
   AnalyticSolution:
     BouncingBlackHole:
       Period: &period 40.0
-      ExtractionRadius: *radius
       Mass: 1.0
-      Amplitude: &amp 0.0 
+      Amplitude: &amp 0.0
 
   Filtering:
     RadialFilterHalfPower: 24

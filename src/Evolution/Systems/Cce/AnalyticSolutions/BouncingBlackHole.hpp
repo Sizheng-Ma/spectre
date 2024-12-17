@@ -67,7 +67,7 @@ struct BouncingBlackHole : public WorldtubeData {
       "Analytic solution in which a static black hole is placed in an "
       "oscillating coordinate system"};
 
-  using options = tmpl::list<Amplitude, ExtractionRadius, Mass, Period>;
+  using options = tmpl::list<Amplitude, Mass, Period>;
 
   WRAPPED_PUPable_decl_template(BouncingBlackHole);  // NOLINT
 
@@ -77,8 +77,7 @@ struct BouncingBlackHole : public WorldtubeData {
   // NOLINTNEXTLINE(modernize-use-equals-default)
   BouncingBlackHole() {}
 
-  BouncingBlackHole(double amplitude, double extraction_radius, double mass,
-                    double period);
+  BouncingBlackHole(double amplitude, double mass, double period);
 
   std::unique_ptr<WorldtubeData> get_clone() const override;
 

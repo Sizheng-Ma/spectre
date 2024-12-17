@@ -94,8 +94,6 @@ struct WorldtubeData : public PUP::able {
   // NOLINTNEXTLINE(modernize-use-equals-default)
   WorldtubeData() {}
 
-  explicit WorldtubeData(const double extraction_radius) {}
-
   explicit WorldtubeData(CkMigrateMessage* msg) : PUP::able(msg) {}
 
   ~WorldtubeData() override = default;

@@ -20,10 +20,9 @@
 
 namespace Cce::Solutions {
 
-BouncingBlackHole::BouncingBlackHole(const double amplitude,
-                                     const double extraction_radius,
-                                     const double mass, const double period)
-    : WorldtubeData(extraction_radius),
+BouncingBlackHole::BouncingBlackHole(const double amplitude, const double mass,
+                                     const double period)
+    : WorldtubeData(),
       amplitude_{amplitude},
       mass_{mass},
       frequency_{2.0 * M_PI / period} {}
