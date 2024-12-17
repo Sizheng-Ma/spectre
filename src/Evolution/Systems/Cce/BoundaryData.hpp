@@ -287,11 +287,9 @@ void worldtube_normal_and_derivatives(
 
 void spacelike_worldtube_normal_and_derivatives(
     gsl::not_null<tnsr::I<DataVector, 3>*> worldtube_normal,
-    gsl::not_null<tnsr::I<DataVector, 3>*> dt_worldtube_normal,
     gsl::not_null<tnsr::I<DataVector, 3>*> dr_worldtube_normal,
     const Scalar<DataVector>& cos_phi, const Scalar<DataVector>& cos_theta,
     const tnsr::aa<DataVector, 3>& spacetime_metric,
-    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
     const tnsr::ii<DataVector, 3>& dr_spacetial_metric,
     const Scalar<DataVector>& sin_phi, const Scalar<DataVector>& sin_theta,
     const tnsr::II<DataVector, 3>& inverse_spatial_metric);
@@ -717,7 +715,7 @@ void create_bondi_boundary_data_spacelike_char(
   spacelike_null_metric_and_derivative(
       make_not_null(&du_null_metric), make_not_null(&null_metric),
       cartesian_to_spherical_jacobian, spatial_metric, dr_spatial_metric,
-      extraction_radius);
+      extraction_radius);  // tested
 
   auto& inverse_null_metric =
       get<gr::Tags::InverseSpacetimeMetric<DataVector, 3, Frame::RadialNull>>(
@@ -759,7 +757,7 @@ void create_bondi_boundary_data_spacelike_char(
         inverse_null_metric.get(i, j) = scaled_inverse_null_metric.get(i, j);
       }
     }
-  }
+  }  // tested
 
   auto& angular_d_null_l =
       get<Tags::detail::AngularDNullL>(*computation_variables);
@@ -778,7 +776,7 @@ void create_bondi_boundary_data_spacelike_char(
         l_max, 1, make_not_null(&eth_buffer), buffer_for_derivatives);
     angular_d_null_l.get(0, a) = -real(eth_buffer.data());
     angular_d_null_l.get(1, a) = -imag(eth_buffer.data());
-  }
+  }  // tested
 
   auto& dlambda_null_metric = get<Tags::detail::DLambda<
       gr::Tags::SpacetimeMetric<DataVector, 3, Frame::RadialNull>>>(
@@ -1269,8 +1267,7 @@ void create_bondi_boundary_data_spacelike_char(
       ::Tags::dt<gr::Tags::Lapse<DataVector>>,
       ::Tags::dr<gr::Tags::Lapse<DataVector>>,
       ::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>,
-      Tags::detail::WorldtubeNormal, ::Tags::dt<Tags::detail::WorldtubeNormal>,
-      ::Tags::dr<Tags::detail::WorldtubeNormal>,
+      Tags::detail::WorldtubeNormal, ::Tags::dr<Tags::detail::WorldtubeNormal>,
       gr::Tags::SpacetimeNormalVector<DataVector, 3>,
       ::Tags::dr<gr::Tags::SpacetimeNormalVector<DataVector, 3>>,
       Tags::detail::NullL, ::Tags::dt<Tags::detail::NullL>,
@@ -1351,19 +1348,16 @@ void create_bondi_boundary_data_spacelike_char(
       get<::Tags::dr<gr::Tags::SpatialMetric<DataVector, 3>>>(
           computation_variables);
   dr_spatial_metric(make_not_null(&dr_spacetial_metric), phi, cos_phi,
-                    cos_theta, sin_phi, sin_theta);
+                    cos_theta, sin_phi, sin_theta);  // tested
 
-  auto& dt_worldtube_normal =
-      get<::Tags::dt<Tags::detail::WorldtubeNormal>>(computation_variables);
   auto& dr_worldtube_normal =
       get<::Tags::dr<Tags::detail::WorldtubeNormal>>(computation_variables);
   auto& worldtube_normal =
       get<Tags::detail::WorldtubeNormal>(computation_variables);
   spacelike_worldtube_normal_and_derivatives(
-      make_not_null(&worldtube_normal), make_not_null(&dt_worldtube_normal),
-      make_not_null(&dr_worldtube_normal), cos_phi, cos_theta, spacetime_metric,
-      dt_spacetime_metric, dr_spacetial_metric, sin_phi, sin_theta,
-      inverse_spatial_metric);
+      make_not_null(&worldtube_normal), make_not_null(&dr_worldtube_normal),
+      cos_phi, cos_theta, spacetime_metric, dr_spacetial_metric, sin_phi,
+      sin_theta, inverse_spatial_metric);  // tested
 
   auto& norm_normal_x = get<Tags::detail::NormNormalX>(computation_variables);
   auto& norm_normal_dr_lnx =
@@ -1371,7 +1365,7 @@ void create_bondi_boundary_data_spacelike_char(
   norm_normal_X_and_derivatives(
       make_not_null(&norm_normal_x), make_not_null(&norm_normal_dr_lnx),
       inverse_spatial_metric, worldtube_normal, dr_spacetial_metric, cos_phi,
-      cos_theta, sin_phi, sin_theta);
+      cos_theta, sin_phi, sin_theta);  // tested
 
   auto& spacetime_unit_normal =
       get<gr::Tags::SpacetimeNormalVector<DataVector, 3>>(
@@ -1404,7 +1398,7 @@ void create_bondi_boundary_data_spacelike_char(
 
   dr_lapse_shift(make_not_null(&dr_lapse), make_not_null(&dr_shift),
                  spatial_dev_lapse, spatial_dev_shift, cos_phi, cos_theta,
-                 sin_phi, sin_theta);
+                 sin_phi, sin_theta);  // tested
 
   auto& dr_spacetime_unit_normal =
       get<::Tags::dr<gr::Tags::SpacetimeNormalVector<DataVector, 3>>>(

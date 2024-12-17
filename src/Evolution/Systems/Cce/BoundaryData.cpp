@@ -473,7 +473,7 @@ void spacelike_null_metric_and_derivative(
   raise_or_lower_index(make_not_null(&dxdr_lower_with_metric), dxdr,
                        spatial_metric);
 
-  {
+  {  // tested
     Scalar<DataVector> temp_variable;
     dot_product(make_not_null(&temp_variable), dxdr, dxdr, spatial_metric);
     //  uu
@@ -482,11 +482,12 @@ void spacelike_null_metric_and_derivative(
     get<0, 0>(*du_null_metric) = -get(temp_variable);
   }
 
+  // tested
   // u lambda
   get<0, 1>(*null_metric) = -1.0;
   get<0, 1>(*du_null_metric) = 0.0;
 
-  // g_u_A
+  // g_u_A tested
   for (size_t A = 0; A < 2; ++A) {
     null_metric->get(0, A + 2) =
         -cartesian_to_spherical_jacobian.get(A + 1, 0) *
@@ -497,7 +498,7 @@ void spacelike_null_metric_and_derivative(
           dxdr_lower_with_metric.get(i);
     }
   }
-  {  // du_g_u_A
+  {  // du_g_u_A tested
     tnsr::ii<DataVector, 3> metric_temp{size};
     for (size_t i = 0; i < 3; ++i) {
       for (size_t j = i; j < 3; ++j) {
@@ -521,12 +522,14 @@ void spacelike_null_metric_and_derivative(
   }
 
   // lambda lambda & lambda A
+  // tested
   for (size_t i = 0; i < 3; ++i) {
     null_metric->get(1, i + 1) = 0.0;
     du_null_metric->get(1, i + 1) = 0.0;
   }
 
   // AB
+  // tested
   for (size_t A = 0; A < 2; ++A) {
     for (size_t B = A; B < 2; ++B) {
       null_metric->get(A + 2, B + 2) =
@@ -556,6 +559,7 @@ void spacelike_null_metric_and_derivative(
   }
 
   {  // du g_AB
+     // tested
     tnsr::ii<DataVector, 3> metric_temp{size};
     for (size_t i = 0; i < 3; ++i) {
       for (size_t j = i; j < 3; ++j) {
@@ -792,11 +796,9 @@ void null_metric_and_derivative(
 
 void spacelike_worldtube_normal_and_derivatives(
     const gsl::not_null<tnsr::I<DataVector, 3>*> worldtube_normal,
-    const gsl::not_null<tnsr::I<DataVector, 3>*> dt_worldtube_normal,
     const gsl::not_null<tnsr::I<DataVector, 3>*> dr_worldtube_normal,
     const Scalar<DataVector>& cos_phi, const Scalar<DataVector>& cos_theta,
     const tnsr::aa<DataVector, 3>& spacetime_metric,
-    const tnsr::aa<DataVector, 3>& dt_spacetime_metric,
     const tnsr::ii<DataVector, 3>& dr_spacetial_metric,
     const Scalar<DataVector>& sin_phi, const Scalar<DataVector>& sin_theta,
     const tnsr::II<DataVector, 3>& inverse_spatial_metric) {
@@ -825,24 +827,6 @@ void spacelike_worldtube_normal_and_derivatives(
     for (size_t j = 1; j < 3; ++j) {
       worldtube_normal->get(i) +=
           inverse_spatial_metric.get(i, j) * sigma.get(j);
-    }
-  }
-
-  for (size_t i = 0; i < 3; ++i) {
-    for (size_t m = 0; m < 3; ++m) {
-      for (size_t n = 0; n < 3; ++n) {
-        if (UNLIKELY(m == 0 and n == 0)) {
-          dt_worldtube_normal->get(i) =
-              (0.5 * worldtube_normal->get(i) * get<0>(*worldtube_normal) -
-               inverse_spatial_metric.get(i, 0)) *
-              get<0>(*worldtube_normal) * get<1, 1>(dt_spacetime_metric);
-        } else {
-          dt_worldtube_normal->get(i) +=
-              (0.5 * worldtube_normal->get(i) * worldtube_normal->get(m) -
-               inverse_spatial_metric.get(i, m)) *
-              worldtube_normal->get(n) * dt_spacetime_metric.get(m + 1, n + 1);
-        }
-      }
     }
   }
 
