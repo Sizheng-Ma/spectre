@@ -326,8 +326,7 @@ void spacelike_null_vector_l_and_derivatives(
     const tnsr::I<DataVector, 3>& dr_worldtube_normal,
     const tnsr::I<DataVector, 3>& worldtube_normal,
     const tnsr::A<DataVector, 3>& spacetime_unit_normal,
-    const tnsr::A<DataVector, 3>& dr_spacetime_unit_normal,
-    const double extraction_radius);
+    const tnsr::A<DataVector, 3>& dr_spacetime_unit_normal);
 
 /*!
  * \brief Computes the partial derivative of the spacetime metric and inverse
@@ -1418,7 +1417,7 @@ void create_bondi_boundary_data_spacelike_char(
   spacelike_null_vector_l_and_derivatives(
       make_not_null(&du_null_l), make_not_null(&null_l), norm_normal_x,
       norm_normal_dr_lnx, dr_worldtube_normal, worldtube_normal,
-      spacetime_unit_normal, dr_spacetime_unit_normal, extraction_radius);
+      spacetime_unit_normal, dr_spacetime_unit_normal);
 
   // pass to the next step that is common between the 'modal' input and 'GH'
   // input strategies

@@ -30,31 +30,28 @@ void spacelike_null_vector_l_and_derivatives(
     const tnsr::I<DataVector, 3>& dr_worldtube_normal,
     const tnsr::I<DataVector, 3>& worldtube_normal,
     const tnsr::A<DataVector, 3>& spacetime_unit_normal,
-    const tnsr::A<DataVector, 3>& dr_spacetime_unit_normal,
-    const double extraction_radius) {
+    const tnsr::A<DataVector, 3>& dr_spacetime_unit_normal) {
   const size_t size = dr_worldtube_normal.get(0).size();
   set_number_of_grid_points(du_null_l, size);
   set_number_of_grid_points(null_l, size);
 
-  null_l->get(0) =
-      spacetime_unit_normal.get(0) * get(norm_normal_x) / extraction_radius;
+  null_l->get(0) = spacetime_unit_normal.get(0) * get(norm_normal_x);
   for (size_t i = 1; i < 4; ++i) {
     null_l->get(i) =
         (spacetime_unit_normal.get(i) + worldtube_normal.get(i - 1)) *
-        get(norm_normal_x) / extraction_radius;
+        get(norm_normal_x);
   }
 
-  auto scalar_temp = get(norm_normal_dr_lnx) - 1. / extraction_radius;
+  auto scalar_temp = get(norm_normal_dr_lnx);
 
-  du_null_l->get(0) =
-      dr_spacetime_unit_normal.get(0) * get(norm_normal_x) / extraction_radius;
+  du_null_l->get(0) = -dr_spacetime_unit_normal.get(0) * get(norm_normal_x);
   for (size_t i = 1; i < 4; ++i) {
     du_null_l->get(i) =
-        (dr_spacetime_unit_normal.get(i) + dr_worldtube_normal.get(i - 1)) *
-        get(norm_normal_x) / extraction_radius;
+        -(dr_spacetime_unit_normal.get(i) + dr_worldtube_normal.get(i - 1)) *
+        get(norm_normal_x);
   }
   for (size_t i = 0; i < 4; ++i) {
-    du_null_l->get(i) += null_l->get(i) * scalar_temp;
+    du_null_l->get(i) -= null_l->get(i) * scalar_temp;
   }
 }
 
