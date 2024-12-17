@@ -31,17 +31,17 @@ namespace Cce::Solutions {
 
 void WorldtubeData::variables_impl(
     const gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_coordinates,
-    const size_t output_l_max, double /*time*/,
+    const size_t output_l_max, double ccetime,
     tmpl::type_<Tags::CauchyCartesianCoords> /*meta*/) const {
   const auto& collocation = Spectral::Swsh::cached_collocation_metadata<
       Spectral::Swsh::ComplexRepresentation::Interleaved>(output_l_max);
   for (const auto collocation_point : collocation) {
     get<0>(*cartesian_coordinates)[collocation_point.offset] =
-        cos(collocation_point.phi) * sin(collocation_point.theta);
+        (-ccetime) * cos(collocation_point.phi) * sin(collocation_point.theta);
     get<1>(*cartesian_coordinates)[collocation_point.offset] =
-        sin(collocation_point.phi) * sin(collocation_point.theta);
+        (-ccetime) * sin(collocation_point.phi) * sin(collocation_point.theta);
     get<2>(*cartesian_coordinates)[collocation_point.offset] =
-        cos(collocation_point.theta);
+        (-ccetime) * cos(collocation_point.theta);
   }
 }
 

@@ -33,10 +33,11 @@ std::unique_ptr<WorldtubeData> BouncingBlackHole::get_clone() const {
 
 void BouncingBlackHole::variables_impl(
     const gsl::not_null<tnsr::aa<DataVector, 3>*> spacetime_metric,
-    const size_t l_max, const double time,
+    const size_t l_max, const double ccetime,
     tmpl::type_<gr::Tags::SpacetimeMetric<DataVector, 3>> /*meta*/) const {
   const auto& cartesian_coordinates =
-      cache_or_compute<Tags::CauchyCartesianCoords>(l_max, time);
+      cache_or_compute<Tags::CauchyCartesianCoords>(l_max, ccetime);
+  const double time = 0;
 
   const double dt_adjusted_x_coordinate = 4.0 * amplitude_ * frequency_ *
                                           cos(frequency_ * time) *
@@ -90,11 +91,12 @@ void BouncingBlackHole::variables_impl(
 
 void BouncingBlackHole::variables_impl(
     const gsl::not_null<tnsr::aa<DataVector, 3>*> dt_spacetime_metric,
-    const size_t l_max, const double time,
+    const size_t l_max, const double ccetime,
     tmpl::type_<::Tags::dt<gr::Tags::SpacetimeMetric<DataVector, 3>>> /*meta*/)
     const {
   const auto& cartesian_coordinates =
-      cache_or_compute<Tags::CauchyCartesianCoords>(l_max, time);
+      cache_or_compute<Tags::CauchyCartesianCoords>(l_max, ccetime);
+  const double time = 0;
 
   const double dt_adjusted_x_coordinate = 4.0 * amplitude_ * frequency_ *
                                           cos(frequency_ * time) *
@@ -168,10 +170,11 @@ void BouncingBlackHole::variables_impl(
 
 void BouncingBlackHole::variables_impl(
     const gsl::not_null<tnsr::iaa<DataVector, 3>*> d_spacetime_metric,
-    const size_t l_max, const double time,
+    const size_t l_max, const double ccetime,
     tmpl::type_<gh::Tags::Phi<DataVector, 3>> /*meta*/) const {
   const auto& cartesian_coordinates =
-      cache_or_compute<Tags::CauchyCartesianCoords>(l_max, time);
+      cache_or_compute<Tags::CauchyCartesianCoords>(l_max, ccetime);
+  const double time = 0;
 
   const double dt_adjusted_x_coordinate = 4.0 * amplitude_ * frequency_ *
                                           cos(frequency_ * time) *
