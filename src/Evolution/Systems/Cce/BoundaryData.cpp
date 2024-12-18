@@ -66,7 +66,7 @@ void dr_spacetime_normal_vector(
   dr_n->get(0) = -get(dr_lapse) / square(get(lapse));
   for (size_t i = 1; i < 4; ++i) {
     dr_n->get(i) =
-        (shift.get(i) * get(dr_lapse) - get(lapse) * dr_shift.get(i)) /
+        (shift.get(i - 1) * get(dr_lapse) - get(lapse) * dr_shift.get(i - 1)) /
         square(get(lapse));
   }
 }
