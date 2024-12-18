@@ -1029,7 +1029,7 @@ void spacelike_dlambda_null_metric_and_inverse(
         d_lambda_g_mu_nu.get(a, b) += null_l.get(i + 1) * phi.get(i, a, b);
       }
     }
-  }
+  }  // tested
 
   // for null_metric u lambda A
   tnsr::A<DataVector, 3> dxdr{size};
@@ -1046,7 +1046,7 @@ void spacelike_dlambda_null_metric_and_inverse(
     dot_product(make_not_null(&temp_variable), dxdr, du_null_l,
                 spacetime_metric);
     get<0, 0>(*dlambda_null_metric) -= 2.0 * get(temp_variable);
-  }
+  }  // tested
 
   {  // uA
     for (size_t A = 0; A < 2; ++A) {
@@ -1072,7 +1072,7 @@ void spacelike_dlambda_null_metric_and_inverse(
       dot_product(make_not_null(&temp_variable), dxdr, dxdA, d_lambda_g_mu_nu);
       (*dlambda_null_metric).get(0, A + 2) -= get(temp_variable);
     }
-  }
+  }  // tested
 
   {  // lambda x
     get<0, 1>(*dlambda_null_metric) = 0.0;
@@ -1110,7 +1110,7 @@ void spacelike_dlambda_null_metric_and_inverse(
         (*dlambda_null_metric).get(A + 2, B + 2) += get(temp_variable);
       }
     }
-  }
+  }  // tested
 
   // Inverse null metric
   for (size_t a = 0; a < 4; ++a) {

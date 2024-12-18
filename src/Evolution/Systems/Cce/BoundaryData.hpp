@@ -788,7 +788,9 @@ void create_bondi_boundary_data_spacelike_char(
       make_not_null(&dlambda_null_metric),
       make_not_null(&dlambda_inverse_null_metric), angular_d_null_l,
       cartesian_to_spherical_jacobian, phi, dt_spacetime_metric, du_null_l,
-      inverse_null_metric, null_l, spacetime_metric);
+      inverse_null_metric, null_l,
+      spacetime_metric);  // dlambda_null_metric was tested, but
+                          // dlambda_inverse_null_metric was not.
 
   auto& r = get<Tags::BoundaryValue<Tags::BondiR>>(*bondi_boundary_data);
   bondi_r(make_not_null(&r), null_metric);
@@ -1411,7 +1413,7 @@ void create_bondi_boundary_data_spacelike_char(
   spacelike_null_vector_l_and_derivatives(
       make_not_null(&du_null_l), make_not_null(&null_l), norm_normal_x,
       norm_normal_dr_lnx, dr_worldtube_normal, worldtube_normal,
-      spacetime_unit_normal, dr_spacetime_unit_normal);
+      spacetime_unit_normal, dr_spacetime_unit_normal);  // tested
 
   // pass to the next step that is common between the 'modal' input and 'GH'
   // input strategies
