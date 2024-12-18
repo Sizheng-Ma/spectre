@@ -43,8 +43,7 @@ class AnalyticBoundaryDataManager {
   AnalyticBoundaryDataManager() = default;
 
   AnalyticBoundaryDataManager(
-      size_t l_max, double extraction_radius,
-      std::unique_ptr<Solutions::WorldtubeData> generator);
+      size_t l_max, std::unique_ptr<Solutions::WorldtubeData> generator);
 
   /*!
    * \brief Update the `boundary_data_variables` entries for all tags in
@@ -79,7 +78,6 @@ class AnalyticBoundaryDataManager {
  private:
   size_t l_max_ = 0;
   std::unique_ptr<Solutions::WorldtubeData> generator_;
-  double extraction_radius_ = std::numeric_limits<double>::signaling_NaN();
 };
 
 template <typename ParallelComponent, typename Metavariables>

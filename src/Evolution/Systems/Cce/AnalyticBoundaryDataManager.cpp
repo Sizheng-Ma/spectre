@@ -10,11 +10,8 @@
 
 namespace Cce {
 AnalyticBoundaryDataManager::AnalyticBoundaryDataManager(
-    const size_t l_max, const double extraction_radius,
-    std::unique_ptr<Solutions::WorldtubeData> generator)
-    : l_max_{l_max},
-      generator_{std::move(generator)},
-      extraction_radius_{extraction_radius} {}
+    const size_t l_max, std::unique_ptr<Solutions::WorldtubeData> generator)
+    : l_max_{l_max}, generator_{std::move(generator)} {}
 
 bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
     const gsl::not_null<Variables<
@@ -40,7 +37,6 @@ bool AnalyticBoundaryDataManager::populate_hypersurface_boundary_data(
 
 void AnalyticBoundaryDataManager::pup(PUP::er& p) {
   p | l_max_;
-  p | extraction_radius_;
   p | generator_;
 }
 }  // namespace Cce

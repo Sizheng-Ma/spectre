@@ -81,7 +81,7 @@ Cce:
 
   StartTime: -1000.0
   EndTime: -960.0
-  ExtractionRadius: &radius 30.0
+  #ExtractionRadius: &radius 30.0
 
   AnalyticSolution:
     BouncingBlackHole:

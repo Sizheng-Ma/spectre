@@ -128,8 +128,7 @@ struct ScriObserveInterpolated {
       const ParallelComponent* const /*meta*/) {
     const size_t observation_l_max = db::get<Tags::ObservationLMax>(box);
     const size_t l_max = db::get<Tags::LMax>(box);
-    const double extraction_radius =
-        Parallel::get<Tags::ExtractionRadius>(cache);
+    const double extraction_radius = 5;
     const std::string subfile_name =
         MakeString{} << "SpectreR" << std::setfill('0') << std::setw(4)
                      << std::lround(extraction_radius);

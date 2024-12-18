@@ -243,8 +243,7 @@ struct InitializeWorldtubeBoundary<AnalyticWorldtubeBoundary<Metavariables>>
   using typename base_type::simple_tags;
   using compute_tags = time_stepper_ref_tags<TimeStepperType>;
   using const_global_cache_tags =
-      tmpl::list<Tags::LMax, Tags::ExtractionRadiusSimple,
-                 Tags::SpecifiedEndTime, Tags::SpecifiedStartTime>;
+      tmpl::list<Tags::LMax, Tags::SpecifiedEndTime, Tags::SpecifiedStartTime>;
   using typename base_type::simple_tags_from_options;
 };
 }  // namespace Actions

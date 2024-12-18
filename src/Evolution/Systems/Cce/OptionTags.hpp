@@ -604,14 +604,14 @@ struct AnalyticInitializeJ : db::SimpleTag, InitializeJBase {
 /// A tag that constructs a `AnalyticBoundaryDataManager` from options
 struct AnalyticBoundaryDataManager : db::SimpleTag {
   using type = ::Cce::AnalyticBoundaryDataManager;
-  using option_tags = tmpl::list<OptionTags::ExtractionRadius, OptionTags::LMax,
-                                 OptionTags::AnalyticSolution>;
+  using option_tags =
+      tmpl::list<OptionTags::LMax, OptionTags::AnalyticSolution>;
 
   static constexpr bool pass_metavariables = false;
   static Cce::AnalyticBoundaryDataManager create_from_options(
-      const double extraction_radius, const size_t l_max,
+      const size_t l_max,
       const std::unique_ptr<Cce::Solutions::WorldtubeData>& worldtube_data) {
-    return ::Cce::AnalyticBoundaryDataManager(l_max, extraction_radius,
+    return ::Cce::AnalyticBoundaryDataManager(l_max,
                                               worldtube_data->get_clone());
   }
 };
