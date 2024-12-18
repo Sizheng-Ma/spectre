@@ -6,6 +6,7 @@ spectre_target_sources(
   PRIVATE
   BouncingBlackHole.cpp
   WorldtubeData.cpp
+  SphericalMetricData.cpp
   )
 
 spectre_target_headers(
@@ -14,4 +15,5 @@ spectre_target_headers(
   HEADERS
   BouncingBlackHole.hpp
   WorldtubeData.hpp
+  SphericalMetricData.hpp
   )
