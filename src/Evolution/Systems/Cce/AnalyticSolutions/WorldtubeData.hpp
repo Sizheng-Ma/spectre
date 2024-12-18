@@ -71,7 +71,7 @@ class TeukolskyWave;
  * calculations.
  */
 struct WorldtubeData : public PUP::able {
-  using creatable_classes = tmpl::list<BouncingBlackHole>;
+  using creatable_classes = tmpl::list<BouncingBlackHole, GaugeWave>;
 
   /// The set of available tags provided by the analytic solution
   using tags = tmpl::list<
