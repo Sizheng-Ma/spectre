@@ -213,7 +213,7 @@ void perform_cce_worldtube_reduction(
             make_not_null(&boundary_data_variables),
             get<tmpl::type_from<std::decay_t<decltype(tags)>>>(
                 coefficients_set)...,
-            buffer_updater.get_extraction_radius(), computation_l_max);
+            -time, computation_l_max);
       }
     };
 
