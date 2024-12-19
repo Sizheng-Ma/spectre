@@ -209,7 +209,7 @@ void perform_cce_worldtube_reduction(
                 coefficients_set)...,
             buffer_updater.get_extraction_radius(), computation_l_max);
       } else {
-        Cce::create_bondi_boundary_data(
+        Cce::create_bondi_boundary_data_spacelike_char(
             make_not_null(&boundary_data_variables),
             get<tmpl::type_from<std::decay_t<decltype(tags)>>>(
                 coefficients_set)...,
