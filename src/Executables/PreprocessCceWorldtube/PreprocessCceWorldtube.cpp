@@ -163,7 +163,7 @@ void perform_cce_worldtube_reduction(
     const std::optional<double>& extraction_radius,
     const bool fix_spec_normalization) {
   Cce::MetricWorldtubeH5BufferUpdater<ComplexModalVector> buffer_updater{
-      input_file, extraction_radius, fix_spec_normalization};
+      input_file, extraction_radius, true};
   const size_t l_max = buffer_updater.get_l_max();
   // Perform the boundary computation to scalars at some factor > 1 of the input
   // l_max to be absolutely certain that there are no problems associated with
