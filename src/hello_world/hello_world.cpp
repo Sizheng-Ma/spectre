@@ -846,9 +846,11 @@ void ccm_interpolation0(std::vector<std::complex<double>>& psi0_ccm_interpolated
 
 void std_vector_to_DataVector(DataVector& pi, const std::vector<double>& data) {
   const auto size = data.size();
-  for (unsigned int i = 0; i < size; i++) {
-    pi[i] = data[i];
-  }
+  std::memcpy(pi.data(), data.data(), sizeof(double) * size);
+  // for (unsigned int i = 0; i < size; i++) {
+  //   std::cout << pi[i] << " " << data[i] << " " << pi[i] - data[i] <<
+  //   std::endl;
+  // }
 }
 
 void std_vector_to_DataVector(tnsr::aa<DataVector, 3>& pi,
