@@ -884,18 +884,28 @@ void tri_std_vector_to_DataVector(
     const std::vector<std::vector<std::vector<double>>>& data) {
   const auto size = data.at(0).at(0).size();
   for (size_t ijj = 0; ijj < 3; ++ijj) {
-    for (size_t i = 0; i < size; i++) {
-      pi.get(ijj, 0, 0)[i] = data.at(ijj).at(0)[i];
-      pi.get(ijj, 0, 1)[i] = data.at(ijj).at(1)[i];
-      pi.get(ijj, 0, 2)[i] = data.at(ijj).at(2)[i];
-      pi.get(ijj, 0, 3)[i] = data.at(ijj).at(3)[i];
-      pi.get(ijj, 1, 1)[i] = data.at(ijj).at(4)[i];
-      pi.get(ijj, 1, 2)[i] = data.at(ijj).at(5)[i];
-      pi.get(ijj, 1, 3)[i] = data.at(ijj).at(6)[i];
-      pi.get(ijj, 2, 2)[i] = data.at(ijj).at(7)[i];
-      pi.get(ijj, 2, 3)[i] = data.at(ijj).at(8)[i];
-      pi.get(ijj, 3, 3)[i] = data.at(ijj).at(9)[i];
-    }
+    std::memcpy(pi.get(ijj, 0, 0).data(), data.at(ijj).at(0).data(),
+                sizeof(double) * size);
+    std::memcpy(pi.get(ijj, 0, 1).data(), data.at(ijj).at(1).data(),
+                sizeof(double) * size);
+    std::memcpy(pi.get(ijj, 0, 2).data(), data.at(ijj).at(2).data(),
+                sizeof(double) * size);
+    std::memcpy(pi.get(ijj, 0, 3).data(), data.at(ijj).at(3).data(),
+                sizeof(double) * size);
+
+    std::memcpy(pi.get(ijj, 1, 1).data(), data.at(ijj).at(4).data(),
+                sizeof(double) * size);
+    std::memcpy(pi.get(ijj, 1, 2).data(), data.at(ijj).at(5).data(),
+                sizeof(double) * size);
+    std::memcpy(pi.get(ijj, 1, 3).data(), data.at(ijj).at(6).data(),
+                sizeof(double) * size);
+
+    std::memcpy(pi.get(ijj, 2, 2).data(), data.at(ijj).at(7).data(),
+                sizeof(double) * size);
+    std::memcpy(pi.get(ijj, 2, 3).data(), data.at(ijj).at(8).data(),
+                sizeof(double) * size);
+    std::memcpy(pi.get(ijj, 3, 3).data(), data.at(ijj).at(9).data(),
+                sizeof(double) * size);
   }
 }
 
