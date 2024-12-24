@@ -510,12 +510,11 @@ void ccm_functions(
           get<2>(*spectre_cauchy_cart)[jij] = cauchy_cart[2][jij];
           get<2>(*spectre_inertial_cart)[jij] = inertial_cart[2][jij];
         }
-        for (int jij = 0; jij < bondij.size(); jij++) {
-          get(*bondi_j).data()[jij] = bondij[jij];
-        }
-        for (int jij = 0; jij < intertial_time.size(); jij++) {
-          get(*inertial_retarded_time_assign)[jij] = intertial_time[jij];
-        }
+        std::memcpy(get(*bondi_j).data().data(), bondij.data(),
+                    sizeof(std::complex<double>) * bondij.size());
+        std::memcpy(get(*inertial_retarded_time_assign).data(),
+                    intertial_time.data(),
+                    sizeof(double) * intertial_time.size());
       },
       make_not_null(&spectre_box));
 
@@ -637,29 +636,31 @@ void ccm_functions(
   //             << get(get<Cce::Tags::BondiH>(spectre_box)).size() <<
   //             std::endl;
   auto& final_h = get(get<Cce::Tags::BondiH>(spectre_box));
-  for (unsigned int i = 0; i < final_h.size(); i++) {
-    finalbondih.push_back(final_h.data()[i]);
-  }
+  finalbondih.insert(finalbondih.end(), final_h.data().begin(),
+                     final_h.data().end());
 
   auto& dt_cauchy_cart =
       db::get<::Tags::dt<Cce::Tags::CauchyCartesianCoords>>(spectre_box);
   auto& dt_inertial_cart =
       db::get<::Tags::dt<Cce::Tags::PartiallyFlatCartesianCoords>>(spectre_box);
 
-  for (unsigned int i = 0; i < dt_cauchy_cart.get(0).size(); i++) {
-    dt_cauchy_x.push_back(dt_cauchy_cart.get(0)[i]);
-    dt_cauchy_y.push_back(dt_cauchy_cart.get(1)[i]);
-    dt_cauchy_z.push_back(dt_cauchy_cart.get(2)[i]);
-    dt_inertial_x.push_back(dt_inertial_cart.get(0)[i]);
-    dt_inertial_y.push_back(dt_inertial_cart.get(1)[i]);
-    dt_inertial_z.push_back(dt_inertial_cart.get(2)[i]);
-  }
+  dt_cauchy_x.insert(dt_cauchy_x.end(), dt_cauchy_cart.get(0).begin(),
+                     dt_cauchy_cart.get(0).end());
+  dt_cauchy_y.insert(dt_cauchy_y.end(), dt_cauchy_cart.get(1).begin(),
+                     dt_cauchy_cart.get(1).end());
+  dt_cauchy_z.insert(dt_cauchy_z.end(), dt_cauchy_cart.get(2).begin(),
+                     dt_cauchy_cart.get(2).end());
+
+  dt_inertial_x.insert(dt_inertial_x.end(), dt_inertial_cart.get(0).begin(),
+                       dt_inertial_cart.get(0).end());
+  dt_inertial_y.insert(dt_inertial_y.end(), dt_inertial_cart.get(1).begin(),
+                       dt_inertial_cart.get(1).end());
+  dt_inertial_z.insert(dt_inertial_z.end(), dt_inertial_cart.get(2).begin(),
+                       dt_inertial_cart.get(2).end());
 
   auto& du_t = get<::Tags::dt<Cce::Tags::InertialRetardedTime>>(spectre_box);
 
-  for (unsigned int i = 0; i < du_t.get().size(); i++) {
-    dt_u_scri.push_back(du_t.get()[i]);
-  }
+  dt_u_scri.insert(dt_u_scri.end(), du_t.get().begin(), du_t.get().end());
 
   auto& eth_inertial_retarded_time_from_cce =
       get<Cce::Tags::EthInertialRetardedTime>(spectre_box);
