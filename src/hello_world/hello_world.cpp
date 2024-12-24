@@ -502,13 +502,16 @@ void ccm_functions(
               spectre_inertial_cart,
           const gsl::not_null<Cce::Tags::InertialRetardedTime::type*>
               inertial_retarded_time_assign) {
-        for (int jij = 0; jij < cauchy_cart[0].size(); jij++) {
-          get<0>(*spectre_cauchy_cart)[jij] = cauchy_cart[0][jij];
-          get<0>(*spectre_inertial_cart)[jij] = inertial_cart[0][jij];
-          get<1>(*spectre_cauchy_cart)[jij] = cauchy_cart[1][jij];
-          get<1>(*spectre_inertial_cart)[jij] = inertial_cart[1][jij];
-          get<2>(*spectre_cauchy_cart)[jij] = cauchy_cart[2][jij];
-          get<2>(*spectre_inertial_cart)[jij] = inertial_cart[2][jij];
+        for (size_t kkd = 0; kkd < 3; kkd++) {
+          std::memcpy((*spectre_cauchy_cart).get(kkd).data(),
+                      cauchy_cart[kkd].data(),
+                      sizeof(double) * cauchy_cart[kkd].size());
+        }
+
+        for (size_t kkd = 0; kkd < 3; kkd++) {
+          std::memcpy((*spectre_inertial_cart).get(kkd).data(),
+                      inertial_cart[kkd].data(),
+                      sizeof(double) * inertial_cart[kkd].size());
         }
         std::memcpy(get(*bondi_j).data().data(), bondij.data(),
                     sizeof(std::complex<double>) * bondij.size());
@@ -800,19 +803,17 @@ void ccm_interpolation(std::vector<std::complex<double>>& psi0_ccm_interpolated,
   SpinWeighted<ComplexDataVector, 2> psi0_for_ccm_from_spectre{psi0_ccm.size()};
   SpinWeighted<ComplexDataVector, 2> psi0_for_ccm_from_spectre_interpolated;
 
-  for (int size = 0; size < psi0_ccm.size(); size++) {
-    psi0_for_ccm_from_spectre.data()[size] = psi0_ccm[size];
-  }
+  std::memcpy(psi0_for_ccm_from_spectre.data().data(), psi0_ccm.data(),
+              sizeof(std::complex<double>) * psi0_ccm.size());
 
   interpolator.interpolate(
       make_not_null(&psi0_for_ccm_from_spectre_interpolated),
       psi0_for_ccm_from_spectre);
 
-  for (unsigned int i = 0; i < psi0_for_ccm_from_spectre_interpolated.size();
-       i++) {
-    psi0_ccm_interpolated.push_back(
-        psi0_for_ccm_from_spectre_interpolated.data()[i]);
-  }
+  psi0_ccm_interpolated.insert(
+      psi0_ccm_interpolated.end(),
+      psi0_for_ccm_from_spectre_interpolated.data().begin(),
+      psi0_for_ccm_from_spectre_interpolated.data().end());
 }
 
 void ccm_interpolation0(std::vector<std::complex<double>>& psi0_ccm_interpolated,
@@ -830,19 +831,17 @@ void ccm_interpolation0(std::vector<std::complex<double>>& psi0_ccm_interpolated
   SpinWeighted<ComplexDataVector, 0> psi0_for_ccm_from_spectre{psi0_ccm.size()};
   SpinWeighted<ComplexDataVector, 0> psi0_for_ccm_from_spectre_interpolated;
 
-  for (int size = 0; size < psi0_ccm.size(); size++) {
-    psi0_for_ccm_from_spectre.data()[size] = psi0_ccm[size];
-  }
+  std::memcpy(psi0_for_ccm_from_spectre.data().data(), psi0_ccm.data(),
+              sizeof(std::complex<double>) * psi0_ccm.size());
 
   interpolator.interpolate(
       make_not_null(&psi0_for_ccm_from_spectre_interpolated),
       psi0_for_ccm_from_spectre);
 
-  for (unsigned int i = 0; i < psi0_for_ccm_from_spectre_interpolated.size();
-       i++) {
-    psi0_ccm_interpolated.push_back(
-        psi0_for_ccm_from_spectre_interpolated.data()[i]);
-  }
+  psi0_ccm_interpolated.insert(
+      psi0_ccm_interpolated.end(),
+      psi0_for_ccm_from_spectre_interpolated.data().begin(),
+      psi0_for_ccm_from_spectre_interpolated.data().end());
 }
 
 void std_vector_to_DataVector(DataVector& pi, const std::vector<double>& data) {
