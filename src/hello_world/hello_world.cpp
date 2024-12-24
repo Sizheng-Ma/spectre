@@ -683,46 +683,88 @@ void ccm_functions(
   auto& ccm_tetrad_coeff_phi =
       get<Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffPhi>>(spectre_box);
 
-  for (unsigned int i = 0; i < get(eth_inertial_retarded_time_from_cce).size();
-       i++) {
-    eth_inertial_retarded_time.push_back(
-        get(eth_inertial_retarded_time_from_cce).data()[i]);
-  }
-  for (unsigned int i = 0; i < get(news_from_cce).size(); i++) {
-    news.push_back(get(news_from_cce).data()[i]);
-  }
-  for (unsigned int i = 0; i < get(strain_from_cce).size(); i++) {
-    strain.push_back(get(strain_from_cce).data()[i]);
-  }
-  for (unsigned int i = 0; i < get(psi0_from_cce).size(); i++) {
-    psi0.push_back(get(psi0_from_cce).data()[i]);
-  }
-  for (unsigned int i = 0; i < get(psi1_from_cce).size(); i++) {
-    psi1.push_back(get(psi1_from_cce).data()[i]);
-  }
-  for (unsigned int i = 0; i < get(psi2_from_cce).size(); i++) {
-    psi2.push_back(get(psi2_from_cce).data()[i]);
-  }
-  for (unsigned int i = 0; i < get(psi3_from_cce).size(); i++) {
-    psi3.push_back(get(psi3_from_cce).data()[i]);
-  }
-  for (unsigned int i = 0; i < get(psi4_from_cce).size(); i++) {
-    psi4.push_back(get(psi4_from_cce).data()[i]);
-  }
-  for (unsigned int i = 0; i < get(psi0_for_ccm_from_spectre).size(); i++) {
-    psi0_ccm.push_back(get(psi0_for_ccm_from_spectre).data()[i]);
-  }
-  for (unsigned int i = 0; i < get(wij_ccm).size(); i++) {
-    wxx_test_for_spec.push_back(get(wij_ccm).data()[i]);
-  }
+  eth_inertial_retarded_time.insert(
+      eth_inertial_retarded_time.end(),
+      get(eth_inertial_retarded_time_from_cce).data().begin(),
+      get(eth_inertial_retarded_time_from_cce).data().end());
+  // for (unsigned int i = 0; i <
+  // get(eth_inertial_retarded_time_from_cce).size();
+  //      i++) {
+  //   std::cout << eth_inertial_retarded_time[i] -
+  //                    (get(eth_inertial_retarded_time_from_cce).data()[i])
+  //             << std::endl;
+  // }
 
-  for (unsigned int i = 0; i < get(ccm_tetrad_coeff_theta).size(); i++) {
-    coeff_theta.push_back(get(ccm_tetrad_coeff_theta).data()[i]);
-  }
+  news.insert(news.end(), get(news_from_cce).data().begin(),
+              get(news_from_cce).data().end());
+  // for (unsigned int i = 0; i < get(news_from_cce).size(); i++) {
+  //   std::cout << news[i] - (get(news_from_cce).data()[i]) << std::endl;
+  // }
 
-  for (unsigned int i = 0; i < get(ccm_tetrad_coeff_phi).size(); i++) {
-    coeff_phi.push_back(get(ccm_tetrad_coeff_phi).data()[i]);
-  }
+  strain.insert(strain.end(), get(strain_from_cce).data().begin(),
+                get(strain_from_cce).data().end());
+  // for (unsigned int i = 0; i < get(strain_from_cce).size(); i++) {
+  //   std::cout << strain[i] - (get(strain_from_cce).data()[i]) << std::endl;
+  // }
+
+  psi0.insert(psi0.end(), get(psi0_from_cce).data().begin(),
+              get(psi0_from_cce).data().end());
+  // for (unsigned int i = 0; i < get(psi0_from_cce).size(); i++) {
+  //   std::cout << psi0[i] - (get(psi0_from_cce).data()[i]) << std::endl;
+  // }
+
+  psi1.insert(psi1.end(), get(psi1_from_cce).data().begin(),
+              get(psi1_from_cce).data().end());
+  // for (unsigned int i = 0; i < get(psi1_from_cce).size(); i++) {
+  //   std::cout << psi1[i] - (get(psi1_from_cce).data()[i]) << std::endl;
+  // }
+
+  psi2.insert(psi2.end(), get(psi2_from_cce).data().begin(),
+              get(psi2_from_cce).data().end());
+  // for (unsigned int i = 0; i < get(psi2_from_cce).size(); i++) {
+  //   std::cout << psi2[i] - (get(psi2_from_cce).data()[i]) << std::endl;
+  // }
+
+  psi3.insert(psi3.end(), get(psi3_from_cce).data().begin(),
+              get(psi3_from_cce).data().end());
+  // for (unsigned int i = 0; i < get(psi3_from_cce).size(); i++) {
+  //   std::cout << psi3[i] - (get(psi3_from_cce).data()[i]) << std::endl;
+  // }
+
+  psi4.insert(psi4.end(), get(psi4_from_cce).data().begin(),
+              get(psi4_from_cce).data().end());
+  // for (unsigned int i = 0; i < get(psi4_from_cce).size(); i++) {
+  //   std::cout << psi4[i] - (get(psi4_from_cce).data()[i]) << std::endl;
+  // }
+
+  psi0_ccm.insert(psi0_ccm.end(), get(psi0_for_ccm_from_spectre).data().begin(),
+                  get(psi0_for_ccm_from_spectre).data().end());
+  // for (unsigned int i = 0; i < get(psi0_for_ccm_from_spectre).size(); i++) {
+  //   std::cout << psi0_ccm[i] - get(psi0_for_ccm_from_spectre).data()[i]
+  //             << std::endl;
+  // }
+
+  wxx_test_for_spec.insert(wxx_test_for_spec.end(), get(wij_ccm).data().begin(),
+                           get(wij_ccm).data().end());
+  // for (unsigned int i = 0; i < get(wij_ccm).size(); i++) {
+  //   std::cout << wxx_test_for_spec[i] - (get(wij_ccm).data()[i]) <<
+  //   std::endl;
+  // }
+
+  coeff_theta.insert(coeff_theta.end(),
+                     get(ccm_tetrad_coeff_theta).data().begin(),
+                     get(ccm_tetrad_coeff_theta).data().end());
+  // for (unsigned int i = 0; i < get(ccm_tetrad_coeff_theta).size(); i++) {
+  //   std::cout << coeff_theta[i] - (get(ccm_tetrad_coeff_theta).data()[i])
+  //             << std::endl;
+  // }
+
+  coeff_phi.insert(coeff_phi.end(), get(ccm_tetrad_coeff_phi).data().begin(),
+                   get(ccm_tetrad_coeff_phi).data().end());
+  // for (unsigned int i = 0; i < get(ccm_tetrad_coeff_phi).size(); i++) {
+  //   std::cout << coeff_phi[i] - get(ccm_tetrad_coeff_phi).data()[i]
+  //             << std::endl;
+  // }
 
   //   std::cout << real(get(psi3).data())[0] << " " <<
   //   imag(get(psi3).data())[0]
