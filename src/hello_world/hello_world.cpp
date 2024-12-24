@@ -856,18 +856,27 @@ void std_vector_to_DataVector(DataVector& pi, const std::vector<double>& data) {
 void std_vector_to_DataVector(tnsr::aa<DataVector, 3>& pi,
                               const std::vector<std::vector<double>>& data) {
   const auto size = data.at(0).size();
-  for (unsigned int i = 0; i < size; i++) {
-    get<0, 0>(pi)[i] = data.at(0)[i];
-    get<0, 1>(pi)[i] = data.at(1)[i];
-    get<0, 2>(pi)[i] = data.at(2)[i];
-    get<0, 3>(pi)[i] = data.at(3)[i];
-    get<1, 1>(pi)[i] = data.at(4)[i];
-    get<1, 2>(pi)[i] = data.at(5)[i];
-    get<1, 3>(pi)[i] = data.at(6)[i];
-    get<2, 2>(pi)[i] = data.at(7)[i];
-    get<2, 3>(pi)[i] = data.at(8)[i];
-    get<3, 3>(pi)[i] = data.at(9)[i];
-  }
+  std::memcpy(get<0, 0>(pi).data(), data.at(0).data(), sizeof(double) * size);
+  std::memcpy(get<0, 1>(pi).data(), data.at(1).data(), sizeof(double) * size);
+  std::memcpy(get<0, 2>(pi).data(), data.at(2).data(), sizeof(double) * size);
+  std::memcpy(get<0, 3>(pi).data(), data.at(3).data(), sizeof(double) * size);
+  std::memcpy(get<1, 1>(pi).data(), data.at(4).data(), sizeof(double) * size);
+  std::memcpy(get<1, 2>(pi).data(), data.at(5).data(), sizeof(double) * size);
+  std::memcpy(get<1, 3>(pi).data(), data.at(6).data(), sizeof(double) * size);
+  std::memcpy(get<2, 2>(pi).data(), data.at(7).data(), sizeof(double) * size);
+  std::memcpy(get<2, 3>(pi).data(), data.at(8).data(), sizeof(double) * size);
+  std::memcpy(get<3, 3>(pi).data(), data.at(9).data(), sizeof(double) * size);
+  // for (unsigned int i = 0; i < size; i++) {
+  //   std::cout << get<0, 1>(pi)[i] - data.at(1)[i] << std::endl;
+  //   std::cout << get<0, 2>(pi)[i] - data.at(2)[i] << std::endl;
+  //   std::cout << get<0, 3>(pi)[i] - data.at(3)[i] << std::endl;
+  //   std::cout << get<1, 1>(pi)[i] - data.at(4)[i] << std::endl;
+  //   std::cout << get<1, 2>(pi)[i] - data.at(5)[i] << std::endl;
+  //   std::cout << get<1, 3>(pi)[i] - data.at(6)[i] << std::endl;
+  //   std::cout << get<2, 2>(pi)[i] - data.at(7)[i] << std::endl;
+  //   std::cout << get<2, 3>(pi)[i] - data.at(8)[i] << std::endl;
+  //   std::cout << get<3, 3>(pi)[i] - data.at(9)[i] << std::endl;
+  // }
 }
 
 void tri_std_vector_to_DataVector(
