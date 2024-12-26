@@ -264,6 +264,209 @@ double iteratively_adapt_angular_coordinates(
   return max_error;
 }
 
+template <typename IterationFunctor, typename FinalizeFunctor = NoOpFinalize>
+double iteratively_adapt_angular_coordinates_ccm(
+    const gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_cauchy_coordinates,
+    const gsl::not_null<
+        tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
+        angular_cauchy_coordinates,
+    const gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_inertial_coordinates,
+    const gsl::not_null<
+        tnsr::i<DataVector, 2, ::Frame::Spherical<::Frame::Inertial>>*>
+        angular_inertial_coordinates,
+    const size_t l_max, const double tolerance, const size_t max_steps,
+    const double error_threshold, const IterationFunctor& iteration_function,
+    const bool require_convergence,
+    const FinalizeFunctor finalize_function = NoOpFinalize{}) {
+  const size_t number_of_angular_points =
+      Spectral::Swsh::number_of_swsh_collocation_points(l_max);
+
+  Spectral::Swsh::create_angular_and_cartesian_coordinates(
+      cartesian_cauchy_coordinates, angular_cauchy_coordinates, l_max);
+  Spectral::Swsh::create_angular_and_cartesian_coordinates(
+      cartesian_inertial_coordinates, angular_inertial_coordinates, l_max);
+
+  Variables<tmpl::list<
+      // cartesian coordinates
+      ::Tags::TempSpinWeightedScalar<0, 0>,
+      ::Tags::TempSpinWeightedScalar<1, 0>,
+      ::Tags::TempSpinWeightedScalar<2, 0>,
+      // eth of cartesian coordinates
+      ::Tags::TempSpinWeightedScalar<3, 1>,
+      ::Tags::TempSpinWeightedScalar<4, 1>,
+      ::Tags::TempSpinWeightedScalar<5, 1>,
+      // eth of gauge-transformed cartesian coordinates
+      ::Tags::TempSpinWeightedScalar<6, 1>,
+      ::Tags::TempSpinWeightedScalar<7, 1>,
+      ::Tags::TempSpinWeightedScalar<8, 1>,
+      // gauge Jacobians
+      ::Tags::TempSpinWeightedScalar<9, 2>,
+      ::Tags::TempSpinWeightedScalar<10, 0>,
+      // gauge Jacobians on next iteration
+      ::Tags::TempSpinWeightedScalar<11, 2>,
+      ::Tags::TempSpinWeightedScalar<12, 0>,
+      // cartesian coordinates steps
+      ::Tags::TempSpinWeightedScalar<13, 0>,
+      ::Tags::TempSpinWeightedScalar<14, 0>,
+      ::Tags::TempSpinWeightedScalar<15, 0>>>
+      computation_buffers{number_of_angular_points};
+
+  auto& x = get(get<::Tags::TempSpinWeightedScalar<0, 0>>(computation_buffers));
+  auto& y = get(get<::Tags::TempSpinWeightedScalar<1, 0>>(computation_buffers));
+  auto& z = get(get<::Tags::TempSpinWeightedScalar<2, 0>>(computation_buffers));
+
+  x.data() =
+      std::complex<double>(1.0, 0.0) * get<0>(*cartesian_cauchy_coordinates);
+  y.data() =
+      std::complex<double>(1.0, 0.0) * get<1>(*cartesian_cauchy_coordinates);
+  z.data() =
+      std::complex<double>(1.0, 0.0) * get<2>(*cartesian_cauchy_coordinates);
+
+  auto& eth_x =
+      get(get<::Tags::TempSpinWeightedScalar<3, 1>>(computation_buffers));
+  auto& eth_y =
+      get(get<::Tags::TempSpinWeightedScalar<4, 1>>(computation_buffers));
+  auto& eth_z =
+      get(get<::Tags::TempSpinWeightedScalar<5, 1>>(computation_buffers));
+
+  Spectral::Swsh::angular_derivatives<
+      tmpl::list<Spectral::Swsh::Tags::Eth, Spectral::Swsh::Tags::Eth,
+                 Spectral::Swsh::Tags::Eth>>(l_max, 1, make_not_null(&eth_x),
+                                             make_not_null(&eth_y),
+                                             make_not_null(&eth_z), x, y, z);
+
+  auto& evolution_gauge_eth_x_step =
+      get(get<::Tags::TempSpinWeightedScalar<6, 1>>(computation_buffers));
+  auto& evolution_gauge_eth_y_step =
+      get(get<::Tags::TempSpinWeightedScalar<7, 1>>(computation_buffers));
+  auto& evolution_gauge_eth_z_step =
+      get(get<::Tags::TempSpinWeightedScalar<8, 1>>(computation_buffers));
+
+  auto& gauge_c =
+      get<::Tags::TempSpinWeightedScalar<9, 2>>(computation_buffers);
+  auto& gauge_d =
+      get<::Tags::TempSpinWeightedScalar<10, 0>>(computation_buffers);
+
+  auto& gauge_c_step =
+      get<::Tags::TempSpinWeightedScalar<11, 2>>(computation_buffers);
+  auto& gauge_d_step =
+      get<::Tags::TempSpinWeightedScalar<12, 0>>(computation_buffers);
+
+  auto& x_step =
+      get(get<::Tags::TempSpinWeightedScalar<13, 0>>(computation_buffers));
+  auto& y_step =
+      get(get<::Tags::TempSpinWeightedScalar<14, 0>>(computation_buffers));
+  auto& z_step =
+      get(get<::Tags::TempSpinWeightedScalar<15, 0>>(computation_buffers));
+
+  double max_error = 1.0;
+  size_t number_of_steps = 0;
+  Spectral::Swsh::SwshInterpolator iteration_interpolator;
+  while (true) {
+    GaugeUpdateAngularFromCartesian<
+        Tags::CauchyAngularCoords,
+        Tags::CauchyCartesianCoords>::apply(angular_cauchy_coordinates,
+                                            cartesian_cauchy_coordinates);
+    GaugeUpdateAngularFromCartesian<
+        Tags::CauchyAngularCoords,
+        Tags::CauchyCartesianCoords>::apply(angular_inertial_coordinates,
+                                            cartesian_inertial_coordinates);
+
+    iteration_interpolator = Spectral::Swsh::SwshInterpolator{
+        get<0>(*angular_cauchy_coordinates),
+        get<1>(*angular_cauchy_coordinates), l_max};
+
+    GaugeUpdateJacobianFromCoordinates<
+        Tags::PartiallyFlatGaugeC, Tags::PartiallyFlatGaugeD,
+        Tags::CauchyAngularCoords,
+        Tags::CauchyCartesianCoords>::apply(make_not_null(&gauge_c),
+                                            make_not_null(&gauge_d),
+                                            angular_cauchy_coordinates,
+                                            *cartesian_cauchy_coordinates,
+                                            l_max);
+
+    max_error = iteration_function(make_not_null(&gauge_c_step),
+                                   make_not_null(&gauge_d_step), gauge_c,
+                                   gauge_d, iteration_interpolator);
+
+    if (max_error > error_threshold) {
+      ERROR(
+          "Iterative solve for surface coordinates of initial data failed. The "
+          "strain is too large to be fully eliminated by a well-behaved "
+          "alteration of the spherical mesh. This could be an indication that "
+          "there is an issue with the worldtube data. If you are confident "
+          "the worldtube data is correct, then please use an alternative "
+          "initial data generator such as `InverseCubic`. If that fails, "
+          "please double check that your spherical harmonic modes are decaying "
+          "correctly with increasing (l,m).\nError: "
+          << max_error << "\nError threshold: " << error_threshold);
+    }
+    ++number_of_steps;
+    if (max_error < tolerance or number_of_steps > max_steps) {
+      break;
+    }
+    // using the evolution_gauge_.._step as temporary buffers for the
+    // interpolation results
+    iteration_interpolator.interpolate(
+        make_not_null(&evolution_gauge_eth_x_step), eth_x);
+    iteration_interpolator.interpolate(
+        make_not_null(&evolution_gauge_eth_y_step), eth_y);
+    iteration_interpolator.interpolate(
+        make_not_null(&evolution_gauge_eth_z_step), eth_z);
+
+    evolution_gauge_eth_x_step =
+        0.5 * ((get(gauge_c_step)) * conj(evolution_gauge_eth_x_step) +
+               conj((get(gauge_d_step))) * evolution_gauge_eth_x_step);
+    evolution_gauge_eth_y_step =
+        0.5 * ((get(gauge_c_step)) * conj(evolution_gauge_eth_y_step) +
+               conj((get(gauge_d_step))) * evolution_gauge_eth_y_step);
+    evolution_gauge_eth_z_step =
+        0.5 * ((get(gauge_c_step)) * conj(evolution_gauge_eth_z_step) +
+               conj((get(gauge_d_step))) * evolution_gauge_eth_z_step);
+
+    Spectral::Swsh::angular_derivatives<tmpl::list<
+        Spectral::Swsh::Tags::InverseEth, Spectral::Swsh::Tags::InverseEth,
+        Spectral::Swsh::Tags::InverseEth>>(
+        l_max, 1, make_not_null(&x_step), make_not_null(&y_step),
+        make_not_null(&z_step), evolution_gauge_eth_x_step,
+        evolution_gauge_eth_y_step, evolution_gauge_eth_z_step);
+
+    get<0>(*cartesian_cauchy_coordinates) += real(x_step.data());
+    get<1>(*cartesian_cauchy_coordinates) += real(y_step.data());
+    get<2>(*cartesian_cauchy_coordinates) += real(z_step.data());
+
+    get<0>(*cartesian_inertial_coordinates) -= real(x_step.data());
+    get<1>(*cartesian_inertial_coordinates) -= real(y_step.data());
+    get<2>(*cartesian_inertial_coordinates) -= real(z_step.data());
+  }
+
+  finalize_function(gauge_c, gauge_d, *angular_cauchy_coordinates,
+                    iteration_interpolator);
+
+  if (tolerance < max_error) {
+    if (require_convergence) {
+      ERROR(
+          "Initial data iterative angular solve did not reach "
+          "target tolerance "
+          << tolerance << ".\n"
+          << "Exited after " << max_steps
+          << " iterations, achieving final\n"
+             "maximum over collocation points deviation of J from target of "
+          << max_error);
+    } else {
+      Parallel::printf(
+          "Warning: iterative angular solve did not reach "
+          "target tolerance %e.\n"
+          "Exited after %zu iterations, achieving final maximum over "
+          "collocation points for deviation from target of %e\n"
+          "Proceeding with evolution using the partial result from partial "
+          "angular solve.\n",
+          tolerance, max_steps, max_error);
+    }
+  }
+  return max_error;
+}
+
 double adjust_angular_coordinates_for_j(
     gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*> volume_j,
     gsl::not_null<tnsr::i<DataVector, 3>*> cartesian_cauchy_coordinates,
