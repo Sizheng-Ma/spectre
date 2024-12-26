@@ -69,6 +69,8 @@ void InverseCubic<true>::apply(
     const size_t number_of_radial_points) {
   // use_input_modes_ = False use_beta_integral_estimate_ = False
   // optimize_l_0_mode_ = True
+  bool use_beta_integral_estimate_ = true;
+  bool use_input_modes_ = false;
   double angular_coordinate_tolerance = 1.0e-13;
   size_t max_iterations = 1000;
   bool require_convergence = false;
@@ -120,6 +122,16 @@ void InverseCubic<true>::apply(
 
   target_omega.data() = exp(2.0 * get(beta).data());
 
+  if (not use_input_modes_ and use_beta_integral_estimate_) {
+    // use buffer for the (1-y) coefficient that we'd generate in the original
+    // gauge.
+    get(surface_j_buffer) = 0.25 * (3.0 * get(boundary_j).data() +
+                                    get(r).data() * get(boundary_dr_j).data());
+    target_omega.data() /= pow(1.0 + 4.0 * get(surface_j_buffer).data() *
+                                         conj(get(surface_j_buffer).data()),
+                               0.125);
+  }
+
   void (*iteration_heuristic_function)(
       const gsl::not_null<SpinWeighted<ComplexDataVector, 2>*>,
       const gsl::not_null<SpinWeighted<ComplexDataVector, 0>*>,
@@ -135,7 +147,7 @@ void InverseCubic<true>::apply(
       [&iteration_heuristic_function, &filtered_gauge_omega, &gauge_omega,
        &target_omega, &interpolated_target_gauge_omega,
        &gauge_omega_transform_buffer, &l_max, &surface_r_buffer,
-       &input_j_buffer,
+       &input_j_buffer, &use_beta_integral_estimate_, use_input_modes_,
        &r](const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 2>>*>
                gauge_c_step,
            const gsl::not_null<Scalar<SpinWeighted<ComplexDataVector, 0>>*>
@@ -148,6 +160,17 @@ void InverseCubic<true>::apply(
                        get(gauge_c).data() * conj(get(gauge_c).data()));
         iteration_interpolator.interpolate(
             make_not_null(&interpolated_target_gauge_omega), target_omega);
+        if (use_input_modes_ and use_beta_integral_estimate_) {
+          // when using input modes, the `input_j_buffer` stores the
+          // 1/r part of J in the evolution gauge
+          iteration_interpolator.interpolate(
+              make_not_null(&get(surface_r_buffer)), get(r));
+          get(surface_r_buffer).data() *= get(gauge_omega).data();
+          interpolated_target_gauge_omega.data() /= pow(
+              1.0 + real(input_j_buffer.data() * conj(input_j_buffer.data()) /
+                         (square(get(surface_r_buffer).data()))),
+              0.125);
+        }
         filtered_gauge_omega = get(gauge_omega);
         double max_error = max(abs(filtered_gauge_omega.data() -
                                    interpolated_target_gauge_omega.data()));
@@ -180,12 +203,13 @@ void InverseCubic<true>::apply(
             make_not_null(&surface_r_buffer), r, gauge_omega, interpolator);
       };
 
-  detail::iteratively_adapt_angular_coordinates(
-      cartesian_cauchy_coordinates, angular_cauchy_coordinates, l_max,
+  detail::iteratively_adapt_angular_coordinates_ccm(
+      cartesian_cauchy_coordinates, angular_cauchy_coordinates,
+      cartesian_inertial_coordinates, angular_inertial_coordinates, l_max,
       angular_coordinate_tolerance, max_iterations, 1.0e-2, iteration_function,
       require_convergence, finalize_function);
-  Spectral::Swsh::create_angular_and_cartesian_coordinates(
-      cartesian_inertial_coordinates, angular_inertial_coordinates, l_max);
+  //   Spectral::Swsh::create_angular_and_cartesian_coordinates(
+  //       cartesian_inertial_coordinates, angular_inertial_coordinates, l_max);
 
   const DataVector one_minus_y_collocation =
       1.0 - Spectral::collocation_points<Spectral::Basis::Legendre,
