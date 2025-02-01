@@ -364,7 +364,7 @@ void ccm_functions(
     std::vector<std::complex<double>>& psi3,
     std::vector<std::complex<double>>& psi4, std::vector<double>& dt_u_scri,
     std::vector<std::complex<double>>& psi0_ccm,
-    std::vector<std::complex<double>>& wxx_test_for_spec,
+    // std::vector<std::complex<double>>& wxx_test_for_spec,
     std::vector<std::complex<double>>& coeff_theta,
     std::vector<std::complex<double>>& coeff_phi, double& ccmconstraintomega,
     double& ccmconstraintc, double& ccmconstraintd, const size_t l_max,
@@ -633,7 +633,7 @@ void ccm_functions(
 
   /*************************for_test*****************************/
 
-  db::mutate_apply<Cce::GetWijForTest>(make_not_null(&spectre_box));
+  // db::mutate_apply<Cce::GetWijForTest>(make_not_null(&spectre_box));
   /*************************after_cce*****************************/
   //   std::cout << "final: BondiH size: "
   //             << get(get<Cce::Tags::BondiH>(spectre_box)).size() <<
@@ -681,7 +681,7 @@ void ccm_functions(
   auto& psi0_for_ccm_from_spectre =
       get<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>>(spectre_box);
 
-  auto& wij_ccm = get<Cce::Tags::WxxForSpECTest>(spectre_box);
+  // auto& wij_ccm = get<Cce::Tags::WxxForSpECTest>(spectre_box);
   auto& ccm_tetrad_coeff_theta =
       get<Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffTheta>>(spectre_box);
   auto& ccm_tetrad_coeff_phi =
@@ -748,8 +748,8 @@ void ccm_functions(
   //             << std::endl;
   // }
 
-  wxx_test_for_spec.insert(wxx_test_for_spec.end(), get(wij_ccm).data().begin(),
-                           get(wij_ccm).data().end());
+  // wxx_test_for_spec.insert(wxx_test_for_spec.end(), get(wij_ccm).data().begin(),
+  //                          get(wij_ccm).data().end());
   // for (unsigned int i = 0; i < get(wij_ccm).size(); i++) {
   //   std::cout << wxx_test_for_spec[i] - (get(wij_ccm).data()[i]) <<
   //   std::endl;
