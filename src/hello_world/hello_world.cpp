@@ -814,11 +814,11 @@ void ccm_interpolation(std::vector<std::complex<double>>& psi0_ccm_interpolated,
       psi0_for_ccm_from_spectre_interpolated.data().end());
 }
 
-void ccm_interpolation0(std::vector<std::complex<double>>& psi0_ccm_interpolated,
-                       const std::vector<double>& cauchy_theta,
-                       const std::vector<double>& cauchy_phi,
-                       const size_t l_max,
-                       const std::vector<std::complex<double>>& psi0_ccm) {
+void ccm_interpolation0(
+    std::vector<std::complex<double>>& psi0_ccm_interpolated,
+    const std::vector<double>& cauchy_theta,
+    const std::vector<double>& cauchy_phi, const size_t l_max,
+    const std::vector<double>& psi0_ccm) {
   DataVector cauchy_theta_dv(cauchy_theta.size());
   DataVector cauchy_phi_dv(cauchy_phi.size());
   std_vector_to_DataVector(cauchy_theta_dv, cauchy_theta);
@@ -829,8 +829,8 @@ void ccm_interpolation0(std::vector<std::complex<double>>& psi0_ccm_interpolated
   SpinWeighted<ComplexDataVector, 0> psi0_for_ccm_from_spectre{psi0_ccm.size()};
   SpinWeighted<ComplexDataVector, 0> psi0_for_ccm_from_spectre_interpolated;
 
-  std::memcpy(psi0_for_ccm_from_spectre.data().data(), psi0_ccm.data(),
-              sizeof(std::complex<double>) * psi0_ccm.size());
+  for (size_t i = 0; i < psi0_ccm.size(); i++)
+    psi0_for_ccm_from_spectre.data()[i] = psi0_ccm[i];
 
   interpolator.interpolate(
       make_not_null(&psi0_for_ccm_from_spectre_interpolated),
