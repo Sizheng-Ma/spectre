@@ -43,7 +43,7 @@ void ccm_functions(
     std::vector<std::complex<double>>& psi4, std::vector<double>& dt_u_scri,
     std::vector<std::complex<double>>& psi0_ccm,
     // std::vector<std::complex<double>>& wxx_test_for_spec,
-    std::vector<std::complex<double>>& coeff_theta,
+    std::vector<double>& coeff_theta,
     std::vector<std::complex<double>>& coeff_phi, double& ccmconstraintomega,
     double& ccmconstraintc, double& ccmconstraintd, const size_t l_max,
     const size_t number_of_radial_points,
