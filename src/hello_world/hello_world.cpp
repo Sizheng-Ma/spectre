@@ -363,7 +363,7 @@ void ccm_functions(
     std::vector<std::complex<double>>& psi4, std::vector<double>& dt_u_scri,
     std::vector<std::complex<double>>& psi0_ccm,
     // std::vector<std::complex<double>>& wxx_test_for_spec,
-    std::vector<std::complex<double>>& coeff_theta,
+    std::vector<double>& coeff_theta,
     std::vector<std::complex<double>>& coeff_phi, double& ccmconstraintomega,
     double& ccmconstraintc, double& ccmconstraintd, const size_t l_max,
     const size_t number_of_radial_points,
@@ -752,10 +752,10 @@ void ccm_functions(
   //   std::cout << wxx_test_for_spec[i] - (get(wij_ccm).data()[i]) <<
   //   std::endl;
   // }
+  auto& real_coeff_theta = real(get(ccm_tetrad_coeff_theta).data());
 
-  coeff_theta.insert(coeff_theta.end(),
-                     get(ccm_tetrad_coeff_theta).data().begin(),
-                     get(ccm_tetrad_coeff_theta).data().end());
+  coeff_theta.insert(coeff_theta.end(), real_coeff_theta.begin(),
+                     real_coeff_theta.end());
   // for (unsigned int i = 0; i < get(ccm_tetrad_coeff_theta).size(); i++) {
   //   std::cout << coeff_theta[i] - (get(ccm_tetrad_coeff_theta).data()[i])
   //             << std::endl;
