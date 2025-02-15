@@ -47,6 +47,7 @@ target_link_libraries(
  GeneralRelativitySolutions
  SPHEREPACK
  SpecialRelativity
+ Options
  )
 
 # # add_custom_command
