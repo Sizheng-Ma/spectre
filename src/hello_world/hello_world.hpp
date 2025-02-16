@@ -92,7 +92,7 @@ struct InterpolationInterface {
       const;
 
   void InsertInterpolationScriData(
-      const double delta_time_spec, std::vector<double>& inertial_time,
+      std::vector<double>& inertial_time,
       std::vector<std::complex<double>>& psi0,
       std::vector<std::complex<double>>& psi1,
       std::vector<std::complex<double>>& psi2,
@@ -102,9 +102,9 @@ struct InterpolationInterface {
       std::vector<std::complex<double>>& news,
       std::vector<std::complex<double>>& eth_inertial_retarded_time);
 
+  void InsertTargetTime(double time);
+
   void ScriObserveInterpolated(
-      std::queue<std::vector<double>>&
-          eth_inertial_retarded_time_to_write_final,
       std::queue<std::vector<double>>& psi0_to_write_final,
       std::queue<std::vector<double>>& psi1_to_write_final,
       std::queue<std::vector<double>>& psi2_to_write_final,
