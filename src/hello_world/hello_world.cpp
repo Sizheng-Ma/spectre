@@ -120,8 +120,7 @@ static void transform_and_write_new(
     const ComplexDataVector& data, const double time,
     const gsl::not_null<ComplexModalVector*> goldberg_mode_buffer,
     const gsl::not_null<std::vector<double>*> data_to_write_buffer,
-    const std::vector<std::string>& legend, const size_t l_max,
-    const size_t observation_l_max) {
+    const size_t l_max, const size_t observation_l_max) {
   const SpinWeighted<ComplexDataVector, Spin> to_transform;
   make_const_view(make_not_null(&to_transform.data()), data, 0, data.size());
   SpinWeighted<ComplexModalVector, Spin> goldberg_modes;
@@ -381,7 +380,6 @@ void ccm_functions(
   const size_t scri_interpolation_order = 5;
   const double radial_filter_alpha = 35.0;
   const size_t radial_filter_half_power = 24;
-  const size_t observation_l_max = 8;
 
   using Metavariables = MyEvolutionMetavars;
 
@@ -1253,9 +1251,20 @@ std::deque<std::vector<double>> InterpolationInterface::get_u_bondi_values()
   return test;
 }
 
+void InterpolationInterface::InsertTargetTime(double time) {
+  my_scri_plus_interpolation_manager_->manager_psi0_.insert_target_time(time);
+  my_scri_plus_interpolation_manager_->manager_psi1_.insert_target_time(time);
+  my_scri_plus_interpolation_manager_->manager_psi2_.insert_target_time(time);
+  my_scri_plus_interpolation_manager_->manager_psi3_.insert_target_time(time);
+  my_scri_plus_interpolation_manager_->manager_psi4_.insert_target_time(time);
+  my_scri_plus_interpolation_manager_->manager_strain_.insert_target_time(time);
+  my_scri_plus_interpolation_manager_->manager_news_.insert_target_time(time);
+  my_scri_plus_interpolation_manager_->manager_eth_inertial_retarded_time_
+      .insert_target_time(time);
+}
+
 void InterpolationInterface::InsertInterpolationScriData(
-    const double delta_time_spec, std::vector<double>& inertial_time,
-    std::vector<std::complex<double>>& psi0,
+    std::vector<double>& inertial_time, std::vector<std::complex<double>>& psi0,
     std::vector<std::complex<double>>& psi1,
     std::vector<std::complex<double>>& psi2,
     std::vector<std::complex<double>>& psi3,
@@ -1300,134 +1309,9 @@ void InterpolationInterface::InsertInterpolationScriData(
       spectre_inertial_time, spectre_news);
   my_scri_plus_interpolation_manager_->manager_eth_inertial_retarded_time_
       .insert_data(spectre_inertial_time, spectre_eth_inertial_retarded_time);
-
-  double time_delta_estimate = delta_time_spec;
-
-  {
-    const auto& time_span_deque =
-        my_scri_plus_interpolation_manager_->manager_psi0_.get_u_bondi_ranges();
-    const double this_time = time_span_deque.back().first;
-    if (time_span_deque.size() > 1) {
-      time_delta_estimate =
-          this_time - time_span_deque[time_span_deque.size() - 2].first;
-    }
-    for (size_t i = 0; i < scri_output_density_; ++i) {
-      my_scri_plus_interpolation_manager_->manager_psi0_.insert_target_time(
-          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
-                          static_cast<double>(scri_output_density_));
-    }
-  }
-
-  {
-    const auto& time_span_deque =
-        my_scri_plus_interpolation_manager_->manager_psi1_.get_u_bondi_ranges();
-    const double this_time = time_span_deque.back().first;
-    if (time_span_deque.size() > 1) {
-      time_delta_estimate =
-          this_time - time_span_deque[time_span_deque.size() - 2].first;
-    }
-    for (size_t i = 0; i < scri_output_density_; ++i) {
-      my_scri_plus_interpolation_manager_->manager_psi1_.insert_target_time(
-          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
-                          static_cast<double>(scri_output_density_));
-    }
-  }
-
-  {
-    const auto& time_span_deque =
-        my_scri_plus_interpolation_manager_->manager_psi2_.get_u_bondi_ranges();
-    const double this_time = time_span_deque.back().first;
-    if (time_span_deque.size() > 1) {
-      time_delta_estimate =
-          this_time - time_span_deque[time_span_deque.size() - 2].first;
-    }
-    for (size_t i = 0; i < scri_output_density_; ++i) {
-      my_scri_plus_interpolation_manager_->manager_psi2_.insert_target_time(
-          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
-                          static_cast<double>(scri_output_density_));
-    }
-  }
-
-  {
-    const auto& time_span_deque =
-        my_scri_plus_interpolation_manager_->manager_psi3_.get_u_bondi_ranges();
-    const double this_time = time_span_deque.back().first;
-    if (time_span_deque.size() > 1) {
-      time_delta_estimate =
-          this_time - time_span_deque[time_span_deque.size() - 2].first;
-    }
-    for (size_t i = 0; i < scri_output_density_; ++i) {
-      my_scri_plus_interpolation_manager_->manager_psi3_.insert_target_time(
-          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
-                          static_cast<double>(scri_output_density_));
-    }
-  }
-
-  {
-    const auto& time_span_deque =
-        my_scri_plus_interpolation_manager_->manager_psi4_.get_u_bondi_ranges();
-    const double this_time = time_span_deque.back().first;
-    if (time_span_deque.size() > 1) {
-      time_delta_estimate =
-          this_time - time_span_deque[time_span_deque.size() - 2].first;
-    }
-    for (size_t i = 0; i < scri_output_density_; ++i) {
-      my_scri_plus_interpolation_manager_->manager_psi4_.insert_target_time(
-          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
-                          static_cast<double>(scri_output_density_));
-    }
-  }
-
-  {
-    const auto& time_span_deque = my_scri_plus_interpolation_manager_
-                                      ->manager_strain_.get_u_bondi_ranges();
-    const double this_time = time_span_deque.back().first;
-    if (time_span_deque.size() > 1) {
-      time_delta_estimate =
-          this_time - time_span_deque[time_span_deque.size() - 2].first;
-    }
-    for (size_t i = 0; i < scri_output_density_; ++i) {
-      my_scri_plus_interpolation_manager_->manager_strain_.insert_target_time(
-          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
-                          static_cast<double>(scri_output_density_));
-    }
-  }
-
-  {
-    const auto& time_span_deque =
-        my_scri_plus_interpolation_manager_->manager_news_.get_u_bondi_ranges();
-    const double this_time = time_span_deque.back().first;
-    if (time_span_deque.size() > 1) {
-      time_delta_estimate =
-          this_time - time_span_deque[time_span_deque.size() - 2].first;
-    }
-    for (size_t i = 0; i < scri_output_density_; ++i) {
-      my_scri_plus_interpolation_manager_->manager_news_.insert_target_time(
-          this_time + 0 * time_delta_estimate * static_cast<double>(i) /
-                          static_cast<double>(scri_output_density_));
-    }
-  }
-
-  {
-    const auto& time_span_deque =
-        my_scri_plus_interpolation_manager_->manager_eth_inertial_retarded_time_
-            .get_u_bondi_ranges();
-    const double this_time = time_span_deque.back().first;
-    if (time_span_deque.size() > 1) {
-      time_delta_estimate =
-          this_time - time_span_deque[time_span_deque.size() - 2].first;
-    }
-    for (size_t i = 0; i < scri_output_density_; ++i) {
-      my_scri_plus_interpolation_manager_->manager_eth_inertial_retarded_time_
-          .insert_target_time(this_time +
-                              0 * time_delta_estimate * static_cast<double>(i) /
-                                  static_cast<double>(scri_output_density_));
-    }
-  }
 }
 
 void InterpolationInterface::ScriObserveInterpolated(
-    std::queue<std::vector<double>>& eth_inertial_retarded_time_to_write_final,
     std::queue<std::vector<double>>& psi0_to_write_final,
     std::queue<std::vector<double>>& psi1_to_write_final,
     std::queue<std::vector<double>>& psi2_to_write_final,
@@ -1445,17 +1329,7 @@ void InterpolationInterface::ScriObserveInterpolated(
   std::vector<double> strain_to_write(2 * square(observation_l_max_ + 1) + 1);
   std::vector<double> news_to_write(2 * square(observation_l_max_ + 1) + 1);
 
-  std::vector<double> data_to_write(2 * square(observation_l_max_ + 1) + 1);
   ComplexModalVector goldberg_modes{square(l_max_ + 1)};
-  std::vector<std::string> file_legend;
-  file_legend.reserve(2 * square(observation_l_max_ + 1) + 1);
-  file_legend.emplace_back("time");
-  for (int i = 0; i <= static_cast<int>(observation_l_max_); ++i) {
-    for (int j = -i; j <= i; ++j) {
-      file_legend.push_back(MakeString{} << "Real Y_" << i << "," << j);
-      file_legend.push_back(MakeString{} << "Imag Y_" << i << "," << j);
-    }
-  }
 
   Variables<Cce::Actions::detail::weyl_correction_list>
       corrected_scri_plus_weyl{
@@ -1520,52 +1394,28 @@ void InterpolationInterface::ScriObserveInterpolated(
     Cce::Actions::detail::correct_weyl_scalars_for_inertial_time(
         make_not_null(&corrected_scri_plus_weyl));
 
-    // tmpl::for_each<Cce::Actions::detail::weyl_correction_list>(
-    //     [&data_to_write, &corrected_scri_plus_weyl, &interpolation_time,
-    //      &file_legend, &goldberg_modes, this](auto tag_v) {
-    //       using tag = typename decltype(tag_v)::type;
-    //       if constexpr (tmpl::list_contains_v<typename MyEvolutionMetavars::
-    //                                               scri_values_to_observe,
-    //                                           tag>) {
-    //         transform_and_write_new<tag, tag::type::type::spin>(
-    //             get(get<tag>(corrected_scri_plus_weyl)).data(),
-    //             interpolation_time, make_not_null(&goldberg_modes),
-    //             make_not_null(&data_to_write), file_legend, l_max_,
-    //             observation_l_max_);
-    //       }
-    //     });
-    {
-      using tag = Cce::Tags::EthInertialRetardedTime;
-      transform_and_write_new<tag, tag::type::type::spin>(
-          get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
-          make_not_null(&goldberg_modes),
-          make_not_null(&eth_inertial_retarded_time_to_write), file_legend,
-          l_max_, observation_l_max_);
-      eth_inertial_retarded_time_to_write_final.push(
-          eth_inertial_retarded_time_to_write);
-    }
     {
       using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi0>;
       transform_and_write_new<tag, tag::type::type::spin>(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
-          make_not_null(&goldberg_modes), make_not_null(&psi0_to_write),
-          file_legend, l_max_, observation_l_max_);
+          make_not_null(&goldberg_modes), make_not_null(&psi0_to_write), l_max_,
+          observation_l_max_);
       psi0_to_write_final.push(psi0_to_write);
     }
     {
       using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi1>;
       transform_and_write_new<tag, tag::type::type::spin>(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
-          make_not_null(&goldberg_modes), make_not_null(&psi1_to_write),
-          file_legend, l_max_, observation_l_max_);
+          make_not_null(&goldberg_modes), make_not_null(&psi1_to_write), l_max_,
+          observation_l_max_);
       psi1_to_write_final.push(psi1_to_write);
     }
     {
       using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi2>;
       transform_and_write_new<tag, tag::type::type::spin>(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
-          make_not_null(&goldberg_modes), make_not_null(&psi2_to_write),
-          file_legend, l_max_, observation_l_max_);
+          make_not_null(&goldberg_modes), make_not_null(&psi2_to_write), l_max_,
+          observation_l_max_);
       psi2_to_write_final.push(psi2_to_write);
     }
 
@@ -1573,8 +1423,8 @@ void InterpolationInterface::ScriObserveInterpolated(
       using tag = Cce::Tags::ScriPlus<Cce::Tags::Psi3>;
       transform_and_write_new<tag, tag::type::type::spin>(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
-          make_not_null(&goldberg_modes), make_not_null(&psi3_to_write),
-          file_legend, l_max_, observation_l_max_);
+          make_not_null(&goldberg_modes), make_not_null(&psi3_to_write), l_max_,
+          observation_l_max_);
       psi3_to_write_final.push(psi3_to_write);
     }
 
@@ -1583,8 +1433,8 @@ void InterpolationInterface::ScriObserveInterpolated(
           Cce::Tags::TimeIntegral<Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>;
       transform_and_write_new<tag, tag::type::type::spin>(
           get(get<tag>(corrected_scri_plus_weyl)).data(), interpolation_time,
-          make_not_null(&goldberg_modes), make_not_null(&psi4_to_write),
-          file_legend, l_max_, observation_l_max_);
+          make_not_null(&goldberg_modes), make_not_null(&psi4_to_write), l_max_,
+          observation_l_max_);
       psi4_to_write_final.push(psi4_to_write);
     }
 
@@ -1595,7 +1445,7 @@ void InterpolationInterface::ScriObserveInterpolated(
       transform_and_write_new<tag, tag::type::type::spin>(
           interpolation.second, interpolation.first,
           make_not_null(&goldberg_modes), make_not_null(&strain_to_write),
-          file_legend, l_max_, observation_l_max_);
+          l_max_, observation_l_max_);
       strain_to_write_final.push(strain_to_write);
     }
     {
@@ -1604,8 +1454,8 @@ void InterpolationInterface::ScriObserveInterpolated(
                           .interpolate_and_pop_first_time();
       transform_and_write_new<tag, tag::type::type::spin>(
           interpolation.second, interpolation.first,
-          make_not_null(&goldberg_modes), make_not_null(&news_to_write),
-          file_legend, l_max_, observation_l_max_);
+          make_not_null(&goldberg_modes), make_not_null(&news_to_write), l_max_,
+          observation_l_max_);
       news_to_write_final.push(news_to_write);
     }
   }
