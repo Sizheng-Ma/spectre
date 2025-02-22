@@ -930,35 +930,8 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
   std_vector_to_DataVector(pi_datavector, pi);
   std_vector_to_DataVector(spacetime_metric_datavector, spacetime_metric);
   tri_std_vector_to_DataVector(phi_datavector, phi);
-  using initialize_action =
-      Cce::Actions::InitializeCharacteristicEvolutionVariables<
-          MyEvolutionMetavars>;
-  auto spectre_box = db::create<
-      db::AddSimpleTags<initialize_action::simple_tags_for_evolution>>();
 
   size_t boundary_size = get_vector_size(l_max);
-  //   using boundary_value_variables_tag = ::Tags::Variables<tmpl::append<
-  //       typename MyEvolutionMetavars::cce_boundary_communication_tags,
-  //       typename MyEvolutionMetavars::cce_gauge_boundary_tags>>;
-  //   Initialization::mutate_assign<tmpl::list<boundary_value_variables_tag>>(
-  //       make_not_null(&spectre_box),
-  //       typename boundary_value_variables_tag::type{boundary_size});
-
-  //   db::mutate<initialize_action::boundary_value_variables_tag>(
-  //       [&l_max, &phi_datavector, &pi_datavector,
-  //       &spacetime_metric_datavector,
-  //        &radius](const gsl::not_null<
-  //                 initialize_action::boundary_value_variables_tag::type*>
-  //                     boundary_variables) {
-  //         auto blah =
-  //             (*boundary_variables)
-  //                 .reference_subset<
-  //                     MyEvolutionMetavars::cce_boundary_communication_tags>();
-  //         Cce::create_bondi_boundary_data(
-  //             make_not_null(&blah), phi_datavector, pi_datavector,
-  //             spacetime_metric_datavector, radius, l_max);
-  //       },
-  //       make_not_null(&spectre_box));
 
   Variables<typename MyEvolutionMetavars::cce_boundary_communication_tags>
       blahblah{boundary_size};
