@@ -84,8 +84,7 @@ std::string git_description() {
   return std::string(BOOST_PP_STRINGIZE(GIT_DESCRIPTION));
 }
 
-std::string git_branch() { return
-std::string(BOOST_PP_STRINGIZE(GIT_BRANCH)); }
+std::string git_branch() { return std::string(BOOST_PP_STRINGIZE(GIT_BRANCH)); }
 
 namespace formaline {
 std::vector<char> get_archive() {
@@ -726,7 +725,8 @@ void ccm_functions(
   //             << std::endl;
   // }
 
-  // wxx_test_for_spec.insert(wxx_test_for_spec.end(), get(wij_ccm).data().begin(),
+  // wxx_test_for_spec.insert(wxx_test_for_spec.end(),
+  // get(wij_ccm).data().begin(),
   //                          get(wij_ccm).data().end());
   // for (unsigned int i = 0; i < get(wij_ccm).size(); i++) {
   //   std::cout << wxx_test_for_spec[i] - (get(wij_ccm).data()[i]) <<
@@ -951,6 +951,119 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
   //   bondir = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>>(spectre_box);
   //   bondiu = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(spectre_box);
   //   bondiw = get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(spectre_box);
+}
+
+void gh_to_bondi_spec(std::vector<double>& final_array,
+                      const std::vector<std::vector<double>>& spacetime_metric,
+                      const std::vector<std::vector<double>>& pi,
+                      const std::vector<std::vector<std::vector<double>>>& phi,
+                      const size_t l_max, const double radius) {
+  // create_bondi_boundary_data
+  const auto size = pi.at(0).size();
+  tnsr::aa<DataVector, 3> pi_datavector{size};
+  tnsr::aa<DataVector, 3> spacetime_metric_datavector{size};
+  tnsr::iaa<DataVector, 3> phi_datavector{size};
+  std_vector_to_DataVector(pi_datavector, pi);
+  std_vector_to_DataVector(spacetime_metric_datavector, spacetime_metric);
+  tri_std_vector_to_DataVector(phi_datavector, phi);
+
+  size_t boundary_size = get_vector_size(l_max);
+
+  Variables<typename MyEvolutionMetavars::cce_boundary_communication_tags>
+      blahblah{boundary_size};
+  Cce::create_bondi_boundary_data(make_not_null(&blahblah), phi_datavector,
+                                  pi_datavector, spacetime_metric_datavector,
+                                  radius, l_max);
+
+  auto& beta_spectre =
+      real(get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>>(blahblah))
+               .data());
+  final_array.insert(final_array.end(), beta_spectre.begin(),
+                     beta_spectre.end());
+
+  auto& bondiu_spectre =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>>(blahblah)).data();
+  final_array.insert(final_array.end(), real(bondiu_spectre).begin(),
+                     real(bondiu_spectre).end());
+  final_array.insert(final_array.end(), imag(bondiu_spectre).begin(),
+                     imag(bondiu_spectre).end());
+
+  auto& dr_u_spectre =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>>(
+              blahblah))
+          .data();
+  final_array.insert(final_array.end(), real(dr_u_spectre).begin(),
+                     real(dr_u_spectre).end());
+  final_array.insert(final_array.end(), imag(dr_u_spectre).begin(),
+                     imag(dr_u_spectre).end());
+
+  auto& bondiq_spectre =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>>(blahblah)).data();
+  final_array.insert(final_array.end(), real(bondiq_spectre).begin(),
+                     real(bondiq_spectre).end());
+  final_array.insert(final_array.end(), imag(bondiq_spectre).begin(),
+                     imag(bondiq_spectre).end());
+
+  auto& bondiw_spectre = real(
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>>(blahblah)).data());
+  final_array.insert(final_array.end(), bondiw_spectre.begin(),
+                     bondiw_spectre.end());
+
+  auto& bondij_spectre =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>>(blahblah)).data();
+  final_array.insert(final_array.end(), real(bondij_spectre).begin(),
+                     real(bondij_spectre).end());
+  final_array.insert(final_array.end(), imag(bondij_spectre).begin(),
+                     imag(bondij_spectre).end());
+
+  auto& dr_j_spectre =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>>(
+              blahblah))
+          .data();
+  final_array.insert(final_array.end(), real(dr_j_spectre).begin(),
+                     real(dr_j_spectre).end());
+  final_array.insert(final_array.end(), imag(dr_j_spectre).begin(),
+                     imag(dr_j_spectre).end());
+
+  auto& bondih_spectre =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiH>>(blahblah)).data();
+  final_array.insert(final_array.end(), real(bondih_spectre).begin(),
+                     real(bondih_spectre).end());
+  final_array.insert(final_array.end(), imag(bondih_spectre).begin(),
+                     imag(bondih_spectre).end());
+
+  auto& du_j_spectre =
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>>(
+              blahblah))
+          .data();
+  final_array.insert(final_array.end(), real(du_j_spectre).begin(),
+                     real(du_j_spectre).end());
+  final_array.insert(final_array.end(), imag(du_j_spectre).begin(),
+                     imag(du_j_spectre).end());
+
+  auto& bondir_spectre = real(
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>>(blahblah)).data());
+  final_array.insert(final_array.end(), bondir_spectre.begin(),
+                     bondir_spectre.end());
+
+  auto& du_r_spectre =
+      real(get(get<Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>>(
+                   blahblah))
+               .data());
+  final_array.insert(final_array.end(), du_r_spectre.begin(),
+                     du_r_spectre.end());
+
+  auto& du_r_r_spectre = real(
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>>(blahblah))
+          .data());
+  final_array.insert(final_array.end(), du_r_r_spectre.begin(),
+                     du_r_r_spectre.end());
+
+  auto& spec_norm_spectre = real(
+      get(get<Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>>(blahblah))
+          .data());
+  final_array.insert(final_array.end(), spec_norm_spectre.begin(),
+                     spec_norm_spectre.end());
 }
 
 namespace spectre {
