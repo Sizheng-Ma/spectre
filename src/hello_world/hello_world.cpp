@@ -195,19 +195,14 @@ void initialize_j(std::vector<std::complex<double>>& finalbondij,
 
   using initialize_action =
       Cce::Actions::InitializeCharacteristicEvolutionVariables<Metavariables>;
-  using initialize_scri = Cce::Actions::InitializeCharacteristicEvolutionScri<
-      Metavariables::scri_values_to_observe,
-      Metavariables::cce_boundary_component>;
   using simple_tags_for_evolution =
       initialize_action::simple_tags_for_evolution;
-  using simple_tags_for_scri = initialize_scri::simple_tags;
   using from_cache =
       tmpl::list<Cce::InitializationTags::ScriInterpolationOrder,
                  Cce::Tags::LMax, Cce::Tags::NumberOfRadialPoints,
                  Cce::Tags::FilterLMax, Cce::Tags::RadialFilterAlpha,
                  Cce::Tags::RadialFilterHalfPower>;
-  using simple_tags =
-      tmpl::append<from_cache, simple_tags_for_evolution, simple_tags_for_scri>;
+  using simple_tags = tmpl::append<from_cache, simple_tags_for_evolution>;
 
   auto spectre_box = db::create<db::AddSimpleTags<simple_tags>>();
 
@@ -222,10 +217,6 @@ void initialize_j(std::vector<std::complex<double>>& finalbondij,
       Cce::Tags::RadialFilterAlpha::type{radial_filter_alpha},
       Cce::Tags::RadialFilterHalfPower::type{radial_filter_half_power});
   initialize_action::initialize_impl(make_not_null(&spectre_box));
-
-  initialize_scri::initialize_impl(
-      make_not_null(&spectre_box),
-      typename Metavariables::scri_values_to_observe{});
 
   /****************************Get_Boundary_Data*************************************/
   db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>,
@@ -385,19 +376,14 @@ void ccm_functions(
 
   using initialize_action =
       Cce::Actions::InitializeCharacteristicEvolutionVariables<Metavariables>;
-  using initialize_scri = Cce::Actions::InitializeCharacteristicEvolutionScri<
-      Metavariables::scri_values_to_observe,
-      Metavariables::cce_boundary_component>;
   using simple_tags_for_evolution =
       initialize_action::simple_tags_for_evolution;
-  using simple_tags_for_scri = initialize_scri::simple_tags;
   using from_cache =
       tmpl::list<Cce::InitializationTags::ScriInterpolationOrder,
                  Cce::Tags::LMax, Cce::Tags::NumberOfRadialPoints,
                  Cce::Tags::FilterLMax, Cce::Tags::RadialFilterAlpha,
                  Cce::Tags::RadialFilterHalfPower>;
-  using simple_tags =
-      tmpl::append<from_cache, simple_tags_for_evolution, simple_tags_for_scri>;
+  using simple_tags = tmpl::append<from_cache, simple_tags_for_evolution>;
 
   auto spectre_box = db::create<db::AddSimpleTags<simple_tags>>();
 
@@ -412,10 +398,6 @@ void ccm_functions(
       Cce::Tags::RadialFilterAlpha::type{radial_filter_alpha},
       Cce::Tags::RadialFilterHalfPower::type{radial_filter_half_power});
   initialize_action::initialize_impl(make_not_null(&spectre_box));
-
-  initialize_scri::initialize_impl(
-      make_not_null(&spectre_box),
-      typename Metavariables::scri_values_to_observe{});
 
   /****************************Get_Boundary_Data*************************************/
   db::mutate<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>,
