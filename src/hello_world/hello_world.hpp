@@ -67,6 +67,12 @@ void ccm_interpolation0(
     const std::vector<double>& cauchy_phi, const size_t l_max,
     const std::vector<double>& psi0_ccm);
 
+void gh_to_bondi_spec(std::vector<double>& final_array,
+                      const std::vector<std::vector<double>>& spacetime_metric,
+                      const std::vector<std::vector<double>>& pi,
+                      const std::vector<std::vector<std::vector<double>>>& phi,
+                      const size_t l_max, const double radius);
+
 namespace spectre {
 struct MyScriPlusInterpolationManager;
 
