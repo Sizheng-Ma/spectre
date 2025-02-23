@@ -35,9 +35,7 @@ struct CalculatePsi0AndDerivAtInnerBoundary {
       tmpl::list<TransformBondiJToCauchyCoords,
                  PreSwshDerivatives<Tags::Dy<Tags::BondiJCauchyView>>,
                  PreSwshDerivatives<Tags::Dy<Tags::Dy<Tags::BondiJCauchyView>>>,
-                 VolumeWeyl<Tags::Psi0Match>,
-                 PreSwshDerivatives<Tags::Dy<Tags::Psi0Match>>,
-                 InnerBoundaryWeyl>;
+                 VolumeWeyl<Tags::Psi0Match>, InnerBoundaryWeyl>;
 
   template <typename DbTags, typename... InboxTags, typename Metavariables,
             typename ArrayIndex, typename ActionList,
