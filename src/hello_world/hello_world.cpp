@@ -5,7 +5,6 @@
 
 #include <boost/preprocessor.hpp>
 #include <complex>
-#include <iomanip>
 #include <iostream>
 #include <queue>
 #include <string>
@@ -70,6 +69,222 @@ void gh_to_bondi(Scalar<SpinWeighted<ComplexDataVector, 0>>& beta,
                  const std::vector<std::vector<double>>& pi,
                  const std::vector<std::vector<std::vector<double>>>& phi,
                  const size_t l_max, const double radius);
+
+void insert_bondi_variables(
+    const gsl::not_null<Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
+        bondi_beta,
+    const gsl::not_null<
+        Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiJ>>::type*>
+        bondi_dr_j,
+    const gsl::not_null<
+        Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiR>>::type*>
+        bondi_du_r,
+    const gsl::not_null<Cce::Tags::BoundaryValue<Cce::Tags::BondiH>::type*>
+        bondi_h,
+    const gsl::not_null<Cce::Tags::BoundaryValue<Cce::Tags::BondiJ>::type*>
+        bondi_j,
+    const gsl::not_null<Cce::Tags::BoundaryValue<Cce::Tags::BondiQ>::type*>
+        bondi_q,
+    const gsl::not_null<Cce::Tags::BoundaryValue<Cce::Tags::BondiR>::type*>
+        bondi_r,
+    const gsl::not_null<Cce::Tags::BoundaryValue<Cce::Tags::BondiU>::type*>
+        bondi_u,
+    const gsl::not_null<Cce::Tags::BoundaryValue<Cce::Tags::BondiW>::type*>
+        bondi_w,
+    const gsl::not_null<
+        Cce::Tags::BoundaryValue<Cce::Tags::Dr<Cce::Tags::BondiU>>::type*>
+        dr_u,
+    const gsl::not_null<
+        Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>::type*>
+        du_j,
+    const gsl::not_null<
+        Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>::type*>
+        du_r_r,
+    const gsl::not_null<
+        Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>::type*>
+        spec_norm,
+    const size_t l_max, std::vector<double>& ccm_sender) {
+  size_t surface_size = get_vector_size(l_max);
+  size_t total_size_ccm_sender = ccm_sender.size();
+  /********************************spec_norm_new*************************/
+  std::vector<double> spec_norm_new;
+  spec_norm_new.insert(spec_norm_new.end(), ccm_sender.end() - surface_size,
+                       ccm_sender.end());
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*spec_norm).data()[xx] = spec_norm_new[xx];
+  }
+
+  /*********************************du_r_r******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> du_r_r_new;
+  du_r_r_new.insert(du_r_r_new.end(), ccm_sender.end() - surface_size,
+                    ccm_sender.end());
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*du_r_r).data()[xx] = du_r_r_new[xx];
+  }
+
+  /***********************************du_r*******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> du_r_new;
+  du_r_new.insert(du_r_new.end(), ccm_sender.end() - surface_size,
+                  ccm_sender.end());
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*bondi_du_r).data()[xx] = du_r_new[xx];
+  }
+
+  /*******************************bondi_r******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> bondir_new;
+  bondir_new.insert(bondir_new.end(), ccm_sender.end() - surface_size,
+                    ccm_sender.end());
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*bondi_r).data()[xx] = bondir_new[xx];
+  }
+
+  /*******************************du_j******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> du_j_im_new;
+  du_j_im_new.insert(du_j_im_new.end(), ccm_sender.end() - surface_size,
+                     ccm_sender.end());
+
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> du_j_re_new;
+  du_j_re_new.insert(du_j_re_new.end(), ccm_sender.end() - surface_size,
+                     ccm_sender.end());
+
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*du_j).data()[xx] =
+        std::complex<double>(du_j_re_new[xx], du_j_im_new[xx]);
+  }
+
+  /*******************************h******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> bondih_im_new;
+  bondih_im_new.insert(bondih_im_new.end(), ccm_sender.end() - surface_size,
+                       ccm_sender.end());
+
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> bondih_re_new;
+  bondih_re_new.insert(bondih_re_new.end(), ccm_sender.end() - surface_size,
+                       ccm_sender.end());
+
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*bondi_h).data()[xx] =
+        std::complex<double>(bondih_re_new[xx], bondih_im_new[xx]);
+  }
+
+  /*******************************dr_j******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> dr_j_im_new;
+  dr_j_im_new.insert(dr_j_im_new.end(), ccm_sender.end() - surface_size,
+                     ccm_sender.end());
+
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> dr_j_re_new;
+  dr_j_re_new.insert(dr_j_re_new.end(), ccm_sender.end() - surface_size,
+                     ccm_sender.end());
+
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*bondi_dr_j).data()[xx] =
+        std::complex<double>(dr_j_re_new[xx], dr_j_im_new[xx]);
+  }
+
+  /*******************************j******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> j_im_new;
+  j_im_new.insert(j_im_new.end(), ccm_sender.end() - surface_size,
+                  ccm_sender.end());
+
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> j_re_new;
+  j_re_new.insert(j_re_new.end(), ccm_sender.end() - surface_size,
+                  ccm_sender.end());
+
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*bondi_j).data()[xx] = std::complex<double>(j_re_new[xx], j_im_new[xx]);
+  }
+
+  /*******************************w******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> w_new;
+  w_new.insert(w_new.end(), ccm_sender.end() - surface_size, ccm_sender.end());
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*bondi_w).data()[xx] = w_new[xx];
+  }
+
+  /*******************************q******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> q_im_new;
+  q_im_new.insert(q_im_new.end(), ccm_sender.end() - surface_size,
+                  ccm_sender.end());
+
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> q_re_new;
+  q_re_new.insert(q_re_new.end(), ccm_sender.end() - surface_size,
+                  ccm_sender.end());
+
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*bondi_q).data()[xx] = std::complex<double>(q_re_new[xx], q_im_new[xx]);
+  }
+
+  /*******************************dr_u******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> dr_u_im_new;
+  dr_u_im_new.insert(dr_u_im_new.end(), ccm_sender.end() - surface_size,
+                     ccm_sender.end());
+
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> dr_u_re_new;
+  dr_u_re_new.insert(dr_u_re_new.end(), ccm_sender.end() - surface_size,
+                     ccm_sender.end());
+
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*dr_u).data()[xx] =
+        std::complex<double>(dr_u_re_new[xx], dr_u_im_new[xx]);
+  }
+
+  /*******************************u******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> u_im_new;
+  u_im_new.insert(u_im_new.end(), ccm_sender.end() - surface_size,
+                  ccm_sender.end());
+
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> u_re_new;
+  u_re_new.insert(u_re_new.end(), ccm_sender.end() - surface_size,
+                  ccm_sender.end());
+
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*bondi_u).data()[xx] = std::complex<double>(u_re_new[xx], u_im_new[xx]);
+  }
+
+  /*******************************beta******************************/
+  total_size_ccm_sender -= surface_size;
+  ccm_sender.resize(total_size_ccm_sender);
+  std::vector<double> beta_new = std::move(ccm_sender);
+  for (size_t xx = 0; xx < surface_size; xx++) {
+    get(*bondi_beta).data()[xx] = beta_new[xx];
+  }
+  ASSERT(total_size_ccm_sender == surface_size, "wrong size");
+}
 
 // Charm looks for this function but since we build without a main function
 // or main module we just have it be empty
@@ -178,12 +393,9 @@ void initialize_j(std::vector<std::complex<double>>& finalbondij,
                   std::vector<double>& cauchy_z,
                   std::vector<double>& inertial_x,
                   std::vector<double>& inertial_y,
-                  std::vector<double>& inertial_z, const size_t l_max,
-                  const size_t number_of_radial_points,
-                  const std::vector<std::vector<double>>& spacetime_metric,
-                  const std::vector<std::vector<double>>& pi,
-                  const std::vector<std::vector<std::vector<double>>>& phi,
-                  const double radius) {
+                  std::vector<double>& inertial_z,
+                  std::vector<double>& ccm_sender, const size_t l_max,
+                  const size_t number_of_radial_points, const double radius) {
   // const DataVector gh_read{const_cast<double*>(gh.data()), gh.size()};
 
   const size_t filter_l_max = l_max - 2;
@@ -232,7 +444,7 @@ void initialize_j(std::vector<std::complex<double>>& finalbondij,
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
              Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>,
              Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>>(
-      [&spacetime_metric, &phi, &pi, &l_max, &radius](
+      [&l_max, &ccm_sender](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
               bondi_beta,
@@ -272,30 +484,14 @@ void initialize_j(std::vector<std::complex<double>>& finalbondij,
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>::type*>
               spec_norm) {
-        gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
-                    *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
-                    *du_r_r, *spec_norm, spacetime_metric, pi, phi, l_max,
-                    radius);
-        // for (unsigned int i = 0; i < bondi_beta_spec.size(); i++) {
-        //   get(*bondi_beta).data()[i] =
-        //       bondi_beta_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_dr_j).data()[i] =
-        //       bondi_dr_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_du_r).data()[i] =
-        //       bondi_du_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_h).data()[i] =
-        //       bondi_h_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_j).data()[i] =
-        //       bondi_j_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_q).data()[i] =
-        //       bondi_q_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_r).data()[i] =
-        //       bondi_r_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_u).data()[i] =
-        //       bondi_u_spec.at(i) * std::complex<double>(1.0, 0.0);
-        //   get(*bondi_w).data()[i] =
-        //       bondi_w_spec.at(i) * std::complex<double>(1.0, 0.0);
-        // }
+        // gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
+        //             *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
+        //             *du_r_r, *spec_norm, spacetime_metric, pi, phi, l_max,
+        //             radius);
+        insert_bondi_variables(bondi_beta, bondi_dr_j, bondi_du_r, bondi_h,
+                               bondi_j, bondi_q, bondi_r, bondi_u, bondi_w,
+                               dr_u, du_j, du_r_r, spec_norm, l_max,
+                               ccm_sender);
       },
       make_not_null(&spectre_box));
 
@@ -357,11 +553,8 @@ void ccm_functions(
     std::vector<std::complex<double>>& coeff_phi, double& ccmconstraintomega,
     double& ccmconstraintc, double& ccmconstraintd,
     std::vector<double>& ccm_sender, const size_t l_max,
-    const size_t number_of_radial_points,
-    const std::vector<std::vector<double>>& spacetime_metric,
-    const std::vector<std::vector<double>>& pi,
-    const std::vector<std::vector<std::vector<double>>>& phi,
-    const double radius, const std::vector<std::complex<double>>& bondij,
+    const size_t number_of_radial_points, const double radius,
+    const std::vector<std::complex<double>>& bondij,
     const std::vector<std::vector<double>>& cauchy_cart,
     const std::vector<std::vector<double>>& inertial_cart,
     const std::vector<double>& intertial_time) {
@@ -414,7 +607,7 @@ void ccm_functions(
              Cce::Tags::BoundaryValue<Cce::Tags::Du<Cce::Tags::BondiJ>>,
              Cce::Tags::BoundaryValue<Cce::Tags::DuRDividedByR>,
              Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>>(
-      [&spacetime_metric, &phi, &pi, &l_max, &radius, &ccm_sender](
+      [&l_max, &ccm_sender](
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::BondiBeta>::type*>
               bondi_beta,
@@ -454,247 +647,16 @@ void ccm_functions(
           const gsl::not_null<
               Cce::Tags::BoundaryValue<Cce::Tags::SpECNormalization>::type*>
               spec_norm) {
-        gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
-                    *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
-                    *du_r_r, *spec_norm, spacetime_metric, pi, phi, l_max,
-                    radius);
+        // gh_to_bondi(*bondi_beta, *bondi_dr_j, *du_j, *bondi_du_r, *bondi_h,
+        //             *bondi_j, *bondi_q, *bondi_r, *bondi_u, *dr_u, *bondi_w,
+        //             *du_r_r, *spec_norm, spacetime_metric, pi, phi, l_max,
+        //             radius);
 
-        size_t surface_size = get_vector_size(l_max);
-        size_t total_size_ccm_sender = ccm_sender.size();
-        /********************************spec_norm_new*************************/
-        std::vector<double> spec_norm_new;
-        spec_norm_new.insert(spec_norm_new.end(),
-                             ccm_sender.end() - surface_size, ccm_sender.end());
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*spec_norm).data()[xx] - spec_norm_new[xx]) > 1e-15)
-            std::cout << std::setprecision(16) << "spec_norm "
-                      << get(*spec_norm).data()[xx] - spec_norm_new[xx]
-                      << std::endl;
-        }
+        insert_bondi_variables(bondi_beta, bondi_dr_j, bondi_du_r, bondi_h,
+                               bondi_j, bondi_q, bondi_r, bondi_u, bondi_w,
+                               dr_u, du_j, du_r_r, spec_norm, l_max,
+                               ccm_sender);
 
-        /*********************************du_r_r******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> du_r_r_new;
-        du_r_r_new.insert(du_r_r_new.end(), ccm_sender.end() - surface_size,
-                          ccm_sender.end());
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*du_r_r).data()[xx] - du_r_r_new[xx]) > 1e-15)
-            std::cout << std::setprecision(16) << "du_r_r "
-                      << get(*du_r_r).data()[xx] - du_r_r_new[xx] << std::endl;
-        }
-
-        /***********************************du_r*******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> du_r_new;
-        du_r_new.insert(du_r_new.end(), ccm_sender.end() - surface_size,
-                        ccm_sender.end());
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*bondi_du_r).data()[xx] - du_r_new[xx]) > 1e-15)
-            std::cout << std::setprecision(16) << "du_r"
-                      << get(*bondi_du_r).data()[xx] - du_r_new[xx]
-                      << std::endl;
-        }
-
-        /*******************************bondi_r******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> bondir_new;
-        bondir_new.insert(bondir_new.end(), ccm_sender.end() - surface_size,
-                          ccm_sender.end());
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*bondi_r).data()[xx] - bondir_new[xx]) > 1e-15)
-            std::cout << std::setprecision(16) << "bondi_r"
-                      << get(*bondi_r).data()[xx] - bondir_new[xx] << std::endl;
-        }
-
-        /*******************************du_j******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> du_j_im_new;
-        du_j_im_new.insert(du_j_im_new.end(), ccm_sender.end() - surface_size,
-                           ccm_sender.end());
-
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> du_j_re_new;
-        du_j_re_new.insert(du_j_re_new.end(), ccm_sender.end() - surface_size,
-                           ccm_sender.end());
-
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*du_j).data()[xx] -
-                  std::complex<double>(du_j_re_new[xx], du_j_im_new[xx])) >
-              1e-15)
-            std::cout << std::setprecision(16) << "du_j "
-                      << get(*du_j).data()[xx] -
-                             std::complex<double>(du_j_re_new[xx],
-                                                  du_j_im_new[xx])
-                      << std::endl;
-        }
-
-        /*******************************h******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> bondih_im_new;
-        bondih_im_new.insert(bondih_im_new.end(),
-                             ccm_sender.end() - surface_size, ccm_sender.end());
-
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> bondih_re_new;
-        bondih_re_new.insert(bondih_re_new.end(),
-                             ccm_sender.end() - surface_size, ccm_sender.end());
-
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*bondi_h).data()[xx] -
-                  std::complex<double>(bondih_re_new[xx], bondih_im_new[xx])) >
-              1e-15)
-            std::cout << std::setprecision(16) << "bondi_h "
-                      << get(*bondi_h).data()[xx] -
-                             std::complex<double>(bondih_re_new[xx],
-                                                  bondih_im_new[xx])
-                      << std::endl;
-        }
-
-        /*******************************dr_j******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> dr_j_im_new;
-        dr_j_im_new.insert(dr_j_im_new.end(), ccm_sender.end() - surface_size,
-                           ccm_sender.end());
-
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> dr_j_re_new;
-        dr_j_re_new.insert(dr_j_re_new.end(), ccm_sender.end() - surface_size,
-                           ccm_sender.end());
-
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*bondi_dr_j).data()[xx] -
-                  std::complex<double>(dr_j_re_new[xx], dr_j_im_new[xx])) >
-              1e-15)
-            std::cout << std::setprecision(16) << "bondi_dr_j "
-                      << get(*bondi_dr_j).data()[xx] -
-                             std::complex<double>(dr_j_re_new[xx],
-                                                  dr_j_im_new[xx])
-                      << std::endl;
-        }
-
-        /*******************************j******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> j_im_new;
-        j_im_new.insert(j_im_new.end(), ccm_sender.end() - surface_size,
-                        ccm_sender.end());
-
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> j_re_new;
-        j_re_new.insert(j_re_new.end(), ccm_sender.end() - surface_size,
-                        ccm_sender.end());
-
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*bondi_j).data()[xx] -
-                  std::complex<double>(j_re_new[xx], j_im_new[xx])) > 1e-15)
-            std::cout << std::setprecision(16) << "bondi_j "
-                      << get(*bondi_j).data()[xx] -
-                             std::complex<double>(j_re_new[xx], j_im_new[xx])
-                      << std::endl;
-        }
-
-        /*******************************w******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> w_new;
-        w_new.insert(w_new.end(), ccm_sender.end() - surface_size,
-                     ccm_sender.end());
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*bondi_w).data()[xx] - w_new[xx]) > 1e-15)
-            std::cout << std::setprecision(16) << "bondi_w "
-                      << get(*bondi_w).data()[xx] - w_new[xx] << std::endl;
-        }
-
-        /*******************************q******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> q_im_new;
-        q_im_new.insert(q_im_new.end(), ccm_sender.end() - surface_size,
-                        ccm_sender.end());
-
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> q_re_new;
-        q_re_new.insert(q_re_new.end(), ccm_sender.end() - surface_size,
-                        ccm_sender.end());
-
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*bondi_q).data()[xx] -
-                  std::complex<double>(q_re_new[xx], q_im_new[xx])) > 1e-15)
-            std::cout << std::setprecision(16) << "bondi_q "
-                      << get(*bondi_q).data()[xx] -
-                             std::complex<double>(q_re_new[xx], q_im_new[xx])
-                      << std::endl;
-        }
-
-        /*******************************dr_u******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> dr_u_im_new;
-        dr_u_im_new.insert(dr_u_im_new.end(), ccm_sender.end() - surface_size,
-                           ccm_sender.end());
-
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> dr_u_re_new;
-        dr_u_re_new.insert(dr_u_re_new.end(), ccm_sender.end() - surface_size,
-                           ccm_sender.end());
-
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*dr_u).data()[xx] -
-                  std::complex<double>(dr_u_re_new[xx], dr_u_im_new[xx])) >
-              1e-15)
-            std::cout << std::setprecision(16) << "dr_u "
-                      << get(*dr_u).data()[xx] -
-                             std::complex<double>(dr_u_re_new[xx],
-                                                  dr_u_im_new[xx])
-                      << std::endl;
-        }
-
-        /*******************************u******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> u_im_new;
-        u_im_new.insert(u_im_new.end(), ccm_sender.end() - surface_size,
-                        ccm_sender.end());
-
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> u_re_new;
-        u_re_new.insert(u_re_new.end(), ccm_sender.end() - surface_size,
-                        ccm_sender.end());
-
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*bondi_u).data()[xx] -
-                  std::complex<double>(u_re_new[xx], u_im_new[xx])) > 1e-15)
-            std::cout << std::setprecision(16) << "bondi_u "
-                      << get(*bondi_u).data()[xx] -
-                             std::complex<double>(u_re_new[xx], u_im_new[xx])
-                      << std::endl;
-        }
-
-        /*******************************beta******************************/
-        total_size_ccm_sender -= surface_size;
-        ccm_sender.resize(total_size_ccm_sender);
-        std::vector<double> beta_new = std::move(ccm_sender);
-        for (size_t xx = 0; xx < surface_size; xx++) {
-          if (abs(get(*bondi_beta).data()[xx] - beta_new[xx]) > 1e-15) {
-            std::cout << std::setprecision(16) << "beta_new " << xx << "  "
-                      << get(*bondi_beta).data()[xx] << " " << beta_new[xx]
-                      << std::endl;
-          }
-        }
-        ASSERT(total_size_ccm_sender == surface_size, "wrong size");
       },
       make_not_null(&spectre_box));
 
