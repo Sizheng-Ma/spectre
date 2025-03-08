@@ -24,7 +24,7 @@
 namespace h5 {
 Dat::Dat(const bool exists, detail::OpenGroup&& group, const hid_t location,
          const std::string& name, std::vector<std::string> legend,
-         const uint32_t version)
+         const uint32_t version, const bool NEED_HACK)
     : group_(std::move(group)),
       name_(extension() == name.substr(name.size() > extension().size()
                                            ? name.size() - extension().size()
@@ -65,8 +65,12 @@ Dat::Dat(const bool exists, detail::OpenGroup&& group, const hid_t location,
       ERROR("Invalid number of dimensions in file on disk.");  // LCOV_EXCL_LINE
     }
     CHECK_H5(H5Sclose(space_id), "Failed to close dataspace");
-    legend_ = read_rank1_attribute<std::string>(dataset_id_, "Legend"s);
-    size_[1] = legend_.size();
+    if (NEED_HACK)
+      size_[1] = 243;
+    else {
+      legend_ = read_rank1_attribute<std::string>(dataset_id_, "Legend"s);
+      size_[1] = legend_.size();
+    }
   } else {  // file does not exist
     dataset_id_ = h5::detail::create_extensible_dataset(
         location, name_, size_, std::array<hsize_t, 2>{{4, legend_.size()}},

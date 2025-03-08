@@ -46,7 +46,7 @@ class Dat : public h5::Object {
 
   Dat(bool exists, detail::OpenGroup&& group, hid_t location,
       const std::string& name, std::vector<std::string> legend = {},
-      uint32_t version = 1);
+      uint32_t version = 1, const bool NEED_HACK = false);
 
   Dat(const Dat& /*rhs*/) = delete;
   Dat& operator=(const Dat& /*rhs*/) = delete;

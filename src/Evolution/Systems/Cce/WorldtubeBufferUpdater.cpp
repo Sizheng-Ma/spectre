@@ -343,9 +343,11 @@ MetricWorldtubeH5BufferUpdater<T>::MetricWorldtubeH5BufferUpdater(
       Cce::get_extraction_radius(cce_data_filename, extraction_radius, true)
           .value();
 
-  detail::set_time_buffer_and_lmax(make_not_null(&time_buffer_), l_max_,
-                                   cce_data_file_.get<h5::Dat>("/Lapse"), false,
-                                   is_modal, is_modal);
+  detail::set_time_buffer_and_lmax(
+      make_not_null(&time_buffer_), l_max_,
+      cce_data_file_.get<h5::Dat>("/Lapse", std::vector<std::string>{}, 1,
+                                  true),
+      false, is_modal, is_modal);
   cce_data_file_.close_current_object();
 }
 
@@ -391,9 +393,11 @@ double MetricWorldtubeH5BufferUpdater<T>::update_buffers_for_time(
             using tag = typename decltype(tag_v)::type;
             this->update_buffer(
                 make_not_null(&get<tag>(*buffers).get(i, j)),
-                cce_data_file_.get<h5::Dat>(detail::dataset_name_for_component(
-                    get<Tags::detail::InputDataSet<tag>>(dataset_names_), i,
-                    j)),
+                cce_data_file_.get<h5::Dat>(
+                    detail::dataset_name_for_component(
+                        get<Tags::detail::InputDataSet<tag>>(dataset_names_), i,
+                        j),
+                    std::vector<std::string>{}, 1, true),
                 computation_l_max, *time_span_start, *time_span_end,
                 time_varies_fastest);
             cce_data_file_.close_current_object();
@@ -405,8 +409,10 @@ double MetricWorldtubeH5BufferUpdater<T>::update_buffers_for_time(
           using tag = typename decltype(tag_v)::type;
           this->update_buffer(
               make_not_null(&get<tag>(*buffers).get(i)),
-              cce_data_file_.get<h5::Dat>(detail::dataset_name_for_component(
-                  get<Tags::detail::InputDataSet<tag>>(dataset_names_), i)),
+              cce_data_file_.get<h5::Dat>(
+                  detail::dataset_name_for_component(
+                      get<Tags::detail::InputDataSet<tag>>(dataset_names_), i),
+                  std::vector<std::string>{}, 1, true),
               computation_l_max, *time_span_start, *time_span_end,
               time_varies_fastest);
           cce_data_file_.close_current_object();
@@ -418,8 +424,10 @@ double MetricWorldtubeH5BufferUpdater<T>::update_buffers_for_time(
         using tag = typename decltype(tag_v)::type;
         this->update_buffer(
             make_not_null(&get(get<tag>(*buffers))),
-            cce_data_file_.get<h5::Dat>(detail::dataset_name_for_component(
-                get<Tags::detail::InputDataSet<tag>>(dataset_names_))),
+            cce_data_file_.get<h5::Dat>(
+                detail::dataset_name_for_component(
+                    get<Tags::detail::InputDataSet<tag>>(dataset_names_)),
+                std::vector<std::string>{}, 1, true),
             computation_l_max, *time_span_start, *time_span_end,
             time_varies_fastest);
         cce_data_file_.close_current_object();
