@@ -7,21 +7,21 @@
 spectre_load_sys_modules() {
     # impi is loaded, which it should be by default
     # but explicitly load it in just in case
-    module load impi/19.0.9
-    module load gcc/9.1.0
-    module load mkl/19.0.5
-    module load gsl
+    module load impi/21.9.0
+    module load gcc/13.2.0
+    module load mkl/23.1.0
+    module load gsl/2.8
     module load hdf5
-    module load boost
+    module load boost/1.86.0
 }
 
 # Unload system modules
 spectre_unload_sys_modules() {
-    module unload boost
+    module unload boost/1.86.0
     module unload hdf5
     module unload gsl
-    module unload mkl/19.0.5
-    module unload gcc/9.1.0
+    module unload mkl/23.1.0
+    module unload gcc/13.2.0
     # Don't unload impi as this is one of the default system modules
 }
 
@@ -78,6 +78,7 @@ spectre_run_cmake() {
     # -D USE_LD=ld - ld.gold seems to hang linking the main executables
     cmake -D CHARM_ROOT=$CHARM_ROOT \
           -D CMAKE_BUILD_TYPE=Release \
+          -D Catch2_DIR=/home1/06407/tg857069/DEPS/Catch2/lib64/cmake/Catch2/ \
           -D CMAKE_Fortran_COMPILER=gfortran \
           -D MEMORY_ALLOCATOR=SYSTEM \
           -D BUILD_PYTHON_BINDINGS=ON \
