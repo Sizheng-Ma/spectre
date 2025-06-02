@@ -7,12 +7,12 @@
 spectre_load_sys_modules() {
     # impi is loaded, which it should be by default
     # but explicitly load it in just in case
+    module load impi/21.9.0
     module load gcc/13.2.0
-    module load impi
-    module load mkl
-    module load gsl
+    module load mkl/23.1.0
+    module load gsl/2.8
     module load hdf5
-    module load boost
+    module load boost/1.86.0
     module load cmake/3.24.2
 }
 
@@ -20,9 +20,10 @@ spectre_load_sys_modules() {
 spectre_unload_sys_modules() {
     module unload cmake
     module unload boost
+    module unload boost/1.86.0
     module unload hdf5
     module unload gsl
-    module unload mkl
+    module unload mkl/23.1.0
     module unload gcc/13.2.0
     # Don't unload impi as this is one of the default system modules
 }
@@ -79,6 +80,7 @@ spectre_run_cmake() {
     # no functioning Python 3.8 with newer gcc version
     cmake -D CHARM_ROOT=$CHARM_ROOT \
           -D CMAKE_BUILD_TYPE=Release \
+          -D Catch2_DIR=/home1/06407/tg857069/DEPS/Catch2/lib64/cmake/Catch2/ \
           -D CMAKE_Fortran_COMPILER=gfortran \
           -D MEMORY_ALLOCATOR=SYSTEM \
           -D ENABLE_PYTHON=OFF \
