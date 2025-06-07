@@ -48,6 +48,7 @@ target_link_libraries(
  SPHEREPACK
  SpecialRelativity
  Options
+ IO
  )
 
 # # add_custom_command
