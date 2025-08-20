@@ -424,7 +424,7 @@ void initialize_j(std::vector<std::complex<double>>& finalbondij,
       Cce::InitializationTags::ScriInterpolationOrder::type{
           scri_interpolation_order},
       Cce::Tags::LMax::type{l_max},
-      Cce::OptionTags::NumberOfRadialPoints::type{number_of_radial_points},
+      Cce::Tags::NumberOfRadialPoints::type{number_of_radial_points},
       Cce::Tags::FilterLMax::type{filter_l_max},
       Cce::Tags::RadialFilterAlpha::type{radial_filter_alpha},
       Cce::Tags::RadialFilterHalfPower::type{radial_filter_half_power});
@@ -587,7 +587,7 @@ void ccm_functions(
       Cce::InitializationTags::ScriInterpolationOrder::type{
           scri_interpolation_order},
       Cce::Tags::LMax::type{l_max},
-      Cce::OptionTags::NumberOfRadialPoints::type{number_of_radial_points},
+      Cce::Tags::NumberOfRadialPoints::type{number_of_radial_points},
       Cce::Tags::FilterLMax::type{filter_l_max},
       Cce::Tags::RadialFilterAlpha::type{radial_filter_alpha},
       Cce::Tags::RadialFilterHalfPower::type{radial_filter_half_power});
