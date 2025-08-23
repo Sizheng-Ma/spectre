@@ -551,8 +551,9 @@ struct AnalyticBoundaryDataManager : db::SimpleTag {
 /// options
 struct KleinGordonAnalyticBoundaryDataManager : db::SimpleTag {
   using type = ::Cce::KleinGordonAnalyticBoundaryDataManager;
-  using option_tags = tmpl::list<OptionTags::ExtractionRadius, OptionTags::LMax,
-                                 OptionTags::KleinGordonAnalyticSolution>;
+  using option_tags =
+      tmpl::list<OptionTags::ExtractionRadius, Spectral::Swsh::OptionTags::LMax,
+                 OptionTags::KleinGordonAnalyticSolution>;
 
   static constexpr bool pass_metavariables = false;
   static Cce::KleinGordonAnalyticBoundaryDataManager create_from_options(
