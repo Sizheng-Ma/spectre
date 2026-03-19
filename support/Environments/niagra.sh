@@ -5,27 +5,30 @@
 
 # Load system modules
 spectre_load_sys_modules() {
-    # impi is loaded, which it should be by default
-    # but explicitly load it in just in case
-    module load impi/21.9.0
-    module load gcc/13.2.0
-    module load mkl/23.1.0
-    module load gsl/2.8
-    module load hdf5
-    module load boost/1.86.0
-    module load cmake/3.24.2
+    module load NiaEnv/2019b
+    # module load intel/2019u4
+    # module load gcc/13.2.0
+    # module load intel/2020u2
+    module load cmake
+    #module load impi/19.0.9
+    module load gcc/12.2.0
+    # module load mkl
+    # module load hdf5/1.8.21
+    # module load intelmpi/2020u2
+    module load boost/1.78.0
+    # module load gsl/2.7
+    module load python/3.9.8
 }
 
 # Unload system modules
 spectre_unload_sys_modules() {
-    module unload cmake
-    module unload boost
-    module unload boost/1.86.0
+    module unload boost/1.78.0
     module unload hdf5
-    module unload gsl
-    module unload mkl/23.1.0
+    module unload gsl/2.7
+    module unload mkl
+    module unload cmake
     module unload gcc/13.2.0
-    # Don't unload impi as this is one of the default system modules
+    module unload NiaEnv/2019b
 }
 
 
@@ -35,7 +38,7 @@ spectre_setup_modules() {
         return 1
     fi
 
-    "${SPECTRE_HOME}/support/Environments/setup/frontera_gcc.sh" "$@"
+    "${SPECTRE_HOME}/support/Environments/setup/niagra.sh" "$@"
     local ret=$?
     if [ "${ret}" -ne 0 ] ; then
         echo >&2
@@ -45,14 +48,15 @@ spectre_setup_modules() {
 }
 
 spectre_unload_modules() {
-    module unload spectre_python
-    module unload charm_mpi
-    module unload yaml-cpp
-    module unload spectre_boost
-    module unload libxsmm
-    module unload libsharp
-    module unload brigand
-    module unload blaze
+    #module unload spectre_python
+    #module unload charm_mpi
+    #module unload yaml-cpp
+    #module unload spectre_boost
+    #module unload libxsmm
+    #module unload libsharp
+    #module unload catch
+    #module unload brigand
+    #module unload blaze
 
     spectre_unload_sys_modules
 }
@@ -62,12 +66,16 @@ spectre_load_modules() {
 
     module load blaze
     module load brigand
+    module load catch
     module load libsharp
     module load libxsmm
     module load spectre_boost
     module load yaml-cpp
     module load charm_mpi
     module load spectre_python
+    module load gsl
+    module load hdf5
+    module load catch2
 }
 
 spectre_run_cmake() {
@@ -77,17 +85,14 @@ spectre_run_cmake() {
     fi
     spectre_load_modules
     # -D USE_LD=ld - ld.gold seems to hang linking the main executables
-    # no functioning Python 3.8 with newer gcc version
     cmake -D CHARM_ROOT=$CHARM_ROOT \
           -D CMAKE_BUILD_TYPE=Release \
-          -D Catch2_DIR=/home1/06407/tg857069/DEPS/Catch2/lib64/cmake/Catch2/ \
           -D CMAKE_Fortran_COMPILER=gfortran \
           -D MEMORY_ALLOCATOR=SYSTEM \
-          -D ENABLE_PYTHON=OFF \
-          -D BUILD_TESTING=OFF \
-          -D BUILD_PYTHON_BINDINGS=OFF \
-          -D BUILD_DOCS=OFF \
+          -D BUILD_PYTHON_BINDINGS=ON \
+          -D Python_EXECUTABLE=`which python3` \
           -D USE_LD=ld \
+          -D SPECTRE_TEST_RUNNER="$(pwd)/bin/charmrun" \
           "$@" \
           $SPECTRE_HOME
 }

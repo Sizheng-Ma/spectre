@@ -31,6 +31,10 @@ struct BondiBeta : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 
+struct SpECNormalization : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
+
 /// Bondi parameter \f$J\f$
 struct BondiJ : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
@@ -84,6 +88,21 @@ struct BondiJbar : db::SimpleTag {
   static std::string name() { return "Jbar"; }
 };
 
+struct CCMConstraintOmega : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+  static std::string name() { return "CCMConstraintOmega"; }
+};
+
+struct CCMConstraintc : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+  static std::string name() { return "CCMConstraintc"; }
+};
+
+struct CCMConstraintd : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+  static std::string name() { return "CCMConstraintd"; }
+};
+
 /// Bondi parameter \f$K = \sqrt{1 + J \bar{J}}\f$
 struct BondiK : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
@@ -128,6 +147,14 @@ struct BondiW : db::SimpleTag {
 
 /// Bondi parameter \f$\bar{J}\f$ in the Cauchy frame
 struct BondiJCauchyView : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
+};
+
+struct TetradCoeffTheta : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
+};
+
+struct TetradCoeffPhi : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
 };
 
@@ -179,6 +206,10 @@ struct PartiallyFlatGaugeD : db::SimpleTag {
 /// to Eq. (31a) of \cite Moxon2020gha, but without hat.
 struct CauchyGaugeC : db::SimpleTag {
   using type = Scalar<SpinWeighted<ComplexDataVector, 2>>;
+};
+
+struct WxxForSpECTest : db::SimpleTag {
+  using type = Scalar<SpinWeighted<ComplexDataVector, 0>>;
 };
 
 /// The spin-weight 0 angular Jacobian factor in the Cauchy coordinates, similar

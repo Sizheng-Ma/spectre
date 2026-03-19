@@ -42,6 +42,8 @@ struct CharacteristicExtractDefaults {
       Cce::Tags::characteristic_worldtube_boundary_tags<
           Cce::Tags::BoundaryValue>;
 
+  using ccm_wt_constraints_tags = tmpl::list<Cce::Tags::CCMConstraintOmega,Cce::Tags::CCMConstraintc,Cce::Tags::CCMConstraintd>;
+
   using cce_gauge_boundary_tags = tmpl::flatten<tmpl::list<
       tmpl::transform<
           tmpl::list<Cce::Tags::BondiR, Cce::Tags::DuRDividedByR,
@@ -70,6 +72,7 @@ struct CharacteristicExtractDefaults {
                  Cce::Tags::ScriPlus<Cce::Tags::Psi3>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi2>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi1>,
+                 Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,
                  Cce::Tags::ScriPlus<Cce::Tags::Psi0>,
                  Cce::Tags::Du<Cce::Tags::TimeIntegral<
                      Cce::Tags::ScriPlus<Cce::Tags::Psi4>>>,
@@ -87,11 +90,14 @@ struct CharacteristicExtractDefaults {
       Cce::bondi_hypersurface_step_tags,
       tmpl::bind<Cce::integrand_terms_to_compute_for_bondi_variable,
                  tmpl::_1>>>;
-  using ccm_matching_tags = tmpl::list<
-      Cce::Tags::BondiJCauchyView, Cce::Tags::Psi0Match,
-      Cce::Tags::Dy<Cce::Tags::Psi0Match>,
-      Cce::Tags::Psi0, Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>,
-      Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>>>;
+  using ccm_matching_tags =
+      tmpl::list<Cce::Tags::BondiJCauchyView, Cce::Tags::Psi0Match,
+                 Cce::Tags::Dy<Cce::Tags::Psi0Match>, Cce::Tags::Psi0,
+                 Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>,
+                 Cce::Tags::TetradCoeffTheta, Cce::Tags::TetradCoeffPhi,
+                 Cce::Tags::Dy<Cce::Tags::Dy<Cce::Tags::BondiJCauchyView>>>;
+
+  using spec_test_tag_tag = tmpl::list<Cce::Tags::WxxForSpECTest>;
 
   using cce_integration_independent_tags = tmpl::conditional_t<
       evolve_ccm,
@@ -119,7 +125,8 @@ struct CharacteristicExtractDefaults {
                                             evolved_coordinates_variables_tag,
                                             coord_vars_selector>>;
 
-  using ccm_psi0 = tmpl::list<
-      Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,
-      Cce::Tags::BoundaryValue<Cce::Tags::Dlambda<Cce::Tags::Psi0Match>>>;
+  using ccm_psi0 =
+      tmpl::list<Cce::Tags::BoundaryValue<Cce::Tags::Psi0Match>,
+                 Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffTheta>,
+                 Cce::Tags::BoundaryValue<Cce::Tags::TetradCoeffPhi>>;
 };
